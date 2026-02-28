@@ -1,0 +1,19 @@
+name: HideAndSeek
+version: '1.0-SNAPSHOT'
+main: de.thecoolcraft11.hideAndSeek.HideAndSeek
+api-version: '1.21'
+description: A minigame plugin
+author: TheCoolcraft11
+
+depend:
+  - MinigameFramework
+soft-depend:
+  - Timer
+
+commands:
+  minigame:
+    description: Game configuration and management
+    usage: /minigame [subcommand] [args...]
+    aliases:
+      - mg
+

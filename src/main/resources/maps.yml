@@ -1,0 +1,50 @@
+# Maps Configuration
+# This file contains imported map configurations with detailed settings
+# Each map can have its own spawn points, world borders, allowed blocks, and preferred game modes
+
+# Format:
+# world-name:
+#   description: "A brief description of the map"
+#   spawn-points:
+#     - "x,y,z,yaw,pitch"
+#     - "x2,y2,z2,yaw2,pitch2"
+#   world-borders:
+#     - "centerX,centerZ,radius"
+#   preferred-modes:
+#     - "NORMAL"
+#     - "BLOCK"
+#   allowed-blocks:
+#     - "STONE"
+#     - "DIRT"
+#     - "*CANDLE{RED_CANDLE}"
+#     - "OAK_LOG[*]"
+#     - "OAK_TRAPDOOR[half,open,facing]"
+
+# Note: If spawn-points and world-borders have equal counts, they are matched by index
+# Example: Spawn 1 → Border 1, Spawn 2 → Border 2, etc.
+# If counts are different, all spawns will use the first border.
+
+# Configuration patterns for allowed-blocks:
+# - Simple material:                 "STONE", "DIRT"
+# - All variants (e.g., all candles): "*CANDLE{RED_CANDLE}"  (shows RED_CANDLE in selector, all colors in appearance GUI)
+# - All blockstates:                  "OAK_LOG[*]"  (allows all axis rotations)
+# - Specific properties allowed:      "CANDLE[lit,candles]"  (only lit & candles customizable)
+
+# Map 1: Default map
+map1:
+  description: "Default map"
+  spawn-points:
+    - "0,65,0,0,0"     # Format: x,y,z,yaw,pitch
+  world-borders: [ ]    # Optional, format: centerX,centerZ,radius
+  preferred-modes:
+    - "BLOCK"
+  allowed-blocks:
+    - "STONE"
+    - "DIRT"
+    - "GRASS_BLOCK"
+    - "COBBLESTONE"
+    - "OAK_LOG[*]"
+    - "OAK_PLANKS"
+    - "*CANDLE{RED_CANDLE}"
+    - "OAK_TRAPDOOR[half,open,facing]"
+

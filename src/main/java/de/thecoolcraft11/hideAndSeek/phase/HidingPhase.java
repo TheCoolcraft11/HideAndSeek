@@ -1,0 +1,465 @@
+package de.thecoolcraft11.hideAndSeek.phase;
+
+import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.HiderItems;
+import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
+import de.thecoolcraft11.hideAndSeek.util.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.util.TimerManager;
+import de.thecoolcraft11.minigameframework.MinigameFramework;
+import de.thecoolcraft11.minigameframework.game.GamePhase;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.Team;
+
+import java.time.Duration;
+import java.util.*;
+
+public class HidingPhase implements GamePhase {
+    private BukkitTask pointsTask;
+    private final Map<BukkitTask, Location> blockTasks = new HashMap<>();
+
+    @Override
+    public String getId() {
+        return "hiding";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Hiding";
+    }
+
+    @Override
+    public void onStart(MinigameFramework plugin) {
+
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+
+        TimerManager.cleanupTimers(hideAndSeekPlugin);
+
+
+        String selectedMapName = HideAndSeek.getDataController().getCurrentMapName();
+        World gameWorld;
+
+        if (selectedMapName != null && !selectedMapName.isEmpty()) {
+
+            plugin.getLogger().info("Using selected map: " + selectedMapName);
+            gameWorld = hideAndSeekPlugin.getMapManager().copyMapToWorkingWorld(selectedMapName);
+        } else {
+
+            plugin.getLogger().info("No specific map selected, choosing random map");
+            gameWorld = hideAndSeekPlugin.getMapManager().selectAndCopyMap();
+
+
+            if (gameWorld != null) {
+                String[] parts = gameWorld.getName().split("_", 2);
+                if (parts.length > 1) {
+                    HideAndSeek.getDataController().setCurrentMapName(parts[1]);
+                }
+            }
+        }
+
+        if (gameWorld != null) {
+            hideAndSeekPlugin.getMapManager().teleportPlayersToMap(gameWorld);
+        } else {
+            plugin.getLogger().severe("Failed to create game world!");
+        }
+
+
+        var hidingTimeResult = plugin.getSettingService().getSetting("game.hiding_time");
+        Object hidingTimeObj = hidingTimeResult.isSuccess() ? hidingTimeResult.getValue() : 60;
+        int timeRemaining = (hidingTimeObj instanceof Integer) ? (Integer) hidingTimeObj : 60;
+
+        plugin.getLogger().info("Hiding time setting retrieved: " + hidingTimeObj + " (type: " +
+                (hidingTimeObj != null ? hidingTimeObj.getClass().getSimpleName() : "null") + ")");
+        plugin.getLogger().info("Hiding phase started - " + timeRemaining + " seconds");
+
+
+        var invisibilityResult = plugin.getSettingService().getSetting("game.hider_invisibility");
+        Object invisibilityObj = invisibilityResult.isSuccess() ? invisibilityResult.getValue() : false;
+        boolean grantInvisibility = (invisibilityObj instanceof Boolean) ? (Boolean) invisibilityObj : false;
+        plugin.getLogger().info("Invisibility setting: " + grantInvisibility);
+
+
+        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : GameModeEnum.NORMAL;
+        GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
+                (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
+        plugin.getLogger().info("Game mode: " + gameMode);
+
+
+        if (gameMode == GameModeEnum.SMALL) {
+            var seekerSizeResult = plugin.getSettingService().getSetting("game.small_mode_seeker_size");
+            Object seekerSizeObj = seekerSizeResult.isSuccess() ? seekerSizeResult.getValue() : 1.0;
+            if ((seekerSizeObj instanceof Number)) {
+                ((Number) seekerSizeObj).doubleValue();
+            }
+        }
+
+
+        if (gameMode == GameModeEnum.BLOCK) {
+            String currentMapName = HideAndSeek.getDataController().getCurrentMapName();
+
+            for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+                if (HideAndSeek.getDataController().getChosenBlock(hiderId) == null) {
+
+                    Material defaultBlock = Material.STONE;
+                    if (currentMapName != null && !currentMapName.isEmpty()) {
+                        defaultBlock = hideAndSeekPlugin.getMapManager().getDefaultAllowedBlock(currentMapName);
+                    }
+
+                    HideAndSeek.getDataController().setChosenBlock(hiderId, defaultBlock);
+                    HideAndSeek.getDataController().setChosenBlockData(hiderId, defaultBlock.createBlockData());
+                    Player hider = Bukkit.getPlayer(hiderId);
+                    if (hider != null) {
+                        HiderItems.updateAppearanceItem(hider, hideAndSeekPlugin);
+                        hider.sendMessage(Component.text("Default block set to " + defaultBlock.name() + ". Use /mg chooseblock to change.", NamedTextColor.YELLOW));
+                    }
+                }
+            }
+        }
+
+
+        var sizeResult = plugin.getSettingService().getSetting("game.small_mode_size");
+        Object sizeObj = sizeResult.isSuccess() ? sizeResult.getValue() : 0.5;
+        double sizeModifier = (sizeObj instanceof Double) ? (Double) sizeObj : 0.5;
+        plugin.getLogger().info("Size modifier: " + sizeModifier);
+
+
+        var hiderHealthResult = plugin.getSettingService().getSetting("game.hider_health");
+        Object hiderHealthObj = hiderHealthResult.isSuccess() ? hiderHealthResult.getValue() : 20;
+        double hiderHealth = (hiderHealthObj instanceof Integer) ? (Integer) hiderHealthObj : 20;
+        plugin.getLogger().info("Hider health: " + hiderHealth);
+
+
+        for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
+            Player seeker = Bukkit.getPlayer(seekerId);
+            if (seeker != null && seeker.isOnline()) {
+                seeker.getInventory().clear();
+                seeker.clearActivePotionEffects();
+                seeker.setGameMode(GameMode.ADVENTURE);
+                seeker.setWalkSpeed(0f);
+                seeker.setAllowFlight(false);
+                seeker.setFlying(false);
+                seeker.sendMessage(Component.text("Wait for the hiders to hide...", NamedTextColor.RED));
+
+
+                seeker.addPotionEffect(new PotionEffect(
+                        PotionEffectType.SATURATION,
+                        Integer.MAX_VALUE,
+                        0,
+                        false,
+                        false
+                ));
+
+                seeker.addPotionEffect(new PotionEffect(
+                        PotionEffectType.BLINDNESS,
+                        Integer.MAX_VALUE,
+                        255,
+                        false,
+                        false
+                ));
+
+                SeekerItems.applyMask(seeker, hideAndSeekPlugin);
+
+                BlockData blockData = Material.BLACK_CONCRETE.createBlockData();
+
+                Location base = seeker.getLocation().clone().subtract(0, 1, 0).getBlock().getLocation();
+                seeker.setAllowFlight(true);
+
+                BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+                    seeker.teleport(base.clone().add(0.5, 0, 0.5));
+                    seeker.sendBlockChange(base, blockData);
+                    seeker.sendBlockChange(base.clone().add(0, 1, 0), blockData);
+                }, 2L, 4L);
+
+                blockTasks.put(task, base);
+
+            }
+        }
+
+
+        for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+            Player hider = Bukkit.getPlayer(hiderId);
+            if (hider != null && hider.isOnline()) {
+                hider.getInventory().clear();
+                hider.clearActivePotionEffects();
+                hider.setGameMode(GameMode.SURVIVAL);
+                hider.setWalkSpeed(0.2f);
+
+                var maxHealth = hider.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+                if (maxHealth != null) {
+                    maxHealth.setBaseValue(hiderHealth);
+                }
+                hider.setHealth(Math.min(hider.getHealth(), hiderHealth));
+                if (hider.getHealth() < hiderHealth) {
+                    hider.setHealth(hiderHealth);
+                }
+
+
+                hider.addPotionEffect(new PotionEffect(
+                        PotionEffectType.SATURATION,
+                        Integer.MAX_VALUE,
+                        0,
+                        false,
+                        false
+                ));
+
+                boolean shouldBeInvisible = grantInvisibility || gameMode == GameModeEnum.BLOCK;
+
+                if (shouldBeInvisible) {
+                    try {
+                        hider.addPotionEffect(new PotionEffect(
+                                PotionEffectType.INVISIBILITY,
+                                Integer.MAX_VALUE,
+                                0,
+                                false,
+                                false
+                        ));
+                        if (gameMode == GameModeEnum.BLOCK) {
+                            hider.sendMessage(Component.text("You are invisible! Choose your block with /mg chooseblock", NamedTextColor.GREEN));
+                        } else {
+                            hider.sendMessage(Component.text("You are invisible! Use this time to hide!", NamedTextColor.GREEN));
+                        }
+                        plugin.getLogger().info(hider.getName() + " granted invisibility");
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("Failed to grant invisibility to " + hider.getName() + ": " + e.getMessage());
+                    }
+                } else {
+                    hider.sendMessage(Component.text("Hide now! You have " + timeRemaining + " seconds!", NamedTextColor.GREEN));
+                }
+
+
+                if (gameMode == GameModeEnum.SMALL) {
+                    final double finalSizeModifier = sizeModifier;
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        try {
+                            Objects.requireNonNull(hider.getAttribute(Attribute.SCALE)).setBaseValue(finalSizeModifier);
+                            plugin.getLogger().info(hider.getName() + " size set to " + finalSizeModifier);
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Failed to set size for " + hider.getName() + ": " + e.getMessage());
+                        }
+                    }, 1L);
+                }
+
+
+                hider.customName(Component.empty());
+                hider.setCustomNameVisible(false);
+            }
+        }
+
+        if (gameMode == GameModeEnum.BLOCK) {
+            for (java.util.UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+                org.bukkit.entity.Player hider = org.bukkit.Bukkit.getPlayer(hiderId);
+                if (hider != null) {
+                    HiderItems.giveItems(hider, hideAndSeekPlugin, true);
+                }
+            }
+        }
+
+        startHiderPointsTask(plugin);
+
+        startCountdown(plugin);
+
+        plugin.getTeamManager().getTeam(plugin.getTeamManager().getPlayerTeam(Bukkit.getPlayer(HideAndSeek.getDataController().getSeekers().getFirst()))).setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        plugin.getTeamManager().getTeam(plugin.getTeamManager().getPlayerTeam(Bukkit.getPlayer(HideAndSeek.getDataController().getSeekers().getFirst()))).setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+
+        plugin.getTeamManager().getTeam(plugin.getTeamManager().getPlayerTeam(Bukkit.getPlayer(HideAndSeek.getDataController().getHiders().getFirst()))).setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        plugin.getTeamManager().getTeam(plugin.getTeamManager().getPlayerTeam(Bukkit.getPlayer(HideAndSeek.getDataController().getHiders().getFirst()))).setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+    }
+
+    @Override
+    public void onEnd(MinigameFramework plugin) {
+
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+
+        if (pointsTask != null) {
+            pointsTask.cancel();
+        }
+
+        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : GameModeEnum.NORMAL;
+        GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
+                (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
+
+
+        for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+            Player hider = Bukkit.getPlayer(hiderId);
+            if (hider != null && hider.isOnline()) {
+
+                if (gameMode != GameModeEnum.BLOCK) {
+                    try {
+                        hider.removePotionEffect(PotionEffectType.INVISIBILITY);
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("Failed to remove invisibility from " + hider.getName());
+                    }
+                }
+
+
+            }
+        }
+
+
+        for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
+            Player seeker = Bukkit.getPlayer(seekerId);
+            if (seeker != null && seeker.isOnline()) {
+
+                seeker.removePotionEffect(PotionEffectType.BLINDNESS);
+
+                Iterator<Map.Entry<BukkitTask, Location>> iterator = blockTasks.entrySet().iterator();
+
+                while (iterator.hasNext()) {
+                    Map.Entry<BukkitTask, Location> entry = iterator.next();
+
+                    BukkitTask task = entry.getKey();
+                    Location location = entry.getValue();
+
+                    if (task.getOwner() == plugin) {
+                        iterator.remove();
+                        task.cancel();
+
+                        seeker.sendBlockChange(location, location.getBlock().getBlockData());
+
+                        Location above = location.clone().add(0, 1, 0);
+                        seeker.sendBlockChange(above, above.getBlock().getBlockData());
+
+                        seeker.setAllowFlight(false);
+                    }
+                }
+
+                seeker.getInventory().setHelmet(null);
+
+                seeker.setGameMode(GameMode.SURVIVAL);
+                seeker.setWalkSpeed(0.2f);
+
+                Title title = Title.title(
+                        Component.text("GO!", NamedTextColor.RED),
+                        Component.text("Find the hiders!", NamedTextColor.YELLOW),
+                        Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(2), Duration.ofMillis(500))
+                );
+                seeker.showTitle(title);
+            }
+        }
+
+        HiderItems.removeFromAllPlayers();
+
+        plugin.getLogger().info("Hiding phase ended - seeking phase starting");
+
+        TimerManager.cleanupTimer(hideAndSeekPlugin, "Hiding");
+    }
+
+    @Override
+    public List<String> getAllowedTransitions() {
+        return List.of("seeking");
+    }
+
+    private void startCountdown(MinigameFramework plugin) {
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+        TimerManager.startHidingTimer(hideAndSeekPlugin);
+    }
+
+    @Override
+    public boolean allowBlockBreak() {
+        return false;
+    }
+
+    @Override
+    public boolean allowBlockPlace() {
+        return false;
+    }
+
+    private void startHiderPointsTask(MinigameFramework plugin) {
+        var hiderPointsResult = plugin.getSettingService().getSetting("game.hider-points");
+        Object hiderPointsObj = hiderPointsResult.isSuccess() ? hiderPointsResult.getValue() : 1;
+        int hiderPoints = (hiderPointsObj instanceof Integer) ? (Integer) hiderPointsObj : 1;
+
+        pointsTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+                    Player hider = Bukkit.getPlayer(hiderId);
+                    if (hider != null && hider.isOnline() && hider.getGameMode() != GameMode.SPECTATOR) {
+                        HideAndSeek.getDataController().addPoints(hiderId, hiderPoints);
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 100L, 100L);
+    }
+
+    @Override
+    public boolean allowBlockInteraction() {
+        return false;
+    }
+
+    @Override
+    public boolean allowEntityInteraction() {
+        return false;
+    }
+
+    @Override
+    public boolean allowBlockDetection() {
+        return false;
+    }
+
+    @Override
+    public boolean allowEntityDetection() {
+        return false;
+    }
+
+    @Override
+    public List<Material> getBlockInteractionExceptions() {
+        return new ArrayList<>(
+                Arrays.stream(Material.values())
+                        .filter(material -> material.name().endsWith("_DOOR") || material.name().endsWith("_FENCE_GATE") || material.name().endsWith("_TRAPDOOR"))
+                        .toList()
+        );
+    }
+
+    @Override
+    public boolean allowBlockPhysics() {
+        return false;
+    }
+
+    @Override
+    public boolean allowEntityChangeBlock() {
+        return false;
+    }
+
+    @Override
+    public boolean allowBlockExplosions() {
+        return false;
+    }
+
+    @Override
+    public boolean allowEntityExplosions() {
+        return false;
+    }
+
+    @Override
+    public boolean allowBlockDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean allowBlockExperienceDrop() {
+        return false;
+    }
+
+    @Override
+    public boolean allowEntityDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean allowEntityExperienceDrop() {
+        return false;
+    }
+
+}
