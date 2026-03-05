@@ -1,4 +1,4 @@
-package de.thecoolcraft11.hideAndSeek.util;
+package de.thecoolcraft11.hideAndSeek.model;
 
 public enum SeekerKillModeEnum {
     NORMAL,

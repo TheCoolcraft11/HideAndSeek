@@ -1,8 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.loadout;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import de.thecoolcraft11.hideAndSeek.items.ItemRarity;
-import de.thecoolcraft11.hideAndSeek.items.LoadoutItemType;
+import de.thecoolcraft11.hideAndSeek.model.ItemRarity;
+import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,9 +56,6 @@ public class LoadoutManager {
         return "lobby".equalsIgnoreCase(currentPhase);
     }
 
-    public void clearAll() {
-        loadouts.clear();
-    }
 }
 
 

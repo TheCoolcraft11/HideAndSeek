@@ -1,7 +1,7 @@
-package de.thecoolcraft11.hideAndSeek.listener;
+package de.thecoolcraft11.hideAndSeek.listener.player;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import de.thecoolcraft11.hideAndSeek.util.SeekerKillModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.SeekerKillModeEnum;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;

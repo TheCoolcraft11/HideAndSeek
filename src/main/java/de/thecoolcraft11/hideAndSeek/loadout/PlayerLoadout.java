@@ -1,6 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.loadout;
 
-import de.thecoolcraft11.hideAndSeek.items.LoadoutItemType;
+import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 
 import java.util.*;
 
@@ -53,12 +53,6 @@ public class PlayerLoadout {
 
     public Set<LoadoutItemType> getSeekerItems() {
         return Collections.unmodifiableSet(seekerItems);
-    }
-
-    public void clear() {
-        hiderItems.clear();
-        seekerItems.clear();
-        itemCosts.clear();
     }
 }
 

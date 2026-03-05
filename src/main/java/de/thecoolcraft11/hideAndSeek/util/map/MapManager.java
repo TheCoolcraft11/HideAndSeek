@@ -2,7 +2,7 @@ package de.thecoolcraft11.hideAndSeek.util.map;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.block.BlockStateFilter;
-import de.thecoolcraft11.hideAndSeek.util.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -284,10 +284,6 @@ public class MapManager {
 
         plugin.getLogger().warning("Could not determine default block for map: " + mapName + ", using STONE");
         return Material.STONE;
-    }
-
-    public World selectAndCopyMap() {
-        return selectAndCopyMap(0);
     }
 
     public World selectAndCopyMap(int playerCount) {

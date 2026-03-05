@@ -1,4 +1,4 @@
-package de.thecoolcraft11.hideAndSeek.listener;
+package de.thecoolcraft11.hideAndSeek.listener.item;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import net.kyori.adventure.text.Component;

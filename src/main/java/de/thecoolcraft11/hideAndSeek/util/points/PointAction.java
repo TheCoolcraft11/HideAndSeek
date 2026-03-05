@@ -16,6 +16,7 @@ public enum PointAction {
     SEEKER_INTERCEPTION("points.seeker.interception.amount", 15),
     SEEKER_KILL("points.seeker.kill.amount", 300),
     SEEKER_ASSIST("points.seeker.assist.amount", 100),
+    
     SEEKER_SPECIAL_BLOODHOUND("points.seeker.special.bloodhound", 200),
     SEEKER_FIRST_BLOOD("points.seeker.first-blood.amount", 100);
 

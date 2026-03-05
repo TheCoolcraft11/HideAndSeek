@@ -1,9 +1,9 @@
-package de.thecoolcraft11.hideAndSeek.listener;
+package de.thecoolcraft11.hideAndSeek.listener.player;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
-import de.thecoolcraft11.hideAndSeek.util.GameStyleEnum;
+import de.thecoolcraft11.hideAndSeek.model.GameStyleEnum;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;

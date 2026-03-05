@@ -3,7 +3,7 @@ package de.thecoolcraft11.hideAndSeek.phase;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
-import de.thecoolcraft11.hideAndSeek.util.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.TimerManager;
 import de.thecoolcraft11.hideAndSeek.util.map.MapConfigHelper;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;

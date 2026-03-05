@@ -1,4 +1,7 @@
-package de.thecoolcraft11.hideAndSeek.items;
+package de.thecoolcraft11.hideAndSeek.model;
+
+import de.thecoolcraft11.hideAndSeek.items.HiderItems;
+import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 
 public enum LoadoutItemType {
 

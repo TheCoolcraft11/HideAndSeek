@@ -1,9 +1,9 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
-import de.thecoolcraft11.hideAndSeek.items.ItemRarity;
-import de.thecoolcraft11.hideAndSeek.items.LoadoutItemType;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
 import de.thecoolcraft11.hideAndSeek.loadout.PlayerLoadout;
+import de.thecoolcraft11.hideAndSeek.model.ItemRarity;
+import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;

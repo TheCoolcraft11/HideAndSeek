@@ -1,4 +1,4 @@
-package de.thecoolcraft11.hideAndSeek.items;
+package de.thecoolcraft11.hideAndSeek.model;
 
 public enum ItemRarity {
     COMMON(1),

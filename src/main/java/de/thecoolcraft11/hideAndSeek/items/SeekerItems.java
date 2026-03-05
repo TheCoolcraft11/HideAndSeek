@@ -2,11 +2,15 @@ package de.thecoolcraft11.hideAndSeek.items;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.gui.BlockStatsGUI;
-import de.thecoolcraft11.hideAndSeek.listener.HiderEquipmentChangeListener;
+import de.thecoolcraft11.hideAndSeek.listener.player.HiderEquipmentChangeListener;
+import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.BlocksAttacks;
+import io.papermc.paper.datacomponent.item.blocksattacks.DamageReduction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -56,6 +60,11 @@ public final class SeekerItems {
     private static final Map<UUID, Long> hiderCursedUntil = new HashMap<>();
     private static final Map<UUID, ItemStack> inkHelmetBackup = new HashMap<>();
     private static final Map<Location, BlockDisplay> sensorDisplays = new HashMap<>();
+    private static final Map<UUID, SwordChargeState> swordChargeStates = new HashMap<>();
+    private static final Map<UUID, BukkitTask> swordChargeTasks = new HashMap<>();
+
+    private record SwordChargeState(long startedAtMs, float previousExp, int previousLevel) {
+    }
 
     public static void registerItems(HideAndSeek plugin) {
         registerCooldownItems(plugin);
@@ -352,9 +361,17 @@ public final class SeekerItems {
     }
 
     public static void registerSeekersSword(HideAndSeek plugin) {
+        int swordCooldown = plugin.getSettingRegistry().get("seeker-items.sword-of-seeking.cooldown", 5);
+
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createSeekerSword(), SEEKERS_SWORD_ID)
                 .withCraftPrevention(true)
                 .withDropPrevention(true)
+                .cancelDefaultAction(false)
+                .withVanillaCooldown(swordCooldown * 20)
+                .withCustomCooldown(swordCooldown * 1000L)
+                .cancelAttackOnCooldown(false)
+                .withAction(ItemActionType.BLOCK_START, context -> startSwordCharge(context, plugin))
+                .withAction(ItemActionType.BLOCK_RELEASE, context -> releaseSwordCharge(context, plugin))
                 .build());
     }
 
@@ -589,6 +606,7 @@ public final class SeekerItems {
             meta.setUnbreakable(true);
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
             sword.setItemMeta(meta);
+            sword.setData(DataComponentTypes.BLOCKS_ATTACKS, BlocksAttacks.blocksAttacks().addDamageReduction(DamageReduction.damageReduction().base(0).factor(0).horizontalBlockingAngle(0.1f).build()).build());
         }
 
         return sword;
@@ -1709,6 +1727,267 @@ public final class SeekerItems {
             case DOWN -> new Vector(0, -1, 0);
             default -> new Vector(0, 1, 0);
         };
+    }
+
+    private static void startSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
+        context.skipCooldown();
+        Player seeker = context.getPlayer();
+        int maxChargeSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
+        long maxChargeMs = maxChargeSeconds * 1000L;
+
+        clearSwordCharge(seeker);
+        swordChargeStates.put(seeker.getUniqueId(), new SwordChargeState(System.currentTimeMillis(), seeker.getExp(), seeker.getLevel()));
+
+
+        seeker.setLevel(0);
+        seeker.setExp(0f);
+
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (!seeker.isOnline() || !plugin.getCustomItemManager().hasItemInMainHand(seeker, SEEKERS_SWORD_ID)) {
+                clearSwordCharge(seeker);
+                return;
+            }
+
+            SwordChargeState chargeState = swordChargeStates.get(seeker.getUniqueId());
+            if (chargeState == null) {
+                clearSwordCharge(seeker);
+                return;
+            }
+
+            long elapsed = Math.min(System.currentTimeMillis() - chargeState.startedAtMs, maxChargeMs);
+            seeker.setLevel(0);
+            seeker.setExp((float) elapsed / (float) maxChargeMs);
+        }, 1L, 1L);
+
+        swordChargeTasks.put(seeker.getUniqueId(), task);
+    }
+
+    private static void releaseSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
+        Player seeker = context.getPlayer();
+        int maxChargeSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
+        long maxChargeMs = maxChargeSeconds * 1000L;
+
+        SwordChargeState state = swordChargeStates.get(seeker.getUniqueId());
+        long measuredHoldMs = Math.max(0L, context.getHoldDurationMs());
+        if (state != null) {
+            measuredHoldMs = Math.max(measuredHoldMs, System.currentTimeMillis() - state.startedAtMs);
+        }
+
+        clearSwordCharge(seeker);
+
+        double chargeRatio = Math.min(1.0, measuredHoldMs / (double) maxChargeMs);
+        throwChargedSword(seeker, plugin, chargeRatio);
+    }
+
+    private static void clearSwordCharge(Player player) {
+        BukkitTask existingTask = swordChargeTasks.remove(player.getUniqueId());
+        if (existingTask != null) {
+            existingTask.cancel();
+        }
+
+        SwordChargeState state = swordChargeStates.remove(player.getUniqueId());
+        if (state != null && player.isOnline()) {
+            player.setLevel(state.previousLevel);
+            player.setExp(state.previousExp);
+        }
+    }
+
+    public static void cleanupSwordCharge(UUID playerId) {
+        Player player = Bukkit.getPlayer(playerId);
+        if (player != null) {
+            clearSwordCharge(player);
+            return;
+        }
+
+        BukkitTask existingTask = swordChargeTasks.remove(playerId);
+        if (existingTask != null) {
+            existingTask.cancel();
+        }
+        swordChargeStates.remove(playerId);
+    }
+
+    private static void throwChargedSword(Player seeker, HideAndSeek plugin, double chargeRatio) {
+        if (!seeker.isOnline()) {
+            return;
+        }
+
+        double minSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.min-speed", 0.8);
+        double maxSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-speed", 2.4);
+        double gravity = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.gravity", 0.035);
+        int maxFlightSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-flight-seconds", 6));
+        int stuckSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.stuck-seconds", 12));
+        double hitbox = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.hitbox", 0.4);
+
+        double speed = minSpeed + (maxSpeed - minSpeed) * chargeRatio;
+        Location start = seeker.getEyeLocation().add(seeker.getEyeLocation().getDirection().normalize().multiply(0.6)).add(0, -0.2, 0);
+        Vector velocity = seeker.getEyeLocation().getDirection().normalize().multiply(speed);
+
+        ItemDisplay swordDisplay = start.getWorld().spawn(start, ItemDisplay.class, display -> {
+            display.setItemStack(createSeekerSword());
+            display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
+            display.setInterpolationDuration(1);
+            display.setTransformation(new Transformation(
+                    new Vector3f(-0.15f, -0.12f, -0.15f),
+                    new AxisAngle4f((float) Math.toRadians(90), 1f, 0f, 0f),
+                    new Vector3f(0.7f, 0.7f, 0.7f),
+                    new AxisAngle4f(0, 0, 0, 0)
+            ));
+        });
+
+        seeker.getWorld().playSound(seeker.getLocation(), Sound.ITEM_TRIDENT_THROW, 1.0f, (float) (0.8 + chargeRatio * 0.5));
+
+        new BukkitRunnable() {
+            Location current = start.clone();
+            int ticks = 0;
+            float rotationAngle = 0f;
+
+            @Override
+            public void run() {
+                if (!seeker.isOnline() || !swordDisplay.isValid()) {
+                    removeDisplay();
+                    cancel();
+                    return;
+                }
+
+                if (ticks++ > maxFlightSeconds * 20) {
+                    removeDisplay();
+                    cancel();
+                    return;
+                }
+
+                Location previous = current.clone();
+                velocity.setY(velocity.getY() - gravity);
+                current = current.add(velocity);
+
+                World world = current.getWorld();
+                Vector travel = current.toVector().subtract(previous.toVector());
+                double distance = travel.length();
+                if (distance <= 0.0001) {
+                    return;
+                }
+                Vector direction = travel.clone().normalize();
+
+                RayTraceResult entityTrace = world.rayTraceEntities(
+                        previous,
+                        direction,
+                        distance,
+                        hitbox,
+                        entity -> entity instanceof Player target
+                                && !target.getUniqueId().equals(seeker.getUniqueId())
+                                && HideAndSeek.getDataController().getHiders().contains(target.getUniqueId())
+                );
+
+                if (entityTrace != null && entityTrace.getHitEntity() instanceof Player target) {
+                    double damage = getThrownSwordDamage(seeker);
+                    target.damage(damage, seeker);
+                    target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 10, 0.25, 0.4, 0.25, 0.02);
+                    target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
+                    seeker.playSound(seeker.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.1f);
+
+                    removeDisplay();
+                    cancel();
+                    return;
+                }
+
+                RayTraceResult blockTrace = world.rayTraceBlocks(
+                        previous,
+                        direction,
+                        distance,
+                        FluidCollisionMode.NEVER,
+                        true
+                );
+
+                if (blockTrace != null) {
+                    Vector hitNormal = blockTrace.getHitBlockFace() != null ?
+                            blockTrace.getHitBlockFace().getDirection() : new Vector(0, 1, 0);
+
+                    Location impact = blockTrace.getHitPosition().toLocation(world);
+                    impact.add(hitNormal.clone().multiply(0.175));
+                    impact.setYaw(rotationAngle + 180f);
+                    impact.setPitch(0);
+
+
+                    Vector bladeDirection = hitNormal.clone().multiply(-1);
+
+
+                    float targetPitch = (float) Math.toDegrees(Math.asin(-bladeDirection.getY()));
+                    float targetYaw = (float) Math.toDegrees(Math.atan2(-bladeDirection.getX(), bladeDirection.getZ()));
+
+
+                    Quaternionf stuckRotation = new Quaternionf()
+                            .rotateX((float) Math.toRadians(90))
+                            .rotateY((float) Math.toRadians(targetYaw))
+                            .rotateX((float) Math.toRadians(targetPitch))
+                            .rotateZ((float) Math.toRadians(rotationAngle));
+
+                    swordDisplay.setTransformation(new Transformation(
+                            new Vector3f(-0.15f, -0.12f, -0.15f),
+                            new AxisAngle4f(stuckRotation),
+                            new Vector3f(0.7f, 0.7f, 0.7f),
+                            new AxisAngle4f(0, 0, 0, 0)
+                    ));
+
+                    swordDisplay.teleport(impact);
+                    swordDisplay.setInterpolationDelay(0);
+                    swordDisplay.setInterpolationDuration(3);
+                    world.playSound(impact, Sound.ITEM_TRIDENT_HIT_GROUND, 1.0f, 0.9f);
+
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        if (swordDisplay.isValid()) {
+                            swordDisplay.remove();
+                        }
+                    }, stuckSeconds * 20L);
+
+                    cancel();
+                    return;
+                }
+
+                rotationAngle += 30f;
+                if (rotationAngle >= 360f) {
+                    rotationAngle -= 360f;
+                }
+
+                float pitch = (float) Math.toDegrees(Math.asin(-direction.getY()));
+                float yaw = (float) Math.toDegrees(Math.atan2(-direction.getX(), direction.getZ()));
+
+                Quaternionf rotation = new Quaternionf()
+                        .rotateY((float) Math.toRadians(yaw))
+                        .rotateX((float) Math.toRadians(pitch))
+                        .rotateZ((float) Math.toRadians(rotationAngle));
+
+                swordDisplay.setTransformation(new Transformation(
+                        new Vector3f(-0.15f, -0.12f, -0.15f),
+                        new AxisAngle4f(rotation),
+                        new Vector3f(0.7f, 0.7f, 0.7f),
+                        new AxisAngle4f(0, 0, 0, 0)
+                ));
+
+                swordDisplay.teleport(current);
+                world.spawnParticle(Particle.SWEEP_ATTACK, current, 1, 0, 0, 0, 0);
+            }
+
+            private void removeDisplay() {
+                if (swordDisplay.isValid()) {
+                    swordDisplay.remove();
+                }
+            }
+        }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    private static double getThrownSwordDamage(Player seeker) {
+        double damage = 6.0;
+        var attackAttr = seeker.getAttribute(Attribute.ATTACK_DAMAGE);
+        if (attackAttr != null) {
+            damage = attackAttr.getValue();
+        }
+
+        ItemStack hand = seeker.getInventory().getItemInMainHand();
+        int sharpnessLevel = hand.getEnchantmentLevel(Enchantment.SHARPNESS);
+        if (sharpnessLevel > 0) {
+            damage += 0.5 * sharpnessLevel + 0.5;
+        }
+
+        return damage;
     }
 
 }

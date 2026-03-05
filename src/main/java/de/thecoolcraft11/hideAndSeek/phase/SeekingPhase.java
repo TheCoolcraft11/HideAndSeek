@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek.phase;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.TimerManager;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
@@ -68,10 +69,10 @@ public class SeekingPhase implements GamePhase {
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
 
 
-        de.thecoolcraft11.hideAndSeek.util.GameModeEnum gameMode = (gameModeObj instanceof de.thecoolcraft11.hideAndSeek.util.GameModeEnum) ?
-                (de.thecoolcraft11.hideAndSeek.util.GameModeEnum) gameModeObj : de.thecoolcraft11.hideAndSeek.util.GameModeEnum.NORMAL;
+        GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
+                (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
         double seekerSize = 1.0;
-        if (gameMode == de.thecoolcraft11.hideAndSeek.util.GameModeEnum.SMALL) {
+        if (gameMode == GameModeEnum.SMALL) {
             var seekerSizeResult = plugin.getSettingService().getSetting("game.small_mode_seeker_size");
             Object seekerSizeObj = seekerSizeResult.isSuccess() ? seekerSizeResult.getValue() : 1.0;
             seekerSize = (seekerSizeObj instanceof Number) ? ((Number) seekerSizeObj).doubleValue() : 1.0;
@@ -136,7 +137,7 @@ public class SeekingPhase implements GamePhase {
                 ));
 
 
-                if (gameMode == de.thecoolcraft11.hideAndSeek.util.GameModeEnum.SMALL && seekerSize != 1.0) {
+                if (gameMode == GameModeEnum.SMALL && seekerSize != 1.0) {
                     var scaleAttribute = player.getAttribute(org.bukkit.attribute.Attribute.SCALE);
                     if (scaleAttribute != null) {
                         scaleAttribute.setBaseValue(seekerSize);

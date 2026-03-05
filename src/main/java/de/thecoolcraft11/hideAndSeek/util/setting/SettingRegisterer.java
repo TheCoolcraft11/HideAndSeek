@@ -1,10 +1,10 @@
 package de.thecoolcraft11.hideAndSeek.util.setting;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import de.thecoolcraft11.hideAndSeek.util.GameModeEnum;
-import de.thecoolcraft11.hideAndSeek.util.GameStyleEnum;
-import de.thecoolcraft11.hideAndSeek.util.SeekerKillModeEnum;
-import de.thecoolcraft11.hideAndSeek.util.SpeedBoostType;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.GameStyleEnum;
+import de.thecoolcraft11.hideAndSeek.model.SeekerKillModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.SpeedBoostType;
 import de.thecoolcraft11.minigameframework.config.SectionDefinition;
 import de.thecoolcraft11.minigameframework.config.SettingDefinition;
 import de.thecoolcraft11.minigameframework.config.SettingType;
@@ -214,6 +214,14 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.duration", Integer.class, -1);
         plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.paralyze-duration", Integer.class, 5);
         plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.setup-time", Integer.class, 5);
+        plugin.getConfigRegistry().register("settings.seeker-items.sword-of-seeking.cooldown", Integer.class, 5);
+        plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.max-charge-seconds", Integer.class, 5);
+        plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.min-speed", Double.class, 0.8);
+        plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.max-speed", Double.class, 2.4);
+        plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.gravity", Double.class, 0.035);
+        plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.hitbox", Double.class, 0.4);
+        plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.max-flight-seconds", Integer.class, 6);
+        plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.stuck-seconds", Integer.class, 12);
 
 
         plugin.getConfigRegistry().register("settings.loadout.hider-max-items", Integer.class, 3);
@@ -1005,6 +1013,61 @@ public class SettingRegisterer {
                 .range(0, 60)
                 .description("Time in seconds the cage trap takes to set up before it can trap a player")
                 .customIcon(Material.IRON_BARS)
+                .build());
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.sword-of-seeking.cooldown", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.cage-trap.setup-time", 5))
+                .range(0, 60)
+                .description("Cooldown for thrown seeker sword in seconds  ")
+                .customIcon(Material.IRON_BARS)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.seeker-sword-throw.max-charge-seconds", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.seeker-sword-throw.max-charge-seconds", 5))
+                .range(1, 15)
+                .description("Maximum sword charge time in seconds")
+                .customIcon(Material.EXPERIENCE_BOTTLE)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.seeker-sword-throw.min-speed", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.seeker-sword-throw.min-speed", 0.8))
+                .rangeDouble(0.2, 5.0)
+                .description("Thrown sword speed with minimum charge")
+                .customIcon(Material.IRON_NUGGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.seeker-sword-throw.max-speed", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.seeker-sword-throw.max-speed", 2.4))
+                .rangeDouble(0.5, 8.0)
+                .description("Thrown sword speed with full charge")
+                .customIcon(Material.TRIDENT)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.seeker-sword-throw.gravity", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.seeker-sword-throw.gravity", 0.035))
+                .rangeDouble(0.0, 0.2)
+                .description("Per-tick gravity applied to the thrown sword")
+                .customIcon(Material.FEATHER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.seeker-sword-throw.hitbox", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.seeker-sword-throw.hitbox", 0.4))
+                .rangeDouble(0.1, 1.5)
+                .description("Collision radius used for hider hit detection")
+                .customIcon(Material.TARGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.seeker-sword-throw.max-flight-seconds", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.seeker-sword-throw.max-flight-seconds", 6))
+                .range(1, 30)
+                .description("Maximum travel time before the thrown sword despawns")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.seeker-sword-throw.stuck-seconds", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.seeker-sword-throw.stuck-seconds", 12))
+                .range(1, 60)
+                .description("How long the sword remains stuck in a block")
+                .customIcon(Material.IRON_SWORD)
                 .build());
 
 

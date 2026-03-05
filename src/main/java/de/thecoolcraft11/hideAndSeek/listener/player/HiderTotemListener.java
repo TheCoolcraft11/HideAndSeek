@@ -1,4 +1,4 @@
-package de.thecoolcraft11.hideAndSeek.listener;
+package de.thecoolcraft11.hideAndSeek.listener.player;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import org.bukkit.entity.Player;

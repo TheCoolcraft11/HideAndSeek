@@ -188,6 +188,14 @@ settings:
       range: 3.0
       duration: -1
       paralyze-duration: 5
+    seeker-sword-throw:
+      max-charge-seconds: 5
+      min-speed: 0.8
+      max-speed: 2.4
+      gravity: 0.035
+      hitbox: 0.4
+      max-flight-seconds: 6
+      stuck-seconds: 12
 
   loadout:
     hider-max-items: 3

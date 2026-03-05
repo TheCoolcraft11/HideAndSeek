@@ -1,6 +1,7 @@
-package de.thecoolcraft11.hideAndSeek.listener;
+package de.thecoolcraft11.hideAndSeek.listener.game;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
@@ -43,6 +44,7 @@ public class GameStateListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        SeekerItems.cleanupSwordCharge(player.getUniqueId());
 
 
         if (HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
@@ -72,4 +74,3 @@ public class GameStateListener implements Listener {
         }
     }
 }
-
