@@ -148,25 +148,39 @@ public class BlockModeListener implements Listener {
         java.util.UUID hiderId = HideAndSeek.getDataController().getHiderByBlock(block.getLocation());
 
         if (hiderId != null) {
-            Player hider = Bukkit.getPlayer(hiderId);
-            if (hider != null && hider.isOnline()) {
+            damageHiddenPlayer(breaker, hiderId, gazeKill);
+        }
+    }
 
-                double damage = gazeKill ? 1000 : getDamage(breaker);
-
-                HideAndSeek.getDataController().setBlockDamageOverride(hider.getUniqueId(), System.currentTimeMillis() + 500);
-                hider.damage(damage, breaker);
-
-                Entity vehicle = hider.getVehicle();
-                Entity sittingEntity = HideAndSeek.getDataController().getSittingEntity(hider.getUniqueId());
+    public void damageHiddenPlayer(Player breaker, java.util.UUID hiderId, boolean gazeKill) {
+        if (!plugin.getStateManager().getCurrentPhaseId().equals("seeking")) {
+            return;
+        }
 
 
-                if (vehicle != null && vehicle.equals(sittingEntity)) {
+        if (!HideAndSeek.getDataController().getSeekers().contains(breaker.getUniqueId())) {
+            return;
+        }
 
-                    Bukkit.getScheduler().runTask(plugin, () -> unhidePlayer(hider));
-                }
+        Player hider = Bukkit.getPlayer(hiderId);
+        if (hider != null && hider.isOnline()) {
 
-                plugin.getLogger().info(breaker.getName() + " hit hidden hider " + hider.getName() + " for " + damage + " damage");
+            double damage = gazeKill ? 1000 : getDamage(breaker);
+
+            HideAndSeek.getDataController().setBlockDamageOverride(hider.getUniqueId(), System.currentTimeMillis() + 500);
+            hider.setNoDamageTicks(0);
+            hider.damage(damage, breaker);
+
+            Entity vehicle = hider.getVehicle();
+            Entity sittingEntity = HideAndSeek.getDataController().getSittingEntity(hider.getUniqueId());
+
+
+            if (vehicle != null && vehicle.equals(sittingEntity)) {
+
+                Bukkit.getScheduler().runTask(plugin, () -> unhidePlayer(hider));
             }
+
+            plugin.getLogger().info(breaker.getName() + " hit hidden hider " + hider.getName() + " for " + damage + " damage");
         }
     }
 
@@ -320,7 +334,7 @@ public class BlockModeListener implements Listener {
                 Location hiddenLocation = HideAndSeek.getDataController().getLastLocation(hiderUUID);
                 if (hiddenLocation != null) {
                     Block hiddenBlock = hiddenLocation.getBlock();
-                    boolean gazeKill = plugin.getSettingRegistry().get("game.seeker-kill-mode").equals("GAZE_KILL");
+                    boolean gazeKill = plugin.getSettingRegistry().get("game.seeker_kill_mode").equals("GAZE_KILL");
                     damageHiddenPlayer(attacker, hiddenBlock, gazeKill);
                     plugin.getLogger().info(attacker.getName() + " hit hidden hider " + hider.getName() + " via interaction entity");
                 }

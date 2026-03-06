@@ -603,19 +603,7 @@ public final class HiderItems {
     }
 
     public static void removeItems(Player player) {
-        player.getInventory().remove(Material.CAT_SPAWN_EGG);
-        player.getInventory().remove(Material.RED_CANDLE);
-        player.getInventory().remove(Material.BLAZE_POWDER);
-        player.getInventory().remove(Material.COMMAND_BLOCK);
-        player.getInventory().remove(Material.COMPARATOR);
-        player.getInventory().remove(Material.WOODEN_HOE);
-        player.getInventory().remove(Material.STONE_HOE);
-        player.getInventory().remove(Material.IRON_HOE);
-        player.getInventory().remove(Material.GOLDEN_HOE);
-        player.getInventory().remove(Material.DIAMOND_HOE);
-        player.getInventory().remove(Material.NETHERITE_HOE);
-        player.getInventory().remove(Material.CROSSBOW);
-        player.getInventory().remove(Material.ARROW);
+        player.getInventory().clear();
     }
 
     public static void removeFromAllPlayers() {

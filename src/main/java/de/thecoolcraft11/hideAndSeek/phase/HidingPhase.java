@@ -155,6 +155,7 @@ public class HidingPhase implements GamePhase {
                 seeker.setFlying(false);
                 seeker.sendMessage(Component.text("Wait for the hiders to hide...", NamedTextColor.RED));
                 seeker.setGlowing(false);
+                Objects.requireNonNull(seeker.getAttribute(Attribute.SCALE)).setBaseValue(1.0);
 
 
                 seeker.addPotionEffect(new PotionEffect(

@@ -34,17 +34,12 @@ public class PlayerHitListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamage(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player victim)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
 
 
         if (plugin.getStateManager().getCurrentPhaseId().equals("seeking") || plugin.getStateManager().getCurrentPhaseId().equals("hiding")) {
-            if (HideAndSeek.getDataController().isHidden(victim.getUniqueId()) &&
-                    HideAndSeek.getDataController().isBlockDamageOverrideActive(victim.getUniqueId())) {
-                return;
-            }
-
             event.setCancelled(true);
         }
     }
@@ -92,16 +87,12 @@ public class PlayerHitListener implements Listener {
 
         if (victimIsHider && HideAndSeek.getDataController().isHidden(victim.getUniqueId())) {
             if (!HideAndSeek.getDataController().isBlockDamageOverrideActive(victim.getUniqueId())) {
-                org.bukkit.Location hiddenLocation = HideAndSeek.getDataController().getLastLocation(victim.getUniqueId());
-                if (hiddenLocation != null) {
-                    org.bukkit.block.Block hiddenBlock = hiddenLocation.getBlock();
-                    plugin.getBlockModeListener().damageHiddenPlayer(attacker, hiddenBlock, plugin.getSettingRegistry().get("game.seeker-kill-mode").equals("GAZE_KILL"));
-                }
+                boolean gazeKill = plugin.getSettingRegistry().get("game.seeker_kill_mode").equals("GAZE_KILL");
+                plugin.getBlockModeListener().damageHiddenPlayer(attacker, victim.getUniqueId(), gazeKill);
                 event.setCancelled(true);
                 return;
             }
             event.setCancelled(false);
-            return;
         }
 
         if (attackerIsSeeker && victimIsHider) {

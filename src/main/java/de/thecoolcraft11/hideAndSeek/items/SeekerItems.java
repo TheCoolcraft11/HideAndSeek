@@ -307,8 +307,7 @@ public final class SeekerItems {
     }
 
     public static void removeItems(Player player) {
-        player.getInventory().remove(Material.IRON_SWORD);
-
+        player.getInventory().clear();
 
         player.removePotionEffect(PotionEffectType.REGENERATION);
     }
@@ -1748,27 +1747,38 @@ public final class SeekerItems {
         long maxChargeMs = maxChargeSeconds * 1000L;
 
         clearSwordCharge(seeker);
-        swordChargeStates.put(seeker.getUniqueId(), new SwordChargeState(System.currentTimeMillis(), seeker.getExp(), seeker.getLevel()));
 
+        SwordChargeState state = new SwordChargeState(System.currentTimeMillis(), seeker.getExp(), seeker.getLevel());
+        swordChargeStates.put(seeker.getUniqueId(), state);
 
         seeker.setLevel(0);
         seeker.setExp(0f);
 
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (!seeker.isOnline() || !plugin.getCustomItemManager().hasItemInMainHand(seeker, SEEKERS_SWORD_ID)) {
-                clearSwordCharge(seeker);
-                return;
-            }
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
+            long nextSoundAtMs = System.currentTimeMillis();
 
-            SwordChargeState chargeState = swordChargeStates.get(seeker.getUniqueId());
-            if (chargeState == null) {
-                clearSwordCharge(seeker);
-                return;
-            }
+            @Override
+            public void run() {
+                if (!seeker.isOnline() || !plugin.getCustomItemManager().hasItemInMainHand(seeker, SEEKERS_SWORD_ID)) {
+                    clearSwordCharge(seeker);
+                    return;
+                }
 
-            long elapsed = Math.min(System.currentTimeMillis() - chargeState.startedAtMs, maxChargeMs);
-            seeker.setLevel(0);
-            seeker.setExp((float) elapsed / (float) maxChargeMs);
+                long now = System.currentTimeMillis();
+                long elapsed = now - state.startedAtMs;
+                double progress = Math.min(1.0, (double) elapsed / maxChargeMs);
+
+                if (now >= nextSoundAtMs && progress < 1.0) {
+                    float pitch = 0.5f + ((float) progress * 1.5f);
+                    seeker.playSound(seeker.getLocation(), Sound.BLOCK_COMPARATOR_CLICK, 0.8f, pitch);
+
+                    long delay = (long) (1000 - (progress * 900));
+                    nextSoundAtMs = now + Math.max(100, delay);
+                }
+
+                seeker.setExp((float) progress);
+                seeker.setLevel((int) (progress * 10));
+            }
         }, 1L, 1L);
 
         swordChargeTasks.put(seeker.getUniqueId(), task);
@@ -1910,6 +1920,12 @@ public final class SeekerItems {
                 );
 
                 if (blockTrace != null) {
+                    Block hitBlock = blockTrace.getHitBlock();
+                    if (hitBlock != null) {
+                        boolean gazeKill = plugin.getSettingRegistry().get("game.seeker_kill_mode").equals("GAZE_KILL");
+                        plugin.getBlockModeListener().damageHiddenPlayer(seeker, hitBlock, gazeKill);
+                    }
+
                     Vector hitNormal = blockTrace.getHitBlockFace() != null ?
                             blockTrace.getHitBlockFace().getDirection() : new Vector(0, 1, 0);
 
