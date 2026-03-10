@@ -2,13 +2,11 @@ package de.thecoolcraft11.hideAndSeek.listener.game;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.block.BlockDirectionUtil;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import io.papermc.paper.event.block.BlockBreakProgressUpdateEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -22,17 +20,21 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.VoxelShape;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -146,14 +148,14 @@ public class BlockModeListener implements Listener {
         }
 
 
-        java.util.UUID hiderId = HideAndSeek.getDataController().getHiderByBlock(block.getLocation());
+        UUID hiderId = HideAndSeek.getDataController().getHiderByBlock(block.getLocation());
 
         if (hiderId != null) {
             damageHiddenPlayer(breaker, hiderId, gazeKill);
         }
     }
 
-    public void damageHiddenPlayer(Player breaker, java.util.UUID hiderId, boolean gazeKill) {
+    public void damageHiddenPlayer(Player breaker, UUID hiderId, boolean gazeKill) {
         if (!plugin.getStateManager().getCurrentPhaseId().equals("seeking")) {
             return;
         }
@@ -186,7 +188,7 @@ public class BlockModeListener implements Listener {
     }
 
     private static double getDamage(Player breaker) {
-        org.bukkit.inventory.ItemStack tool = breaker.getInventory().getItemInMainHand();
+        ItemStack tool = breaker.getInventory().getItemInMainHand();
         double damage = 4.0;
 
 
@@ -247,7 +249,7 @@ public class BlockModeListener implements Listener {
         }
 
         String hiderId = interaction.getPersistentDataContainer().get(
-                new org.bukkit.NamespacedKey(plugin, "hidingBlock"),
+                new NamespacedKey(plugin, "hidingBlock"),
                 PersistentDataType.STRING
         );
 
@@ -256,7 +258,7 @@ public class BlockModeListener implements Listener {
         }
 
         try {
-            UUID hiderUUID = java.util.UUID.fromString(hiderId);
+            UUID hiderUUID = UUID.fromString(hiderId);
 
 
             if (attacker.getUniqueId().equals(hiderUUID)) {
@@ -282,7 +284,7 @@ public class BlockModeListener implements Listener {
         }
 
         String hiderId = interaction.getPersistentDataContainer().get(
-                new org.bukkit.NamespacedKey(plugin, "hidingBlock"),
+                new NamespacedKey(plugin, "hidingBlock"),
                 PersistentDataType.STRING
         );
 
@@ -291,7 +293,7 @@ public class BlockModeListener implements Listener {
         }
 
         try {
-            java.util.UUID hiderUUID = java.util.UUID.fromString(hiderId);
+            UUID hiderUUID = UUID.fromString(hiderId);
 
 
             if (attacker.getUniqueId().equals(hiderUUID)) {
@@ -309,7 +311,7 @@ public class BlockModeListener implements Listener {
 
     private void handleInteractionHit(Player attacker, Interaction interaction) {
         String hiderId = interaction.getPersistentDataContainer().get(
-                new org.bukkit.NamespacedKey(plugin, "hidingBlock"),
+                new NamespacedKey(plugin, "hidingBlock"),
                 PersistentDataType.STRING
         );
 
@@ -318,7 +320,7 @@ public class BlockModeListener implements Listener {
         }
 
         try {
-            java.util.UUID hiderUUID = java.util.UUID.fromString(hiderId);
+            UUID hiderUUID = UUID.fromString(hiderId);
             Player hider = Bukkit.getPlayer(hiderUUID);
 
             if (hider == null || !hider.isOnline()) {
@@ -347,7 +349,7 @@ public class BlockModeListener implements Listener {
             }
 
 
-            org.bukkit.inventory.ItemStack mainHand = attacker.getInventory().getItemInMainHand();
+            ItemStack mainHand = attacker.getInventory().getItemInMainHand();
             if (mainHand.getType() == Material.IRON_SWORD) {
                 attacker.setCooldown(Material.IRON_SWORD, 10);
             }
@@ -382,7 +384,7 @@ public class BlockModeListener implements Listener {
         if (display == null || !display.isValid()) {
             needsNewDisplay = true;
         } else {
-            String tempGlowId = display.getPersistentDataContainer().get(new org.bukkit.NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
+            String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
             if (tempGlowId != null) {
                 display.remove();
                 needsNewDisplay = true;
@@ -404,7 +406,7 @@ public class BlockModeListener implements Listener {
 
         if (needsNewDisplay) {
 
-            org.bukkit.block.data.BlockData blockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
+            BlockData blockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
             if (blockData == null) {
                 blockData = chosenBlock.createBlockData();
             }
@@ -424,11 +426,16 @@ public class BlockModeListener implements Listener {
                 display.setGlowing(true);
             }
             if (shouldGlow) {
-                org.bukkit.scoreboard.Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                org.bukkit.scoreboard.Team hiderTeam = scoreboard.getEntryTeam(player.getName());
+                Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+                Team hiderTeam = scoreboard.getEntryTeam(player.getName());
                 display.setGlowColorOverride(toGlowColor(hiderTeam));
             }
 
+            Entity interactionEntity = HideAndSeek.getDataController().getInteractionEntity(player.getUniqueId());
+
+            if (interactionEntity != null && interactionEntity.isValid() && interactionEntity instanceof Interaction interaction) {
+                scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId()), player.getLocation()));
+            }
 
             ensureInteractionPassenger(player, display);
         }
@@ -440,7 +447,7 @@ public class BlockModeListener implements Listener {
                 if (blockData == null) {
                     blockData = chosenBlock.createBlockData();
                 }
-                double scale = getHeightFactorComparedToPlayer(blockData, playerLoc);
+                double scale = getHeightFactorComparedToPlayer(getCombinedBoundingBox(blockData, playerLoc));
                 scale = Math.max(0.1, Math.min(2.0, scale));
                 Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).setBaseValue(scale);
             } catch (Exception e) {
@@ -460,7 +467,7 @@ public class BlockModeListener implements Listener {
         }
     }
 
-    private BlockDisplay createBlockDisplay(Player player, Location location, org.bukkit.block.data.BlockData blockData) {
+    private BlockDisplay createBlockDisplay(Player player, Location location, BlockData blockData) {
         return player.getWorld().spawn(location, BlockDisplay.class, bd -> {
             bd.setBlock(blockData);
 
@@ -477,8 +484,8 @@ public class BlockModeListener implements Listener {
 
             if (HideAndSeek.getDataController().isGlowing(player.getUniqueId())) {
                 bd.setGlowing(true);
-                org.bukkit.scoreboard.Scoreboard scoreboard = org.bukkit.Bukkit.getScoreboardManager().getMainScoreboard();
-                org.bukkit.scoreboard.Team hiderTeam = scoreboard.getEntryTeam(player.getName());
+                Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+                Team hiderTeam = scoreboard.getEntryTeam(player.getName());
                 bd.setGlowColorOverride(toGlowColor(hiderTeam));
             }
         });
@@ -507,7 +514,7 @@ public class BlockModeListener implements Listener {
 
             entity.setInvisible(true);
             entity.getPersistentDataContainer().set(
-                    new org.bukkit.NamespacedKey(plugin, "hidingBlock"),
+                    new NamespacedKey(plugin, "hidingBlock"),
                     PersistentDataType.STRING,
                     player.getUniqueId().toString()
             );
@@ -515,6 +522,8 @@ public class BlockModeListener implements Listener {
         });
 
         display.addPassenger(interaction);
+
+        scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId()), player.getLocation()));
         HideAndSeek.getDataController().setInteractionEntity(player.getUniqueId(), interaction);
     }
 
@@ -535,8 +544,7 @@ public class BlockModeListener implements Listener {
 
             HideAndSeek.getDataController().setSneakStart(playerId, currentTime);
 
-            player.setLevel(5);
-            player.setExp(1.0f);
+            XpProgressHelper.applyCountdown(player, 0, SNEAK_DURATION_MS);
             return;
         }
 
@@ -548,16 +556,7 @@ public class BlockModeListener implements Listener {
             player.setExp(0.0f);
             placeBlockAndHide(player);
         } else {
-
-
-            int secondsLeft = (int) ((SNEAK_DURATION_MS - sneakDuration) / 1000);
-            if (secondsLeft < 0) secondsLeft = 0;
-
-
-            float progress = (float) (SNEAK_DURATION_MS - sneakDuration) / SNEAK_DURATION_MS;
-
-            player.setLevel(secondsLeft);
-            player.setExp(progress);
+            XpProgressHelper.applyCountdown(player, sneakDuration, SNEAK_DURATION_MS);
         }
     }
 
@@ -577,7 +576,7 @@ public class BlockModeListener implements Listener {
 
         String currentMap = HideAndSeek.getDataController().getCurrentMapName();
         if (currentMap != null && !currentMap.isEmpty()) {
-            java.util.List<String> allowedBlocks = plugin.getMapManager().getAllowedBlocksForMap(currentMap);
+            List<String> allowedBlocks = plugin.getMapManager().getAllowedBlocksForMap(currentMap);
             if (!allowedBlocks.isEmpty()) {
                 var selector = plugin.getBlockSelectorGUI();
                 var resolvedConfig = selector.resolveConfigForMaterial(allowedBlocks, chosenData.getMaterial());
@@ -652,7 +651,7 @@ public class BlockModeListener implements Listener {
         if (HideAndSeek.getDataController().isGlowing(player.getUniqueId())) {
             BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
             if (display != null && display.isValid()) {
-                String tempGlowId = display.getPersistentDataContainer().get(new org.bukkit.NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
+                String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
                 if (tempGlowId != null && tempGlowId.equals(player.getUniqueId().toString())) {
 
                     display.remove();
@@ -679,10 +678,10 @@ public class BlockModeListener implements Listener {
                         new AxisAngle4f(0, 0, 0, 0)
                 ));
                 bd.setBrightness(new Display.Brightness(15, 15));
-                org.bukkit.scoreboard.Scoreboard scoreboard = org.bukkit.Bukkit.getScoreboardManager().getMainScoreboard();
-                org.bukkit.scoreboard.Team hiderTeam = scoreboard.getEntryTeam(player.getName());
+                Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+                Team hiderTeam = scoreboard.getEntryTeam(player.getName());
                 bd.setGlowColorOverride(toGlowColor(hiderTeam));
-                bd.getPersistentDataContainer().set(new org.bukkit.NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING, player.getUniqueId().toString());
+                bd.getPersistentDataContainer().set(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING, player.getUniqueId().toString());
             });
 
             HideAndSeek.getDataController().setBlockDisplay(player.getUniqueId(), tempDisplay);
@@ -705,7 +704,7 @@ public class BlockModeListener implements Listener {
             entity.setArms(false);
             entity.registerAttribute(Attribute.SCALE);
             Objects.requireNonNull(entity.getAttribute(Attribute.SCALE)).setBaseValue(0.0);
-            entity.getPersistentDataContainer().set(new org.bukkit.NamespacedKey(plugin, "isHidingSit"), PersistentDataType.BOOLEAN, true);
+            entity.getPersistentDataContainer().set(new NamespacedKey(plugin, "isHidingSit"), PersistentDataType.BOOLEAN, true);
         });
 
 
@@ -868,10 +867,6 @@ public class BlockModeListener implements Listener {
         return blockHeight / 1.8f;
     }
 
-    private static double getHeightFactorComparedToPlayer(BlockData data, Location loc) {
-        return getHeightFactorComparedToPlayer(getBlockBoundingBox(data, loc));
-    }
-
     private static BoundingBox getBlockBoundingBox(BlockData data, Location loc) {
         VoxelShape shape = data.getCollisionShape(loc);
 
@@ -901,6 +896,40 @@ public class BlockModeListener implements Listener {
         return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+
+    private static void scaleInteractionToBoundingBox(Interaction interaction, BoundingBox bb) {
+        if (interaction.getInteractionWidth() == bb.getWidthX() && interaction.getInteractionHeight() == bb.getHeight())
+            return;
+        interaction.setInteractionHeight((float) bb.getHeight());
+        interaction.setInteractionWidth((float) ((bb.getWidthX() + bb.getWidthZ()) / 2));
+    }
+
+    private List<BoundingBox> getBoundingBoxesFromBlockData(BlockData blockData, Location loc) {
+        List<BoundingBox> adapterBoxes = plugin.getNmsAdapter().getBoundingBoxes(blockData, loc);
+        if (adapterBoxes != null && !adapterBoxes.isEmpty()) {
+            return adapterBoxes;
+        }
+
+        VoxelShape shape = blockData.getCollisionShape(loc);
+        return List.copyOf(shape.getBoundingBoxes());
+    }
+
+
+    private BoundingBox getCombinedBoundingBox(BlockData blockData, Location loc) {
+        List<BoundingBox> boxes = getBoundingBoxesFromBlockData(blockData, loc);
+
+        if (boxes.isEmpty()) {
+
+            return new BoundingBox(loc.getX(), loc.getY(), loc.getZ(), loc.getX(), loc.getY(), loc.getZ());
+        }
+
+        BoundingBox combined = boxes.getFirst();
+        for (int i = 1; i < boxes.size(); i++) {
+            combined = combined.union(boxes.get(i));
+        }
+        return combined;
+    }
+
     private static double calculateViewHeight(BlockData blockData, Block targetBlock, HideAndSeek plugin) {
         BoundingBox blockBox = getBlockBoundingBox(blockData, targetBlock.getLocation());
         double blockMaxY = blockBox.getMaxY();
@@ -910,7 +939,7 @@ public class BlockModeListener implements Listener {
         return Math.max(configuredHeight, blockMaxY + 0.05);
     }
 
-    private static Color toGlowColor(org.bukkit.scoreboard.Team team) {
+    private static Color toGlowColor(Team team) {
         if (team == null) {
             return null;
         } else {

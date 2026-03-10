@@ -4,6 +4,7 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.listener.player.HiderEquipmentChangeListener;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -23,7 +24,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.inkHelmetBackup;
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.*;
 
 public class InkSplashItem implements GameItem {
     public static final String ID = "has_seeker_ink_splash";
@@ -77,6 +78,17 @@ public class InkSplashItem implements GameItem {
         int radius = plugin.getSettingRegistry().get("seeker-items.ink-splash.radius", 25);
         int duration = plugin.getSettingRegistry().get("seeker-items.ink-splash.duration", 7);
 
+        
+        BukkitTask prevSeekerTask = inkSplashSeekerXpTasks.remove(seeker.getUniqueId());
+        XpProgressHelper.SavedXp seekerSavedXp = XpProgressHelper.saveXp(seeker);
+        XpProgressHelper.stopAndClear(seeker, prevSeekerTask);
+        BukkitTask seekerXpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        inkSplashSeekerXpTasks.put(seeker.getUniqueId(), seekerXpTask);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            BukkitTask t = inkSplashSeekerXpTasks.remove(seeker.getUniqueId());
+            XpProgressHelper.stopAndRestore(seeker, t, seekerSavedXp);
+        }, duration * 20L);
+
         for (Player hider : Bukkit.getOnlinePlayers()) {
             if (!HideAndSeek.getDataController().getHiders().contains(hider.getUniqueId())) continue;
             if (hider.getLocation().distance(seeker.getLocation()) > radius) continue;
@@ -88,23 +100,31 @@ public class InkSplashItem implements GameItem {
             inkHelmetBackup.put(hider.getUniqueId(), previous);
             HiderItems.applyMask(hider, plugin);
             HiderEquipmentChangeListener.hideHelmet(hider);
-            BukkitTask task = Bukkit.getScheduler().runTaskTimer(
+            BukkitTask helmetTask = Bukkit.getScheduler().runTaskTimer(
                     plugin,
                     () -> HiderEquipmentChangeListener.hideHelmet(hider),
                     0L, 1L
             );
 
-
             hider.getWorld().spawnParticle(Particle.SQUID_INK, hider.getEyeLocation(), 10, 0.3, 0.3, 0.3, 0.1);
-
             hider.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duration * 20, 255, false, false));
             hider.sendMessage(Component.text("You've been hit with ink!", NamedTextColor.DARK_AQUA));
 
+            
+            BukkitTask prevXpTask = inkSplashXpTasks.remove(hider.getUniqueId());
+            XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(hider);
+            XpProgressHelper.stopAndClear(hider, prevXpTask);
+            BukkitTask xpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+            inkSplashXpTasks.put(hider.getUniqueId(), xpTask);
+
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                task.cancel();
+                helmetTask.cancel();
                 ItemStack restore = inkHelmetBackup.remove(hider.getUniqueId());
                 hider.getInventory().setHelmet(restore);
                 HiderEquipmentChangeListener.hideHelmet(hider);
+
+                BukkitTask t = inkSplashXpTasks.remove(hider.getUniqueId());
+                XpProgressHelper.stopAndRestore(hider, t, savedXp);
             }, duration * 20L);
         }
     }

@@ -213,7 +213,11 @@ public class SeekingPhase implements GamePhase {
 
         for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
             Player hider = Bukkit.getPlayer(hiderId);
-            if (hider != null && hider.isOnline() && hider.getGameMode() != GameMode.SPECTATOR) {
+            if (hider != null
+                    && hider.isOnline()
+                    && (hider.getGameMode() != GameMode.SPECTATOR
+                    || HideAndSeek.getDataController().getAllowedSpectators().contains(hider.getUniqueId()))) {
+
                 activeHiders.add(hiderId);
             }
         }
@@ -245,7 +249,10 @@ public class SeekingPhase implements GamePhase {
             public void run() {
                 for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
                     Player hider = Bukkit.getPlayer(hiderId);
-                    if (hider != null && hider.isOnline() && hider.getGameMode() != GameMode.SPECTATOR) {
+                    if (hider != null
+                            && hider.isOnline()
+                            && (hider.getGameMode() != GameMode.SPECTATOR
+                            || HideAndSeek.getDataController().getAllowedSpectators().contains(hider.getUniqueId()))) {
                         hideAndSeekPlugin.getPointService().award(hiderId, PointAction.HIDER_SURVIVAL_TICK);
                     }
                 }

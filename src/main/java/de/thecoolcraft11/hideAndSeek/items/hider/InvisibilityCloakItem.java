@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
@@ -18,9 +19,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.Set;
+
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.invisibilityCloakXpTasks;
 
 public class InvisibilityCloakItem implements GameItem {
     public static final String ID = "has_hider_invisibility_cloak";
@@ -120,6 +124,14 @@ public class InvisibilityCloakItem implements GameItem {
         player.getWorld().spawnParticle(Particle.GLOW, loc, 15, 0.4, 0.4, 0.4, 0.1);
         player.playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 1.0f, 1.5f);
 
+        
+        BukkitTask prevXpTask = invisibilityCloakXpTasks.remove(player.getUniqueId());
+        XpProgressHelper.stopAndClear(player, prevXpTask);
+
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        invisibilityCloakXpTasks.put(player.getUniqueId(), xpTask);
+
         new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = duration * 20;
@@ -129,10 +141,14 @@ public class InvisibilityCloakItem implements GameItem {
                 if (!player.isOnline() || ticks >= maxTicks) {
                     cancel();
 
+                    
+                    BukkitTask t = invisibilityCloakXpTasks.remove(player.getUniqueId());
+                    XpProgressHelper.stopAndRestore(player, t, savedXp);
+
                     if ("BLOCK".equals(gameMode)) {
-                        BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
-                        if (display != null && display.isValid()) {
-                            display.setVisibleByDefault(true);
+                        BlockDisplay d = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
+                        if (d != null && d.isValid()) {
+                            d.setVisibleByDefault(true);
                         }
                     }
                     return;

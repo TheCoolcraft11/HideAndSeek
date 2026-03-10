@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
@@ -15,8 +16,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
+
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.totemXpTasks;
 
 public class TotemItem implements GameItem {
     public static final String ID = "has_hider_totem";
@@ -80,6 +84,11 @@ public class TotemItem implements GameItem {
         player.getInventory().removeItem(new ItemStack(Material.TOTEM_OF_UNDYING, 1));
         player.sendMessage(Component.text("Revive mode activated for " + duration + " seconds!", NamedTextColor.GOLD));
 
+        
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        totemXpTasks.put(player.getUniqueId(), xpTask);
+
         new BukkitRunnable() {
             int ticks = 0;
             final int maxTicks = duration * 20;
@@ -88,6 +97,9 @@ public class TotemItem implements GameItem {
             public void run() {
                 if (!player.isOnline() || ticks >= maxTicks || !isTotemActive(player.getUniqueId())) {
                     cancel();
+
+                    BukkitTask t = totemXpTasks.remove(player.getUniqueId());
+                    XpProgressHelper.stopAndRestore(player, t, savedXp);
                     return;
                 }
 
@@ -119,6 +131,8 @@ public class TotemItem implements GameItem {
 
     public static void clearTotem(UUID playerId) {
         totemActiveUntil.remove(playerId);
+        BukkitTask xpTask = totemXpTasks.remove(playerId);
+        if (xpTask != null) xpTask.cancel();
     }
 
     public static void reviveWithTotem(Player player) {

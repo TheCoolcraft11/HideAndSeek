@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
@@ -18,12 +19,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.UUID;
 
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.hiderCursedUntil;
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.seekerCurseActiveUntil;
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.*;
 
 public class CurseSpellItem implements GameItem {
     public static final String ID = "has_seeker_curse_spell";
@@ -81,14 +82,22 @@ public class CurseSpellItem implements GameItem {
         ItemMeta meta = sword.getItemMeta();
         if (meta != null) {
             meta.addEnchant(Enchantment.SHARPNESS, 1, true);
-
             sword.setItemMeta(meta);
         }
 
         seeker.sendMessage(Component.text("Curse spell activated! (" + duration + "s)", NamedTextColor.DARK_PURPLE));
 
+        
+        BukkitTask prevTask = curseSpellSeekerXpTasks.remove(seeker.getUniqueId());
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
+        XpProgressHelper.stopAndClear(seeker, prevTask);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        curseSpellSeekerXpTasks.put(seeker.getUniqueId(), xpTask);
+
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             seekerCurseActiveUntil.remove(seeker.getUniqueId());
+            BukkitTask t = curseSpellSeekerXpTasks.remove(seeker.getUniqueId());
+            XpProgressHelper.stopAndRestore(seeker, t, savedXp);
             ItemStack s = seeker.getInventory().getItemInMainHand();
             ItemMeta m = s.getItemMeta();
             if (m != null) {
@@ -155,6 +164,12 @@ public class CurseSpellItem implements GameItem {
 
         hider.sendMessage(Component.text("You have been cursed!", NamedTextColor.DARK_PURPLE));
 
+        
+        BukkitTask prevXpTask = hiderCursedXpTasks.remove(hider.getUniqueId());
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(hider);
+        XpProgressHelper.stopAndClear(hider, prevXpTask);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        hiderCursedXpTasks.put(hider.getUniqueId(), xpTask);
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -162,12 +177,13 @@ public class CurseSpellItem implements GameItem {
             @Override
             public void run() {
                 if (!hider.isOnline() || !isHiderCursed(hider.getUniqueId())) {
+                    BukkitTask t = hiderCursedXpTasks.remove(hider.getUniqueId());
+                    XpProgressHelper.stopAndRestore(hider, t, savedXp);
                     cancel();
                     return;
                 }
 
                 Location loc = hider.getLocation().add(0, 1, 0);
-
                 hider.getWorld().spawnParticle(Particle.SOUL, loc, 8, 0.3, 0.5, 0.3, 0.1);
 
                 hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 5, 0.2, 0.3, 0.2, 0.05);

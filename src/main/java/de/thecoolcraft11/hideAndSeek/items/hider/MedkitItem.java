@@ -2,7 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
-import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
@@ -24,8 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.medkitChannelStates;
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.medkitChannelTasks;
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class MedkitItem implements GameItem {
@@ -102,19 +101,18 @@ public class MedkitItem implements GameItem {
         int channelTime = plugin.getSettingRegistry().get("hider-items.medkit.channel-time", 5);
         long totalTicks = channelTime * 20L;
 
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
+        medkitChannelXp.put(player.getUniqueId(), savedXp);
 
-        ItemStateManager.MedkitChannelState state = new ItemStateManager.MedkitChannelState(player.getExp(), player.getLevel());
-        medkitChannelStates.put(player.getUniqueId(), state);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, totalTicks, XpProgressHelper.Mode.COUNTDOWN, channelTime);
+        medkitChannelTasks.put(player.getUniqueId(), xpTask);
 
-        player.setLevel(5);
-        player.setExp(0f);
-
-        BukkitTask task = new BukkitRunnable() {
+        
+        BukkitTask particleTask = new BukkitRunnable() {
             long ticks = 0;
 
             @Override
             public void run() {
-
                 if (!player.isOnline() || ticks > totalTicks) {
                     cancel();
                     return;
@@ -123,20 +121,11 @@ public class MedkitItem implements GameItem {
                 Location loc = player.getLocation().add(0, 1, 0);
                 player.getWorld().spawnParticle(Particle.HEART, loc, 1, 0.2, 0.3, 0.2, 0.05);
                 player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, loc, 1, 0.15, 0.25, 0.15, 0.02);
-                double progress = (double) ticks / totalTicks;
-
-                int levelCountdown = Math.max(0, (int) Math.ceil(channelTime * (1.0 - progress)));
-                float expProgress = (float) (1.0 - progress);
-
-                player.setLevel(levelCountdown);
-                player.setExp(Math.max(0.0f, Math.min(0.9999f, expProgress)));
-
 
                 ticks++;
             }
         }.runTaskTimer(plugin, 0L, 1L);
-
-        medkitChannelTasks.put(player.getUniqueId(), task);
+        medkitChannelParticleTasks.put(player.getUniqueId(), particleTask);
     }
 
     private static void finishMedkitCharge(ItemInteractionContext context, HideAndSeek plugin) {
@@ -178,30 +167,20 @@ public class MedkitItem implements GameItem {
         }
 
         BukkitTask existingTask = medkitChannelTasks.remove(playerId);
-        if (existingTask != null) {
-            existingTask.cancel();
-        }
-        medkitChannelStates.remove(playerId);
+        if (existingTask != null) existingTask.cancel();
+
+        BukkitTask particleTask = medkitChannelParticleTasks.remove(playerId);
+        if (particleTask != null) particleTask.cancel();
+
+        medkitChannelXp.remove(playerId);
     }
 
     private static void clearMedkitCharge(Player player) {
         BukkitTask existingTask = medkitChannelTasks.remove(player.getUniqueId());
-        if (existingTask != null) {
-            existingTask.cancel();
-        }
+        BukkitTask particleTask = medkitChannelParticleTasks.remove(player.getUniqueId());
+        if (particleTask != null) particleTask.cancel();
 
-        ItemStateManager.MedkitChannelState state = medkitChannelStates.remove(player.getUniqueId());
-        if (state != null && player.isOnline()) {
-            player.setLevel(state.previousLevel());
-            player.setExp(state.previousExp());
-        }
+        XpProgressHelper.SavedXp savedXp = medkitChannelXp.remove(player.getUniqueId());
+        XpProgressHelper.stopAndRestore(player, existingTask, savedXp);
     }
 }
-
-
-
-
-
-
-
-

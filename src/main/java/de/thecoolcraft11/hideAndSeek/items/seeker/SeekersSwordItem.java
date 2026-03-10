@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek.items.seeker;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
@@ -33,8 +34,7 @@ import org.joml.Vector3f;
 import java.util.List;
 import java.util.UUID;
 
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.swordChargeStates;
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.swordChargeTasks;
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class SeekersSwordItem implements GameItem {
@@ -95,11 +95,14 @@ public class SeekersSwordItem implements GameItem {
 
         clearSwordCharge(seeker);
 
-        ItemStateManager.SwordChargeState state = new ItemStateManager.SwordChargeState(System.currentTimeMillis(), seeker.getExp(), seeker.getLevel());
+        ItemStateManager.SwordChargeState state = new ItemStateManager.SwordChargeState(System.currentTimeMillis());
         swordChargeStates.put(seeker.getUniqueId(), state);
 
-        seeker.setLevel(0);
-        seeker.setExp(0f);
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
+        swordChargeXp.put(seeker.getUniqueId(), savedXp);
+
+        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, maxChargeSeconds * 20L, XpProgressHelper.Mode.COUNTUP, 10);
+        swordChargeXpTasks.put(seeker.getUniqueId(), xpTask);
 
         BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
             long nextSoundAtMs = System.currentTimeMillis();
@@ -122,9 +125,6 @@ public class SeekersSwordItem implements GameItem {
                     long delay = (long) (1000 - (progress * 900));
                     nextSoundAtMs = now + Math.max(100, delay);
                 }
-
-                seeker.setExp((float) progress);
-                seeker.setLevel((int) (progress * 10));
             }
         }, 1L, 1L);
 
@@ -154,11 +154,11 @@ public class SeekersSwordItem implements GameItem {
             existingTask.cancel();
         }
 
-        ItemStateManager.SwordChargeState state = swordChargeStates.remove(player.getUniqueId());
-        if (state != null && player.isOnline()) {
-            player.setLevel(state.previousLevel());
-            player.setExp(state.previousExp());
-        }
+        BukkitTask xpTask = swordChargeXpTasks.remove(player.getUniqueId());
+        XpProgressHelper.SavedXp savedXp = swordChargeXp.remove(player.getUniqueId());
+        XpProgressHelper.stopAndRestore(player, xpTask, savedXp);
+
+        swordChargeStates.remove(player.getUniqueId());
     }
 
     public static void cleanupSwordCharge(UUID playerId) {
@@ -169,9 +169,12 @@ public class SeekersSwordItem implements GameItem {
         }
 
         BukkitTask existingTask = swordChargeTasks.remove(playerId);
-        if (existingTask != null) {
-            existingTask.cancel();
-        }
+        if (existingTask != null) existingTask.cancel();
+
+        BukkitTask xpTask = swordChargeXpTasks.remove(playerId);
+        if (xpTask != null) xpTask.cancel();
+
+        swordChargeXp.remove(playerId);
         swordChargeStates.remove(playerId);
     }
 

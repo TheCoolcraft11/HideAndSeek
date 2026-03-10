@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
+import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -17,8 +18,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
+
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.lightningFreezeHiderXpTasks;
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.lightningFreezeXpTasks;
 
 public class LightningFreezeItem implements GameItem {
     public static final String ID = "has_seeker_lightning_freeze";
@@ -87,9 +92,32 @@ public class LightningFreezeItem implements GameItem {
             Entity entity = hider.getWorld().spawnEntity(hider.getLocation(), EntityType.LIGHTNING_BOLT);
             entity.getPersistentDataContainer().set(new NamespacedKey(plugin, "freezeLightning"), PersistentDataType.BOOLEAN, true);
             Bukkit.getOnlinePlayers().stream().filter(player -> !player.getUniqueId().equals(hider.getUniqueId())).forEach(p -> p.hideEntity(plugin, entity));
+
+            
+            BukkitTask prevHiderTask = lightningFreezeHiderXpTasks.remove(hider.getUniqueId());
+            XpProgressHelper.SavedXp hiderSavedXp = XpProgressHelper.saveXp(hider);
+            XpProgressHelper.stopAndClear(hider, prevHiderTask);
+            BukkitTask hiderXpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+            lightningFreezeHiderXpTasks.put(hider.getUniqueId(), hiderXpTask);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                BukkitTask t = lightningFreezeHiderXpTasks.remove(hider.getUniqueId());
+                XpProgressHelper.stopAndRestore(hider, t, hiderSavedXp);
+            }, duration * 20L);
         }
 
         seeker.sendMessage(Component.text("All hiders frozen!", NamedTextColor.AQUA));
         seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1.0, 0), 15, 0.5, 0.5, 0.5, 0.1);
+
+        
+        BukkitTask prevTask = lightningFreezeXpTasks.remove(seeker.getUniqueId());
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
+        XpProgressHelper.stopAndClear(seeker, prevTask);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        lightningFreezeXpTasks.put(seeker.getUniqueId(), xpTask);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            BukkitTask t = lightningFreezeXpTasks.remove(seeker.getUniqueId());
+            XpProgressHelper.stopAndRestore(seeker, t, savedXp);
+        }, duration * 20L);
     }
 }

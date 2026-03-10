@@ -21,6 +21,11 @@ seeker-break-blocks:
   - "SEAGRASS"
   - "TALL_SEAGRASS"
 
+nms:
+  # Master switch: attempt to load NMS adapter. If true, plugin will try to enable NMS features
+  # on startup. If adapter missing or fails, behavior depends on fallbacks.
+  enabled: true
+
   # Game settings
 game:
   # Apply player facing direction to placed blockstate in BLOCK mode
@@ -151,6 +156,13 @@ settings:
       cooldown: 10
       duration: 6
       amplifier: 1
+    ghost-essence:
+      cooldown: 25
+      max-radius: 15
+      min-light-block: 1
+      min-light-sky: 1
+      flying-speed: 0.01
+      max-duration: 1.5
 
   seeker-items:
     grappling-hook:

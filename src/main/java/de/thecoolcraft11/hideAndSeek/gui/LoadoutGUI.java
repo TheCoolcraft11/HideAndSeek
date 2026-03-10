@@ -60,7 +60,7 @@ public class LoadoutGUI implements Listener {
             DataComponentTypes.TROPICAL_FISH_PATTERN,
             DataComponentTypes.WRITTEN_BOOK_CONTENT
     );
-    
+
     public LoadoutGUI(LoadoutManager loadoutManager, HideAndSeek plugin) {
         this.loadoutManager = loadoutManager;
         this.plugin = plugin;
@@ -91,7 +91,7 @@ public class LoadoutGUI implements Listener {
 
 
         int slot = 9;
-        for (LoadoutItemType item : LoadoutItemType.values()) {
+        for (LoadoutItemType item : Arrays.stream(LoadoutItemType.values()).filter(type -> type.isSupported(plugin.getNmsAdapter())).toList()) {
             if (hiderView && !item.isForHiders()) continue;
             if (!hiderView && !item.isForSeekers()) continue;
 
@@ -232,7 +232,7 @@ public class LoadoutGUI implements Listener {
 
     private LoadoutItemType getItemTypeFromSlot(int index, boolean isHider) {
         int currentIndex = 0;
-        for (LoadoutItemType item : LoadoutItemType.values()) {
+        for (LoadoutItemType item : Arrays.stream(LoadoutItemType.values()).filter(type -> type.isSupported(plugin.getNmsAdapter())).toList()) {
             if (isHider && !item.isForHiders()) continue;
             if (!isHider && !item.isForSeekers()) continue;
 

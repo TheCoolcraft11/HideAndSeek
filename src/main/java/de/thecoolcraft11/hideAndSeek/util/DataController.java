@@ -26,6 +26,7 @@ public class DataController {
     private final Map<UUID, Long> blockDamageOverrideUntil;
     private final Map<UUID, Boolean> glowingState;
     private org.bukkit.Location roundSpawnPoint;
+    private final List<UUID> allowedSpectators;
 
 
     public DataController() {
@@ -46,6 +47,7 @@ public class DataController {
         this.currentBorderIndex = -1;
         this.blockDamageOverrideUntil = new HashMap<>();
         this.glowingState = new HashMap<>();
+        this.allowedSpectators = new ArrayList<>();
     }
 
     public void setup() {
@@ -289,5 +291,17 @@ public class DataController {
 
     public org.bukkit.Location getRoundSpawnPoint() {
         return this.roundSpawnPoint;
+    }
+
+    public void addAllowedSpectator(UUID uuid) {
+        this.allowedSpectators.add(uuid);
+    }
+
+    public void removeAllowedSpectator(UUID uuid) {
+        this.allowedSpectators.remove(uuid);
+    }
+
+    public List<UUID> getAllowedSpectators() {
+        return this.allowedSpectators;
     }
 }

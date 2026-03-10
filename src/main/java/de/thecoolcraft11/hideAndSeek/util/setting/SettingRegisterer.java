@@ -1,10 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.util.setting;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
-import de.thecoolcraft11.hideAndSeek.model.GameStyleEnum;
-import de.thecoolcraft11.hideAndSeek.model.SeekerKillModeEnum;
-import de.thecoolcraft11.hideAndSeek.model.SpeedBoostType;
+import de.thecoolcraft11.hideAndSeek.model.*;
 import de.thecoolcraft11.minigameframework.config.SectionDefinition;
 import de.thecoolcraft11.minigameframework.config.SettingDefinition;
 import de.thecoolcraft11.minigameframework.config.SettingType;
@@ -104,6 +101,7 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("seeker-break-blocks", List.class, List.of("SHORT_GRASS", "TALL_GRASS", "SEAGRASS", "TALL_SEAGRASS"));
         plugin.getConfigRegistry().register("game.apply-player-direction", Boolean.class, true);
         plugin.getConfigRegistry().register("game.max-air-above-liquid", Integer.class, 2);
+        plugin.getConfigRegistry().register("nms.enabled", Boolean.class, true);
 
 
         plugin.getConfigRegistry().register("settings.game.gametype", String.class, "NORMAL");
@@ -176,6 +174,15 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.cooldown", Integer.class, 15);
         plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.duration", Integer.class, 8);
         plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.radius", Integer.class, 4);
+
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.cooldown", Integer.class, 25);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.max-radius", Integer.class, 15);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.min-light-block", Integer.class, 1);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.min-light-sky", Integer.class, 1);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.flying-speed", Double.class, 0.01);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.max-duration", Float.class, 1.5f);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.boost-power", Float.class, 1.5f);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.particle-mode", String.class, "FLYING");
 
 
         plugin.getConfigRegistry().register("settings.timer.hiding_color1", String.class, "#FF0000");
@@ -818,6 +825,67 @@ public class SettingRegisterer {
                 .description("Radius of smoke cloud in blocks")
                 .customIcon(Material.COMPASS)
                 .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.cooldown", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.cooldown", 25))
+                .range(0, 300)
+                .description("Cooldown for ghost essence in seconds")
+                .customIcon(Material.GHAST_TEAR)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.max-radius", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.max-radius", 15))
+                .range(1, 100)
+                .description("Maximum radius (in blocks) a ghost can move from their body")
+                .customIcon(Material.IRON_CHAIN)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.min-light-block", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.min-light-block", 1))
+                .range(0, 15)
+                .description("Minimum block light level required to materialize")
+                .customIcon(Material.TORCH)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.min-light-sky", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.min-light-sky", 1))
+                .range(0, 15)
+                .description("Minimum sky light level required to materialize")
+                .customIcon(Material.SUNFLOWER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.flying-speed", SettingType.FLOAT, Float.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.flying-speed", 0.01f))
+                .rangeFloat(0.001f, 1.0f)
+                .description("Client-side flying speed while ghostly")
+                .customIcon(Material.FEATHER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.max-duration", SettingType.INTEGER, Float.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.max-duration", 1.5f))
+                .range(1, 60)
+                .description("Max ghost duration in seconds")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.boost-power", SettingType.FLOAT, Float.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.boost-power", 1.5f))
+                .rangeFloat(0.0f, 5.0f)
+                .description("Initial boost power when activating ghost essence")
+                .customIcon(Material.GHAST_TEAR)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.particle-mode", SettingType.ENUM, GhostEssenceParticleMode.class)
+                .defaultValue(getEnumConfigValue(plugin, "hider-items.ghost-essence.particle-mode", GhostEssenceParticleMode.class, GhostEssenceParticleMode.FLYING))
+                .description("Particle effect mode for ghost essence")
+                .customIcon(Material.SOUL_TORCH)
+                .valueIcons(Map.of(
+                        GhostEssenceParticleMode.FLYING, Material.SOUL_TORCH,
+                        GhostEssenceParticleMode.SNAP, Material.SOUL_LANTERN,
+                        GhostEssenceParticleMode.NONE, Material.BARRIER
+                ))
+                .build());
+
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.grappling-hook.cooldown", SettingType.INTEGER, Integer.class)
 
