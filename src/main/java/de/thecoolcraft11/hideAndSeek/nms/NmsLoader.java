@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class NmsLoader {
@@ -47,8 +48,8 @@ public final class NmsLoader {
                                     return adapter;
                                 }
                             }
-                        } catch (Exception ignored) {
-
+                        } catch (ReflectiveOperationException | LinkageError e) {
+                            logger.log(Level.FINE, "Failed to load NMS adapter class " + className + ": " + e.getMessage(), e);
                         }
                     }
                 }

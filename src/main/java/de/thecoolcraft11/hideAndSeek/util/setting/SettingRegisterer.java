@@ -903,9 +903,9 @@ public class SettingRegisterer {
                 .customIcon(Material.FEATHER)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.max-duration", SettingType.INTEGER, Float.class)
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.ghost-essence.max-duration", SettingType.FLOAT, Float.class)
                 .defaultValue(getConfigValue(plugin, "hider-items.ghost-essence.max-duration", 1.5f))
-                .range(1, 60)
+                .rangeFloat(1.0f, 60.0f)
                 .description("Max ghost duration in seconds")
                 .customIcon(Material.CLOCK)
                 .build());

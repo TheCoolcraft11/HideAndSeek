@@ -434,7 +434,11 @@ public class BlockModeListener implements Listener {
             Entity interactionEntity = HideAndSeek.getDataController().getInteractionEntity(player.getUniqueId());
 
             if (interactionEntity != null && interactionEntity.isValid() && interactionEntity instanceof Interaction interaction) {
-                scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId()), player.getLocation()));
+                BlockData interactionBlockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
+                if (interactionBlockData == null) {
+                    interactionBlockData = chosenBlock.createBlockData();
+                }
+                scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(interactionBlockData, player.getLocation()));
             }
 
             ensureInteractionPassenger(player, display);
@@ -523,7 +527,11 @@ public class BlockModeListener implements Listener {
 
         display.addPassenger(interaction);
 
-        scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId()), player.getLocation()));
+        BlockData chosenBlockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
+        if (chosenBlockData == null) {
+            chosenBlockData = player.getLocation().getBlock().getBlockData();
+        }
+        scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(chosenBlockData, player.getLocation()));
         HideAndSeek.getDataController().setInteractionEntity(player.getUniqueId(), interaction);
     }
 

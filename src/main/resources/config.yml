@@ -163,6 +163,8 @@ settings:
       min-light-sky: 1
       flying-speed: 0.01
       max-duration: 1.5
+      boost-power: 1.5
+      particle-mode: "FLYING"
 
   seeker-items:
     grappling-hook:

@@ -41,7 +41,7 @@ public class GhostEssenceItem implements GameItem {
             meta.displayName(Component.text("Ghostly Essence", NamedTextColor.AQUA, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));
             meta.lore(List.of(
-                    Component.text("Pass through walls for" + duration + " seconds", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                    Component.text("Pass through walls for " + duration + " seconds", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                     Component.text("You cannot descend while ghostly!", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)
             ));
             item.setItemMeta(meta);
@@ -100,10 +100,12 @@ public class GhostEssenceItem implements GameItem {
             s.setInvisible(true);
             s.setPersistent(true);
             s.setSilent(true);
+            s.setCollidable(false);
+            s.setInvulnerable(true);
         });
         Bukkit.getOnlinePlayers().forEach(p -> p.hideEntity(plugin, ghost));
 
-        
+
         BukkitTask prevTask = ghostEssenceXpTasks.remove(player.getUniqueId());
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
         XpProgressHelper.stopAndClear(player, prevTask);
@@ -112,7 +114,7 @@ public class GhostEssenceItem implements GameItem {
                 (int) Math.ceil(maxDurationSeconds));
         ghostEssenceXpTasks.put(player.getUniqueId(), xpTask);
 
-        
+
         boolean restoreBlockDisplayVisible = true;
         var modeResult = plugin.getSettingService().getSetting("game.gametype");
         Object modeObj = modeResult.isSuccess() ? modeResult.getValue() : null;
@@ -135,7 +137,15 @@ public class GhostEssenceItem implements GameItem {
 
             @Override
             public void run() {
-                if (!player.isOnline() || ticks >= maxDurationSeconds * 20) {
+                if (!player.isOnline()) {
+                    BukkitTask t = ghostEssenceXpTasks.remove(player.getUniqueId());
+                    XpProgressHelper.stopAndRestore(player, t, savedXp);
+                    cleanupGhostModeOffline(player.getUniqueId(), ghost, finalRestoreBlockDisplayVisible);
+                    this.cancel();
+                    return;
+                }
+
+                if (ticks >= durationTicks) {
                     BukkitTask t = ghostEssenceXpTasks.remove(player.getUniqueId());
                     XpProgressHelper.stopAndRestore(player, t, savedXp);
                     finalizeGhostMode(player, plugin, ghost, startLoc, maxRadius, minLightBlock, minLightSky,
@@ -181,7 +191,7 @@ public class GhostEssenceItem implements GameItem {
                 player.addPotionEffect(new org.bukkit.potion.PotionEffect(
                         org.bukkit.potion.PotionEffectType.LEVITATION, 5, 255, false, false, false));
 
-                
+
                 if (particleMode == GhostEssenceParticleMode.FLYING && ticks % 5 == 0) {
                     player.getWorld().spawnParticle(org.bukkit.Particle.SOUL,
                             player.getLocation().add(0, 1, 0), 3, 0.1, 0.1, 0.1, 0.02);
@@ -189,11 +199,25 @@ public class GhostEssenceItem implements GameItem {
 
                 if (ticks % 20 == 0) {
                     ghost.setTarget(player);
-                    if (ticks < (maxDurationSeconds * 20) - 20) ghost.teleport(startLoc);
+                    if (ticks < durationTicks - 20) ghost.teleport(startLoc);
                 }
                 ticks++;
             }
         }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    private void cleanupGhostModeOffline(java.util.UUID playerId, org.bukkit.entity.Zombie ghost,
+                                         boolean restoreBlockDisplayVisible) {
+        if (ghost != null && ghost.isValid()) {
+            ghost.remove();
+        }
+
+        var blockDisplay = HideAndSeek.getDataController().getBlockDisplay(playerId);
+        if (blockDisplay != null && blockDisplay.isValid()) {
+            blockDisplay.setVisibleByDefault(restoreBlockDisplayVisible);
+        }
+
+        HideAndSeek.getDataController().removeAllowedSpectator(playerId);
     }
 
 
@@ -239,7 +263,7 @@ public class GhostEssenceItem implements GameItem {
             player.playSound(adjustedLoc, Sound.ENTITY_GHAST_DEATH, 1f, 1f);
         }
 
-        
+
         if (particleMode == GhostEssenceParticleMode.SNAP) {
             Location endLoc = isCheating ? startLoc : adjustedLoc;
             spawnSnapLine(startLoc, endLoc);
@@ -247,7 +271,7 @@ public class GhostEssenceItem implements GameItem {
 
         if (ghost.isValid()) ghost.remove();
 
-        
+
         var blockDisplay = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
         if (blockDisplay != null && blockDisplay.isValid()) {
             blockDisplay.setVisibleByDefault(restoreBlockDisplayVisible);
@@ -255,7 +279,7 @@ public class GhostEssenceItem implements GameItem {
 
         HideAndSeek.getDataController().removeAllowedSpectator(player.getUniqueId());
     }
-    
+
     private static void spawnSnapLine(Location from, Location to) {
         if (!from.getWorld().equals(to.getWorld())) return;
 

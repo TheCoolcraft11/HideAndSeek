@@ -26,7 +26,7 @@ public class DataController {
     private final Map<UUID, Long> blockDamageOverrideUntil;
     private final Map<UUID, Boolean> glowingState;
     private org.bukkit.Location roundSpawnPoint;
-    private final List<UUID> allowedSpectators;
+    private final Set<UUID> allowedSpectators;
 
 
     public DataController() {
@@ -47,7 +47,7 @@ public class DataController {
         this.currentBorderIndex = -1;
         this.blockDamageOverrideUntil = new HashMap<>();
         this.glowingState = new HashMap<>();
-        this.allowedSpectators = new ArrayList<>();
+        this.allowedSpectators = new HashSet<>();
     }
 
     public void setup() {
@@ -109,6 +109,7 @@ public class DataController {
         playerPoints.clear();
         blockDamageOverrideUntil.clear();
         glowingState.clear();
+        clearAllowedSpectators();
         roundSpawnPoint = null;
         for (org.bukkit.entity.Entity entity : sittingEntities.values()) {
             if (entity != null && entity.isValid()) {
@@ -116,6 +117,12 @@ public class DataController {
             }
         }
         sittingEntities.clear();
+        for (org.bukkit.entity.Entity entity : interactionEntities.values()) {
+            if (entity != null && entity.isValid()) {
+                entity.remove();
+            }
+        }
+        interactionEntities.clear();
     }
 
     public void addHider(UUID uuid) {
@@ -301,7 +308,11 @@ public class DataController {
         this.allowedSpectators.remove(uuid);
     }
 
-    public List<UUID> getAllowedSpectators() {
-        return this.allowedSpectators;
+    public void clearAllowedSpectators() {
+        this.allowedSpectators.clear();
+    }
+
+    public Set<UUID> getAllowedSpectators() {
+        return Collections.unmodifiableSet(this.allowedSpectators);
     }
 }

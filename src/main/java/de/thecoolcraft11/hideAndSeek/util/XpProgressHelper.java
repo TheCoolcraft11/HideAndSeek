@@ -16,14 +16,16 @@ public final class XpProgressHelper {
     }
 
     public static void applyCountdown(Player player, long elapsedMs, long totalMs) {
-        double remaining = Math.max(0.0, 1.0 - (double) elapsedMs / totalMs);
-        int secondsLeft = (int) Math.ceil((totalMs - elapsedMs) / 1000.0);
+        long safeTotalMs = Math.max(1L, totalMs);
+        double remaining = Math.max(0.0, 1.0 - (double) elapsedMs / safeTotalMs);
+        int secondsLeft = (int) Math.ceil((safeTotalMs - elapsedMs) / 1000.0);
         player.setLevel(Math.max(0, secondsLeft));
         player.setExp((float) Math.max(0.0, Math.min(0.9999, remaining)));
     }
 
     public static void applyCountup(Player player, long elapsedMs, long totalMs, int maxLevel) {
-        double progress = Math.min(1.0, (double) elapsedMs / totalMs);
+        long safeTotalMs = Math.max(1L, totalMs);
+        double progress = Math.min(1.0, (double) elapsedMs / safeTotalMs);
         player.setExp((float) Math.min(0.9999, progress));
         player.setLevel((int) (progress * maxLevel));
     }
@@ -34,6 +36,7 @@ public final class XpProgressHelper {
     }
 
     public static BukkitTask start(HideAndSeek plugin, Player player, long durationTicks, Mode mode, int maxLevel) {
+        long safeDurationTicks = Math.max(1L, durationTicks);
 
         if (mode == Mode.COUNTDOWN) {
             player.setLevel(maxLevel);
@@ -48,16 +51,28 @@ public final class XpProgressHelper {
 
             @Override
             public void run() {
-                if (!player.isOnline() || tick > durationTicks) {
+                if (!player.isOnline()) {
                     cancel();
                     return;
                 }
 
-                double progress = (double) tick / durationTicks;
+                if (tick >= safeDurationTicks) {
+                    if (mode == Mode.COUNTDOWN) {
+                        player.setLevel(0);
+                        player.setExp(0.0f);
+                    } else {
+                        player.setLevel(maxLevel);
+                        player.setExp(0.9999f);
+                    }
+                    cancel();
+                    return;
+                }
+
+                double progress = Math.max(0.0, Math.min(1.0, (double) tick / safeDurationTicks));
 
                 if (mode == Mode.COUNTDOWN) {
                     double remaining = 1.0 - progress;
-                    int secondsLeft = (int) Math.ceil((durationTicks - tick) / 20.0);
+                    int secondsLeft = (int) Math.ceil((safeDurationTicks - tick) / 20.0);
                     player.setLevel(Math.max(0, secondsLeft));
                     player.setExp((float) Math.max(0.0, Math.min(0.9999, remaining)));
                 } else {
@@ -71,7 +86,7 @@ public final class XpProgressHelper {
     }
 
     public static BukkitTask start(HideAndSeek plugin, Player player, long durationTicks, Mode mode) {
-        int maxLevel = (mode == Mode.COUNTDOWN) ? (int) Math.ceil(durationTicks / 20.0) : 10;
+        int maxLevel = (mode == Mode.COUNTDOWN) ? (int) Math.ceil(Math.max(1L, durationTicks) / 20.0) : 10;
         return start(plugin, player, durationTicks, mode, maxLevel);
     }
 
@@ -98,5 +113,3 @@ public final class XpProgressHelper {
     private XpProgressHelper() {
     }
 }
-
-

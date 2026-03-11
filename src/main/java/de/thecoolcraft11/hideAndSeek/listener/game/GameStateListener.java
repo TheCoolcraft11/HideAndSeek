@@ -48,6 +48,7 @@ public class GameStateListener implements Listener {
         Player player = event.getPlayer();
         cleanupSwordCharge(player.getUniqueId());
         cleanupMedkitCharge(player.getUniqueId());
+        HideAndSeek.getDataController().removeAllowedSpectator(player.getUniqueId());
 
 
         if (HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
