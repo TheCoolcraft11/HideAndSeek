@@ -47,8 +47,9 @@ public class SoundItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Play a sound for everyone";
+    public String getDescription(HideAndSeek plugin) {
+        int points = plugin.getPointService().getInt("points.hider.taunt.small", 25);
+        return String.format("Play a loud cat taunt for all players, grants %d points.", points);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class SoundItem implements GameItem {
                 .withVanillaCooldown(soundCooldown * 20)
                 .withCustomCooldown(soundCooldown * 1000L)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

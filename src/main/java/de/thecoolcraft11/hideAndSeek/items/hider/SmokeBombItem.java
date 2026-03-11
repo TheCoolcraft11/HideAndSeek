@@ -48,8 +48,9 @@ public class SmokeBombItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Throw a smoke bomb to create cover";
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("hider-items.smoke-bomb.duration", 8);
+        return String.format("Throw a smoke bomb that creates cover for %ds.", duration.intValue());
     }
 
     @Override
@@ -58,7 +59,7 @@ public class SmokeBombItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> throwSmokeBomb(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> throwSmokeBomb(context, plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(smokeBombCooldown * 20)

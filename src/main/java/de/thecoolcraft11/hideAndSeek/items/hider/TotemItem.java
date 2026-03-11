@@ -49,28 +49,6 @@ public class TotemItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription() {
-        return "Activate revive mode (one-time use)";
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int totemUses = plugin.getSettingRegistry().get("hider-items.totem.max-uses", 1);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> activateTotem(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> activateTotem(context.getPlayer(), plugin))
-                .withDescription(getDescription())
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withMaxPlayerUses(totemUses)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(Component.text("You've already used your totem!", NamedTextColor.RED)))
-                .build());
-    }
-
     private static void activateTotem(Player player, HideAndSeek plugin) {
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
             player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
@@ -84,7 +62,7 @@ public class TotemItem implements GameItem {
         player.getInventory().removeItem(new ItemStack(Material.TOTEM_OF_UNDYING, 1));
         player.sendMessage(Component.text("Revive mode activated for " + duration + " seconds!", NamedTextColor.GOLD));
 
-        
+
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
         BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
         totemXpTasks.put(player.getUniqueId(), xpTask);
@@ -115,6 +93,29 @@ public class TotemItem implements GameItem {
                 ticks++;
             }
         }.runTaskTimer(plugin, 1L, 2L);
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("hider-items.totem.effect-duration", 30);
+        return String.format("Activate a one-time revive window for %ds.", duration.intValue());
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int totemUses = plugin.getSettingRegistry().get("hider-items.totem.max-uses", 1);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> activateTotem(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> activateTotem(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin))
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withMaxPlayerUses(totemUses)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(Component.text("You've already used your totem!", NamedTextColor.RED)))
+                .build());
     }
 
     public static boolean isTotemActive(UUID playerId) {
@@ -153,4 +154,3 @@ public class TotemItem implements GameItem {
         player.sendMessage(Component.text("You were revived!", NamedTextColor.GOLD));
     }
 }
-

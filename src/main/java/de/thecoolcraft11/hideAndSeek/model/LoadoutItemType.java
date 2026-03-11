@@ -9,14 +9,14 @@ import java.util.Set;
 
 public enum LoadoutItemType {
 
-    FIRECRACKER(true, false, ItemRarity.RARE, ExplosionItem.ID),
+    FIRECRACKER(true, false, ItemRarity.COMMON, ExplosionItem.ID),
     CAT_SOUND(true, false, ItemRarity.COMMON, SoundItem.ID),
     RANDOM_BLOCK(true, false, ItemRarity.COMMON, RandomBlockItem.ID),
     SPEED_BOOST(true, false, ItemRarity.COMMON, SpeedBoostItem.ID),
     TRACKER_CROSSBOW(true, false, ItemRarity.COMMON, TrackerCrossbowItem.ID),
     KNOCKBACK_STICK(true, false, ItemRarity.COMMON, KnockbackStickItem.ID),
     BLOCK_SWAP(true, false, ItemRarity.RARE, BlockSwapItem.ID),
-    BIG_FIRECRACKER(true, false, ItemRarity.UNCOMMON, BigFirecrackerItem.ID),
+    BIG_FIRECRACKER(true, false, ItemRarity.RARE, BigFirecrackerItem.ID),
     FIREWORK_ROCKET(true, false, ItemRarity.UNCOMMON, FireworkRocketItem.ID),
     MEDKIT(true, false, ItemRarity.RARE, MedkitItem.ID),
     TOTEM_OF_UNDYING(true, false, ItemRarity.LEGENDARY, TotemItem.ID),

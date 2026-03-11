@@ -45,8 +45,8 @@ public class ChainPullItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Pull hiders back to you";
+    public String getDescription(HideAndSeek plugin) {
+        return "Pull the hider in front of you to your position.";
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ChainPullItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> chainPull(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> chainPull(context.getPlayer(), plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(chainCooldown * 20)

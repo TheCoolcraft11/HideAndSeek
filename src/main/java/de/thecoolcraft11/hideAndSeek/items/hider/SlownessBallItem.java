@@ -46,8 +46,9 @@ public class SlownessBallItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Throw a snowball that slows seekers";
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("hider-items.slowness-ball.duration", 6);
+        return String.format("Throw an ice ball that slows seekers for %ds.", duration.intValue());
     }
 
     @Override
@@ -56,7 +57,7 @@ public class SlownessBallItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> throwSlownessBall(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> throwSlownessBall(context, plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(slownessBallCooldown * 20)

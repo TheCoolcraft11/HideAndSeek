@@ -48,8 +48,8 @@ public class RandomBlockItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Transform into a random allowed block";
+    public String getDescription(HideAndSeek plugin) {
+        return "Reroll your disguise block from the map's allowed blocks.";
     }
 
     @Override
@@ -66,7 +66,7 @@ public class RandomBlockItem implements GameItem {
                 .withVanillaCooldown(randomBlockCooldown * 20)
                 .withCustomCooldown(randomBlockCooldown * 1000L)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

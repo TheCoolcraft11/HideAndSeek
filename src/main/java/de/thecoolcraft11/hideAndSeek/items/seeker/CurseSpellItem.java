@@ -50,29 +50,6 @@ public class CurseSpellItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription() {
-        return "Curse hiders when hitting them";
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int curseCooldown = plugin.getSettingRegistry().get("seeker-items.curse-spell.cooldown", 30);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> activateCurseSpell(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> activateCurseSpell(context.getPlayer(), plugin))
-                .withDescription(getDescription())
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(curseCooldown * 20)
-                .withCustomCooldown(curseCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-    }
-
     private static void activateCurseSpell(Player seeker, HideAndSeek plugin) {
         int duration = plugin.getSettingRegistry().get("seeker-items.curse-spell.active-duration", 10);
         long until = System.currentTimeMillis() + (duration * 1000L);
@@ -87,7 +64,7 @@ public class CurseSpellItem implements GameItem {
 
         seeker.sendMessage(Component.text("Curse spell activated! (" + duration + "s)", NamedTextColor.DARK_PURPLE));
 
-        
+
         BukkitTask prevTask = curseSpellSeekerXpTasks.remove(seeker.getUniqueId());
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
         XpProgressHelper.stopAndClear(seeker, prevTask);
@@ -106,31 +83,6 @@ public class CurseSpellItem implements GameItem {
             }
         }, duration * 20L);
     }
-
-    public static boolean isCurseActive(UUID seekerId) {
-        Long until = seekerCurseActiveUntil.get(seekerId);
-        if (until == null) {
-            return false;
-        }
-        if (System.currentTimeMillis() > until) {
-            seekerCurseActiveUntil.remove(seekerId);
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean isHiderCursed(UUID hiderId) {
-        Long until = hiderCursedUntil.get(hiderId);
-        if (until == null) {
-            return false;
-        }
-        if (System.currentTimeMillis() > until) {
-            hiderCursedUntil.remove(hiderId);
-            return false;
-        }
-        return true;
-    }
-
 
     public static void applyCurseToHider(Player hider, HideAndSeek plugin) {
         int duration = plugin.getSettingRegistry().get("seeker-items.curse-spell.curse-duration", 8);
@@ -164,7 +116,7 @@ public class CurseSpellItem implements GameItem {
 
         hider.sendMessage(Component.text("You have been cursed!", NamedTextColor.DARK_PURPLE));
 
-        
+
         BukkitTask prevXpTask = hiderCursedXpTasks.remove(hider.getUniqueId());
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(hider);
         XpProgressHelper.stopAndClear(hider, prevXpTask);
@@ -191,5 +143,53 @@ public class CurseSpellItem implements GameItem {
                 ticks++;
             }
         }.runTaskTimer(plugin, 0L, 5L);
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.curse-spell.active-duration", 10);
+        return String.format("Empower your blade for %ds to curse hiders on hit.", duration.intValue());
+    }
+
+    public static boolean isCurseActive(UUID seekerId) {
+        Long until = seekerCurseActiveUntil.get(seekerId);
+        if (until == null) {
+            return false;
+        }
+        if (System.currentTimeMillis() > until) {
+            seekerCurseActiveUntil.remove(seekerId);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isHiderCursed(UUID hiderId) {
+        Long until = hiderCursedUntil.get(hiderId);
+        if (until == null) {
+            return false;
+        }
+        if (System.currentTimeMillis() > until) {
+            hiderCursedUntil.remove(hiderId);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int curseCooldown = plugin.getSettingRegistry().get("seeker-items.curse-spell.cooldown", 30);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> activateCurseSpell(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> activateCurseSpell(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin))
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(curseCooldown * 20)
+                .withCustomCooldown(curseCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
     }
 }

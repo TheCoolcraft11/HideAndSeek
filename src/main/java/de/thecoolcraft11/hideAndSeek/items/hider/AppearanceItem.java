@@ -45,8 +45,8 @@ public class AppearanceItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Customize your appearance";
+    public String getDescription(HideAndSeek plugin) {
+        return "Open the appearance editor for your current disguise.";
     }
 
     @Override
@@ -57,7 +57,7 @@ public class AppearanceItem implements GameItem {
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

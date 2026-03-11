@@ -50,12 +50,18 @@ public class GhostEssenceItem implements GameItem {
     }
 
     @Override
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("hider-items.ghost-essence.max-duration", 1.5f);
+        return String.format("Become ghostly to phase through blocks for %.1fs.", duration.floatValue());
+    }
+
+    @Override
     public void register(HideAndSeek plugin) {
         int cooldown = plugin.getSettingRegistry().get("hider-items.ghost-essence.cooldown", 25);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, ctx -> useGhostEssence(ctx.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, ctx -> useGhostEssence(ctx.getPlayer(), plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(cooldown * 20)
@@ -343,10 +349,6 @@ public class GhostEssenceItem implements GameItem {
         return plugin.getNmsAdapter().canPathfind(ghost, start, end);
     }
 
-    @Override
-    public String getDescription() {
-        return "Phase through blocks but stay above your starting height.";
-    }
 
     @Override
     public Set<String> getConfigKeys() {

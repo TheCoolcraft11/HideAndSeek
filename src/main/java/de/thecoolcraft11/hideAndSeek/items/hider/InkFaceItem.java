@@ -44,8 +44,8 @@ public class InkFaceItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Ink mask (armor)";
+    public String getDescription(HideAndSeek plugin) {
+        return "Hidden helmet used for ink-blindness effects.";
     }
 
     @Override

@@ -61,33 +61,6 @@ public class MedkitItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription() {
-        return "Block for 5s to heal yourself";
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int medkitCooldown = plugin.getSettingRegistry().get("hider-items.medkit.cooldown", 30);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.BLOCK_START, context -> startMedkitCharge(context, plugin))
-                .withAction(ItemActionType.BLOCK_RELEASE, context -> finishMedkitCharge(context, plugin))
-                .withCustomCooldown(medkitCooldown * 1000L)
-                .withVanillaCooldown(medkitCooldown * 20)
-                .withVanillaCooldownDisplay(true)
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(false)
-                .build());
-    }
-
-    @Override
-    public Set<String> getConfigKeys() {
-        return Set.of("hider-items.medkit.cooldown");
-    }
-
     private static void startMedkitCharge(ItemInteractionContext context, HideAndSeek plugin) {
         Player player = context.getPlayer();
         context.skipCooldown();
@@ -107,7 +80,7 @@ public class MedkitItem implements GameItem {
         BukkitTask xpTask = XpProgressHelper.start(plugin, player, totalTicks, XpProgressHelper.Mode.COUNTDOWN, channelTime);
         medkitChannelTasks.put(player.getUniqueId(), xpTask);
 
-        
+
         BukkitTask particleTask = new BukkitRunnable() {
             long ticks = 0;
 
@@ -126,6 +99,35 @@ public class MedkitItem implements GameItem {
             }
         }.runTaskTimer(plugin, 0L, 1L);
         medkitChannelParticleTasks.put(player.getUniqueId(), particleTask);
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin) {
+        Number channelTime = plugin.getSettingRegistry().get("hider-items.medkit.channel-time", 5);
+        return String.format("Hold block for %ds, then release to heal yourself fully.", channelTime.intValue());
+    }
+
+    @Override
+    public Set<String> getConfigKeys() {
+        return Set.of("hider-items.medkit.cooldown");
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int medkitCooldown = plugin.getSettingRegistry().get("hider-items.medkit.cooldown", 30);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.BLOCK_START, context -> startMedkitCharge(context, plugin))
+                .withAction(ItemActionType.BLOCK_RELEASE, context -> finishMedkitCharge(context, plugin))
+                .withCustomCooldown(medkitCooldown * 1000L)
+                .withVanillaCooldown(medkitCooldown * 20)
+                .withVanillaCooldownDisplay(true)
+                .withDescription(getDescription(plugin))
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(false)
+                .build());
     }
 
     private static void finishMedkitCharge(ItemInteractionContext context, HideAndSeek plugin) {

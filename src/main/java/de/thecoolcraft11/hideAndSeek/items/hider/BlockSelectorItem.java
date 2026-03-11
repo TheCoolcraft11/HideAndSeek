@@ -42,8 +42,8 @@ public class BlockSelectorItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Choose your block";
+    public String getDescription(HideAndSeek plugin) {
+        return "Open the block picker to choose your disguise block.";
     }
 
     @Override
@@ -54,7 +54,7 @@ public class BlockSelectorItem implements GameItem {
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

@@ -44,8 +44,9 @@ public class TrackerCrossbowItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Hit seekers to upgrade your speed boost";
+    public String getDescription(HideAndSeek plugin) {
+        int points = plugin.getPointService().getInt("points.hider.sharpshooter.amount", 20);
+        return String.format("Hit seekers with arrows to upgrade items, grants %d points per hit.", points);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class TrackerCrossbowItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.SHOOT, context -> {
                 })
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(crossbowCooldown * 20)

@@ -44,8 +44,8 @@ public class KnockbackStickItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Knock away seekers";
+    public String getDescription(HideAndSeek plugin) {
+        return "Smack seekers to launch them away.";
     }
 
     @Override
@@ -56,7 +56,7 @@ public class KnockbackStickItem implements GameItem {
             String levelId = ID + "_" + level;
             plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createKnockbackStickItem(level), levelId)
                     .withAction(ItemActionType.LEFT_CLICK_ENTITY, KnockbackStickItem::knockbackHit)
-                    .withDescription(getDescription())
+                    .withDescription(getDescription(plugin))
                     .withDropPrevention(true)
                     .withCraftPrevention(true)
                     .withVanillaCooldown(knockbackCooldown * 20)

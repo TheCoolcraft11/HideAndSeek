@@ -67,8 +67,8 @@ public class SeekersSwordItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "";
+    public String getDescription(HideAndSeek plugin) {
+        return "Main weapon: hold block to charge and throw your sword.";
     }
 
     @Override

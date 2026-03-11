@@ -45,8 +45,8 @@ public class BlockRandomizerItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Randomize all hider blocks";
+    public String getDescription(HideAndSeek plugin) {
+        return "Force all hiders to reroll their disguise blocks.";
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BlockRandomizerItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeAllBlocks(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeAllBlocks(context.getPlayer(), plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(randCooldown * 20)

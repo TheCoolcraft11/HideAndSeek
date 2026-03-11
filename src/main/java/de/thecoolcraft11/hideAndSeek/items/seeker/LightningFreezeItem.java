@@ -49,30 +49,6 @@ public class LightningFreezeItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription() {
-        return "Freeze all hiders";
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int lightningCooldown = plugin.getSettingRegistry().get("seeker-items.lightning-freeze.cooldown", 60);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> castLightningFreeze(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> castLightningFreeze(context.getPlayer(), plugin))
-                .withDescription(getDescription())
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(lightningCooldown * 20)
-                .withCustomCooldown(lightningCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-
-    }
-
     private static void castLightningFreeze(Player seeker, HideAndSeek plugin) {
         int duration = plugin.getSettingRegistry().get("seeker-items.lightning-freeze.duration", 5);
 
@@ -93,7 +69,7 @@ public class LightningFreezeItem implements GameItem {
             entity.getPersistentDataContainer().set(new NamespacedKey(plugin, "freezeLightning"), PersistentDataType.BOOLEAN, true);
             Bukkit.getOnlinePlayers().stream().filter(player -> !player.getUniqueId().equals(hider.getUniqueId())).forEach(p -> p.hideEntity(plugin, entity));
 
-            
+
             BukkitTask prevHiderTask = lightningFreezeHiderXpTasks.remove(hider.getUniqueId());
             XpProgressHelper.SavedXp hiderSavedXp = XpProgressHelper.saveXp(hider);
             XpProgressHelper.stopAndClear(hider, prevHiderTask);
@@ -108,7 +84,7 @@ public class LightningFreezeItem implements GameItem {
         seeker.sendMessage(Component.text("All hiders frozen!", NamedTextColor.AQUA));
         seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1.0, 0), 15, 0.5, 0.5, 0.5, 0.1);
 
-        
+
         BukkitTask prevTask = lightningFreezeXpTasks.remove(seeker.getUniqueId());
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
         XpProgressHelper.stopAndClear(seeker, prevTask);
@@ -119,5 +95,31 @@ public class LightningFreezeItem implements GameItem {
             BukkitTask t = lightningFreezeXpTasks.remove(seeker.getUniqueId());
             XpProgressHelper.stopAndRestore(seeker, t, savedXp);
         }, duration * 20L);
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.lightning-freeze.duration", 5);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return String.format("Call lightning that freezes all hiders for %ds, grants %d points per hider.", duration.intValue(), points);
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int lightningCooldown = plugin.getSettingRegistry().get("seeker-items.lightning-freeze.cooldown", 60);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> castLightningFreeze(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> castLightningFreeze(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin))
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(lightningCooldown * 20)
+                .withCustomCooldown(lightningCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
+
     }
 }

@@ -61,8 +61,10 @@ public class ProximitySensorItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Place a proximity sensor";
+    public String getDescription(HideAndSeek plugin) {
+        Number range = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.range", 8.0);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return String.format("Place a sensor revealing hiders within %.0f blocks, grants %d points per detection.", range.doubleValue(), points);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class ProximitySensorItem implements GameItem {
         int proximityCooldown = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.cooldown", 20);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeProximitySensor(context, plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(proximityCooldown * 20)

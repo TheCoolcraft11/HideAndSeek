@@ -50,8 +50,9 @@ public class FireworkRocketItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Launch a firework into the sky";
+    public String getDescription(HideAndSeek plugin) {
+        int points = plugin.getPointService().getInt("points.hider.taunt.large", 75);
+        return String.format("Launch a high-altitude firework taunt, granting %d points.", points);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class FireworkRocketItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> launchFirework(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> launchFirework(context.getPlayer(), plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(fireworkCooldown * 20)

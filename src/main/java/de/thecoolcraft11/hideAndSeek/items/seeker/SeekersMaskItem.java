@@ -43,8 +43,8 @@ public class SeekersMaskItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "";
+    public String getDescription(HideAndSeek plugin) {
+        return "Bound seeker helmet item.";
     }
 
     @Override

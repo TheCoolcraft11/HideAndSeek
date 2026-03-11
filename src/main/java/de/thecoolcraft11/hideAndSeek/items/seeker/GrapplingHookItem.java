@@ -48,8 +48,8 @@ public class GrapplingHookItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Cast the hook, then pull to launch yourself";
+    public String getDescription(HideAndSeek plugin) {
+        return "Reel your hook to launch yourself toward the cast point.";
     }
 
 
@@ -67,7 +67,7 @@ public class GrapplingHookItem implements GameItem {
                 .withVanillaCooldown(grapplingHookCooldown * 20)
                 .withCustomCooldown(grapplingHookCooldown * 1000L)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

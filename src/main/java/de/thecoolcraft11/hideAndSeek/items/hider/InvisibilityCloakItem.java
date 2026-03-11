@@ -52,34 +52,6 @@ public class InvisibilityCloakItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription() {
-        return "Make yourself invisible for a short time";
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int invisibilityCloakCooldown = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.cooldown", 20);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> useInvisibilityCloak(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> useInvisibilityCloak(context.getPlayer(), plugin))
-                .withDescription(getDescription())
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(invisibilityCloakCooldown * 20)
-                .withCustomCooldown(invisibilityCloakCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-    }
-
-    @Override
-    public Set<String> getConfigKeys() {
-        return Set.of("hider-items.invisibility-cloak.cooldown");
-    }
-
     private static void useInvisibilityCloak(Player player, HideAndSeek plugin) {
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
             player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
@@ -124,7 +96,7 @@ public class InvisibilityCloakItem implements GameItem {
         player.getWorld().spawnParticle(Particle.GLOW, loc, 15, 0.4, 0.4, 0.4, 0.1);
         player.playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 1.0f, 1.5f);
 
-        
+
         BukkitTask prevXpTask = invisibilityCloakXpTasks.remove(player.getUniqueId());
         XpProgressHelper.stopAndClear(player, prevXpTask);
 
@@ -141,7 +113,7 @@ public class InvisibilityCloakItem implements GameItem {
                 if (!player.isOnline() || ticks >= maxTicks) {
                     cancel();
 
-                    
+
                     BukkitTask t = invisibilityCloakXpTasks.remove(player.getUniqueId());
                     XpProgressHelper.stopAndRestore(player, t, savedXp);
 
@@ -162,5 +134,34 @@ public class InvisibilityCloakItem implements GameItem {
                 ticks++;
             }
         }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.duration", 8);
+        return String.format("Turn invisible for %ds.", duration.intValue());
+    }
+
+    @Override
+    public Set<String> getConfigKeys() {
+        return Set.of("hider-items.invisibility-cloak.cooldown");
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int invisibilityCloakCooldown = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.cooldown", 20);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> useInvisibilityCloak(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> useInvisibilityCloak(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin))
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(invisibilityCloakCooldown * 20)
+                .withCustomCooldown(invisibilityCloakCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
     }
 }

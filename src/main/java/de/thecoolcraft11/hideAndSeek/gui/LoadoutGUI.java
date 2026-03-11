@@ -324,7 +324,7 @@ public class LoadoutGUI implements Listener {
             item = HiderItems.getItem(type.getItemId());
         }
 
-        return (item != null) ? item.getDescription() : "No description available";
+        return (item != null) ? item.getDescription(plugin) : "No description available";
     }
 
     private ItemStack createSelectedItemDisplay(LoadoutItemType type, int cost) {

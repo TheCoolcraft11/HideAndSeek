@@ -50,8 +50,11 @@ public class GlowingCompassItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Make nearest hider glow";
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.glowing-compass.duration", 10);
+        Number range = plugin.getSettingRegistry().get("seeker-items.glowing-compass.range", 50);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return String.format("Reveal nearest hider within %d blocks with glow for %ds, grants %d points.", range.intValue(), duration.intValue(), points);
     }
 
     @Override
@@ -60,7 +63,7 @@ public class GlowingCompassItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> glowHider(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> glowHider(context.getPlayer(), plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(glowCooldown * 20)

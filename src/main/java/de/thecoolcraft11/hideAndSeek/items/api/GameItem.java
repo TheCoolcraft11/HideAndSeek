@@ -19,7 +19,7 @@ public interface GameItem {
 
     ItemStack createItem(HideAndSeek plugin);
 
-    String getDescription();
+    String getDescription(HideAndSeek plugin);
 
     void register(HideAndSeek plugin);
 }

@@ -50,8 +50,9 @@ public class BigFirecrackerItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Place a big firecracker";
+    public String getDescription(HideAndSeek plugin) {
+        int points = plugin.getPointService().getInt("points.hider.taunt.large", 75);
+        return String.format("Place a large firecracker that explodes, granting %d points.", points);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class BigFirecrackerItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> spawnBigFirecracker(context, plugin))
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> spawnBigFirecracker(context, plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(bigFirecrackerCooldown * 20)

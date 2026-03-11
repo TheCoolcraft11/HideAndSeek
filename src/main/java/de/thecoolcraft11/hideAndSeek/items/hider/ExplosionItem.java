@@ -46,20 +46,21 @@ public class ExplosionItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Play an explosion particle for everyone";
+    public String getDescription(HideAndSeek plugin) {
+        int points = plugin.getPointService().getInt("points.hider.taunt.small", 25);
+        return String.format("Place a firecracker that pops, granting %d points.", points);
     }
 
     @Override
     public void register(HideAndSeek plugin) {
-        int explosionCooldown = plugin.getSettingRegistry().get("hider-items.explosion.cooldown", 8);
+        int cooldown = plugin.getSettingRegistry().get("hider-items.explosion.cooldown", 8);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> spawnExplosionForAll(context, plugin))
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> spawnExplosionForAll(context, plugin))
-                .withVanillaCooldown(explosionCooldown * 20)
-                .withCustomCooldown(explosionCooldown * 1000L)
+                .withVanillaCooldown(cooldown * 20)
+                .withCustomCooldown(cooldown * 1000L)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

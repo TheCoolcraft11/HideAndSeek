@@ -50,8 +50,8 @@ public class BlockSwapItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Swap blocks with another hider";
+    public String getDescription(HideAndSeek plugin) {
+        return "Swap disguise blocks with the nearest other hider.";
     }
 
     @Override
@@ -60,7 +60,7 @@ public class BlockSwapItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> blockSwap(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> blockSwap(context, plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(blockSwapCooldown * 20)

@@ -41,15 +41,15 @@ public class BlockStatsItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Right Click to open block statistics menu";
+    public String getDescription(HideAndSeek plugin) {
+        return "Open the block statistics menu.";
     }
 
     @Override
     public void register(HideAndSeek plugin) {
         BlockStatsGUI gui = new BlockStatsGUI(plugin);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> gui.open(context.getPlayer()))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> gui.open(context.getPlayer()))
                 .withDropPrevention(true)

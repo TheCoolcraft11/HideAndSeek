@@ -52,8 +52,9 @@ public class CageTrapItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Place an invisible cage trap";
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.cage-trap.paralyze-duration", 5);
+        return String.format("Place a hidden trap that cages and immobilizes a hider for %ds.", duration.intValue());
     }
 
     @Override
@@ -61,7 +62,7 @@ public class CageTrapItem implements GameItem {
         int cageCooldown = plugin.getSettingRegistry().get("seeker-items.cage-trap.cooldown", 20);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeCageTrap(context, plugin))
-                .withDescription(getDescription())
+                .withDescription(getDescription(plugin))
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(cageCooldown * 20)

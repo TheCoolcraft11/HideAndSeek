@@ -46,8 +46,16 @@ public class SpeedBoostItem implements GameItem {
     }
 
     @Override
-    public String getDescription() {
-        return "Quick speed boost";
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("hider-items.speed-boost.duration", 5);
+        Object boostTypeObj = plugin.getSettingRegistry().get("hider-items.speed-boost.type");
+        String boostMode = (boostTypeObj instanceof Enum) ? boostTypeObj.toString() : "SPEED_EFFECT";
+
+        if ("VELOCITY_BOOST".equals(boostMode)) {
+            return "Launch yourself forward with a velocity boost.";
+        } else {
+            return String.format("Gain speed effect for %ds to move faster.", duration.intValue());
+        }
     }
 
     @Override
@@ -64,7 +72,7 @@ public class SpeedBoostItem implements GameItem {
                     .withVanillaCooldown(speedBoostCooldown * 20)
                     .withCustomCooldown(speedBoostCooldown * 1000L)
                     .withVanillaCooldownDisplay(true)
-                    .withDescription(getDescription())
+                    .withDescription(getDescription(plugin))
                     .withDropPrevention(true)
                     .withCraftPrevention(true)
                     .allowOffHand(false)

@@ -50,35 +50,12 @@ public class InkSplashItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription() {
-        return "Throw ink to blind hiders";
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int inkCooldown = plugin.getSettingRegistry().get("seeker-items.ink-splash.cooldown", 20);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withDescription(getDescription())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> spawnInkSplash(context, plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> spawnInkSplash(context, plugin))
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(inkCooldown * 20)
-                .withCustomCooldown(inkCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-    }
-
     private static void spawnInkSplash(ItemInteractionContext context, HideAndSeek plugin) {
         Player seeker = context.getPlayer();
         int radius = plugin.getSettingRegistry().get("seeker-items.ink-splash.radius", 25);
         int duration = plugin.getSettingRegistry().get("seeker-items.ink-splash.duration", 7);
 
-        
+
         BukkitTask prevSeekerTask = inkSplashSeekerXpTasks.remove(seeker.getUniqueId());
         XpProgressHelper.SavedXp seekerSavedXp = XpProgressHelper.saveXp(seeker);
         XpProgressHelper.stopAndClear(seeker, prevSeekerTask);
@@ -110,7 +87,7 @@ public class InkSplashItem implements GameItem {
             hider.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duration * 20, 255, false, false));
             hider.sendMessage(Component.text("You've been hit with ink!", NamedTextColor.DARK_AQUA));
 
-            
+
             BukkitTask prevXpTask = inkSplashXpTasks.remove(hider.getUniqueId());
             XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(hider);
             XpProgressHelper.stopAndClear(hider, prevXpTask);
@@ -127,5 +104,31 @@ public class InkSplashItem implements GameItem {
                 XpProgressHelper.stopAndRestore(hider, t, savedXp);
             }, duration * 20L);
         }
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.ink-splash.duration", 7);
+        Number radius = plugin.getSettingRegistry().get("seeker-items.ink-splash.radius", 25);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return String.format("Splash hiders within %d blocks with ink for %ds, grants %d points per hit.", radius.intValue(), duration.intValue(), points);
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int inkCooldown = plugin.getSettingRegistry().get("seeker-items.ink-splash.cooldown", 20);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> spawnInkSplash(context, plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> spawnInkSplash(context, plugin))
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(inkCooldown * 20)
+                .withCustomCooldown(inkCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
     }
 }
