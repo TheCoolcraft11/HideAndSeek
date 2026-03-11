@@ -53,4 +53,8 @@ public class NoopNmsAdapter implements NmsAdapter {
     @Override
     public void spoofClientGameMode(Player player, GameMode mode) {
     }
+
+    @Override
+    public void setNoClipForEntity(org.bukkit.entity.Entity entity, boolean noClip) {
+    }
 }

@@ -11,7 +11,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -86,7 +85,7 @@ public class FireworkRocketItem implements GameItem {
 
         Firework firework = (Firework) launchLocation.getWorld().spawnEntity(launchLocation, EntityType.FIREWORK_ROCKET);
         FireworkMeta meta = firework.getFireworkMeta();
-        meta.setPower(3);
+        meta.setPower(10);
         meta.addEffect(FireworkEffect.builder()
                 .with(FireworkEffect.Type.BALL_LARGE)
                 .withColor(Color.RED, Color.YELLOW, Color.ORANGE)
@@ -98,43 +97,60 @@ public class FireworkRocketItem implements GameItem {
 
         player.sendMessage(Component.text("Firework launched! +" + points + " points", NamedTextColor.GOLD));
 
+
+        var nms = plugin.getNmsAdapter();
+        boolean useNoClip = nms != null && nms.isAvailable();
+
+        if (useNoClip) {
+            nms.setNoClipForEntity(firework, true);
+        }
+
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (!firework.isValid()) {
-                    cancel();
+                    this.cancel();
                     return;
                 }
 
                 Location loc = firework.getLocation();
-                firework.setTicksToDetonate(100);
+                firework.setTicksToDetonate(2000);
+                firework.setTicksLived(1);
+
 
                 if (loc.getY() >= targetY) {
-                    firework.detonate();
-                    for (Player p : loc.getNearbyPlayers(200)) {
-                        p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, (float) volume, 0.9f);
-                        p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, (float) volume, 0.9f);
-                    }
-                    cancel();
+                    detonate(firework, volume);
+                    this.cancel();
                     return;
                 }
 
-                World world = loc.getWorld();
+                if (useNoClip) {
 
-                Vector up = new Vector(0, 1, 0);
-                double maxCheckDistance = 2.0;
-                var rayResult = world.rayTraceBlocks(loc, up, maxCheckDistance);
-
-                if (rayResult != null) {
-                    Block blockHit = rayResult.getHitBlock();
-                    if (blockHit != null) {
-                        Location safeLoc = blockHit.getWorld().getHighestBlockAt(blockHit.getLocation()).getLocation().add(0, 1, 0);
-                        firework.teleport(safeLoc);
-                    }
-                } else {
                     firework.setVelocity(new Vector(0, 1.2, 0));
+                } else {
+
+                    World world = loc.getWorld();
+                    Vector up = new Vector(0, 1, 0);
+                    var rayResult = world.rayTraceBlocks(loc, up, 2.0);
+
+                    if (rayResult != null && rayResult.getHitBlock() != null) {
+                        Location safeLoc = world.getHighestBlockAt(rayResult.getHitBlock().getLocation())
+                                .getLocation().add(0, 1, 0);
+                        firework.teleport(safeLoc);
+                    } else {
+                        firework.setVelocity(new Vector(0, 1.2, 0));
+                    }
                 }
             }
         }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    private static void detonate(Firework firework, double volume) {
+        firework.detonate();
+        Location loc = firework.getLocation();
+        for (Player p : loc.getNearbyPlayers(200)) {
+            p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, (float) volume, 0.9f);
+            p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, (float) volume, 0.9f);
+        }
     }
 }

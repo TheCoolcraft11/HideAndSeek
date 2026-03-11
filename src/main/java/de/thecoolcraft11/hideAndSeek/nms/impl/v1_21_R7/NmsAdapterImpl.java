@@ -13,8 +13,10 @@ import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 
@@ -29,7 +31,8 @@ public class NmsAdapterImpl implements NmsAdapter {
             EnumSet.of(
                     NmsCapabilities.BLOCK_VOXEL_SHAPE,
                     NmsCapabilities.MOB_PATHFINDING,
-                    NmsCapabilities.CLIENT_GAMEMODE_SPOOFING
+                    NmsCapabilities.CLIENT_GAMEMODE_SPOOFING,
+                    NmsCapabilities.NO_CLIP_MOB
             );
 
     @Override
@@ -147,5 +150,12 @@ public class NmsAdapterImpl implements NmsAdapter {
                         value
                 )
         );
+    }
+
+    @Override
+    public void setNoClipForEntity(Entity entity, boolean noClip) {
+        net.minecraft.world.entity.Entity serverEntity = ((CraftEntity) entity).getHandle();
+
+        serverEntity.noPhysics = noClip;
     }
 }

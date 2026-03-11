@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek.nms;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
@@ -32,6 +33,8 @@ public interface NmsAdapter {
     void setServerGameModeSpectator(Player player);
 
     void spoofClientGameMode(Player player, GameMode mode);
+
+    void setNoClipForEntity(Entity entity, boolean noClip);
 
 
 }
