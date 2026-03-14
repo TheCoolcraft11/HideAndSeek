@@ -321,4 +321,9 @@ public class LobbyPhase implements GamePhase {
     public boolean allowEntityExperienceDrop() {
         return false;
     }
+
+    @Override
+    public boolean allowHunger() {
+        return false;
+    }
 }

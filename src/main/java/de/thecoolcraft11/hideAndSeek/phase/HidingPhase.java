@@ -484,4 +484,8 @@ public class HidingPhase implements GamePhase {
         return false;
     }
 
+    @Override
+    public boolean allowHunger() {
+        return false;
+    }
 }

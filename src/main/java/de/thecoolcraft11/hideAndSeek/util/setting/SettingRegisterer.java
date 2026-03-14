@@ -134,8 +134,7 @@ public class SettingRegisterer {
 
         plugin.getConfigRegistry().register("settings.hider-items.random-block.uses", Integer.class, 5);
         plugin.getConfigRegistry().register("settings.hider-items.crossbow.hits-per-upgrade", Integer.class, 3);
-        plugin.getConfigRegistry().register("settings.hider-items.sound.cooldown", Integer.class, 4);
-        plugin.getConfigRegistry().register("settings.hider-items.sound.points", Integer.class, 5);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.cooldown", Integer.class, 8);
         plugin.getConfigRegistry().register("settings.hider-items.sound.volume", Double.class, 0.75);
         plugin.getConfigRegistry().register("settings.hider-items.sound.pitch", Double.class, 0.8);
         plugin.getConfigRegistry().register("settings.hider-items.sound.note-particles", Integer.class, 8);
@@ -149,8 +148,7 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_rubber_chicken.volume-multiplier", Double.class, 0.95);
         plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_rubber_chicken.pitch-multiplier", Double.class, 1.1);
         plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_rubber_chicken.particle-multiplier", Double.class, 1.0);
-        plugin.getConfigRegistry().register("settings.hider-items.explosion.cooldown", Integer.class, 8);
-        plugin.getConfigRegistry().register("settings.hider-items.explosion.points", Integer.class, 10);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.cooldown", Integer.class, 12);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.volume", Double.class, 0.65);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.pitch", Double.class, 1.5);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.smoke-particles", Integer.class, 3);
@@ -170,13 +168,13 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_bubble_popper.smoke-multiplier", Double.class, 1.0);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_bubble_popper.burst-multiplier", Double.class, 1.05);
         plugin.getConfigRegistry().register("settings.hider-items.speed-boost.type", String.class, "SPEED_EFFECT");
-        plugin.getConfigRegistry().register("settings.hider-items.speed-boost.cooldown", Integer.class, 10);
-        plugin.getConfigRegistry().register("settings.hider-items.speed-boost.duration", Integer.class, 5);
-        plugin.getConfigRegistry().register("settings.hider-items.speed-boost.boost-power", Double.class, 0.5);
-        plugin.getConfigRegistry().register("settings.hider-items.knockback-stick.level", Integer.class, 2);
-        plugin.getConfigRegistry().register("settings.hider-items.block-swap.cooldown", Integer.class, 15);
-        plugin.getConfigRegistry().register("settings.hider-items.block-swap.range", Double.class, 50.0);
-        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.cooldown", Integer.class, 12);
+        plugin.getConfigRegistry().register("settings.hider-items.speed-boost.cooldown", Integer.class, 25);
+        plugin.getConfigRegistry().register("settings.hider-items.speed-boost.duration", Integer.class, 4);
+        plugin.getConfigRegistry().register("settings.hider-items.speed-boost.boost-power", Double.class, 0.65);
+        plugin.getConfigRegistry().register("settings.hider-items.knockback-stick.cooldown", Integer.class, 9);
+        plugin.getConfigRegistry().register("settings.hider-items.block-swap.cooldown", Integer.class, 30);
+        plugin.getConfigRegistry().register("settings.hider-items.block-swap.range", Double.class, 35.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.cooldown", Integer.class, 18);
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.fuse-time", Integer.class, 60);
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.mini-fuse-time", Integer.class, 30);
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.mini-count", Integer.class, 3);
@@ -201,50 +199,40 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_boombox.main-particle-multiplier", Double.class, 1.0);
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_boombox.mini-particle-multiplier", Double.class, 1.0);
         plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.cooldown", Integer.class, 10);
+        plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.cooldown", Integer.class, 20);
         plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.target-y", Integer.class, 128);
-        plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.points", Integer.class, 15);
         plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.volume", Double.class, 10.0);
-        plugin.getConfigRegistry().register("settings.hider-items.medkit.cooldown", Integer.class, 30);
+        plugin.getConfigRegistry().register("settings.hider-items.medkit.cooldown", Integer.class, 65);
         plugin.getConfigRegistry().register("settings.hider-items.medkit.channel-time", Integer.class, 5);
         plugin.getConfigRegistry().register("settings.hider-items.medkit.heal-amount", Double.class, 20.0);
-        plugin.getConfigRegistry().register("settings.hider-items.totem.effect-duration", Integer.class, 30);
+        plugin.getConfigRegistry().register("settings.hider-items.totem.effect-duration", Integer.class, 5);
         plugin.getConfigRegistry().register("settings.hider-items.totem.max-uses", Integer.class, 1);
-        plugin.getConfigRegistry().register("settings.hider-items.invisibility-cloak.cooldown", Integer.class, 20);
-        plugin.getConfigRegistry().register("settings.hider-items.invisibility-cloak.duration", Integer.class, 8);
-        plugin.getConfigRegistry().register("settings.hider-items.slowness-ball.cooldown", Integer.class, 10);
-        plugin.getConfigRegistry().register("settings.hider-items.slowness-ball.duration", Integer.class, 6);
+        plugin.getConfigRegistry().register("settings.hider-items.invisibility-cloak.cooldown", Integer.class, 50);
+        plugin.getConfigRegistry().register("settings.hider-items.invisibility-cloak.duration", Integer.class, 6);
+        plugin.getConfigRegistry().register("settings.hider-items.slowness-ball.cooldown", Integer.class, 14);
+        plugin.getConfigRegistry().register("settings.hider-items.slowness-ball.duration", Integer.class, 4);
         plugin.getConfigRegistry().register("settings.hider-items.slowness-ball.amplifier", Integer.class, 1);
-        plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.cooldown", Integer.class, 15);
-        plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.duration", Integer.class, 8);
+        plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.cooldown", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.duration", Integer.class, 6);
         plugin.getConfigRegistry().register("settings.hider-items.smoke-bomb.radius", Integer.class, 4);
-
-        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.cooldown", Integer.class, 25);
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.cooldown", Integer.class, 45);
         plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.max-radius", Integer.class, 15);
         plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.min-light-block", Integer.class, 1);
         plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.min-light-sky", Integer.class, 1);
         plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.flying-speed", Double.class, 0.01);
         plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.max-duration", Float.class, 1.5f);
         plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.boost-power", Float.class, 1.5f);
-        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.particle-mode", String.class, "FLYING");
+        plugin.getConfigRegistry().register("settings.hider-items.ghost-essence.particle-mode", String.class, "SNAP");
 
-
-        plugin.getConfigRegistry().register("settings.timer.hiding_color1", String.class, "#FF0000");
-        plugin.getConfigRegistry().register("settings.timer.hiding_color2", String.class, "#0000FF");
-        plugin.getConfigRegistry().register("settings.timer.seeking_color1", String.class, "#FFFF00");
-        plugin.getConfigRegistry().register("settings.timer.seeking_color2", String.class, "#00FFFF");
-        plugin.getConfigRegistry().register("settings.timer.animation_type", String.class, "WAVE");
-        plugin.getConfigRegistry().register("settings.timer.animation_speed", Double.class, 0.5);
-
-
-        plugin.getConfigRegistry().register("settings.seeker-items.grappling-hook.cooldown", Integer.class, 2);
+        plugin.getConfigRegistry().register("settings.seeker-items.grappling-hook.cooldown", Integer.class, 7);
         plugin.getConfigRegistry().register("settings.seeker-items.grappling-hook.speed", Double.class, 1.5);
-        plugin.getConfigRegistry().register("settings.seeker-items.ink-splash.cooldown", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.seeker-items.ink-splash.cooldown", Integer.class, 35);
         plugin.getConfigRegistry().register("settings.seeker-items.ink-splash.radius", Integer.class, 25);
-        plugin.getConfigRegistry().register("settings.seeker-items.ink-splash.duration", Integer.class, 7);
-        plugin.getConfigRegistry().register("settings.seeker-items.lightning-freeze.cooldown", Integer.class, 60);
+        plugin.getConfigRegistry().register("settings.seeker-items.ink-splash.duration", Integer.class, 8);
+        plugin.getConfigRegistry().register("settings.seeker-items.lightning-freeze.cooldown", Integer.class, 130);
         plugin.getConfigRegistry().register("settings.seeker-items.lightning-freeze.duration", Integer.class, 5);
-        plugin.getConfigRegistry().register("settings.seeker-items.glowing-compass.cooldown", Integer.class, 25);
-        plugin.getConfigRegistry().register("settings.seeker-items.glowing-compass.duration", Integer.class, 10);
+        plugin.getConfigRegistry().register("settings.seeker-items.glowing-compass.cooldown", Integer.class, 50);
+        plugin.getConfigRegistry().register("settings.seeker-items.glowing-compass.duration", Integer.class, 6);
         plugin.getConfigRegistry().register("settings.seeker-items.glowing-compass.range", Double.class, 50.0);
         plugin.getConfigRegistry().register("settings.seeker-items.curse-spell.cooldown", Integer.class, 30);
         plugin.getConfigRegistry().register("settings.seeker-items.curse-spell.active-duration", Integer.class, 10);
@@ -255,11 +243,11 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.seeker-items.chain-pull.range", Double.class, 30.0);
         plugin.getConfigRegistry().register("settings.seeker-items.chain-pull.pull-power", Double.class, 2.0);
         plugin.getConfigRegistry().register("settings.seeker-items.chain-pull.slowness-duration", Integer.class, 3);
-        plugin.getConfigRegistry().register("settings.seeker-items.proximity-sensor.cooldown", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.seeker-items.proximity-sensor.cooldown", Integer.class, 35);
         plugin.getConfigRegistry().register("settings.seeker-items.proximity-sensor.range", Double.class, 8.0);
-        plugin.getConfigRegistry().register("settings.seeker-items.proximity-sensor.duration", Integer.class, 60);
-        plugin.getConfigRegistry().register("settings.seeker-items.proximity-sensor.fov-angle", Double.class, 90.0);
-        plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.cooldown", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.seeker-items.proximity-sensor.duration", Integer.class, 25);
+        plugin.getConfigRegistry().register("settings.seeker-items.proximity-sensor.fov-angle", Double.class, 160.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.cooldown", Integer.class, 25);
         plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.range", Double.class, 3.0);
         plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.duration", Integer.class, -1);
         plugin.getConfigRegistry().register("settings.seeker-items.cage-trap.paralyze-duration", Integer.class, 5);
@@ -316,6 +304,13 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.points.seeker.assist.range", Double.class, 16.0);
         plugin.getConfigRegistry().register("settings.points.seeker.special.bloodhound", Integer.class, 200);
         plugin.getConfigRegistry().register("settings.points.seeker.first-blood.amount", Integer.class, 100);
+
+        plugin.getConfigRegistry().register("settings.timer.hiding_color1", String.class, "#FF0000");
+        plugin.getConfigRegistry().register("settings.timer.hiding_color2", String.class, "#0000FF");
+        plugin.getConfigRegistry().register("settings.timer.seeking_color1", String.class, "#FFFF00");
+        plugin.getConfigRegistry().register("settings.timer.seeking_color2", String.class, "#00FFFF");
+        plugin.getConfigRegistry().register("settings.timer.animation_type", String.class, "WAVE");
+        plugin.getConfigRegistry().register("settings.timer.animation_speed", Double.class, 0.5);
     }
 
 
@@ -633,12 +628,6 @@ public class SettingRegisterer {
                 .customIcon(Material.CLOCK)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.sound.points", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "hider-items.sound.points", 5))
-                .range(0, 100)
-                .description("Points awarded for using cat sound")
-                .customIcon(Material.EMERALD)
-                .build());
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.sound.volume", SettingType.DOUBLE, Double.class)
                 .defaultValue(getConfigValue(plugin, "hider-items.sound.volume", 0.75))
@@ -684,13 +673,6 @@ public class SettingRegisterer {
                 .range(0, 30)
                 .description("Cooldown for firecracker item in seconds")
                 .customIcon(Material.CLOCK)
-                .build());
-
-        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.explosion.points", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "hider-items.explosion.points", 10))
-                .range(0, 100)
-                .description("Points awarded for using firecracker")
-                .customIcon(Material.EMERALD)
                 .build());
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.explosion.volume", SettingType.DOUBLE, Double.class)
@@ -781,8 +763,8 @@ public class SettingRegisterer {
                 .build());
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.knockback-stick.level", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "hider-items.knockback-stick.level", 2))
-                .range(1, 5)
+                .defaultValue(getConfigValue(plugin, "hider-items.knockback-stick.level", 5))
+                .range(0, 60)
                 .description("Knockback level for knockback stick")
                 .customIcon(Material.ANVIL)
                 .build());
@@ -827,13 +809,6 @@ public class SettingRegisterer {
                 .range(1, 10)
                 .description("Number of mini firecrackers")
                 .customIcon(Material.FIREWORK_STAR)
-                .build());
-
-        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.big-firecracker.points", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "hider-items.big-firecracker.points", 20))
-                .range(0, 200)
-                .description("Points for big firecracker")
-                .customIcon(Material.EMERALD)
                 .build());
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.big-firecracker.volume", SettingType.DOUBLE, Double.class)
@@ -910,13 +885,6 @@ public class SettingRegisterer {
                 .range(-64, 320)
                 .description("Target Y for firework explosion")
                 .customIcon(Material.LADDER)
-                .build());
-
-        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.firework-rocket.points", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "hider-items.firework-rocket.points", 15))
-                .range(0, 200)
-                .description("Points for firework rocket")
-                .customIcon(Material.EMERALD)
                 .build());
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.firework-rocket.volume", SettingType.DOUBLE, Double.class)
