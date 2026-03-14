@@ -360,4 +360,9 @@ public class SeekingPhase implements GamePhase {
             allowedMaterials.addAll(BlockListParser.parseBlockList(entry));
         }
     }
+
+    @Override
+    public boolean allowHunger() {
+        return false;
+    }
 }
