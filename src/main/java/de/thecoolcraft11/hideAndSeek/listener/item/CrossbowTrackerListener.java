@@ -2,6 +2,8 @@ package de.thecoolcraft11.hideAndSeek.listener.item;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
+import de.thecoolcraft11.hideAndSeek.items.hider.TrackerCrossbowItem;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import static de.thecoolcraft11.hideAndSeek.items.hider.TrackerCrossbowItem.onTrackerHit;
 
@@ -27,6 +30,29 @@ public class CrossbowTrackerListener implements Listener {
 
         if (!HideAndSeek.getDataController().getHiders().contains(shooter.getUniqueId())) {
             return;
+        }
+
+        if (event.getProjectile() instanceof Arrow arrow) {
+            boolean laserTag = ItemSkinSelectionService.isSelected(shooter, TrackerCrossbowItem.ID, "skin_laser_tag");
+            if (laserTag) {
+                // Much more visible trail for the laser-tag skin
+                arrow.getWorld().spawnParticle(org.bukkit.Particle.ELECTRIC_SPARK, arrow.getLocation(), 24, 0.18, 0.18, 0.18, 0.05);
+                arrow.getWorld().playSound(arrow.getLocation(), org.bukkit.Sound.BLOCK_BEACON_POWER_SELECT, 0.6f, 1.6f);
+
+                new BukkitRunnable() {
+                    int ticks = 0;
+
+                    @Override
+                    public void run() {
+                        if (!arrow.isValid() || arrow.isInBlock() || ticks++ > 80) {
+                            cancel();
+                            return;
+                        }
+                        arrow.getWorld().spawnParticle(org.bukkit.Particle.END_ROD, arrow.getLocation(), 4, 0.05, 0.05, 0.05, 0.0);
+                        arrow.getWorld().spawnParticle(org.bukkit.Particle.ELECTRIC_SPARK, arrow.getLocation(), 3, 0.03, 0.03, 0.03, 0.0);
+                    }
+                }.runTaskTimer(plugin, 1L, 1L);
+            }
         }
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> HiderItems.ensureArrow(shooter), 1L);

@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -10,6 +11,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -103,7 +106,15 @@ public class KnockbackStickItem implements GameItem {
             Vector backDir = fromAttacker.normalize().multiply(-0.25);
             for (int i = 0; i < 5; i++) {
                 Location point = victimLoc.clone().add(backDir.clone().multiply(i));
-                victim.getWorld().spawnParticle(org.bukkit.Particle.CLOUD, point, 2, 0.05, 0.05, 0.05, 0.02);
+                victim.getWorld().spawnParticle(Particle.CLOUD, point, 2, 0.05, 0.05, 0.05, 0.02);
+            }
+
+            if (ItemSkinSelectionService.isSelected(attacker, ID, "skin_squeaky_hammer")) {
+                victim.getWorld().spawnParticle(Particle.WAX_ON, victimLoc, 10, 0.3, 0.3, 0.3, 0.01);
+                victim.getWorld().playSound(victimLoc, Sound.ENTITY_CHICKEN_EGG, 0.55f, 1.7f);
+            } else if (ItemSkinSelectionService.isSelected(attacker, ID, "skin_pool_noodle")) {
+                victim.getWorld().spawnParticle(Particle.BUBBLE, victimLoc, 10, 0.25, 0.25, 0.25, 0.02);
+                victim.getWorld().playSound(victimLoc, Sound.ITEM_BUCKET_EMPTY_FISH, 0.5f, 1.4f);
             }
         }
     }

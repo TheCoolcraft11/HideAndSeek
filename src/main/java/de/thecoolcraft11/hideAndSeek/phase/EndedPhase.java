@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.phase;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.util.TimerManager;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.game.GamePhase;
@@ -14,10 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class EndedPhase implements GamePhase {
     @Override
@@ -47,9 +45,20 @@ public class EndedPhase implements GamePhase {
 
         hideAndSeekPlugin.getPointService().awardRoundEndBonuses(activeHiders);
 
+        int pointsPerCoin = Math.max(1, plugin.getSettingRegistry().get("skin-shop.points-per-coin", 50));
+        Map<UUID, Integer> coinGains = new HashMap<>();
+        for (Map.Entry<UUID, Integer> entry : HideAndSeek.getDataController().getAllPoints().entrySet()) {
+            int points = Math.max(0, entry.getValue());
+            int gainedCoins = points / pointsPerCoin;
+            if (gainedCoins > 0) {
+                ItemSkinSelectionService.addCoins(hideAndSeekPlugin, entry.getKey(), gainedCoins);
+            }
+            coinGains.put(entry.getKey(), gainedCoins);
+        }
+
         boolean hidersWin = !activeHiders.isEmpty();
 
-        announceWinner(plugin, hidersWin);
+        announceWinner(plugin, hidersWin, coinGains);
 
 
         boolean autoCleanup = plugin.getSettingRegistry().get("game.auto_cleanup_after_round", true);
@@ -156,7 +165,7 @@ public class EndedPhase implements GamePhase {
         return List.of("lobby");
     }
 
-    private void announceWinner(MinigameFramework plugin, boolean hidersWin) {
+    private void announceWinner(MinigameFramework plugin, boolean hidersWin, Map<UUID, Integer> coinGains) {
         Component winnerTitle;
         Component winnerSubtitle;
         NamedTextColor color;
@@ -196,6 +205,11 @@ public class EndedPhase implements GamePhase {
                             player.sendMessage(Component.text(scoredPlayer.getName() + ": " + entry.getValue() + " points", NamedTextColor.YELLOW));
                         }
                     });
+            int gainedCoins = coinGains.getOrDefault(player.getUniqueId(), 0);
+            int totalCoins = ItemSkinSelectionService.getCoins(player.getUniqueId());
+            player.sendMessage(Component.text("COINS:", NamedTextColor.GOLD, TextDecoration.BOLD));
+            player.sendMessage(Component.text("+" + gainedCoins + " coins this round", NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Balance: " + totalCoins + " coins", NamedTextColor.AQUA));
             player.sendMessage(Component.empty());
         }
 

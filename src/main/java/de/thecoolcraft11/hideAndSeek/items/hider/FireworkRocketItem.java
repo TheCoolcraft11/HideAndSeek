@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
@@ -83,20 +84,29 @@ public class FireworkRocketItem implements GameItem {
         int targetY = plugin.getSettingRegistry().get("hider-items.firework-rocket.target-y", 128);
         int points = plugin.getPointService().award(player.getUniqueId(), PointAction.HIDER_TAUNT_LARGE);
         double volume = plugin.getSettingRegistry().get("hider-items.firework-rocket.volume", 10.0);
+        boolean spaceShuttle = ItemSkinSelectionService.isSelected(player, ID, "skin_space_shuttle");
+        boolean signalFlare = ItemSkinSelectionService.isSelected(player, ID, "skin_signal_flare");
 
         Firework firework = (Firework) launchLocation.getWorld().spawnEntity(launchLocation, EntityType.FIREWORK_ROCKET);
         FireworkMeta meta = firework.getFireworkMeta();
         meta.setPower(10);
         meta.addEffect(FireworkEffect.builder()
-                .with(FireworkEffect.Type.BALL_LARGE)
-                .withColor(Color.RED, Color.YELLOW, Color.ORANGE)
-                .withFade(Color.WHITE)
-                .flicker(true)
+                .with(spaceShuttle ? FireworkEffect.Type.STAR : signalFlare ? FireworkEffect.Type.BURST : FireworkEffect.Type.BALL_LARGE)
+                .withColor(spaceShuttle ? Color.WHITE : Color.RED,
+                        spaceShuttle ? Color.AQUA : Color.YELLOW,
+                        Color.ORANGE)
+                .withFade(signalFlare ? Color.RED : Color.WHITE)
+                .flicker(!spaceShuttle)
                 .trail(true)
                 .build());
         firework.setFireworkMeta(meta);
 
         player.sendMessage(Component.text("Firework launched! +" + points + " points", NamedTextColor.GOLD));
+        if (signalFlare) {
+            launchLocation.getWorld().spawnParticle(Particle.FLAME, launchLocation, 16, 0.2, 0.3, 0.2, 0.04);
+            launchLocation.getWorld().spawnParticle(Particle.SMOKE, launchLocation, 12, 0.18, 0.28, 0.18, 0.02);
+            player.playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 0.5f, 1.25f);
+        }
 
 
         var nms = plugin.getNmsAdapter();
@@ -115,12 +125,20 @@ public class FireworkRocketItem implements GameItem {
                 }
 
                 Location loc = firework.getLocation();
+                if (spaceShuttle) {
+                    loc.getWorld().spawnParticle(Particle.END_ROD, loc, 4, 0.08, 0.08, 0.08, 0.01);
+                    loc.getWorld().spawnParticle(Particle.CLOUD, loc, 2, 0.06, 0.06, 0.06, 0.01);
+                } else if (signalFlare) {
+                    loc.getWorld().spawnParticle(Particle.SMOKE, loc, 4, 0.08, 0.08, 0.08, 0.01);
+                    loc.getWorld().spawnParticle(Particle.FLAME, loc, 2, 0.05, 0.05, 0.05, 0.02);
+                    loc.getWorld().spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, loc, 2, 0.06, 0.06, 0.06, 0.003);
+                }
                 firework.setTicksToDetonate(2000);
                 firework.setTicksLived(1);
 
 
                 if (loc.getY() >= targetY) {
-                    detonate(firework, volume);
+                    detonate(firework, volume, spaceShuttle, signalFlare);
                     this.cancel();
                     return;
                 }
@@ -146,12 +164,23 @@ public class FireworkRocketItem implements GameItem {
         }.runTaskTimer(plugin, 1L, 1L);
     }
 
-    private static void detonate(Firework firework, double volume) {
+    private static void detonate(Firework firework, double volume, boolean spaceShuttle, boolean signalFlare) {
         firework.detonate();
         Location loc = firework.getLocation();
+        if (spaceShuttle) {
+            loc.getWorld().spawnParticle(Particle.FIREWORK, loc, 18, 0.5, 0.5, 0.5, 0.04);
+        } else if (signalFlare) {
+            loc.getWorld().spawnParticle(Particle.FLAME, loc, 24, 0.4, 0.4, 0.4, 0.03);
+            loc.getWorld().spawnParticle(Particle.SMOKE, loc, 18, 0.4, 0.4, 0.4, 0.03);
+            loc.getWorld().spawnParticle(Particle.LAVA, loc, 12, 0.32, 0.32, 0.32, 0.01);
+            loc.getWorld().spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, loc, 14, 0.35, 0.35, 0.35, 0.01);
+        }
         for (Player p : loc.getNearbyPlayers(200)) {
             p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, (float) volume, 0.9f);
-            p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, (float) volume, 0.9f);
+            p.playSound(p.getLocation(), signalFlare ? Sound.BLOCK_FIRE_EXTINGUISH : Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, (float) volume, signalFlare ? 1.4f : 0.9f);
+            if (signalFlare) {
+                p.playSound(p.getLocation(), Sound.ENTITY_BLAZE_SHOOT, Math.max(0.1f, (float) (volume * 0.35)), 1.45f);
+            }
         }
     }
 }

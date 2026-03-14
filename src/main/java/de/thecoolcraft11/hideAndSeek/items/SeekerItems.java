@@ -71,6 +71,7 @@ public final class SeekerItems {
         player.getInventory().setItem(0, sword);
 
         giveLoadoutItems(player, plugin);
+        ItemSkinSelectionService.applySelectedVariants(player, plugin);
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 4, false, false, false));
     }

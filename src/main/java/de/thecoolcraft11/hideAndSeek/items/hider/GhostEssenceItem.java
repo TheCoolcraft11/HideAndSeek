@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.model.GhostEssenceParticleMode;
 import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
@@ -73,6 +74,71 @@ public class GhostEssenceItem implements GameItem {
                 .build());
     }
 
+    private static void spawnGhostFlightAura(Player player, int ticks, boolean spectral, boolean digital) {
+        Location aura = player.getLocation().add(0, 1, 0);
+        player.getWorld().spawnParticle(Particle.SOUL, aura, 3, 0.1, 0.1, 0.1, 0.02);
+        if (spectral) {
+            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, aura, 3, 0.14, 0.2, 0.14, 0.01);
+            if (ticks % 10 == 0) {
+                player.getWorld().spawnParticle(Particle.TRIAL_OMEN, aura, 2, 0.2, 0.25, 0.2, 0.01);
+            }
+        } else if (digital) {
+            player.getWorld().spawnParticle(Particle.DUST, aura, 3, 0.12, 0.18, 0.12,
+                    new Particle.DustOptions(Color.AQUA, 1.0f));
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, aura, 2, 0.12, 0.15, 0.12, 0.01);
+            if (ticks % 10 == 0) {
+                player.getWorld().spawnParticle(Particle.END_ROD, aura, 2, 0.2, 0.25, 0.2, 0.01);
+            }
+        }
+    }
+
+    private static void spawnGhostAuraBurst(Player player, Location loc, boolean spectral, boolean digital, boolean activation) {
+        if (spectral) {
+            player.getWorld().spawnParticle(Particle.SOUL, loc, activation ? 20 : 16, 0.35, 0.45, 0.35, 0.03);
+            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, activation ? 16 : 12, 0.28, 0.38, 0.28, 0.015);
+            player.getWorld().spawnParticle(Particle.TRIAL_OMEN, loc, activation ? 6 : 4, 0.25, 0.3, 0.25, 0.01);
+        } else if (digital) {
+            player.getWorld().spawnParticle(Particle.END_ROD, loc, activation ? 18 : 14, 0.28, 0.38, 0.28, 0.02);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, activation ? 20 : 14, 0.3, 0.4, 0.3, 0.02);
+            player.getWorld().spawnParticle(Particle.DUST, loc, activation ? 10 : 8, 0.22, 0.3, 0.22,
+                    new Particle.DustOptions(Color.fromRGB(95, 250, 255), 1.1f));
+        }
+    }
+
+    private static void spawnSnapLine(Location from, Location to) {
+        if (!from.getWorld().equals(to.getWorld())) return;
+
+        Vector direction = to.toVector().subtract(from.toVector());
+        double length = direction.length();
+        if (length < 0.001) {
+            from.getWorld().spawnParticle(Particle.SOUL, from.clone().add(0, 1, 0), 8, 0.1, 0.1, 0.1, 0.02);
+            return;
+        }
+
+        Vector step = direction.clone().normalize().multiply(0.25);
+        int steps = (int) Math.ceil(length / 0.25);
+        Location current = from.clone().add(0, 1, 0);
+
+        for (int i = 0; i <= steps; i++) {
+            from.getWorld().spawnParticle(Particle.SOUL, current, 1, 0.0, 0.0, 0.0, 0.0);
+            current.add(step);
+        }
+    }
+
+    private void cleanupGhostModeOffline(java.util.UUID playerId, org.bukkit.entity.Zombie ghost,
+                                         boolean restoreBlockDisplayVisible) {
+        if (ghost != null && ghost.isValid()) {
+            ghost.remove();
+        }
+
+        var blockDisplay = HideAndSeek.getDataController().getBlockDisplay(playerId);
+        if (blockDisplay != null && blockDisplay.isValid()) {
+            blockDisplay.setVisibleByDefault(restoreBlockDisplayVisible);
+        }
+
+        HideAndSeek.getDataController().removeAllowedSpectator(playerId);
+    }
+
     private void useGhostEssence(Player player, HideAndSeek plugin) {
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) return;
 
@@ -85,6 +151,8 @@ public class GhostEssenceItem implements GameItem {
         float boostPower = plugin.getSettingRegistry().get("hider-items.ghost-essence.boost-power", 1.5f);
         GhostEssenceParticleMode particleMode = plugin.getSettingRegistry().get(
                 "hider-items.ghost-essence.particle-mode", GhostEssenceParticleMode.FLYING);
+        boolean spectral = ItemSkinSelectionService.isSelected(player, ID, "skin_spectral_form");
+        boolean digital = ItemSkinSelectionService.isSelected(player, ID, "skin_digital_phase");
 
         HideAndSeek.getDataController().addAllowedSpectator(player.getUniqueId());
         plugin.getNmsAdapter().setServerGameModeSpectator(player);
@@ -100,6 +168,15 @@ public class GhostEssenceItem implements GameItem {
 
         player.sendMessage(Component.text("You are now a Ghost! Phasing enabled for " + maxDurationSeconds + "s.", NamedTextColor.AQUA));
         player.playSound(player.getLocation(), Sound.ENTITY_GHAST_WARN, 1f, 1.2f);
+        if (spectral) {
+            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, startLoc.clone().add(0, 1, 0), 22, 0.35, 0.5, 0.35, 0.01);
+            player.playSound(startLoc, Sound.PARTICLE_SOUL_ESCAPE, 0.7f, 0.9f);
+        } else if (digital) {
+            player.getWorld().spawnParticle(Particle.END_ROD, startLoc.clone().add(0, 1, 0), 18, 0.3, 0.45, 0.3, 0.03);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, startLoc.clone().add(0, 1, 0), 16, 0.28, 0.4, 0.28, 0.02);
+            player.playSound(startLoc, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.65f, 1.5f);
+        }
+        spawnGhostAuraBurst(player, startLoc.clone().add(0, 1, 0), spectral, digital, true);
 
         org.bukkit.entity.Zombie ghost = startLoc.getWorld().spawn(startLoc, org.bukkit.entity.Zombie.class, s -> {
             s.setAI(true);
@@ -155,7 +232,7 @@ public class GhostEssenceItem implements GameItem {
                     BukkitTask t = ghostEssenceXpTasks.remove(player.getUniqueId());
                     XpProgressHelper.stopAndRestore(player, t, savedXp);
                     finalizeGhostMode(player, plugin, ghost, startLoc, maxRadius, minLightBlock, minLightSky,
-                            finalRestoreBlockDisplayVisible, particleMode);
+                            finalRestoreBlockDisplayVisible, particleMode, spectral, digital);
                     this.cancel();
                     return;
                 }
@@ -199,8 +276,7 @@ public class GhostEssenceItem implements GameItem {
 
 
                 if (particleMode == GhostEssenceParticleMode.FLYING && ticks % 5 == 0) {
-                    player.getWorld().spawnParticle(org.bukkit.Particle.SOUL,
-                            player.getLocation().add(0, 1, 0), 3, 0.1, 0.1, 0.1, 0.02);
+                    spawnGhostFlightAura(player, ticks, spectral, digital);
                 }
 
                 if (ticks % 20 == 0) {
@@ -212,24 +288,10 @@ public class GhostEssenceItem implements GameItem {
         }.runTaskTimer(plugin, 1L, 1L);
     }
 
-    private void cleanupGhostModeOffline(java.util.UUID playerId, org.bukkit.entity.Zombie ghost,
-                                         boolean restoreBlockDisplayVisible) {
-        if (ghost != null && ghost.isValid()) {
-            ghost.remove();
-        }
-
-        var blockDisplay = HideAndSeek.getDataController().getBlockDisplay(playerId);
-        if (blockDisplay != null && blockDisplay.isValid()) {
-            blockDisplay.setVisibleByDefault(restoreBlockDisplayVisible);
-        }
-
-        HideAndSeek.getDataController().removeAllowedSpectator(playerId);
-    }
-
-
     private void finalizeGhostMode(Player player, HideAndSeek plugin, org.bukkit.entity.Zombie ghost,
                                    Location startLoc, int maxRadius, int minLightB, int minLightS,
-                                   boolean restoreBlockDisplayVisible, GhostEssenceParticleMode particleMode) {
+                                   boolean restoreBlockDisplayVisible, GhostEssenceParticleMode particleMode,
+                                   boolean spectral, boolean digital) {
 
         player.setGameMode(GameMode.SURVIVAL);
         plugin.getNmsAdapter().spoofClientGameMode(player, GameMode.SURVIVAL);
@@ -269,9 +331,19 @@ public class GhostEssenceItem implements GameItem {
             player.playSound(adjustedLoc, Sound.ENTITY_GHAST_DEATH, 1f, 1f);
         }
 
+        Location endLoc = isCheating ? startLoc : adjustedLoc;
+        if (spectral) {
+            player.getWorld().spawnParticle(Particle.SOUL, endLoc.clone().add(0, 1, 0), 24, 0.35, 0.55, 0.35, 0.03);
+            player.playSound(endLoc, Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 0.45f, 0.8f);
+        } else if (digital) {
+            player.getWorld().spawnParticle(Particle.END_ROD, endLoc.clone().add(0, 1, 0), 22, 0.3, 0.45, 0.3, 0.02);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, endLoc.clone().add(0, 1, 0), 18, 0.28, 0.4, 0.28, 0.03);
+            player.playSound(endLoc, Sound.BLOCK_BEACON_ACTIVATE, 0.5f, 1.5f);
+        }
+        spawnGhostAuraBurst(player, endLoc.clone().add(0, 1, 0), spectral, digital, false);
+
 
         if (particleMode == GhostEssenceParticleMode.SNAP) {
-            Location endLoc = isCheating ? startLoc : adjustedLoc;
             spawnSnapLine(startLoc, endLoc);
         }
 
@@ -284,26 +356,6 @@ public class GhostEssenceItem implements GameItem {
         }
 
         HideAndSeek.getDataController().removeAllowedSpectator(player.getUniqueId());
-    }
-
-    private static void spawnSnapLine(Location from, Location to) {
-        if (!from.getWorld().equals(to.getWorld())) return;
-
-        Vector direction = to.toVector().subtract(from.toVector());
-        double length = direction.length();
-        if (length < 0.001) {
-            from.getWorld().spawnParticle(Particle.SOUL, from.clone().add(0, 1, 0), 8, 0.1, 0.1, 0.1, 0.02);
-            return;
-        }
-
-        Vector step = direction.clone().normalize().multiply(0.25);
-        int steps = (int) Math.ceil(length / 0.25);
-        Location current = from.clone().add(0, 1, 0);
-
-        for (int i = 0; i <= steps; i++) {
-            from.getWorld().spawnParticle(Particle.SOUL, current, 1, 0.0, 0.0, 0.0, 0.0);
-            current.add(step);
-        }
     }
 
     private Location findSafeMaterialization(Location loc) {

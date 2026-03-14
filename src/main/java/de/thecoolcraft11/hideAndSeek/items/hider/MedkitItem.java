@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
@@ -73,6 +74,8 @@ public class MedkitItem implements GameItem {
 
         int channelTime = plugin.getSettingRegistry().get("hider-items.medkit.channel-time", 5);
         long totalTicks = channelTime * 20L;
+        boolean bandageRoll = ItemSkinSelectionService.isSelected(player, ID, "skin_bandage_roll");
+        boolean magicPotion = ItemSkinSelectionService.isSelected(player, ID, "skin_magic_potion");
 
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
         medkitChannelXp.put(player.getUniqueId(), savedXp);
@@ -94,6 +97,22 @@ public class MedkitItem implements GameItem {
                 Location loc = player.getLocation().add(0, 1, 0);
                 player.getWorld().spawnParticle(Particle.HEART, loc, 1, 0.2, 0.3, 0.2, 0.05);
                 player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, loc, 1, 0.15, 0.25, 0.15, 0.02);
+                if (bandageRoll && ticks % 3 == 0) {
+                    player.getWorld().spawnParticle(Particle.BLOCK, loc, 2, 0.12, 0.12, 0.12,
+                            Material.WHITE_WOOL.createBlockData());
+                    player.getWorld().spawnParticle(Particle.CLOUD, loc, 1, 0.1, 0.12, 0.1, 0.01);
+                    if (ticks % 10 == 0) {
+                        player.getWorld().spawnParticle(Particle.WAX_ON, loc, 2, 0.16, 0.18, 0.16, 0.01);
+                        player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 0.15f, 1.55f);
+                    }
+                } else if (magicPotion && ticks % 3 == 0) {
+                    player.getWorld().spawnParticle(Particle.WITCH, loc, 3, 0.18, 0.22, 0.18, 0.03);
+                    player.getWorld().spawnParticle(Particle.ENCHANT, loc, 2, 0.18, 0.22, 0.18, 0.02);
+                    if (ticks % 10 == 0) {
+                        player.getWorld().spawnParticle(Particle.ENTITY_EFFECT, loc, 3, 0.2, 0.25, 0.2, 0.01);
+                        player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.2f, 1.25f);
+                    }
+                }
 
                 ticks++;
             }
@@ -153,12 +172,24 @@ public class MedkitItem implements GameItem {
         }
 
         double healAmount = plugin.getSettingRegistry().get("hider-items.medkit.heal-amount", 20.0);
+        boolean bandageRoll = ItemSkinSelectionService.isSelected(player, ID, "skin_bandage_roll");
+        boolean magicPotion = ItemSkinSelectionService.isSelected(player, ID, "skin_magic_potion");
         double maxHealth = Objects.requireNonNull(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue();
         double newHealth = Math.min(maxHealth, player.getHealth() + healAmount);
         player.setHealth(newHealth);
         player.sendMessage(Component.text("Healed!", NamedTextColor.GREEN));
         player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation().add(0, 1, 0), 10, 0.3, 0.4, 0.3, 0.1);
         player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 0.3f, 1.5f);
+        if (bandageRoll) {
+            player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0, 1, 0), 12, 0.25, 0.3, 0.25, 0.02);
+            player.getWorld().spawnParticle(Particle.BLOCK, player.getLocation().add(0, 1, 0), 6, 0.2, 0.25, 0.2,
+                    Material.WHITE_WOOL.createBlockData());
+            player.playSound(player.getLocation(), Sound.ITEM_HONEY_BOTTLE_DRINK, 0.45f, 1.3f);
+        } else if (magicPotion) {
+            player.getWorld().spawnParticle(Particle.WITCH, player.getLocation().add(0, 1, 0), 14, 0.3, 0.35, 0.3, 0.03);
+            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 10, 0.28, 0.32, 0.28, 0.02);
+            player.playSound(player.getLocation(), Sound.ENTITY_WITCH_DRINK, 0.45f, 1.2f);
+        }
     }
 
     public static void cleanupMedkitCharge(UUID playerId) {

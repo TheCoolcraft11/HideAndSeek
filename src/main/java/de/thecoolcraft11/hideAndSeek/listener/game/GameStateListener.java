@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.listener.game;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
@@ -27,6 +28,7 @@ public class GameStateListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        ItemSkinSelectionService.loadPlayer(plugin, player.getUniqueId());
         String currentPhase = plugin.getStateManager().getCurrentPhaseId();
 
 
@@ -46,6 +48,7 @@ public class GameStateListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
         cleanupSwordCharge(player.getUniqueId());
         cleanupMedkitCharge(player.getUniqueId());
         HideAndSeek.getDataController().removeAllowedSpectator(player.getUniqueId());

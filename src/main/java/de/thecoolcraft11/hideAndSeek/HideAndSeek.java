@@ -4,8 +4,8 @@ import de.thecoolcraft11.hideAndSeek.command.*;
 import de.thecoolcraft11.hideAndSeek.gui.BlockSelectorGUI;
 import de.thecoolcraft11.hideAndSeek.gui.LoadoutGUI;
 import de.thecoolcraft11.hideAndSeek.gui.MapGUI;
-import de.thecoolcraft11.hideAndSeek.items.HiderItems;
-import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
+import de.thecoolcraft11.hideAndSeek.gui.SkinGUI;
+import de.thecoolcraft11.hideAndSeek.items.*;
 import de.thecoolcraft11.hideAndSeek.listener.game.BlockModeListener;
 import de.thecoolcraft11.hideAndSeek.listener.game.GameStateListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.CrossbowTrackerListener;
@@ -42,6 +42,7 @@ public final class HideAndSeek extends MinigameFramework {
     private LoadoutManager loadoutManager;
     private LoadoutGUI loadoutGUI;
     private MapGUI mapGUI;
+    private SkinGUI skinGUI;
     private PointService pointService;
     private NmsAdapter nmsAdapter;
 
@@ -49,11 +50,13 @@ public final class HideAndSeek extends MinigameFramework {
     protected void onGameEnable() {
 
         DataController.getInstance().setup();
+        ItemSkinSelectionService.initialize(this);
         mapManager = new MapManager(this);
         blockSelectorGUI = new BlockSelectorGUI(this);
         loadoutManager = new LoadoutManager(this);
         loadoutGUI = new LoadoutGUI(loadoutManager, this);
         mapGUI = new MapGUI(this);
+        skinGUI = new SkinGUI(this);
         pointService = new PointService(this);
 
         nmsAdapter = NmsLoader.load(this);
@@ -75,6 +78,9 @@ public final class HideAndSeek extends MinigameFramework {
         HiderItems.registerItems(this);
         SeekerItems.registerItems(this);
 
+        HiderItemSkins.registerAll(this);
+        SeekerItemSkins.registerAll(this);
+
         blockModeListener = new BlockModeListener(this);
 
         Bukkit.getPluginManager().registerEvents(new PlayerHitListener(this), this);
@@ -90,17 +96,20 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new SmokeBombListener(this), this);
         Bukkit.getPluginManager().registerEvents(loadoutGUI, this);
         Bukkit.getPluginManager().registerEvents(mapGUI, this);
+        Bukkit.getPluginManager().registerEvents(skinGUI, this);
         Bukkit.getPluginManager().registerEvents(new PlayerSpectateListener(), this);
 
 
         registerMapSelectionMenu();
         registerLoadoutMenu();
+        registerSkinMenu();
 
         MinigameSubcommandRegistry.register(new ChooseBlockCommand(this));
         MinigameSubcommandRegistry.register(new ChooseAppearanceCommand(this));
         MinigameSubcommandRegistry.register(new BlockStatsCommand(this));
         MinigameSubcommandRegistry.register(new MapCommand(this));
         MinigameSubcommandRegistry.register(new LoadoutCommand(this));
+        MinigameSubcommandRegistry.register(new ItemSkinCommand(this));
 
         timerPlugin = (Timer) Bukkit.getPluginManager().getPlugin("Timer");
         if (timerPlugin != null) {
@@ -116,6 +125,7 @@ public final class HideAndSeek extends MinigameFramework {
         if (blockModeListener != null) {
             blockModeListener.cancelSneakTimerTask();
         }
+        ItemSkinSelectionService.shutdown(this);
     }
 
     @Override
@@ -159,6 +169,10 @@ public final class HideAndSeek extends MinigameFramework {
         return mapGUI;
     }
 
+    public SkinGUI getSkinGUI() {
+        return skinGUI;
+    }
+
     public PointService getPointService() {
         return pointService;
     }
@@ -184,6 +198,19 @@ public final class HideAndSeek extends MinigameFramework {
                 new de.thecoolcraft11.minigameframework.inventory.InventoryItem(mapSelectorItem).onClick((p, type) -> {
                     if (type == org.bukkit.event.inventory.ClickType.LEFT) {
                         mapGUI.open(p);
+                    }
+                })
+        );
+    }
+
+    private void registerSkinMenu() {
+        ItemStack skinItem = createMapMenuItem(Material.ARMOR_STAND, "Skin Selector", "Click to choose item skins");
+        getCustomMenuItemRegistry().register(
+                "skin_selection_menu",
+                20,
+                new de.thecoolcraft11.minigameframework.inventory.InventoryItem(skinItem).onClick((p, type) -> {
+                    if (type == org.bukkit.event.inventory.ClickType.LEFT) {
+                        skinGUI.open(p);
                     }
                 })
         );

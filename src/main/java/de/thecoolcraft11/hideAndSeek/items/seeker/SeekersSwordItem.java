@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
@@ -191,11 +192,15 @@ public class SeekersSwordItem implements GameItem {
         double hitbox = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.hitbox", 0.4);
 
         double speed = minSpeed + (maxSpeed - minSpeed) * chargeRatio;
+        boolean energyBlade = ItemSkinSelectionService.isSelected(seeker, ID, "skin_energy_blade");
+        boolean banHammer = ItemSkinSelectionService.isSelected(seeker, ID, "skin_the_ban_hammer");
+        boolean giantSpatula = ItemSkinSelectionService.isSelected(seeker, ID, "skin_giant_spatula");
         Location start = seeker.getEyeLocation().add(seeker.getEyeLocation().getDirection().normalize().multiply(0.6)).add(0, -0.2, 0);
         Vector velocity = seeker.getEyeLocation().getDirection().normalize().multiply(speed);
 
+        ItemStack swordDisplayItem = getSwordDisplayItem(seeker, plugin);
         ItemDisplay swordDisplay = start.getWorld().spawn(start, ItemDisplay.class, display -> {
-            display.setItemStack(createItem(plugin));
+            display.setItemStack(swordDisplayItem);
             display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
             display.setInterpolationDuration(1);
             display.setTransformation(new Transformation(
@@ -207,6 +212,13 @@ public class SeekersSwordItem implements GameItem {
         });
 
         seeker.getWorld().playSound(seeker.getLocation(), Sound.ITEM_TRIDENT_THROW, 1.0f, (float) (0.8 + chargeRatio * 0.5));
+        if (energyBlade) {
+            seeker.getWorld().playSound(seeker.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.55f, 1.5f);
+        } else if (banHammer) {
+            seeker.getWorld().playSound(seeker.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.45f, 0.7f);
+        } else if (giantSpatula) {
+            seeker.getWorld().playSound(seeker.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 0.45f, 1.6f);
+        }
 
         new BukkitRunnable() {
             Location current = start.clone();
@@ -255,6 +267,16 @@ public class SeekersSwordItem implements GameItem {
                     target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 10, 0.25, 0.4, 0.25, 0.02);
                     target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
                     seeker.playSound(seeker.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.1f);
+                    if (energyBlade) {
+                        target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
+                        target.getWorld().playSound(target.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.45f, 1.5f);
+                    } else if (banHammer) {
+                        target.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, target.getLocation().add(0, 1, 0), 6, 0.2, 0.2, 0.2, 0.01);
+                        target.getWorld().playSound(target.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 0.8f);
+                    } else if (giantSpatula) {
+                        target.getWorld().spawnParticle(Particle.CLOUD, target.getLocation().add(0, 1, 0), 10, 0.22, 0.3, 0.22, 0.02);
+                        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.45f, 1.25f);
+                    }
 
                     removeDisplay();
                     cancel();
@@ -309,6 +331,17 @@ public class SeekersSwordItem implements GameItem {
                     swordDisplay.setInterpolationDelay(0);
                     swordDisplay.setInterpolationDuration(3);
                     world.playSound(impact, Sound.ITEM_TRIDENT_HIT_GROUND, 1.0f, 0.9f);
+                    if (energyBlade) {
+                        world.spawnParticle(Particle.ELECTRIC_SPARK, impact.clone().add(0, 0.2, 0), 14, 0.18, 0.18, 0.18, 0.03);
+                        world.playSound(impact, Sound.BLOCK_BEACON_ACTIVATE, 0.45f, 1.45f);
+                    } else if (banHammer) {
+                        world.spawnParticle(Particle.BLOCK, impact.clone().add(0, 0.2, 0), 14, 0.2, 0.2, 0.2,
+                                Material.IRON_BLOCK.createBlockData());
+                        world.playSound(impact, Sound.BLOCK_ANVIL_BREAK, 0.4f, 0.85f);
+                    } else if (giantSpatula) {
+                        world.spawnParticle(Particle.BUBBLE_POP, impact.clone().add(0, 0.2, 0), 14, 0.2, 0.2, 0.2, 0.04);
+                        world.playSound(impact, Sound.ITEM_BUCKET_EMPTY, 0.35f, 1.4f);
+                    }
 
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         if (swordDisplay.isValid()) {
@@ -342,6 +375,13 @@ public class SeekersSwordItem implements GameItem {
 
                 swordDisplay.teleport(current);
                 world.spawnParticle(Particle.SWEEP_ATTACK, current, 1, 0, 0, 0, 0);
+                if (energyBlade) {
+                    world.spawnParticle(Particle.END_ROD, current, 1, 0.02, 0.02, 0.02, 0.0);
+                } else if (banHammer) {
+                    world.spawnParticle(Particle.CRIT, current, 1, 0.03, 0.03, 0.03, 0.0);
+                } else if (giantSpatula) {
+                    world.spawnParticle(Particle.CLOUD, current, 1, 0.03, 0.03, 0.03, 0.0);
+                }
             }
 
             private void removeDisplay() {
@@ -350,6 +390,17 @@ public class SeekersSwordItem implements GameItem {
                 }
             }
         }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    private ItemStack getSwordDisplayItem(Player seeker, HideAndSeek plugin) {
+        String selected = ItemSkinSelectionService.getSelectedVariant(seeker, SeekersSwordItem.ID);
+        if (selected != null) {
+            var variant = plugin.getCustomItemManager().getVariantManager().getVariant(SeekersSwordItem.ID, selected);
+            if (variant != null) {
+                return variant.getItemStack().clone();
+            }
+        }
+        return createItem(plugin);
     }
 
     private static double getThrownSwordDamage(Player seeker) {

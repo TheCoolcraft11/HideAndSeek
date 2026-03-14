@@ -137,11 +137,36 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.hider-items.sound.cooldown", Integer.class, 8);
         plugin.getConfigRegistry().register("settings.hider-items.sound.volume", Double.class, 0.75);
         plugin.getConfigRegistry().register("settings.hider-items.sound.pitch", Double.class, 0.8);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.note-particles", Integer.class, 8);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.accent-particles", Integer.class, 6);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.default.volume-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.default.pitch-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.default.particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_megaphone.volume-multiplier", Double.class, 0.9);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_megaphone.pitch-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_megaphone.particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_rubber_chicken.volume-multiplier", Double.class, 0.95);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_rubber_chicken.pitch-multiplier", Double.class, 1.1);
+        plugin.getConfigRegistry().register("settings.hider-items.sound.variants.skin_rubber_chicken.particle-multiplier", Double.class, 1.0);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.cooldown", Integer.class, 12);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.volume", Double.class, 0.65);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.pitch", Double.class, 1.5);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.smoke-particles", Integer.class, 3);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.accent-particles", Integer.class, 2);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.burst-particles", Integer.class, 14);
         plugin.getConfigRegistry().register("settings.hider-items.explosion.fuse-time", Integer.class, 40);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.default.volume-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.default.pitch-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.default.smoke-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.default.burst-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_confetti_popper.volume-multiplier", Double.class, 0.95);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_confetti_popper.pitch-multiplier", Double.class, 1.05);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_confetti_popper.smoke-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_confetti_popper.burst-multiplier", Double.class, 1.05);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_bubble_popper.volume-multiplier", Double.class, 0.9);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_bubble_popper.pitch-multiplier", Double.class, 1.1);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_bubble_popper.smoke-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.explosion.variants.skin_bubble_popper.burst-multiplier", Double.class, 1.05);
         plugin.getConfigRegistry().register("settings.hider-items.speed-boost.type", String.class, "SPEED_EFFECT");
         plugin.getConfigRegistry().register("settings.hider-items.speed-boost.cooldown", Integer.class, 25);
         plugin.getConfigRegistry().register("settings.hider-items.speed-boost.duration", Integer.class, 4);
@@ -153,6 +178,27 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.fuse-time", Integer.class, 60);
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.mini-fuse-time", Integer.class, 30);
         plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.mini-count", Integer.class, 3);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.points", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.volume", Double.class, 1.2);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.pitch", Double.class, 0.5);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.mini-volume", Double.class, 0.8);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.mini-pitch", Double.class, 1.2);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.main-particles", Integer.class, 16);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.mini-particles", Integer.class, 8);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.spark-particles", Integer.class, 5);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.default.volume-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.default.pitch-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.default.main-particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.default.mini-particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_giant_present.volume-multiplier", Double.class, 0.95);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_giant_present.pitch-multiplier", Double.class, 1.05);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_giant_present.main-particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_giant_present.mini-particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_boombox.volume-multiplier", Double.class, 0.95);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_boombox.pitch-multiplier", Double.class, 0.95);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_boombox.main-particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.big-firecracker.variants.skin_boombox.mini-particle-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.cooldown", Integer.class, 10);
         plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.cooldown", Integer.class, 20);
         plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.target-y", Integer.class, 128);
         plugin.getConfigRegistry().register("settings.hider-items.firework-rocket.volume", Double.class, 10.0);
@@ -226,6 +272,13 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.loadout.token-cost-epic", Integer.class, 6);
         plugin.getConfigRegistry().register("settings.loadout.token-cost-legendary", Integer.class, 10);
 
+        plugin.getConfigRegistry().register("settings.skin-shop.points-per-coin", Integer.class, 50);
+        plugin.getConfigRegistry().register("settings.skin-shop.cost-common", Integer.class, 100);
+        plugin.getConfigRegistry().register("settings.skin-shop.cost-uncommon", Integer.class, 250);
+        plugin.getConfigRegistry().register("settings.skin-shop.cost-rare", Integer.class, 500);
+        plugin.getConfigRegistry().register("settings.skin-shop.cost-epic", Integer.class, 900);
+        plugin.getConfigRegistry().register("settings.skin-shop.cost-legendary", Integer.class, 1500);
+
         plugin.getConfigRegistry().register("settings.points.tracking.interval-seconds", Integer.class, 1);
         plugin.getConfigRegistry().register("settings.points.hider.survival.amount", Integer.class, 5);
         plugin.getConfigRegistry().register("settings.points.hider.survival.interval-seconds", Integer.class, 20);
@@ -293,6 +346,7 @@ public class SettingRegisterer {
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.seeker-sword-throw").icon(Material.DIAMOND_SWORD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("loadout").icon(Material.ARMOR_STAND).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("loadout.token-cost").icon(Material.GOLD_BLOCK).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("skin-shop").icon(Material.EMERALD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points").icon(Material.EMERALD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.tracking").icon(Material.CLOCK).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.hider").icon(Material.PLAYER_HEAD).build());
@@ -589,6 +643,30 @@ public class SettingRegisterer {
                 .customIcon(Material.NOTE_BLOCK)
                 .build());
 
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.sound.note-particles", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.sound.note-particles", 8))
+                .range(1, 40)
+                .description("Base note particle amount for taunt sounds")
+                .customIcon(Material.NOTE_BLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.sound.accent-particles", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.sound.accent-particles", 6))
+                .range(1, 40)
+                .description("Base accent particle amount for taunt sounds")
+                .customIcon(Material.GLOW_INK_SAC)
+                .build());
+
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.default.volume-multiplier", 1.0, "Default sound skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.default.pitch-multiplier", 1.0, "Default sound skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.default.particle-multiplier", 1.0, "Default sound skin particle multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.skin_megaphone.volume-multiplier", 0.9, "Megaphone skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.skin_megaphone.pitch-multiplier", 1.0, "Megaphone skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.skin_megaphone.particle-multiplier", 1.0, "Megaphone skin particle multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.skin_rubber_chicken.volume-multiplier", 0.95, "Rubber chicken skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.skin_rubber_chicken.pitch-multiplier", 1.1, "Rubber chicken skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.sound.variants.skin_rubber_chicken.particle-multiplier", 1.0, "Rubber chicken skin particle multiplier");
+
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.explosion.cooldown", SettingType.INTEGER, Integer.class)
                 .defaultValue(getConfigValue(plugin, "hider-items.explosion.cooldown", 8))
@@ -618,12 +696,39 @@ public class SettingRegisterer {
                 .customIcon(Material.GUNPOWDER)
                 .build());
 
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.explosion.accent-particles", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.explosion.accent-particles", 2))
+                .range(1, 20)
+                .description("Accent particle amount while fuse burns")
+                .customIcon(Material.BLAZE_POWDER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.explosion.burst-particles", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.explosion.burst-particles", 14))
+                .range(1, 50)
+                .description("Base burst particles when explosion taunt detonates")
+                .customIcon(Material.FIREWORK_STAR)
+                .build());
+
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.explosion.fuse-time", SettingType.INTEGER, Integer.class)
                 .defaultValue(getConfigValue(plugin, "hider-items.explosion.fuse-time", 40))
                 .range(10, 100)
                 .description("Fuse time in ticks before explosion (20 ticks = 1 second)")
                 .customIcon(Material.CLOCK)
                 .build());
+
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.default.volume-multiplier", 1.0, "Default explosion skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.default.pitch-multiplier", 1.0, "Default explosion skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.default.smoke-multiplier", 1.0, "Default explosion skin smoke multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.default.burst-multiplier", 1.0, "Default explosion skin burst multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_confetti_popper.volume-multiplier", 0.95, "Confetti skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_confetti_popper.pitch-multiplier", 1.05, "Confetti skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_confetti_popper.smoke-multiplier", 1.0, "Confetti skin smoke multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_confetti_popper.burst-multiplier", 1.05, "Confetti skin burst multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_bubble_popper.volume-multiplier", 0.9, "Bubble skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_bubble_popper.pitch-multiplier", 1.1, "Bubble skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_bubble_popper.smoke-multiplier", 1.0, "Bubble skin smoke multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.explosion.variants.skin_bubble_popper.burst-multiplier", 1.05, "Bubble skin burst multiplier");
 
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.speed-boost.type", SettingType.ENUM, SpeedBoostType.class)
@@ -719,6 +824,54 @@ public class SettingRegisterer {
                 .description("Explosion pitch for big firecracker")
                 .customIcon(Material.NOTE_BLOCK)
                 .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.big-firecracker.mini-volume", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.big-firecracker.mini-volume", 0.8))
+                .rangeDouble(0.1, 2.0)
+                .description("Volume for mini firecracker explosions")
+                .customIcon(Material.JUKEBOX)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.big-firecracker.mini-pitch", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.big-firecracker.mini-pitch", 1.2))
+                .rangeDouble(0.1, 2.0)
+                .description("Pitch for mini firecracker explosions")
+                .customIcon(Material.NOTE_BLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.big-firecracker.main-particles", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.big-firecracker.main-particles", 16))
+                .range(1, 60)
+                .description("Base particle count for main big firecracker detonation")
+                .customIcon(Material.FIREWORK_STAR)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.big-firecracker.mini-particles", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.big-firecracker.mini-particles", 8))
+                .range(1, 40)
+                .description("Base particle count for mini firecracker detonations")
+                .customIcon(Material.BLAZE_POWDER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.big-firecracker.spark-particles", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "hider-items.big-firecracker.spark-particles", 5))
+                .range(1, 30)
+                .description("Spark particles shown while mini firecrackers are flying")
+                .customIcon(Material.GLOWSTONE_DUST)
+                .build());
+
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.default.volume-multiplier", 1.0, "Default big firecracker volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.default.pitch-multiplier", 1.0, "Default big firecracker pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.default.main-particle-multiplier", 1.0, "Default big firecracker main particle multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.default.mini-particle-multiplier", 1.0, "Default big firecracker mini particle multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_giant_present.volume-multiplier", 0.95, "Giant Present skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_giant_present.pitch-multiplier", 1.05, "Giant Present skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_giant_present.main-particle-multiplier", 1.0, "Giant Present skin main particle multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_giant_present.mini-particle-multiplier", 1.0, "Giant Present skin mini particle multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_boombox.volume-multiplier", 0.95, "Boombox skin volume multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_boombox.pitch-multiplier", 0.95, "Boombox skin pitch multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_boombox.main-particle-multiplier", 1.0, "Boombox skin main particle multiplier");
+        registerVariantMultiplierSetting(plugin, "hider-items.big-firecracker.variants.skin_boombox.mini-particle-multiplier", 1.0, "Boombox skin mini particle multiplier");
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("hider-items.firework-rocket.cooldown", SettingType.INTEGER, Integer.class)
                 .defaultValue(getConfigValue(plugin, "hider-items.firework-rocket.cooldown", 10))
@@ -1209,6 +1362,48 @@ public class SettingRegisterer {
                 .customIcon(Material.NETHERITE_INGOT)
                 .build());
 
+        plugin.getSettingRegistry().register(SettingDefinition.builder("skin-shop.points-per-coin", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "skin-shop.points-per-coin", 50))
+                .range(1, 500)
+                .description("How many points are converted into 1 coin at round end")
+                .customIcon(Material.SUNFLOWER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("skin-shop.cost-common", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "skin-shop.cost-common", 100))
+                .range(0, 100000)
+                .description("Coin cost for Common skin variants")
+                .customIcon(Material.IRON_NUGGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("skin-shop.cost-uncommon", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "skin-shop.cost-uncommon", 250))
+                .range(0, 100000)
+                .description("Coin cost for Uncommon skin variants")
+                .customIcon(Material.IRON_INGOT)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("skin-shop.cost-rare", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "skin-shop.cost-rare", 500))
+                .range(0, 100000)
+                .description("Coin cost for Rare skin variants")
+                .customIcon(Material.DIAMOND)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("skin-shop.cost-epic", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "skin-shop.cost-epic", 900))
+                .range(0, 100000)
+                .description("Coin cost for Epic skin variants")
+                .customIcon(Material.AMETHYST_CLUSTER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("skin-shop.cost-legendary", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "skin-shop.cost-legendary", 1500))
+                .range(0, 100000)
+                .description("Coin cost for Legendary skin variants")
+                .customIcon(Material.NETHERITE_INGOT)
+                .build());
+
         plugin.getSettingRegistry().register(SettingDefinition.builder("points.tracking.interval-seconds", SettingType.INTEGER, Integer.class)
                 .defaultValue(getConfigValue(plugin, "points.tracking.interval-seconds", 1))
                 .range(1, 5)
@@ -1375,6 +1570,15 @@ public class SettingRegisterer {
                 .range(0, 5000)
                 .description("Bonus for first kill of the round")
                 .customIcon(Material.REDSTONE)
+                .build());
+    }
+
+    private static void registerVariantMultiplierSetting(HideAndSeek plugin, String key, double defaultValue, String description) {
+        plugin.getSettingRegistry().register(SettingDefinition.builder(key, SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, key, defaultValue))
+                .rangeDouble(0.1, 2.0)
+                .description(description)
+                .customIcon(Material.COMPARATOR)
                 .build());
     }
 

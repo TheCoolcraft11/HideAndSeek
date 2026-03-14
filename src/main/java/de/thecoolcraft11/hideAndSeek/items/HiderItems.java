@@ -160,6 +160,7 @@ public final class HiderItems {
             }
         }
 
+        ItemSkinSelectionService.applySelectedVariants(player, plugin);
         plugin.getLogger().info("Finished giving loadout items to " + player.getName() + " (" + (slot) + " items placed)");
     }
 

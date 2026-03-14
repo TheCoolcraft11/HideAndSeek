@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -8,6 +9,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -79,6 +82,16 @@ public class TrackerCrossbowItem implements GameItem {
 
         int hitPoints = plugin.getPointService().award(hider.getUniqueId(), de.thecoolcraft11.hideAndSeek.util.points.PointAction.HIDER_SHARPSHOOTER);
         hider.sendMessage(Component.text("Crossbow hit! +" + hitPoints + " points", NamedTextColor.GOLD));
+
+        if (ItemSkinSelectionService.isSelected(hider, ID, "skin_paintball_gun")) {
+            hider.getWorld().spawnParticle(Particle.ENTITY_EFFECT, hider.getLocation().add(0, 1.1, 0), 14, 0.4, 0.3, 0.4, 1.0);
+            hider.getWorld().spawnParticle(Particle.ITEM_SLIME, hider.getLocation().add(0, 1.0, 0), 6, 0.25, 0.25, 0.25, 0.01);
+            hider.playSound(hider.getLocation(), Sound.ENTITY_SLIME_SQUISH_SMALL, 0.55f, 1.5f);
+        } else if (ItemSkinSelectionService.isSelected(hider, ID, "skin_laser_tag")) {
+            hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 12, 0.3, 0.3, 0.3, 0.03);
+            hider.getWorld().spawnParticle(Particle.END_ROD, hider.getLocation().add(0, 1.0, 0), 6, 0.15, 0.2, 0.15, 0.01);
+            hider.playSound(hider.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.45f, 1.8f);
+        }
 
         int hits = trackerHits.getOrDefault(hider.getUniqueId(), 0) + 1;
         trackerHits.put(hider.getUniqueId(), hits);

@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -165,16 +166,39 @@ public class BlockSwapItem implements GameItem {
                 targetDisplay.setRotation(finalTarget.getLocation().getYaw(), 0f);
             }
 
+            boolean magicMirror = ItemSkinSelectionService.isSelected(player, ID, "skin_magic_mirror");
+            boolean quantumLink = ItemSkinSelectionService.isSelected(player, ID, "skin_quantum_link");
+
             player.getWorld().spawnParticle(Particle.PORTAL, player.getLocation(), 20, 0.2, 0.5, 0.2, 1.0);
             finalTarget.getWorld().spawnParticle(Particle.PORTAL, finalTarget.getLocation(), 20, 0.2, 0.5, 0.2, 1.0);
-            player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05);
-            finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3, 0.3, 0.05);
 
-            player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
-            finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+            if (magicMirror) {
+                player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
+                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
+                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
+            } else if (quantumLink) {
+                player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation(), 20, 0.3, 0.3, 0.3, 0.05);
+                finalTarget.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, finalTarget.getLocation(), 20, 0.3, 0.3, 0.3, 0.05);
+                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
+            } else {
+                player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05);
+                finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3, 0.3, 0.05);
+                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+            }
 
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+            if (quantumLink) {
+                player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2, 0.02);
+                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2, 0.02);
+                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
+            }
 
             HiderItemUtil.updateAppearanceItem(player, plugin);
             HiderItemUtil.updateAppearanceItem(finalTarget, plugin);

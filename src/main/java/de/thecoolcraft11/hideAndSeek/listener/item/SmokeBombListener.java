@@ -52,6 +52,11 @@ public class SmokeBombListener implements Listener {
         if (storedDuration != null) duration = storedDuration;
         if (storedRadius != null) radius = storedRadius;
 
+        String skin = container.get(
+                new NamespacedKey(plugin, "smoke_bomb_skin"),
+                PersistentDataType.STRING
+        );
+
         Location impactLocation;
 
         if (event.getHitBlock() != null) {
@@ -65,16 +70,20 @@ public class SmokeBombListener implements Listener {
         World world = impactLocation.getWorld();
         if (world == null) return;
 
-        world.playSound(impactLocation, Sound.BLOCK_FIRE_EXTINGUISH, 1.5f, 0.5f);
+        if ("spore_cloud".equals(skin)) {
+            world.playSound(impactLocation, Sound.BLOCK_ROOTED_DIRT_BREAK, 1.0f, 0.8f);
+        } else if ("ninja_smoke".equals(skin)) {
+            world.playSound(impactLocation, Sound.ENTITY_BREEZE_INHALE, 1.0f, 0.6f);
+        } else {
+            world.playSound(impactLocation, Sound.BLOCK_FIRE_EXTINGUISH, 1.5f, 0.5f);
+        }
 
 
-        world.spawnParticle(
-                Particle.CLOUD,
-                impactLocation,
-                500,
-                1.2, 1.0, 1.2,
-                0.02
-        );
+        if ("spore_cloud".equals(skin)) {
+            world.spawnParticle(Particle.SPORE_BLOSSOM_AIR, impactLocation, 500, 1.2, 1.0, 1.2, 0.02);
+        } else {
+            world.spawnParticle(Particle.CLOUD, impactLocation, 500, 1.2, 1.0, 1.2, 0.02);
+        }
 
         final int finalDuration = duration;
         final int finalRadius = radius;
@@ -102,7 +111,7 @@ public class SmokeBombListener implements Listener {
 
 
                 world.spawnParticle(
-                        Particle.CLOUD,
+                        "spore_cloud".equals(skin) ? Particle.SPORE_BLOSSOM_AIR : Particle.CLOUD,
                         impactLocation,
                         coreAmount,
                         finalRadius * 0.5,
@@ -119,7 +128,7 @@ public class SmokeBombListener implements Listener {
                         1.5,
                         finalRadius * 0.5,
                         0,
-                        new Particle.DustOptions(Color.fromRGB(120, 120, 120), 2.0f)
+                        new Particle.DustOptions("spore_cloud".equals(skin) ? Color.fromRGB(95, 125, 65) : Color.fromRGB(120, 120, 120), 2.0f)
                 );
 
                 world.spawnParticle(
@@ -130,7 +139,7 @@ public class SmokeBombListener implements Listener {
                         1.5,
                         finalRadius * 0.5,
                         0,
-                        new Particle.DustOptions(Color.fromRGB(160, 160, 160), 5.0f)
+                        new Particle.DustOptions("spore_cloud".equals(skin) ? Color.fromRGB(145, 180, 110) : Color.fromRGB(160, 160, 160), 5.0f)
                 );
 
                 for (int i = 0; i < 20; i++) {
@@ -142,7 +151,7 @@ public class SmokeBombListener implements Listener {
                     Location particleLoc = impactLocation.clone().add(offsetX, offsetY, offsetZ);
 
                     world.spawnParticle(
-                            Particle.CAMPFIRE_COSY_SMOKE,
+                            "spore_cloud".equals(skin) ? Particle.SPORE_BLOSSOM_AIR : Particle.CAMPFIRE_COSY_SMOKE,
                             particleLoc,
                             swirlAmount,
                             0.05,

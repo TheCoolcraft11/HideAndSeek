@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
@@ -8,10 +9,7 @@ import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -52,6 +50,8 @@ public class CurseSpellItem implements GameItem {
 
     private static void activateCurseSpell(Player seeker, HideAndSeek plugin) {
         int duration = plugin.getSettingRegistry().get("seeker-items.curse-spell.active-duration", 10);
+        boolean voodoo = ItemSkinSelectionService.isSelected(seeker, ID, "skin_voodoo_magic");
+        boolean toxic = ItemSkinSelectionService.isSelected(seeker, ID, "skin_toxic_tome");
         long until = System.currentTimeMillis() + (duration * 1000L);
         seekerCurseActiveUntil.put(seeker.getUniqueId(), until);
 
@@ -63,6 +63,38 @@ public class CurseSpellItem implements GameItem {
         }
 
         seeker.sendMessage(Component.text("Curse spell activated! (" + duration + "s)", NamedTextColor.DARK_PURPLE));
+        Location loc = seeker.getLocation().add(0, 1, 0);
+        if (voodoo) {
+            seeker.getWorld().spawnParticle(Particle.SOUL, loc, 16, 0.3, 0.4, 0.3, 0.02);
+            seeker.getWorld().spawnParticle(Particle.TRIAL_OMEN, loc, 6, 0.22, 0.3, 0.22, 0.01);
+            seeker.playSound(seeker.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 0.5f, 0.85f);
+        } else if (toxic) {
+            seeker.getWorld().spawnParticle(Particle.ITEM_SLIME, loc, 14, 0.25, 0.3, 0.25, 0.02);
+            seeker.getWorld().spawnParticle(Particle.SNEEZE, loc, 8, 0.2, 0.25, 0.2, 0.03);
+            seeker.playSound(seeker.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 0.45f, 1.2f);
+        }
+
+        if (voodoo) {
+            new BukkitRunnable() {
+                int ticks = 0;
+
+                @Override
+                public void run() {
+                    if (!seeker.isOnline() || !isCurseActive(seeker.getUniqueId())) {
+                        cancel();
+                        return;
+                    }
+
+                    Location aura = seeker.getLocation().add(0, 1, 0);
+                    seeker.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, aura, 4, 0.25, 0.32, 0.25, 0.01);
+                    seeker.getWorld().spawnParticle(Particle.TRIAL_OMEN, aura, 2, 0.2, 0.28, 0.2, 0.01);
+                    if (ticks % 15 == 0) {
+                        seeker.playSound(seeker.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 0.12f, 0.6f);
+                    }
+                    ticks += 5;
+                }
+            }.runTaskTimer(plugin, 0L, 5L);
+        }
 
 
         BukkitTask prevTask = curseSpellSeekerXpTasks.remove(seeker.getUniqueId());
@@ -86,6 +118,22 @@ public class CurseSpellItem implements GameItem {
 
     public static void applyCurseToHider(Player hider, HideAndSeek plugin) {
         int duration = plugin.getSettingRegistry().get("seeker-items.curse-spell.curse-duration", 8);
+        Player nearestSeeker = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
+            Player candidate = Bukkit.getPlayer(seekerId);
+            if (candidate == null || !candidate.isOnline() || !candidate.getWorld().equals(hider.getWorld())) {
+                continue;
+            }
+            double dist = candidate.getLocation().distanceSquared(hider.getLocation());
+            if (dist < nearestDistance) {
+                nearestDistance = dist;
+                nearestSeeker = candidate;
+            }
+        }
+        boolean voodoo = nearestSeeker != null && ItemSkinSelectionService.isSelected(nearestSeeker, ID, "skin_voodoo_magic");
+        boolean toxic = nearestSeeker != null && ItemSkinSelectionService.isSelected(nearestSeeker, ID, "skin_toxic_tome");
+        final Player auraSeeker = nearestSeeker;
         long until = System.currentTimeMillis() + (duration * 1000L);
         hiderCursedUntil.put(hider.getUniqueId(), until);
 
@@ -115,6 +163,14 @@ public class CurseSpellItem implements GameItem {
         }
 
         hider.sendMessage(Component.text("You have been cursed!", NamedTextColor.DARK_PURPLE));
+        if (voodoo) {
+            hider.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, hider.getLocation().add(0, 1, 0), 12, 0.25, 0.3, 0.25, 0.02);
+            hider.getWorld().spawnParticle(Particle.TRIAL_OMEN, hider.getLocation().add(0, 1, 0), 4, 0.2, 0.25, 0.2, 0.01);
+            hider.playSound(hider.getLocation(), Sound.ENTITY_ALLAY_HURT, 0.45f, 0.7f);
+        } else if (toxic) {
+            hider.getWorld().spawnParticle(Particle.SNEEZE, hider.getLocation().add(0, 1, 0), 16, 0.3, 0.35, 0.3, 0.05);
+            hider.playSound(hider.getLocation(), Sound.ENTITY_SLIME_SQUISH, 0.4f, 1.0f);
+        }
 
 
         BukkitTask prevXpTask = hiderCursedXpTasks.remove(hider.getUniqueId());
@@ -139,6 +195,17 @@ public class CurseSpellItem implements GameItem {
                 hider.getWorld().spawnParticle(Particle.SOUL, loc, 8, 0.3, 0.5, 0.3, 0.1);
 
                 hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 5, 0.2, 0.3, 0.2, 0.05);
+                if (voodoo) {
+                    hider.getWorld().spawnParticle(Particle.TRIAL_OMEN, loc, 2, 0.2, 0.25, 0.2, 0.01);
+                    hider.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, 3, 0.2, 0.25, 0.2, 0.01);
+                    if (auraSeeker.isOnline() && auraSeeker.getWorld().equals(hider.getWorld())) {
+                        Location seekerAura = auraSeeker.getLocation().add(0, 1, 0);
+                        auraSeeker.getWorld().spawnParticle(Particle.SOUL, seekerAura, 3, 0.2, 0.28, 0.2, 0.01);
+                        auraSeeker.getWorld().spawnParticle(Particle.TRIAL_OMEN, seekerAura, 1, 0.18, 0.24, 0.18, 0.01);
+                    }
+                } else if (toxic) {
+                    hider.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR, loc, 3, 0.2, 0.25, 0.2, 0.02);
+                }
 
                 ticks++;
             }

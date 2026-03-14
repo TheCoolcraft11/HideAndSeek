@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -8,10 +9,7 @@ import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -83,13 +81,26 @@ public class SlownessBallItem implements GameItem {
 
         int duration = plugin.getSettingRegistry().get("hider-items.slowness-ball.duration", 6);
         int amplifier = plugin.getSettingRegistry().get("hider-items.slowness-ball.amplifier", 1);
+        boolean stickyHoney = ItemSkinSelectionService.isSelected(player, ID, "skin_sticky_honey");
+        boolean tarBall = ItemSkinSelectionService.isSelected(player, ID, "skin_tar_ball");
 
         org.bukkit.entity.Snowball snowball = player.launchProjectile(org.bukkit.entity.Snowball.class);
-        snowball.setItem(new ItemStack(Material.ICE));
+        snowball.setItem(new ItemStack(stickyHoney ? Material.HONEY_BOTTLE : tarBall ? Material.COAL : Material.ICE));
         snowball.setVelocity(snowball.getVelocity().multiply(1.5));
         snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball"), PersistentDataType.BOOLEAN, true);
         snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_duration"), PersistentDataType.INTEGER, duration);
         snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_amplifier"), PersistentDataType.INTEGER, amplifier);
+        if (stickyHoney) {
+            snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_skin"), PersistentDataType.STRING, "sticky_honey");
+        } else if (tarBall) {
+            snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_skin"), PersistentDataType.STRING, "tar_ball");
+        }
+
+        if (tarBall) {
+            snowball.getWorld().spawnParticle(Particle.ASH, snowball.getLocation(), 12, 0.18, 0.18, 0.18, 0.02);
+            snowball.getWorld().spawnParticle(Particle.SMOKE, snowball.getLocation(), 10, 0.14, 0.14, 0.14, 0.01);
+            player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SHOOT, 0.35f, 1.5f);
+        }
 
         new BukkitRunnable() {
             @Override
@@ -99,7 +110,15 @@ public class SlownessBallItem implements GameItem {
                     return;
                 }
 
-                snowball.getWorld().spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 3, 0.1, 0.1, 0.1, 0.05);
+                if (stickyHoney) {
+                    snowball.getWorld().spawnParticle(Particle.DRIPPING_HONEY, snowball.getLocation(), 3, 0.1, 0.1, 0.1, 0.01);
+                } else if (tarBall) {
+                    snowball.getWorld().spawnParticle(Particle.ASH, snowball.getLocation(), 3, 0.1, 0.1, 0.1, 0.02);
+                    snowball.getWorld().spawnParticle(Particle.DUST, snowball.getLocation(), 2, 0.08, 0.08, 0.08,
+                            new Particle.DustOptions(org.bukkit.Color.fromRGB(60, 60, 60), 1.0f));
+                } else {
+                    snowball.getWorld().spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 3, 0.1, 0.1, 0.1, 0.05);
+                }
             }
         }.runTaskTimer(plugin, 1L, 2L);
 

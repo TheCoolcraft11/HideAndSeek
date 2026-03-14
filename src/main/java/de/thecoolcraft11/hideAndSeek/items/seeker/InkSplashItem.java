@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.listener.player.HiderEquipmentChangeListener;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
@@ -15,6 +16,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -54,6 +56,8 @@ public class InkSplashItem implements GameItem {
         Player seeker = context.getPlayer();
         int radius = plugin.getSettingRegistry().get("seeker-items.ink-splash.radius", 25);
         int duration = plugin.getSettingRegistry().get("seeker-items.ink-splash.duration", 7);
+        boolean paintBalloon = ItemSkinSelectionService.isSelected(seeker, ID, "skin_paint_balloon");
+        boolean mudBall = ItemSkinSelectionService.isSelected(seeker, ID, "skin_mud_ball");
 
 
         BukkitTask prevSeekerTask = inkSplashSeekerXpTasks.remove(seeker.getUniqueId());
@@ -65,6 +69,15 @@ public class InkSplashItem implements GameItem {
             BukkitTask t = inkSplashSeekerXpTasks.remove(seeker.getUniqueId());
             XpProgressHelper.stopAndRestore(seeker, t, seekerSavedXp);
         }, duration * 20L);
+
+        if (paintBalloon) {
+            seeker.getWorld().spawnParticle(Particle.ENTITY_EFFECT, seeker.getLocation().add(0, 1, 0), 20, 0.45, 0.35, 0.45, 1.0);
+            seeker.playSound(seeker.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 0.55f, 1.35f);
+        } else if (mudBall) {
+            seeker.getWorld().spawnParticle(Particle.BLOCK, seeker.getLocation().add(0, 1, 0), 20, 0.4, 0.35, 0.4,
+                    Material.MUD.createBlockData());
+            seeker.playSound(seeker.getLocation(), Sound.BLOCK_MUD_BREAK, 0.55f, 0.9f);
+        }
 
         for (Player hider : Bukkit.getOnlinePlayers()) {
             if (!HideAndSeek.getDataController().getHiders().contains(hider.getUniqueId())) continue;
@@ -84,6 +97,14 @@ public class InkSplashItem implements GameItem {
             );
 
             hider.getWorld().spawnParticle(Particle.SQUID_INK, hider.getEyeLocation(), 10, 0.3, 0.3, 0.3, 0.1);
+            if (paintBalloon) {
+                hider.getWorld().spawnParticle(Particle.ITEM_SLIME, hider.getEyeLocation(), 10, 0.25, 0.25, 0.25, 0.02);
+                hider.playSound(hider.getLocation(), Sound.ENTITY_SLIME_SQUISH_SMALL, 0.4f, 1.3f);
+            } else if (mudBall) {
+                hider.getWorld().spawnParticle(Particle.BLOCK, hider.getEyeLocation(), 12, 0.22, 0.22, 0.22,
+                        Material.PACKED_MUD.createBlockData());
+                hider.playSound(hider.getLocation(), Sound.BLOCK_MUD_PLACE, 0.4f, 0.8f);
+            }
             hider.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duration * 20, 255, false, false));
             hider.sendMessage(Component.text("You've been hit with ink!", NamedTextColor.DARK_AQUA));
 

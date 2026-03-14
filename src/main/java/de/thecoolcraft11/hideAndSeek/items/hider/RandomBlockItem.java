@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.block.BlockAppearanceConfig;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -10,6 +11,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -180,6 +183,23 @@ public class RandomBlockItem implements GameItem {
         if (display != null && display.isValid()) {
             display.setBlock(blockData);
             display.setRotation(player.getLocation().getYaw(), 0f);
+        }
+
+        if (ItemSkinSelectionService.isSelected(player, ID, "skin_shapeshifter_dust")) {
+            player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1, 0), 18, 0.35, 0.35, 0.35, 0.02);
+            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 10, 0.35, 0.35, 0.35, 0.1);
+            player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.9f, 1.4f);
+        } else if (ItemSkinSelectionService.isSelected(player, ID, "skin_mystery_box")) {
+            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1, 0), 12, 0.35, 0.35, 0.35, 0.03);
+            player.getWorld().spawnParticle(Particle.NOTE, player.getLocation().add(0, 1, 0), 6, 0.25, 0.25, 0.25, 1.0);
+            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 0.8f, 1.2f);
+        }
+
+        boolean mysteryBox = ItemSkinSelectionService.isSelected(player, ID, "skin_mystery_box");
+        if (mysteryBox) {
+            player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.25, 0.3, 0.25, 0.02);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 6, 0.2, 0.25, 0.2, 0.02);
+            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.35f, 1.55f);
         }
 
         HiderItemUtil.updateAppearanceItem(player, plugin);

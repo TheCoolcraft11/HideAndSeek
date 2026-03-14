@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.hider;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
@@ -59,6 +60,8 @@ public class InvisibilityCloakItem implements GameItem {
         }
 
         int duration = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.duration", 8);
+        boolean cardboard = ItemSkinSelectionService.isSelected(player, ID, "skin_cardboard_box");
+        boolean camo = ItemSkinSelectionService.isSelected(player, ID, "skin_camo_netting");
 
         var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
@@ -95,6 +98,13 @@ public class InvisibilityCloakItem implements GameItem {
         player.getWorld().spawnParticle(Particle.POOF, loc, 30, 0.5, 0.5, 0.5, 0.15);
         player.getWorld().spawnParticle(Particle.GLOW, loc, 15, 0.4, 0.4, 0.4, 0.1);
         player.playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 1.0f, 1.5f);
+        if (cardboard) {
+            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3, Material.OAK_PLANKS.createBlockData());
+            player.playSound(player.getLocation(), Sound.BLOCK_WOOD_PLACE, 0.55f, 0.9f);
+        } else if (camo) {
+            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3, Material.OAK_LEAVES.createBlockData());
+            player.playSound(player.getLocation(), Sound.BLOCK_AZALEA_LEAVES_FALL, 0.45f, 1.1f);
+        }
 
 
         BukkitTask prevXpTask = invisibilityCloakXpTasks.remove(player.getUniqueId());
@@ -129,6 +139,13 @@ public class InvisibilityCloakItem implements GameItem {
                 if (ticks % 10 == 0) {
                     Location particleLoc = player.getLocation().add(0, 1, 0);
                     player.getWorld().spawnParticle(Particle.SOUL, particleLoc, 2, 0.2, 0.2, 0.2, 0.02);
+                    if (cardboard) {
+                        player.getWorld().spawnParticle(Particle.BLOCK_CRUMBLE, particleLoc, 2, 0.15, 0.15, 0.15,
+                                Material.OAK_PLANKS.createBlockData());
+                    } else if (camo) {
+                        player.getWorld().spawnParticle(Particle.FALLING_DUST, particleLoc, 2, 0.15, 0.15, 0.15,
+                                Material.MOSS_BLOCK.createBlockData());
+                    }
                 }
 
                 ticks++;

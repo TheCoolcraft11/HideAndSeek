@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
@@ -92,6 +93,7 @@ public class ProximitySensorItem implements GameItem {
 
         Block clickedBlock = context.getLocation().getBlock();
         Player player = context.getPlayer();
+        boolean alarmBell = ItemSkinSelectionService.isSelected(player, ID, "skin_alarm_bell");
 
 
         if (!clickedBlock.getType().isSolid()) {
@@ -143,7 +145,7 @@ public class ProximitySensorItem implements GameItem {
             display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-type"), PersistentDataType.STRING, "proximity");
             display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-block"), PersistentDataType.STRING, torchBlock.getLocation().toString());
             display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-facing"), PersistentDataType.STRING, "UP");
-            BlockData data = Material.SCULK_SENSOR.createBlockData();
+            BlockData data = getSensorBlockData(player);
 
             display.setBlock(data);
 
@@ -172,7 +174,7 @@ public class ProximitySensorItem implements GameItem {
                 display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-type"), PersistentDataType.STRING, "proximity");
                 display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-block"), PersistentDataType.STRING, torchBlock.getLocation().toString());
                 display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-facing"), PersistentDataType.STRING, clickedFace.name());
-                BlockData data = Material.SCULK_SENSOR.createBlockData();
+                BlockData data = getSensorBlockData(player);
 
                 display.setBlock(data);
 
@@ -186,6 +188,12 @@ public class ProximitySensorItem implements GameItem {
 
         Location sensorLocation = torchBlock.getLocation().clone().add(0.5, 0.5, 0.5);
 
+        if (alarmBell) {
+            sensorLocation.getWorld().spawnParticle(Particle.WAX_ON, sensorLocation, 14, 0.2, 0.2, 0.2, 0.01);
+            sensorLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, sensorLocation, 10, 0.16, 0.16, 0.16, 0.03);
+            player.playSound(sensorLocation, Sound.BLOCK_BELL_USE, 0.45f, 1.35f);
+        }
+
         BlockDisplay sensorDisplay = sensorDisplays.get(torchBlock.getLocation());
         String facingStr = sensorDisplay != null ?
                 sensorDisplay.getPersistentDataContainer().get(new NamespacedKey(plugin, "sensor-facing"), PersistentDataType.STRING) :
@@ -198,12 +206,24 @@ public class ProximitySensorItem implements GameItem {
         new BukkitRunnable() {
             final long startTime = System.currentTimeMillis();
             final long durationMs = sensorDuration == -1 ? Long.MAX_VALUE : (long) sensorDuration * 1000L;
+            long lastAuraPulseAt = 0L;
 
             @Override
             public void run() {
 
+                if (alarmBell && System.currentTimeMillis() - lastAuraPulseAt >= 1200L) {
+                    lastAuraPulseAt = System.currentTimeMillis();
+                    sensorLocation.getWorld().spawnParticle(Particle.WAX_ON, sensorLocation, 6, 0.18, 0.18, 0.18, 0.01);
+                    sensorLocation.getWorld().spawnParticle(Particle.END_ROD, sensorLocation, 4, 0.16, 0.16, 0.16, 0.01);
+                }
+
                 if (torchBlock.getType() != Material.REDSTONE_TORCH && torchBlock.getType() != Material.REDSTONE_WALL_TORCH) {
                     cancel();
+
+                    if (alarmBell) {
+                        sensorLocation.getWorld().spawnParticle(Particle.SMOKE, sensorLocation, 12, 0.18, 0.18, 0.18, 0.02);
+                        sensorLocation.getWorld().playSound(sensorLocation, Sound.BLOCK_BELL_RESONATE, 0.35f, 0.8f);
+                    }
 
                     if (torchBlock.getBlockData() instanceof Lightable lightable) {
                         plugin.getLogger().info("Removing power from " + torchBlock.getLocation());
@@ -227,6 +247,12 @@ public class ProximitySensorItem implements GameItem {
                 if (sensorDuration != -1 && System.currentTimeMillis() - startTime > durationMs) {
                     torchBlock.setType(Material.AIR);
                     cancel();
+
+                    if (alarmBell) {
+                        sensorLocation.getWorld().spawnParticle(Particle.SMOKE, sensorLocation, 14, 0.2, 0.2, 0.2, 0.02);
+                        sensorLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, sensorLocation, 6, 0.15, 0.15, 0.15, 0.02);
+                        sensorLocation.getWorld().playSound(sensorLocation, Sound.BLOCK_BELL_RESONATE, 0.35f, 0.75f);
+                    }
 
                     BlockDisplay display = sensorDisplays.remove(torchBlock.getLocation());
                     if (display != null && display.isValid()) {
@@ -450,6 +476,16 @@ public class ProximitySensorItem implements GameItem {
                     new AxisAngle4f(0, 0f, 0f, 0f)
             );
         };
+    }
+
+    private static BlockData getSensorBlockData(Player player) {
+        if (ItemSkinSelectionService.isSelected(player, ProximitySensorItem.ID, "skin_alarm_bell")) {
+            return Material.BELL.createBlockData();
+        } else if (ItemSkinSelectionService.isSelected(player, ProximitySensorItem.ID, "skin_cctv_camera")) {
+
+            return Material.DAYLIGHT_DETECTOR.createBlockData();
+        }
+        return Material.SCULK_SENSOR.createBlockData();
     }
 
     private static Vector getSensorDirection(BlockFace face) {
