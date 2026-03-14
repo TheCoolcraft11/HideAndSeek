@@ -13,6 +13,7 @@ import java.util.List;
 
 public class BlockStatsCommand implements MinigameSubcommand {
     private final BlockStatsGUI gui;
+    private static final String PERMISSION = "hideandseek.command.blockstats";
 
     public BlockStatsCommand(HideAndSeek plugin) {
         this.gui = new BlockStatsGUI(plugin);
@@ -32,6 +33,11 @@ public class BlockStatsCommand implements MinigameSubcommand {
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
+            return true;
+        }
+
+        if (!sender.hasPermission(PERMISSION)) {
+            sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
             return true;
         }
 
