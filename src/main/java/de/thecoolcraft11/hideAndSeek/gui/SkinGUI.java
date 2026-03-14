@@ -223,7 +223,7 @@ public class SkinGUI implements Listener {
         String runtimeItemId = ItemSkinSelectionService.resolveRuntimeItemId(player, logicalItemId);
         var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
 
-        ItemStack stack = customItem != null ? customItem.getItemStack() : new ItemStack(Material.PAPER);
+        ItemStack stack = customItem != null ? customItem.getItemStack().clone() : new ItemStack(Material.PAPER);
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) {
             return stack;

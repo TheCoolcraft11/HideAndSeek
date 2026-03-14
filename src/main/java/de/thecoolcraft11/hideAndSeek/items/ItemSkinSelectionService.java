@@ -206,7 +206,12 @@ public final class ItemSkinSelectionService {
         }
     }
 
+
     public static void savePlayer(HideAndSeek plugin, UUID playerId) {
+        savePlayer(plugin, playerId, true);
+    }
+
+    public static void savePlayer(HideAndSeek plugin, UUID playerId, boolean flush) {
         if (dataConfig == null) {
             initialize(plugin);
         }
@@ -228,7 +233,9 @@ public final class ItemSkinSelectionService {
             }
         }
 
-        saveData(plugin);
+        if (flush) {
+            saveData(plugin);
+        }
     }
 
     public static void saveAll(HideAndSeek plugin) {
@@ -236,7 +243,7 @@ public final class ItemSkinSelectionService {
             initialize(plugin);
         }
         for (UUID playerId : Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).toList()) {
-            savePlayer(plugin, playerId);
+            savePlayer(plugin, playerId, false);
         }
         saveData(plugin);
     }

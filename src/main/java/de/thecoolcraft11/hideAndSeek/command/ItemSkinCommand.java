@@ -102,7 +102,8 @@ public class ItemSkinCommand implements MinigameSubcommand {
         ItemSkinSelectionService.setSelectedVariant(player.getUniqueId(), logicalItemId, targetVariant.getId());
         ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
 
-        String shownName = targetVariant.getDisplayName().isEmpty() ? targetVariant.getId() : targetVariant.getDisplayName();
+        String displayName = targetVariant.getDisplayName();
+        String shownName = (displayName == null || displayName.isBlank()) ? targetVariant.getId() : displayName;
         player.sendMessage(Component.text("Selected skin: ", NamedTextColor.GREEN)
                 .append(Component.text(shownName, NamedTextColor.GOLD))
                 .append(Component.text(" for ", NamedTextColor.GREEN))

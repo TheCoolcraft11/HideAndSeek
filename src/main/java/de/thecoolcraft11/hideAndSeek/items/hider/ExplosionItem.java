@@ -108,7 +108,7 @@ public class ExplosionItem implements GameItem {
         double basePitch = plugin.getSettingRegistry().get("hider-items.explosion.pitch", 1.5);
         int baseSmokeParticles = plugin.getSettingRegistry().get("hider-items.explosion.smoke-particles", 3);
         int baseAccentParticles = plugin.getSettingRegistry().get("hider-items.explosion.accent-particles", 2);
-        int baseBurstParticles = plugin.getSettingRegistry().get("hider-items.explosion.burst-particles", 15);
+        int baseBurstParticles = plugin.getSettingRegistry().get("hider-items.explosion.burst-particles", 14);
         int fuseTime = plugin.getSettingRegistry().get("hider-items.explosion.fuse-time", 40);
         double volumeMultiplier = plugin.getSettingRegistry().get("hider-items.explosion.variants." + variantKey + ".volume-multiplier", 1.0);
         double pitchMultiplier = plugin.getSettingRegistry().get("hider-items.explosion.variants." + variantKey + ".pitch-multiplier", 1.0);
