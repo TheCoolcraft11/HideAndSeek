@@ -12,8 +12,10 @@ import java.util.concurrent.ConcurrentMap;
 public class VoteManager {
     private final HideAndSeek plugin;
     private final Random random = new Random();
+    private final Object readinessLock = new Object();
     private final ConcurrentMap<UUID, GameModeEnum> gamemodeVotes = new ConcurrentHashMap<>();
     private final ConcurrentMap<UUID, String> mapVotes = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, Boolean> readyStates = new ConcurrentHashMap<>();
 
     public VoteManager(HideAndSeek plugin) {
         this.plugin = plugin;
@@ -37,12 +39,18 @@ public class VoteManager {
         return value instanceof Boolean enabled ? enabled : true;
     }
 
+    public boolean isReadinessEnabled() {
+        var result = plugin.getSettingService().getSetting("game.readiness_enabled");
+        Object value = result.isSuccess() ? result.getValue() : true;
+        return value instanceof Boolean enabled ? enabled : true;
+    }
+
     public boolean isVotingEnabled() {
         return isGamemodeVotingEnabled() || isMapVotingEnabled();
     }
 
-    public boolean isLobbyPhase() {
-        return "lobby".equalsIgnoreCase(plugin.getStateManager().getCurrentPhaseId());
+    public boolean isNotLobbyPhase() {
+        return !"lobby".equalsIgnoreCase(plugin.getStateManager().getCurrentPhaseId());
     }
 
     public Optional<GameModeEnum> getGamemodeVote(UUID playerId) {
@@ -53,11 +61,53 @@ public class VoteManager {
         return Optional.ofNullable(mapVotes.get(playerId));
     }
 
+    public boolean isReady(UUID playerId) {
+        if (!isReadinessEnabled()) {
+            return true;
+        }
+        return readyStates.getOrDefault(playerId, false);
+    }
+
+    public void setReady(UUID playerId, boolean ready) {
+        if (playerId == null) {
+            return;
+        }
+        if (!isReadinessEnabled()) {
+            readyStates.remove(playerId);
+            return;
+        }
+        readyStates.put(playerId, ready);
+    }
+
+    public boolean toggleReady(UUID playerId) {
+        if (playerId == null) {
+            return false;
+        }
+        if (!isReadinessEnabled()) {
+            return true;
+        }
+        return readyStates.compute(playerId, (id, current) -> current == null || !current);
+    }
+
+    public void clearReady(UUID playerId) {
+        if (playerId == null) {
+            return;
+        }
+        readyStates.remove(playerId);
+    }
+
+    public void resetReadiness() {
+        readyStates.clear();
+    }
+
     public void castGamemodeVote(UUID playerId, GameModeEnum mode) {
         if (playerId == null || mode == null) {
             return;
         }
         gamemodeVotes.put(playerId, mode);
+        if (isReadinessEnabled()) {
+            setReady(playerId, false);
+        }
     }
 
     public void castMapVote(UUID playerId, String mapName) {
@@ -65,6 +115,9 @@ public class VoteManager {
             return;
         }
         mapVotes.put(playerId, mapName);
+        if (isReadinessEnabled()) {
+            setReady(playerId, false);
+        }
     }
 
     public void clearVotes(UUID playerId) {
@@ -73,11 +126,13 @@ public class VoteManager {
         }
         gamemodeVotes.remove(playerId);
         mapVotes.remove(playerId);
+        readyStates.remove(playerId);
     }
 
     public void resetVotes() {
         gamemodeVotes.clear();
         mapVotes.clear();
+        readyStates.clear();
     }
 
     public Set<UUID> getOnlineVoterIds() {
@@ -86,6 +141,70 @@ public class VoteManager {
             onlineIds.add(player.getUniqueId());
         }
         return onlineIds;
+    }
+
+    public Set<UUID> getNotReadyOnlinePlayerIds() {
+        if (!isReadinessEnabled()) {
+            return Set.of();
+        }
+        Set<UUID> notReady = new HashSet<>();
+        for (UUID playerId : getOnlineVoterIds()) {
+            if (!isReady(playerId)) {
+                notReady.add(playerId);
+            }
+        }
+        return notReady;
+    }
+
+    public boolean areAllEligiblePlayersReady() {
+        if (!isReadinessEnabled()) {
+            return true;
+        }
+        Set<UUID> onlineIds = getOnlineVoterIds();
+        if (onlineIds.isEmpty()) {
+            return false;
+        }
+        for (UUID playerId : onlineIds) {
+            if (!isReady(playerId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean hasCompletedVote(UUID playerId) {
+        if (playerId == null) {
+            return false;
+        }
+        if (!isVotingEnabled()) {
+            return true;
+        }
+        boolean hasGamemodeVote = !isGamemodeVotingEnabled() || gamemodeVotes.containsKey(playerId);
+        boolean hasMapVote = !isMapVotingEnabled() || mapVotes.containsKey(playerId);
+        return hasGamemodeVote && hasMapVote;
+    }
+
+    public boolean markReadyIfVoteComplete(UUID playerId) {
+        if (!isReadinessEnabled()) {
+            return false;
+        }
+        if (!hasCompletedVote(playerId)) {
+            return false;
+        }
+        setReady(playerId, true);
+        return true;
+    }
+
+    public boolean tryAutoStartIfEveryoneReady() {
+        if (!isReadinessEnabled() || isNotLobbyPhase()) {
+            return false;
+        }
+        synchronized (readinessLock) {
+            if (!areAllEligiblePlayersReady()) {
+                return false;
+            }
+            return plugin.getStateManager().setPhase("hiding", true);
+        }
     }
 
     public Map<GameModeEnum, Long> countGamemodeVotes(Set<UUID> eligibleVoters) {

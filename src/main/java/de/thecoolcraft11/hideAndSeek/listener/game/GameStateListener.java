@@ -42,6 +42,7 @@ public class GameStateListener implements Listener {
             Objects.requireNonNull(player.getAttribute(Attribute.MAX_HEALTH)).setBaseValue(20.0);
             player.setHealth(20.0);
             player.setFoodLevel(20);
+            plugin.getVoteManager().setReady(player.getUniqueId(), false);
         }
     }
 
@@ -52,6 +53,7 @@ public class GameStateListener implements Listener {
         cleanupSwordCharge(player.getUniqueId());
         cleanupMedkitCharge(player.getUniqueId());
         HideAndSeek.getDataController().removeAllowedSpectator(player.getUniqueId());
+        plugin.getVoteManager().clearVotes(player.getUniqueId());
 
 
         if (HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {

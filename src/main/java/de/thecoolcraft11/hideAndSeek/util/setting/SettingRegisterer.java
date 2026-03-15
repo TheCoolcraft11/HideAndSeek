@@ -115,6 +115,7 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.game.vote_gamemode_enabled", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.vote_map_enabled", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.vote_show_counts", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.readiness_enabled", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_preferred_modes", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_map_specific_timings", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_map_specific_seeker_count", Boolean.class, true);
@@ -459,6 +460,16 @@ public class SettingRegisterer {
                 .valueIconStacks(Map.of(
                         true, setEnchanted(Material.PAPER, true),
                         false, setEnchanted(Material.PAPER, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.readiness_enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.readiness_enabled", true))
+                .description("Require players to ready up before the round can start")
+                .customIcon(Material.LIME_STAINED_GLASS_PANE)
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.LIME_STAINED_GLASS_PANE, true),
+                        false, setEnchanted(Material.RED_STAINED_GLASS_PANE, false)
                 ))
                 .build());
 

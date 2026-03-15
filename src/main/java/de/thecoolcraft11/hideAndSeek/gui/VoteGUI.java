@@ -21,6 +21,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -39,7 +40,7 @@ public class VoteGUI implements Listener {
             player.sendMessage(Component.text("Voting is disabled.", NamedTextColor.RED));
             return;
         }
-        if (!voteManager.isLobbyPhase()) {
+        if (voteManager.isNotLobbyPhase()) {
             player.sendMessage(Component.text("Voting is only available in the lobby.", NamedTextColor.RED));
             return;
         }
@@ -51,8 +52,14 @@ public class VoteGUI implements Listener {
         List<String> displayMaps = getDisplayMaps(gamemodeEnabled, selectedGamemode, allMaps);
         int gamemodeRows = gamemodeEnabled ? getRows(GameModeEnum.values().length) : 0;
         int separatorRows = gamemodeEnabled && mapEnabled ? 1 : 0;
-        int mapRows = mapEnabled ? getRows(Math.max(displayMaps.size(), 1)) : 0;
-        int totalRows = Math.max(1, Math.min(6, gamemodeRows + separatorRows + mapRows));
+        int readinessRows = voteManager.isReadinessEnabled() ? 1 : 0;
+        int mapRows = 0;
+        if (mapEnabled) {
+            int requestedRows = getRows(Math.max(displayMaps.size(), 1));
+            int maxMapRows = Math.max(1, 6 - gamemodeRows - separatorRows - readinessRows);
+            mapRows = Math.min(requestedRows, maxMapRows);
+        }
+        int totalRows = Math.max(1, Math.min(6, gamemodeRows + separatorRows + mapRows + readinessRows));
         VoteMenuHolder holder = new VoteMenuHolder();
         Inventory inventory = Bukkit.createInventory(holder, totalRows * 9, TITLE);
         holder.inventory = inventory;
@@ -65,9 +72,13 @@ public class VoteGUI implements Listener {
             fillSeparatorRow(inventory, rowOffset);
             rowOffset++;
         }
-        if (mapEnabled && rowOffset < totalRows) {
+        int mapEndRowExclusive = totalRows - readinessRows;
+        if (mapEnabled && rowOffset < mapEndRowExclusive) {
             boolean lockMapVotes = gamemodeEnabled && selectedGamemode == null;
-            addMapRows(inventory, holder, rowOffset, totalRows, displayMaps, selectedMap, selectedGamemode, lockMapVotes, eligibleVoters);
+            addMapRows(inventory, holder, rowOffset, mapEndRowExclusive, displayMaps, selectedMap, selectedGamemode, lockMapVotes, eligibleVoters);
+        }
+        if (readinessRows == 1) {
+            fillReadinessRow(inventory, holder, player, totalRows - 1, voteManager);
         }
         player.openInventory(inventory);
     }
@@ -88,18 +99,36 @@ public class VoteGUI implements Listener {
             return;
         }
         VoteManager voteManager = plugin.getVoteManager();
-        if (!voteManager.isLobbyPhase()) {
+        if (voteManager.isNotLobbyPhase()) {
             player.sendMessage(Component.text("Voting is only available in the lobby.", NamedTextColor.RED));
             player.closeInventory();
             return;
         }
         int slot = event.getRawSlot();
+        if (slot == holder.readyToggleSlot && voteManager.isReadinessEnabled()) {
+            boolean ready = voteManager.toggleReady(player.getUniqueId());
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, ready ? 1.2f : 0.9f);
+            player.sendMessage(Component.text("Ready status: ", NamedTextColor.GRAY)
+                    .append(Component.text(ready ? "READY" : "NOT READY", ready ? NamedTextColor.GREEN : NamedTextColor.RED)));
+            if (voteManager.tryAutoStartIfEveryoneReady()) {
+                Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+            }
+            open(player);
+            return;
+        }
         GameModeEnum clickedMode = holder.gamemodeSlots.get(slot);
         if (clickedMode != null && voteManager.isGamemodeVotingEnabled()) {
             voteManager.castGamemodeVote(player.getUniqueId(), clickedMode);
+            boolean autoReady = voteManager.markReadyIfVoteComplete(player.getUniqueId());
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
             player.sendMessage(Component.text("Voted gamemode: ", NamedTextColor.GREEN)
                     .append(Component.text(clickedMode.name(), NamedTextColor.GOLD)));
+            if (autoReady) {
+                player.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+            }
+            if (voteManager.tryAutoStartIfEveryoneReady()) {
+                Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+            }
             open(player);
             return;
         }
@@ -113,9 +142,16 @@ public class VoteGUI implements Listener {
             return;
         }
         voteManager.castMapVote(player.getUniqueId(), clickedMap);
+        boolean autoReady = voteManager.markReadyIfVoteComplete(player.getUniqueId());
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.1f);
         player.sendMessage(Component.text("Voted map: ", NamedTextColor.GREEN)
                 .append(Component.text(clickedMap, NamedTextColor.GOLD)));
+        if (autoReady) {
+            player.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+        }
+        if (voteManager.tryAutoStartIfEveryoneReady()) {
+            Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+        }
         open(player);
     }
 
@@ -146,7 +182,7 @@ public class VoteGUI implements Listener {
             Inventory inventory,
             VoteMenuHolder holder,
             int rowOffset,
-            int totalRows,
+            int endRowExclusive,
             List<String> displayMaps,
             String selectedMap,
             GameModeEnum selectedGamemode,
@@ -158,7 +194,7 @@ public class VoteGUI implements Listener {
                 : plugin.getMapManager().getAvailableMapsForMode(selectedGamemode);
         Map<String, Long> mapVotes = plugin.getVoteManager().countMapVotes(eligibleVoters, eligibleMaps);
         int startSlot = rowOffset * 9;
-        int maxSlots = (totalRows - rowOffset) * 9;
+        int maxSlots = (endRowExclusive - rowOffset) * 9;
         if (displayMaps.isEmpty()) {
             inventory.setItem(startSlot, createNoMapsItem());
             return;
@@ -172,6 +208,22 @@ public class VoteGUI implements Listener {
             inventory.setItem(slot, createMapItem(mapName, mapData, selected, votes, lockMapVotes));
             holder.mapSlots.put(slot, mapName);
         }
+    }
+
+    private void fillReadinessRow(Inventory inventory, VoteMenuHolder holder, Player player, int row, VoteManager voteManager) {
+        int rowStart = row * 9;
+        for (int i = 0; i < 9; i++) {
+            inventory.setItem(rowStart + i, createSeparatorItem());
+        }
+
+        int headSlot = rowStart + 7;
+        int toggleSlot = rowStart + 8;
+        boolean ready = voteManager.isReady(player.getUniqueId());
+        boolean voteComplete = voteManager.hasCompletedVote(player.getUniqueId());
+
+        inventory.setItem(headSlot, createSelfHeadItem(player, ready));
+        inventory.setItem(toggleSlot, createReadyToggleItem(ready, voteComplete));
+        holder.readyToggleSlot = toggleSlot;
     }
 
     private List<String> getDisplayMaps(boolean gamemodeEnabled, GameModeEnum selectedGamemode, List<String> allMaps) {
@@ -295,17 +347,58 @@ public class VoteGUI implements Listener {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("No maps available", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(Component.text("Check your maps.yml configuration.", NamedTextColor.GRAY)
+            meta.displayName(Component.text("No maps available :(", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
+            meta.lore(List.of(Component.text("There are no maps configured for this mode.", NamedTextColor.GRAY)
                     .decoration(TextDecoration.ITALIC, false)));
             item.setItemMeta(meta);
         }
         return item;
     }
 
+    private ItemStack createSelfHeadItem(Player player, boolean ready) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta rawMeta = item.getItemMeta();
+        if (!(rawMeta instanceof SkullMeta meta)) {
+            return item;
+        }
+
+        meta.setOwningPlayer(player);
+        meta.displayName(Component.text("Your Readiness", NamedTextColor.AQUA, TextDecoration.BOLD)
+                .decoration(TextDecoration.ITALIC, false));
+        meta.lore(List.of(
+                Component.text("Status: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                        .append(Component.text(ready ? "READY" : "NOT READY", ready ? NamedTextColor.GREEN : NamedTextColor.RED))
+        ));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack createReadyToggleItem(boolean ready, boolean voteComplete) {
+        Material material = ready ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return item;
+        }
+
+        meta.displayName(Component.text(ready ? "Ready" : "Not Ready", ready ? NamedTextColor.GREEN : NamedTextColor.RED, TextDecoration.BOLD)
+                .decoration(TextDecoration.ITALIC, false));
+        List<Component> lore = new ArrayList<>();
+        lore.add(Component.text("Click to toggle", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        if (!voteComplete && plugin.getVoteManager().isVotingEnabled()) {
+            lore.add(Component.text("Voting is not complete yet.", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("You can still ready manually.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        }
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        applySelectionGlow(item, ready);
+        return item;
+    }
+
     private static final class VoteMenuHolder implements InventoryHolder {
         private final Map<Integer, GameModeEnum> gamemodeSlots = new HashMap<>();
         private final Map<Integer, String> mapSlots = new HashMap<>();
+        private int readyToggleSlot = -1;
         private Inventory inventory;
 
         @Override

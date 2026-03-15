@@ -5,6 +5,7 @@ import de.thecoolcraft11.hideAndSeek.gui.*;
 import de.thecoolcraft11.hideAndSeek.items.*;
 import de.thecoolcraft11.hideAndSeek.listener.game.BlockModeListener;
 import de.thecoolcraft11.hideAndSeek.listener.game.GameStateListener;
+import de.thecoolcraft11.hideAndSeek.listener.game.SetPhaseReadinessGuardListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.CrossbowTrackerListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.LightningListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.SlownessBallListener;
@@ -45,6 +46,7 @@ public final class HideAndSeek extends MinigameFramework {
     private NmsAdapter nmsAdapter;
     private VoteManager voteManager;
     private VoteGUI voteGUI;
+    private ReadyGUI readyGUI;
 
     @Override
     protected void onGameEnable() {
@@ -60,6 +62,7 @@ public final class HideAndSeek extends MinigameFramework {
         pointService = new PointService(this);
         voteManager = new VoteManager(this);
         voteGUI = new VoteGUI(this);
+        readyGUI = new ReadyGUI(this);
 
         nmsAdapter = NmsLoader.load(this);
 
@@ -100,6 +103,8 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(mapGUI, this);
         Bukkit.getPluginManager().registerEvents(skinGUI, this);
         Bukkit.getPluginManager().registerEvents(voteGUI, this);
+        Bukkit.getPluginManager().registerEvents(readyGUI, this);
+        Bukkit.getPluginManager().registerEvents(new SetPhaseReadinessGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerSpectateListener(), this);
 
 
@@ -114,6 +119,7 @@ public final class HideAndSeek extends MinigameFramework {
         MinigameSubcommandRegistry.register(new LoadoutCommand(this));
         MinigameSubcommandRegistry.register(new ItemSkinCommand(this));
         MinigameSubcommandRegistry.register(new VoteCommand(this));
+        MinigameSubcommandRegistry.register(new ReadyCommand(this));
 
         timerPlugin = (Timer) Bukkit.getPluginManager().getPlugin("Timer");
         if (timerPlugin != null) {
@@ -250,5 +256,9 @@ public final class HideAndSeek extends MinigameFramework {
 
     public VoteGUI getVoteGUI() {
         return voteGUI;
+    }
+
+    public ReadyGUI getReadyGUI() {
+        return readyGUI;
     }
 }
