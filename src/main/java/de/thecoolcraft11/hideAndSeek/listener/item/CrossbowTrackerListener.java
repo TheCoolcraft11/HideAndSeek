@@ -35,7 +35,7 @@ public class CrossbowTrackerListener implements Listener {
         if (event.getProjectile() instanceof Arrow arrow) {
             boolean laserTag = ItemSkinSelectionService.isSelected(shooter, TrackerCrossbowItem.ID, "skin_laser_tag");
             if (laserTag) {
-                // Much more visible trail for the laser-tag skin
+
                 arrow.getWorld().spawnParticle(org.bukkit.Particle.ELECTRIC_SPARK, arrow.getLocation(), 24, 0.18, 0.18, 0.18, 0.05);
                 arrow.getWorld().playSound(arrow.getLocation(), org.bukkit.Sound.BLOCK_BEACON_POWER_SELECT, 0.6f, 1.6f);
 

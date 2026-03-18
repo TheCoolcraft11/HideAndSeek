@@ -30,6 +30,32 @@ public class MapManager {
         return plugin.getConfig().getStringList("maps");
     }
 
+    public List<String> getMapsForVoting() {
+        List<String> maps = new ArrayList<>(mapDataCache.keySet());
+        if (maps.isEmpty()) {
+            maps = new ArrayList<>(getAvailableMaps());
+        }
+        maps.removeIf(name -> name == null || name.isBlank());
+        maps.sort(String.CASE_INSENSITIVE_ORDER);
+        return maps;
+    }
+
+    public List<String> getAvailableMapsForMode(GameModeEnum mode) {
+        List<String> maps = getMapsForVoting();
+        if (mode == null) {
+            return maps;
+        }
+
+        List<String> filtered = new ArrayList<>();
+        for (String mapName : maps) {
+            MapData mapData = getMapData(mapName);
+            if (mapData == null || mapData.getPreferredModes().isEmpty() || mapData.getPreferredModes().contains(mode)) {
+                filtered.add(mapName);
+            }
+        }
+        return filtered;
+    }
+
     public List<String> getAvailableMapsByPreferredMode() {
         List<String> allMaps = getAvailableMaps();
 

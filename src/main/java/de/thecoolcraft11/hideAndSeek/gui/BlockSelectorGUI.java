@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek.gui;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.block.BlockAppearanceConfig;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
+import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -53,7 +54,6 @@ public class BlockSelectorGUI {
             return;
         }
 
-
         List<Material> displayMaterials = new ArrayList<>();
         Map<Material, BlockAppearanceConfig> configMap = new java.util.HashMap<>();
 
@@ -64,9 +64,7 @@ public class BlockSelectorGUI {
                 continue;
             }
 
-
             if (config.isCustomList() && config.hasVariantGroup() && !config.shouldShowAllVariantsInSelector()) {
-
                 if (config.getDefaultVariant() != null) {
                     try {
                         Material defaultMat = Material.valueOf(config.getDefaultVariant());
@@ -81,7 +79,6 @@ public class BlockSelectorGUI {
                 continue;
             }
 
-
             if (config.isCustomList() && config.shouldShowAllVariantsInSelector()) {
                 for (Material mat : config.getCustomMaterials()) {
                     if (!displayMaterials.contains(mat)) {
@@ -92,9 +89,7 @@ public class BlockSelectorGUI {
                 continue;
             }
 
-
             Material displayMaterial = null;
-
             if (config.isAllowAllVariants() && config.getDefaultVariant() != null) {
                 try {
                     displayMaterial = Material.valueOf(config.getDefaultVariant());
@@ -116,18 +111,25 @@ public class BlockSelectorGUI {
         }
 
         int rows = Math.min(6, (displayMaterials.size() + 8) / 9);
-        FrameworkInventory inventory = plugin.getInventoryFramework().create("Choose Your Block", rows);
-        inventory.setSetting("allow_outside_clicks", false);
-        inventory.setSetting("allow_drag", false);
-        inventory.setSetting("allow_player_inventory_interaction", false);
+        FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
+                .id("block_selector_" + player.getUniqueId())
+                .title("Choose Your Block")
+                .rows(rows)
+                .allowOutsideClicks(false)
+                .allowDrag(false)
+                .allowPlayerInventoryInteraction(false)
+                .build();
+
         Material currentlyChosen = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
         int slot = 0;
         for (Material material : displayMaterials) {
             if (slot >= rows * 9) break;
             BlockAppearanceConfig config = configMap.get(material);
             ItemStack item = createBlockItem(material, currentlyChosen == material);
-            inventory.setItem(slot, new InventoryItem(item).onClick((p, type) -> {
-                if (type == ClickType.LEFT) {
+
+            InventoryItem blockItem = new InventoryItem(item);
+            blockItem.setClickHandler((p, invItem, event, s) -> {
+                if (event.getClick() == ClickType.LEFT) {
                     HideAndSeek.getDataController().setChosenBlock(p.getUniqueId(), material);
                     playerConfigs.put(p.getUniqueId(), config);
 
@@ -142,22 +144,26 @@ public class BlockSelectorGUI {
                         HideAndSeek.getDataController().setChosenBlockData(p.getUniqueId(), material.createBlockData());
                     }
 
-
                     de.thecoolcraft11.hideAndSeek.items.HiderItems.updateAppearanceItem(p, plugin);
 
                     p.sendMessage(Component.text("Selected ", NamedTextColor.GREEN)
                             .append(Component.text(formatName(material.name()), NamedTextColor.GOLD)));
 
-
                     if (config.isAllowAllVariants() || config.hasVariantGroup() || config.isAllowAllBlockStates() || !config.getAllowedStates().isEmpty()) {
                         p.closeInventory();
-
                         Bukkit.getScheduler().runTaskLater(plugin, () -> new AppearanceGUI(plugin, BlockSelectorGUI.this).open(p), 1L);
                     } else {
                         p.closeInventory();
                     }
                 }
-            }));
+                event.setCancelled(true);
+            });
+            blockItem.setAllowTakeout(false);
+            blockItem.setAllowInsert(false);
+            blockItem.setMetadata("material", material.name());
+            blockItem.setMetadata("is_selected", currentlyChosen == material);
+
+            inventory.setItem(slot, blockItem);
             slot++;
         }
         plugin.getInventoryFramework().openInventory(player, inventory);
