@@ -33,4 +33,12 @@ permissions:
   hideandseek.command.map:
     description: Allows selecting and setting maps
     default: op
-
+  hideandseek.command.vote:
+    description: Allows using /mg vote command
+    default: true
+  hideandseek.command.ready:
+    description: Allows toggling ready status with /mg ready
+    default: true
+  hideandseek.command.ready.gui:
+    description: Allows opening the readiness overview GUI
+    default: op

@@ -1,8 +1,10 @@
 package de.thecoolcraft11.hideAndSeek.phase;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.map.MapConfigHelper;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
+import de.thecoolcraft11.hideAndSeek.vote.VotingResult;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.game.GamePhase;
 import net.kyori.adventure.text.Component;
@@ -36,6 +38,7 @@ public class LobbyPhase implements GamePhase {
     public void onStart(MinigameFramework plugin) {
 
         HideAndSeek.getDataController().reset();
+        ((HideAndSeek) plugin).getVoteManager().resetVotes();
 
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -59,6 +62,7 @@ public class LobbyPhase implements GamePhase {
 
     @Override
     public void onEnd(MinigameFramework plugin) {
+        applyVotingOutcome((HideAndSeek) plugin);
 
         assignRoles(plugin);
 
@@ -72,6 +76,30 @@ public class LobbyPhase implements GamePhase {
     @Override
     public List<String> getAllowedTransitions() {
         return List.of("hiding");
+    }
+
+    private void applyVotingOutcome(HideAndSeek plugin) {
+        VotingResult result = plugin.getVoteManager().resolveVotingResult(plugin.getVoteManager().getOnlineVoterIds());
+
+        if (!result.hasAnyVotes()) {
+            plugin.getLogger().info("No votes submitted in lobby; using default map/gamemode behavior.");
+            return;
+        }
+
+        if (result.winningGamemode() != null) {
+            GameModeEnum winningMode = result.winningGamemode();
+            var setResult = plugin.getSettingService().setSetting("game.gametype", winningMode.name());
+            if (setResult.isSuccess()) {
+                plugin.getLogger().info("Applied voted gamemode: " + winningMode.name());
+            } else {
+                plugin.getLogger().warning("Failed to apply voted gamemode " + winningMode.name() + ": " + setResult.getErrorMessage());
+            }
+        }
+
+        if (result.winningMap() != null && !result.winningMap().isBlank()) {
+            HideAndSeek.getDataController().setCurrentMapName(result.winningMap());
+            plugin.getLogger().info("Applied voted map: " + result.winningMap());
+        }
     }
 
     private void assignRoles(MinigameFramework plugin) {

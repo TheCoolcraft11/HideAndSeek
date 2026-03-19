@@ -5,6 +5,7 @@ import de.thecoolcraft11.hideAndSeek.block.BlockAppearanceConfig;
 import de.thecoolcraft11.hideAndSeek.block.BlockListParser;
 import de.thecoolcraft11.hideAndSeek.block.BlockStateFilter;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
+import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -119,14 +120,23 @@ public class AppearanceGUI {
         List<FrameworkInventory> inventories = new ArrayList<>();
 
         for (int i = 0; i < totalPages; i++) {
-            FrameworkInventory inv = plugin.getInventoryFramework().create("Customize Appearance (" + (i + 1) + "/" + totalPages + ")", 6);
-            setupSettings(inv);
+            FrameworkInventory inv = new InventoryBuilder(plugin.getInventoryFramework())
+                    .id("appearance_" + player.getUniqueId() + "_page_" + i)
+                    .title("Customize Appearance (" + (i + 1) + "/" + totalPages + ")")
+                    .rows(6)
+                    .allowOutsideClicks(false)
+                    .allowDrag(false)
+                    .allowPlayerInventoryInteraction(false)
+                    .build();
 
             int start = i * itemsPerPage;
             int end = Math.min(start + itemsPerPage, allItems.size());
 
             for (int slot = 0; slot < (end - start); slot++) {
-                inv.setItem(slot, allItems.get(start + slot));
+                InventoryItem item = allItems.get(start + slot);
+                item.setAllowTakeout(false);
+                item.setAllowInsert(false);
+                inv.setItem(slot, item);
             }
 
             addFooter(inv);
@@ -137,17 +147,27 @@ public class AppearanceGUI {
             FrameworkInventory current = inventories.get(i);
             if (i > 0) {
                 int finalI = i;
-                current.setItem(48, new InventoryItem(createNavArrow("◀ Previous")).onClick((p, t) -> {
+                InventoryItem prevBtn = new InventoryItem(createNavArrow("◀ Previous"));
+                prevBtn.setClickHandler((p, item, event, slot) -> {
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.8f, 1.0f);
                     plugin.getInventoryFramework().openInventory(p, inventories.get(finalI - 1));
-                }));
+                    event.setCancelled(true);
+                });
+                prevBtn.setAllowTakeout(false);
+                prevBtn.setAllowInsert(false);
+                current.setItem(48, prevBtn);
             }
             if (i < inventories.size() - 1) {
                 int finalI1 = i;
-                current.setItem(50, new InventoryItem(createNavArrow("Next ▶")).onClick((p, t) -> {
+                InventoryItem nextBtn = new InventoryItem(createNavArrow("Next ▶"));
+                nextBtn.setClickHandler((p, item, event, slot) -> {
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.8f, 1.0f);
                     plugin.getInventoryFramework().openInventory(p, inventories.get(finalI1 + 1));
-                }));
+                    event.setCancelled(true);
+                });
+                nextBtn.setAllowTakeout(false);
+                nextBtn.setAllowInsert(false);
+                current.setItem(50, nextBtn);
             }
         }
 
@@ -174,7 +194,8 @@ public class AppearanceGUI {
 
             int myPage = allItems.size() / 45;
 
-            allItems.add(new InventoryItem(createVariantItem(variant, isSelected)).onClick((p, type) -> {
+            InventoryItem variantItem = new InventoryItem(createVariantItem(variant, isSelected));
+            variantItem.setClickHandler((p, item, event, slot) -> {
                 BlockData previousData = HideAndSeek.getDataController().getChosenBlockData(p.getUniqueId());
                 BlockData newData = variant.createBlockData();
                 if (previousData != null) copySharedBlockStates(previousData, newData);
@@ -183,7 +204,14 @@ public class AppearanceGUI {
 
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.5f);
                 open(p, myPage);
-            }));
+                event.setCancelled(true);
+            });
+            variantItem.setAllowTakeout(false);
+            variantItem.setAllowInsert(false);
+            variantItem.setMetadata("variant_material", variant.name());
+            variantItem.setMetadata("is_selected", isSelected);
+
+            allItems.add(variantItem);
         }
     }
 
@@ -199,12 +227,18 @@ public class AppearanceGUI {
 
             int myPage = allItems.size() / 45;
 
-            allItems.add(new InventoryItem(createStateItem(propertyName, player, data)).onClick((p, type) -> {
-                cyclePropertyValue(p, propertyName, type == ClickType.RIGHT);
-
+            InventoryItem stateItem = new InventoryItem(createStateItem(propertyName, player, data));
+            stateItem.setClickHandler((p, item, event, slot) -> {
+                cyclePropertyValue(p, propertyName, event.getClick() == ClickType.RIGHT);
                 p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.2f);
                 open(p, myPage);
-            }));
+                event.setCancelled(true);
+            });
+            stateItem.setAllowTakeout(false);
+            stateItem.setAllowInsert(false);
+            stateItem.setMetadata("property_name", propertyName);
+
+            allItems.add(stateItem);
         }
     }
 
@@ -427,11 +461,5 @@ public class AppearanceGUI {
 
     private String formatName(String name) {
         return Arrays.stream(name.toLowerCase().split("_")).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1)).collect(Collectors.joining(" "));
-    }
-
-    private void setupSettings(FrameworkInventory inv) {
-        inv.setSetting("allow_outside_clicks", false);
-        inv.setSetting("allow_drag", false);
-        inv.setSetting("allow_player_inventory_interaction", false);
     }
 }

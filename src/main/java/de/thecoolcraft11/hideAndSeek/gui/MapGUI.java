@@ -3,6 +3,9 @@ package de.thecoolcraft11.hideAndSeek.gui;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
+import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
+import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
+import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -10,18 +13,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapGUI implements Listener {
+public class MapGUI {
     private final HideAndSeek plugin;
 
     public MapGUI(HideAndSeek plugin) {
@@ -32,18 +30,27 @@ public class MapGUI implements Listener {
         List<String> availableMaps = plugin.getMapManager().getAvailableMaps();
         int rows = Math.max(3, (availableMaps.size() + 9) / 9);
 
-        Inventory inventory = Bukkit.createInventory(null, rows * 9,
-                Component.text("Select Map", NamedTextColor.GOLD));
+        FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
+                .id("map_selector_" + player.getUniqueId())
+                .title("Select Map")
+                .rows(rows)
+                .allowOutsideClicks(false)
+                .allowDrag(false)
+                .allowPlayerInventoryInteraction(false)
+                .build();
 
         String currentMapName = HideAndSeek.getDataController().getCurrentMapName();
 
-
         boolean isRandomSelected = (currentMapName == null || currentMapName.isEmpty());
-        ItemStack randomMapItem = createMapMenuItem(
-                isRandomSelected
-        );
-        inventory.setItem(0, randomMapItem);
-
+        ItemStack randomMapItem = createMapMenuItem(isRandomSelected);
+        InventoryItem randomItem = new InventoryItem(randomMapItem);
+        randomItem.setClickHandler((p, item, event, slot) -> {
+            selectRandomMap(p);
+            event.setCancelled(true);
+        });
+        randomItem.setAllowTakeout(false);
+        randomItem.setAllowInsert(false);
+        inventory.setItem(0, randomItem);
 
         int slot = 1;
         for (String mapName : availableMaps) {
@@ -51,39 +58,20 @@ public class MapGUI implements Listener {
             MapData mapData = plugin.getMapManager().getMapData(mapName);
 
             ItemStack mapItem = createMapItemWithData(mapName, mapData, isCurrentMap);
-            inventory.setItem(slot++, mapItem);
+            final String selectedMapName = mapName;
+            InventoryItem mapGuiItem = new InventoryItem(mapItem);
+            mapGuiItem.setClickHandler((p, item, event, s) -> {
+                selectSpecificMap(p, selectedMapName);
+                event.setCancelled(true);
+            });
+            mapGuiItem.setAllowTakeout(false);
+            mapGuiItem.setAllowInsert(false);
+            inventory.setItem(slot++, mapGuiItem);
         }
 
-        player.openInventory(inventory);
+        plugin.getInventoryFramework().openInventory(player, inventory);
     }
 
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-
-        Component title = event.getView().title();
-        String titleStr = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(title);
-
-        if (!titleStr.equals("Select Map")) return;
-
-        event.setCancelled(true);
-
-        if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
-
-        int slot = event.getRawSlot();
-
-        if (event.getClick() != ClickType.LEFT) return;
-
-        if (slot == 0) {
-            selectRandomMap(player);
-            return;
-        }
-
-        String mapName = getMapNameFromSlot(slot - 1);
-        if (mapName != null) {
-            selectSpecificMap(player, mapName);
-        }
-    }
 
     private void selectRandomMap(Player player) {
         HideAndSeek.getDataController().setCurrentMapName(null);
@@ -122,13 +110,6 @@ public class MapGUI implements Listener {
         }, 1L);
     }
 
-    private String getMapNameFromSlot(int index) {
-        List<String> availableMaps = plugin.getMapManager().getAvailableMaps();
-        if (index >= 0 && index < availableMaps.size()) {
-            return availableMaps.get(index);
-        }
-        return null;
-    }
 
     private ItemStack createMapMenuItem(boolean highlight) {
         ItemStack item = new ItemStack(Material.COMPASS);

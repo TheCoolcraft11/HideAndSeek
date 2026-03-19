@@ -1,13 +1,11 @@
 package de.thecoolcraft11.hideAndSeek;
 
 import de.thecoolcraft11.hideAndSeek.command.*;
-import de.thecoolcraft11.hideAndSeek.gui.BlockSelectorGUI;
-import de.thecoolcraft11.hideAndSeek.gui.LoadoutGUI;
-import de.thecoolcraft11.hideAndSeek.gui.MapGUI;
-import de.thecoolcraft11.hideAndSeek.gui.SkinGUI;
+import de.thecoolcraft11.hideAndSeek.gui.*;
 import de.thecoolcraft11.hideAndSeek.items.*;
 import de.thecoolcraft11.hideAndSeek.listener.game.BlockModeListener;
 import de.thecoolcraft11.hideAndSeek.listener.game.GameStateListener;
+import de.thecoolcraft11.hideAndSeek.listener.game.SetPhaseReadinessGuardListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.CrossbowTrackerListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.LightningListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.SlownessBallListener;
@@ -25,6 +23,7 @@ import de.thecoolcraft11.hideAndSeek.util.map.MapManager;
 import de.thecoolcraft11.hideAndSeek.util.points.PointService;
 import de.thecoolcraft11.hideAndSeek.util.setting.SettingChangeListener;
 import de.thecoolcraft11.hideAndSeek.util.setting.SettingRegisterer;
+import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
 import de.thecoolcraft11.timer.Timer;
@@ -47,6 +46,9 @@ public final class HideAndSeek extends MinigameFramework {
     private NmsAdapter nmsAdapter;
     private PlayerHitListener playerHitListener;
     private int worldBorderCheckTaskId = -1;
+    private VoteManager voteManager;
+    private VoteGUI voteGUI;
+    private ReadyGUI readyGUI;
 
     @Override
     protected void onGameEnable() {
@@ -60,6 +62,9 @@ public final class HideAndSeek extends MinigameFramework {
         mapGUI = new MapGUI(this);
         skinGUI = new SkinGUI(this);
         pointService = new PointService(this);
+        voteManager = new VoteManager(this);
+        voteGUI = new VoteGUI(this);
+        readyGUI = new ReadyGUI(this);
 
         nmsAdapter = NmsLoader.load(this);
 
@@ -85,8 +90,7 @@ public final class HideAndSeek extends MinigameFramework {
 
         blockModeListener = new BlockModeListener(this);
 
-        playerHitListener = new PlayerHitListener(this);
-        Bukkit.getPluginManager().registerEvents(playerHitListener, this);
+        Bukkit.getPluginManager().registerEvents(new PlayerHitListener(this), this);
         Bukkit.getPluginManager().registerEvents(new GameStateListener(this), this);
         Bukkit.getPluginManager().registerEvents(blockModeListener, this);
         Bukkit.getPluginManager().registerEvents(new HiderEquipmentChangeListener(this), this);
@@ -97,9 +101,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new LightningListener(this), this);
         Bukkit.getPluginManager().registerEvents(new SlownessBallListener(this), this);
         Bukkit.getPluginManager().registerEvents(new SmokeBombListener(this), this);
-        Bukkit.getPluginManager().registerEvents(loadoutGUI, this);
-        Bukkit.getPluginManager().registerEvents(mapGUI, this);
-        Bukkit.getPluginManager().registerEvents(skinGUI, this);
+        Bukkit.getPluginManager().registerEvents(new SetPhaseReadinessGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerSpectateListener(), this);
 
 
@@ -120,6 +122,8 @@ public final class HideAndSeek extends MinigameFramework {
         MinigameSubcommandRegistry.register(new MapCommand(this));
         MinigameSubcommandRegistry.register(new LoadoutCommand(this));
         MinigameSubcommandRegistry.register(new ItemSkinCommand(this));
+        MinigameSubcommandRegistry.register(new VoteCommand(this));
+        MinigameSubcommandRegistry.register(new ReadyCommand(this));
 
         timerPlugin = (Timer) Bukkit.getPluginManager().getPlugin("Timer");
         if (timerPlugin != null) {
@@ -251,5 +255,17 @@ public final class HideAndSeek extends MinigameFramework {
 
     public NmsAdapter getNmsAdapter() {
         return nmsAdapter;
+    }
+
+    public VoteManager getVoteManager() {
+        return voteManager;
+    }
+
+    public VoteGUI getVoteGUI() {
+        return voteGUI;
+    }
+
+    public ReadyGUI getReadyGUI() {
+        return readyGUI;
     }
 }

@@ -116,6 +116,10 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.game.worldborder_damage_cooldown", Integer.class, 20);
         plugin.getConfigRegistry().register("settings.game.small_mode_size", Double.class, 0.5);
         plugin.getConfigRegistry().register("settings.game.random_team_distribution", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.vote_gamemode_enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.vote_map_enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.vote_show_counts", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.readiness_enabled", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_preferred_modes", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_map_specific_timings", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_map_specific_seeker_count", Boolean.class, true);
@@ -461,6 +465,46 @@ public class SettingRegisterer {
                 .valueIconStacks(Map.of(
                         true, setEnchanted(Material.PLAYER_HEAD, true),
                         false, setEnchanted(Material.PLAYER_HEAD, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.vote_gamemode_enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.vote_gamemode_enabled", true))
+                .description("Allow players to vote for gamemodes in lobby")
+                .customIcon(Material.COMMAND_BLOCK)
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.COMMAND_BLOCK, true),
+                        false, setEnchanted(Material.COMMAND_BLOCK, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.vote_map_enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.vote_map_enabled", true))
+                .description("Allow players to vote for maps in lobby")
+                .customIcon(Material.MAP)
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.MAP, true),
+                        false, setEnchanted(Material.MAP, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.vote_show_counts", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.vote_show_counts", true))
+                .description("Show current vote counts in the voting GUI")
+                .customIcon(Material.PAPER)
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.PAPER, true),
+                        false, setEnchanted(Material.PAPER, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.readiness_enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.readiness_enabled", true))
+                .description("Require players to ready up before the round can start")
+                .customIcon(Material.LIME_STAINED_GLASS_PANE)
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.LIME_STAINED_GLASS_PANE, true),
+                        false, setEnchanted(Material.RED_STAINED_GLASS_PANE, false)
                 ))
                 .build());
 
