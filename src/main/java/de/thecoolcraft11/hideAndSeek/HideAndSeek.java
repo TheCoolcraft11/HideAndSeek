@@ -89,8 +89,9 @@ public final class HideAndSeek extends MinigameFramework {
         SeekerItemSkins.registerAll(this);
 
         blockModeListener = new BlockModeListener(this);
+        playerHitListener = new PlayerHitListener(this);
 
-        Bukkit.getPluginManager().registerEvents(new PlayerHitListener(this), this);
+        Bukkit.getPluginManager().registerEvents(playerHitListener, this);
         Bukkit.getPluginManager().registerEvents(new GameStateListener(this), this);
         Bukkit.getPluginManager().registerEvents(blockModeListener, this);
         Bukkit.getPluginManager().registerEvents(new HiderEquipmentChangeListener(this), this);
