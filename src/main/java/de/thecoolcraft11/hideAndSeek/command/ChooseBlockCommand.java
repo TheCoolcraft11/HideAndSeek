@@ -147,7 +147,9 @@ public class ChooseBlockCommand implements MinigameSubcommand {
                 .append(Component.text("!", NamedTextColor.YELLOW))
                 .build());
 
-        plugin.getLogger().info(player.getName() + " chose block: " + material.name());
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info(player.getName() + " chose block: " + material.name());
+        }
 
         return true;
     }

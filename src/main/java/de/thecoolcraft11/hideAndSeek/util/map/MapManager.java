@@ -96,7 +96,9 @@ public class MapManager {
             return allMaps;
         }
 
-        plugin.getLogger().info("Filtered " + filteredMaps.size() + " maps for mode " + currentMode + " out of " + allMaps.size() + " total maps");
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Filtered " + filteredMaps.size() + " maps for mode " + currentMode + " out of " + allMaps.size() + " total maps");
+        }
         return filteredMaps;
     }
 
@@ -115,7 +117,9 @@ public class MapManager {
                 MapData mapData = loadMapFromConfig(mapName, mapConfig.getConfigurationSection(mapName));
                 if (mapData != null) {
                     mapDataCache.put(mapName, mapData);
-                    plugin.getLogger().info("Loaded map config for: " + mapName);
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info("Loaded map config for: " + mapName);
+                    }
                 }
             }
         }
@@ -130,7 +134,9 @@ public class MapManager {
                     MapData mapData = loadMapFromConfig(mapName, section);
                     if (mapData != null) {
                         mapDataCache.put(mapName, mapData);
-                        plugin.getLogger().info("Loaded map from maps.yml: " + mapName);
+                        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                            plugin.getLogger().info("Loaded map from maps.yml: " + mapName);
+                        }
                     }
                 }
             }
@@ -204,7 +210,9 @@ public class MapManager {
         List<String> allowedBlockStrings = section.getStringList("allowed-blocks");
         mapData.setAllowedBlocks(allowedBlockStrings);
         if (!allowedBlockStrings.isEmpty()) {
-            plugin.getLogger().info("Loaded " + allowedBlockStrings.size() + " allowed block patterns for map " + mapName);
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Loaded " + allowedBlockStrings.size() + " allowed block patterns for map " + mapName);
+            }
         }
 
 
@@ -333,7 +341,9 @@ public class MapManager {
         }
 
         String selectedMap = maps.get((int) (Math.random() * maps.size()));
-        plugin.getLogger().info("Selected map: " + selectedMap);
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Selected map: " + selectedMap);
+        }
         return selectedMap;
     }
 
@@ -360,7 +370,9 @@ public class MapManager {
             File uidFile = new File(destDir, "uid.dat");
             if (uidFile.exists()) {
                 uidFile.delete();
-                plugin.getLogger().info("Deleted uid.dat from working world to prevent duplicate error");
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Deleted uid.dat from working world to prevent duplicate error");
+                }
             }
 
 
@@ -369,7 +381,9 @@ public class MapManager {
             World workingWorld = worldCreator.createWorld();
 
             if (workingWorld != null) {
-                plugin.getLogger().info("Created working world: " + workingWorldName);
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Created working world: " + workingWorldName);
+                }
                 workingWorld.setAutoSave(false);
                 workingWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
                 workingWorld.setGameRule(GameRule.LOCATOR_BAR, false);
@@ -404,17 +418,23 @@ public class MapManager {
 
             if (spawnWithBorder != null) {
                 spawnLocation = spawnWithBorder.spawnPoint().toLocation(workingWorld);
-                plugin.getLogger().info("Using configured spawn point #" + spawnWithBorder.spawnIndex() + " from MapData for map: " + mapName);
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Using configured spawn point #" + spawnWithBorder.spawnIndex() + " from MapData for map: " + mapName);
+                }
 
 
                 if (!mapData.getWorldBorders().isEmpty() && spawnWithBorder.borderIndex() >= 0) {
                     mapData.applyWorldBorder(workingWorld, spawnWithBorder.borderIndex());
-                    plugin.getLogger().info("Applied world border #" + spawnWithBorder.borderIndex() + " for spawn #" + spawnWithBorder.spawnIndex());
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info("Applied world border #" + spawnWithBorder.borderIndex() + " for spawn #" + spawnWithBorder.spawnIndex());
+                    }
 
 
                     HideAndSeek.getDataController().setCurrentBorderIndex(spawnWithBorder.borderIndex());
                 } else {
-                    plugin.getLogger().info("No world borders configured for this map");
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info("No world borders configured for this map");
+                    }
                     HideAndSeek.getDataController().setCurrentBorderIndex(-1);
                 }
             } else {
@@ -439,7 +459,9 @@ public class MapManager {
             player.teleport(spawnLocation);
         }
 
-        plugin.getLogger().info("Teleported all players to map world: " + workingWorld.getName());
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Teleported all players to map world: " + workingWorld.getName());
+        }
     }
 
 
@@ -451,12 +473,16 @@ public class MapManager {
             if (world != null) {
 
                 Bukkit.unloadWorld(world, false);
-                plugin.getLogger().info("Unloaded world: " + workingWorldName);
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Unloaded world: " + workingWorldName);
+                }
             }
 
 
             deleteWorldIfExists(workingWorldName);
-            plugin.getLogger().info("Deleted working world: " + workingWorldName);
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Deleted working world: " + workingWorldName);
+            }
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to delete working world: " + e.getMessage());
         }

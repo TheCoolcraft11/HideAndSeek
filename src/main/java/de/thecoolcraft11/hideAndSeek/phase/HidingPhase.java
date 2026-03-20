@@ -54,11 +54,15 @@ public class HidingPhase implements GamePhase {
 
         if (selectedMapName != null && !selectedMapName.isEmpty()) {
 
-            plugin.getLogger().info("Using selected map: " + selectedMapName);
+            if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Using selected map: " + selectedMapName);
+            }
             gameWorld = hideAndSeekPlugin.getMapManager().copyMapToWorkingWorld(selectedMapName);
         } else {
 
-            plugin.getLogger().info("No specific map selected, choosing random map");
+            if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("No specific map selected, choosing random map");
+            }
             gameWorld = hideAndSeekPlugin.getMapManager().selectAndCopyMap(Bukkit.getOnlinePlayers().size());
 
 
@@ -85,13 +89,17 @@ public class HidingPhase implements GamePhase {
 
 
         int timeRemaining = MapConfigHelper.getHidingTime(plugin, currentMapData);
-        plugin.getLogger().info("Hiding phase started - " + timeRemaining + " seconds");
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Hiding phase started - " + timeRemaining + " seconds");
+        }
 
 
         var invisibilityResult = plugin.getSettingService().getSetting("game.hider_invisibility");
         Object invisibilityObj = invisibilityResult.isSuccess() ? invisibilityResult.getValue() : false;
         boolean grantInvisibility = (invisibilityObj instanceof Boolean) ? (Boolean) invisibilityObj : false;
-        plugin.getLogger().info("Invisibility setting: " + grantInvisibility);
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Invisibility setting: " + grantInvisibility);
+        }
 
 
         var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
@@ -135,13 +143,17 @@ public class HidingPhase implements GamePhase {
         var sizeResult = plugin.getSettingService().getSetting("game.small_mode_size");
         Object sizeObj = sizeResult.isSuccess() ? sizeResult.getValue() : 0.5;
         double sizeModifier = (sizeObj instanceof Double) ? (Double) sizeObj : 0.5;
-        plugin.getLogger().info("Size modifier: " + sizeModifier);
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Size modifier: " + sizeModifier);
+        }
 
 
         var hiderHealthResult = plugin.getSettingService().getSetting("game.hider_health");
         Object hiderHealthObj = hiderHealthResult.isSuccess() ? hiderHealthResult.getValue() : 20;
         double hiderHealth = (hiderHealthObj instanceof Integer) ? (Integer) hiderHealthObj : 20;
-        plugin.getLogger().info("Hider health: " + hiderHealth);
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Hider health: " + hiderHealth);
+        }
 
 
         for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
@@ -236,7 +248,9 @@ public class HidingPhase implements GamePhase {
                         } else {
                             hider.sendMessage(Component.text("You are invisible! Use this time to hide!", NamedTextColor.GREEN));
                         }
-                        plugin.getLogger().info(hider.getName() + " granted invisibility");
+                        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                            plugin.getLogger().info(hider.getName() + " granted invisibility");
+                        }
                     } catch (Exception e) {
                         plugin.getLogger().warning("Failed to grant invisibility to " + hider.getName() + ": " + e.getMessage());
                     }
@@ -250,7 +264,9 @@ public class HidingPhase implements GamePhase {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         try {
                             Objects.requireNonNull(hider.getAttribute(Attribute.SCALE)).setBaseValue(finalSizeModifier);
-                            plugin.getLogger().info(hider.getName() + " size set to " + finalSizeModifier);
+                            if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                                plugin.getLogger().info(hider.getName() + " size set to " + finalSizeModifier);
+                            }
                         } catch (Exception e) {
                             plugin.getLogger().warning("Failed to set size for " + hider.getName() + ": " + e.getMessage());
                         }
@@ -372,7 +388,9 @@ public class HidingPhase implements GamePhase {
 
         HiderItems.removeFromAllPlayers();
 
-        plugin.getLogger().info("Hiding phase ended - seeking phase starting");
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Hiding phase ended - seeking phase starting");
+        }
 
         TimerManager.cleanupTimer(hideAndSeekPlugin, "Hiding");
     }

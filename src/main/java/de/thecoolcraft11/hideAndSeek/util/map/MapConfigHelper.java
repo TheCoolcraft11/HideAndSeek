@@ -37,9 +37,11 @@ public class MapConfigHelper {
             seekers = Math.min(seekers, mapMaxSeekers);
         }
 
-        plugin.getLogger().info("Calculated seekers from map config: " + seekers +
-                " (min=" + mapMinSeekers + ", perX=" + mapSeekersPerPlayers +
-                ", max=" + mapMaxSeekers + ", players=" + playerCount + ")");
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Calculated seekers from map config: " + seekers +
+                    " (min=" + mapMinSeekers + ", perX=" + mapSeekersPerPlayers +
+                    ", max=" + mapMaxSeekers + ", players=" + playerCount + ")");
+        }
 
         return seekers;
     }
@@ -49,7 +51,9 @@ public class MapConfigHelper {
         Object seekerCountObj = seekerCountResult.isSuccess() ? seekerCountResult.getValue() : 1;
         int seekerCount = (seekerCountObj instanceof Integer) ? (Integer) seekerCountObj : 1;
 
-        plugin.getLogger().info("Using global seeker count: " + seekerCount);
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Using global seeker count: " + seekerCount);
+        }
         return seekerCount;
     }
 
@@ -63,7 +67,9 @@ public class MapConfigHelper {
 
         if (useMapSpecific && mapData != null && mapData.getHidingTime() != null) {
             int hidingTime = mapData.getHidingTime();
-            plugin.getLogger().info("Using map-specific hiding time: " + hidingTime);
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Using map-specific hiding time: " + hidingTime);
+            }
             return hidingTime;
         }
 
@@ -72,7 +78,9 @@ public class MapConfigHelper {
         Object hidingTimeObj = hidingTimeResult.isSuccess() ? hidingTimeResult.getValue() : 60;
         int hidingTime = (hidingTimeObj instanceof Integer) ? (Integer) hidingTimeObj : 60;
 
-        plugin.getLogger().info("Using global hiding time: " + hidingTime);
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Using global hiding time: " + hidingTime);
+        }
         return hidingTime;
     }
 
@@ -85,7 +93,9 @@ public class MapConfigHelper {
 
         if (useMapSpecific && mapData != null && mapData.getSeekingTime() != null) {
             int seekingTime = mapData.getSeekingTime();
-            plugin.getLogger().info("Using map-specific seeking time: " + seekingTime);
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Using map-specific seeking time: " + seekingTime);
+            }
             return seekingTime;
         }
 
@@ -94,7 +104,9 @@ public class MapConfigHelper {
         Object seekingTimeObj = seekingTimeResult.isSuccess() ? seekingTimeResult.getValue() : 300;
         int seekingTime = (seekingTimeObj instanceof Integer) ? (Integer) seekingTimeObj : 300;
 
-        plugin.getLogger().info("Using global seeking time: " + seekingTime);
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Using global seeking time: " + seekingTime);
+        }
         return seekingTime;
     }
 
@@ -107,13 +119,15 @@ public class MapConfigHelper {
         var useMapSpecificResult = plugin.getSettingService().getSetting("game.use_map_specific_player_limits");
         Object useMapSpecificObj = useMapSpecificResult.isSuccess() ? useMapSpecificResult.getValue() : true;
         boolean useMapSpecific = (useMapSpecificObj instanceof Boolean) ? (Boolean) useMapSpecificObj : true;
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
 
         if (!useMapSpecific) {
-            plugin.getLogger().info("Map-specific player limits disabled, using all available maps");
+            if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Map-specific player limits disabled, using all available maps");
+            }
             return availableMaps;
         }
 
-        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
         java.util.List<String> filteredMaps = new java.util.ArrayList<>();
 
         for (String mapName : availableMaps) {
@@ -130,13 +144,17 @@ public class MapConfigHelper {
 
 
             if (minPlayers != null && playerCount < minPlayers) {
-                plugin.getLogger().info("Map '" + mapName + "' filtered out: playerCount (" + playerCount + ") < minPlayers (" + minPlayers + ")");
+                if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Map '" + mapName + "' filtered out: playerCount (" + playerCount + ") < minPlayers (" + minPlayers + ")");
+                }
                 continue;
             }
 
 
             if (maxPlayers != null && playerCount > maxPlayers) {
-                plugin.getLogger().info("Map '" + mapName + "' filtered out: playerCount (" + playerCount + ") > maxPlayers (" + maxPlayers + ")");
+                if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Map '" + mapName + "' filtered out: playerCount (" + playerCount + ") > maxPlayers (" + maxPlayers + ")");
+                }
                 continue;
             }
 
@@ -149,7 +167,9 @@ public class MapConfigHelper {
             return availableMaps;
         }
 
-        plugin.getLogger().info("Filtered maps by player count: " + filteredMaps.size() + " out of " + availableMaps.size());
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Filtered maps by player count: " + filteredMaps.size() + " out of " + availableMaps.size());
+        }
         return filteredMaps;
     }
 }

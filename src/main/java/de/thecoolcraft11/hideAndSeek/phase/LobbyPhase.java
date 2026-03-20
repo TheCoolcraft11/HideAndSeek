@@ -53,7 +53,10 @@ public class LobbyPhase implements GamePhase {
             player.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
         }
 
-        plugin.getLogger().info("Lobby phase started. Waiting for teams to be set up...");
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Lobby phase started. Waiting for teams to be set up...");
+        }
 
         ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
         Team dummyTeam = scoreboardManager.getMainScoreboard().getTeam("hiders_display");
@@ -82,7 +85,9 @@ public class LobbyPhase implements GamePhase {
         VotingResult result = plugin.getVoteManager().resolveVotingResult(plugin.getVoteManager().getOnlineVoterIds());
 
         if (!result.hasAnyVotes()) {
-            plugin.getLogger().info("No votes submitted in lobby; using default map/gamemode behavior.");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("No votes submitted in lobby; using default map/gamemode behavior.");
+            }
             return;
         }
 
@@ -90,7 +95,9 @@ public class LobbyPhase implements GamePhase {
             GameModeEnum winningMode = result.winningGamemode();
             var setResult = plugin.getSettingService().setSetting("game.gametype", winningMode.name());
             if (setResult.isSuccess()) {
-                plugin.getLogger().info("Applied voted gamemode: " + winningMode.name());
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Applied voted gamemode: " + winningMode.name());
+                }
             } else {
                 plugin.getLogger().warning("Failed to apply voted gamemode " + winningMode.name() + ": " + setResult.getErrorMessage());
             }
@@ -98,7 +105,9 @@ public class LobbyPhase implements GamePhase {
 
         if (result.winningMap() != null && !result.winningMap().isBlank()) {
             HideAndSeek.getDataController().setCurrentMapName(result.winningMap());
-            plugin.getLogger().info("Applied voted map: " + result.winningMap());
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Applied voted map: " + result.winningMap());
+            }
         }
     }
 
@@ -128,7 +137,9 @@ public class LobbyPhase implements GamePhase {
 
         if (randomDistribution) {
 
-            plugin.getLogger().info("Random team distribution enabled");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Random team distribution enabled");
+            }
 
 
             currentMapName = HideAndSeek.getDataController().getCurrentMapName();
@@ -160,7 +171,9 @@ public class LobbyPhase implements GamePhase {
 
             for (int i = 0; i < allPlayers.size(); i++) {
                 Player player = allPlayers.get(i);
-                plugin.getLogger().info("Removing player " + player.getName() + " from team");
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Removing player " + player.getName() + " from team");
+                }
                 plugin.getTeamManager().removePlayerFromTeam(player);
 
                 if (i < seekersToAssign) {
@@ -191,7 +204,9 @@ public class LobbyPhase implements GamePhase {
             }
         } else {
 
-            plugin.getLogger().info("Fixed team distribution enabled");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Fixed team distribution enabled");
+            }
 
             var fixedSeekerTeamResult = plugin.getSettingService().getSetting("game.fixed_seeker_team");
             String fixedSeekerTeamName = (fixedSeekerTeamResult.isSuccess() && fixedSeekerTeamResult.getValue() instanceof String) ?
@@ -207,7 +222,9 @@ public class LobbyPhase implements GamePhase {
                     useFixedSeekerTeam = false;
                 } else {
                     hidersTeam = teams.get((teams.indexOf(seekersTeam) + 1) % 2);
-                    plugin.getLogger().info("Using fixed seeker team: " + seekersTeam.getName());
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info("Using fixed seeker team: " + seekersTeam.getName());
+                    }
 
                     for (Player player : plugin.getTeamManager().getPlayersInTeam(seekersTeam)) {
                         HideAndSeek.getDataController().addSeeker(player.getUniqueId());

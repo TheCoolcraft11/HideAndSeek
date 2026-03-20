@@ -30,9 +30,11 @@ public class EndedPhase implements GamePhase {
 
     @Override
     public void onStart(MinigameFramework plugin) {
-        plugin.getLogger().info("Game ended");
-
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Game ended");
+        }
+
         TimerManager.cleanupTimers(hideAndSeekPlugin);
 
         List<UUID> activeHiders = new ArrayList<>();
@@ -213,8 +215,10 @@ public class EndedPhase implements GamePhase {
             player.sendMessage(Component.empty());
         }
 
-
-        plugin.getLogger().info((hidersWin ? "Hiders" : "Seekers") + " won the game!");
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info((hidersWin ? "Hiders" : "Seekers") + " won the game!");
+        }
     }
 
     @Override

@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -47,6 +49,9 @@ public class PlayerHitListener implements Listener {
             return;
         }
 
+        if (event.getCause() == EntityDamageEvent.DamageCause.WORLD_BORDER) {
+            return;
+        }
 
         if (plugin.getStateManager().getCurrentPhaseId().equals("seeking") || plugin.getStateManager().getCurrentPhaseId().equals("hiding")) {
             event.setCancelled(true);
@@ -284,7 +289,9 @@ public class PlayerHitListener implements Listener {
 
         if (seekerTeam != null) {
             plugin.getTeamManager().addPlayerToTeam(hider, seekerTeam.getName());
-            plugin.getLogger().info("Moved " + hider.getName() + " to seeker team: " + seekerTeam.getName());
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Moved " + hider.getName() + " to seeker team: " + seekerTeam.getName());
+            }
         } else {
             plugin.getLogger().warning("Could not find seeker team for eliminated hider!");
         }
@@ -307,7 +314,9 @@ public class PlayerHitListener implements Listener {
             hider.showTitle(title);
         }, 1L);
 
-        plugin.getLogger().info(hider.getName() + " was eliminated and is now spectating (moved to seeker team)");
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info(hider.getName() + " was eliminated and is now spectating (moved to seeker team)");
+        }
     }
 
     private void handleInvasionMode(Player hider) {
@@ -337,7 +346,9 @@ public class PlayerHitListener implements Listener {
 
         if (seekerTeam != null) {
             plugin.getTeamManager().addPlayerToTeam(hider, seekerTeam.getName());
-            plugin.getLogger().info("Added " + hider.getName() + " to seeker team: " + seekerTeam.getName());
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Added " + hider.getName() + " to seeker team: " + seekerTeam.getName());
+            }
         } else {
             plugin.getLogger().warning("Could not find seeker team for INVASION mode conversion!");
         }
@@ -370,7 +381,9 @@ public class PlayerHitListener implements Listener {
 
             try {
                 Objects.requireNonNull(hider.getAttribute(Attribute.SCALE)).setBaseValue(1.0);
-                plugin.getLogger().info("Reset size for converted seeker: " + hider.getName());
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Reset size for converted seeker: " + hider.getName());
+                }
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to reset size for " + hider.getName());
             }
@@ -383,7 +396,9 @@ public class PlayerHitListener implements Listener {
             hider.showTitle(title);
         }, 1L);
 
-        plugin.getLogger().info(hider.getName() + " was eliminated and joined the seekers (INVASION mode)");
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info(hider.getName() + " was eliminated and joined the seekers (INVASION mode)");
+        }
     }
 
     private void cleanupBlockModeHider(Player hider) {
@@ -446,7 +461,9 @@ public class PlayerHitListener implements Listener {
 
                 if (!hidersBorderExitTime.containsKey(hiderId)) {
                     hidersBorderExitTime.put(hiderId, currentTime);
-                    plugin.getLogger().info(hider.getName() + " went outside world border");
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info(hider.getName() + " went outside world border");
+                    }
                 }
 
 
@@ -460,15 +477,19 @@ public class PlayerHitListener implements Listener {
 
                     if (ticksSinceLastDamage >= damageCooldownTicks) {
 
-                        hider.damage(damageAmount, hider);
+                        hider.damage(damageAmount, DamageSource.builder(DamageType.OUT_OF_WORLD).build());
                         lastDamageTime.put(hiderId, currentTime);
-                        plugin.getLogger().info(hider.getName() + " took " + damageAmount + " damage for being outside border (" + timeOutsideSeconds + "s outside)");
+                        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                            plugin.getLogger().info(hider.getName() + " took " + damageAmount + " damage for being outside border (" + timeOutsideSeconds + "s outside)");
+                        }
                     }
                 }
             } else {
 
                 if (hidersBorderExitTime.containsKey(hiderId)) {
-                    plugin.getLogger().info(hider.getName() + " returned inside world border");
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info(hider.getName() + " returned inside world border");
+                    }
                 }
                 hidersBorderExitTime.remove(hiderId);
                 lastDamageTime.remove(hiderId);

@@ -58,12 +58,16 @@ public class GameStateListener implements Listener {
 
         if (HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
             HideAndSeek.getDataController().removeHider(player.getUniqueId());
-            plugin.getLogger().info(player.getName() + " (hider) left the game");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info(player.getName() + " (hider) left the game");
+            }
         }
 
         if (HideAndSeek.getDataController().getSeekers().contains(player.getUniqueId())) {
             HideAndSeek.getDataController().removeSeeker(player.getUniqueId());
-            plugin.getLogger().info(player.getName() + " (seeker) left the game");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info(player.getName() + " (seeker) left the game");
+            }
         }
     }
 

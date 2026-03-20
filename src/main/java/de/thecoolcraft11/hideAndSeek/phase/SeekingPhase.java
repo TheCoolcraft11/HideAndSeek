@@ -60,9 +60,13 @@ public class SeekingPhase implements GamePhase {
             if (mapData != null && !mapData.getWorldBorders().isEmpty() && borderIndex >= 0) {
 
                 mapData.applyWorldBorder(gameWorld, borderIndex);
-                plugin.getLogger().info("Re-applied world border #" + borderIndex + " for seeking phase on map: " + mapName);
+                if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Re-applied world border #" + borderIndex + " for seeking phase on map: " + mapName);
+                }
             } else if (borderIndex < 0) {
-                plugin.getLogger().info("No world borders configured for this map");
+                if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("No world borders configured for this map");
+                }
             }
         }
 
@@ -183,7 +187,9 @@ public class SeekingPhase implements GamePhase {
         HiderItems.removeFromAllPlayers();
         SeekerItems.removeFromAllPlayers();
 
-        plugin.getLogger().info("Seeking phase ended");
+        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Seeking phase ended");
+        }
 
         TimerManager.cleanupTimer(hideAndSeekPlugin, "Seeking");
     }

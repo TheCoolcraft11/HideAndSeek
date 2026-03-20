@@ -183,7 +183,9 @@ public class BlockModeListener implements Listener {
                 Bukkit.getScheduler().runTask(plugin, () -> unhidePlayer(hider));
             }
 
-            plugin.getLogger().info(breaker.getName() + " hit hidden hider " + hider.getName() + " for " + damage + " damage");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info(breaker.getName() + " hit hidden hider " + hider.getName() + " for " + damage + " damage");
+            }
         }
     }
 
@@ -339,13 +341,17 @@ public class BlockModeListener implements Listener {
                     Block hiddenBlock = hiddenLocation.getBlock();
                     boolean gazeKill = plugin.getSettingRegistry().get("game.seeker_kill_mode").equals("GAZE_KILL");
                     damageHiddenPlayer(attacker, hiddenBlock, gazeKill);
-                    plugin.getLogger().info(attacker.getName() + " hit hidden hider " + hider.getName() + " via interaction entity");
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info(attacker.getName() + " hit hidden hider " + hider.getName() + " via interaction entity");
+                    }
                 }
             } else {
 
                 double attackDamage = getDamage(attacker);
                 hider.damage(attackDamage, attacker);
-                plugin.getLogger().info(attacker.getName() + " hit walking hider " + hider.getName() + " via interaction for " + attackDamage + " damage");
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info(attacker.getName() + " hit walking hider " + hider.getName() + " via interaction for " + attackDamage + " damage");
+                }
             }
 
 
@@ -744,8 +750,10 @@ public class BlockModeListener implements Listener {
 
         player.sendActionBar(Component.text("Dismount (Shift) to unhide", NamedTextColor.GRAY));
 
-        plugin.getLogger().info(player.getName() + " hid as a " + chosenBlock.name() + " at " +
-                targetBlock.getX() + "," + targetBlock.getY() + "," + targetBlock.getZ());
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info(player.getName() + " hid as a " + chosenBlock.name() + " at " +
+                    targetBlock.getX() + "," + targetBlock.getY() + "," + targetBlock.getZ());
+        }
     }
 
     private void unhidePlayer(Player player) {

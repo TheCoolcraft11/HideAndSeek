@@ -22,7 +22,9 @@ public class TimerManager {
         try {
 
             plugin.getTimerApi().deleteTimer("Hiding");
-            plugin.getLogger().info("Deleted hiding timer");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Deleted hiding timer");
+            }
         } catch (Exception ignored) {
 
         }
@@ -30,7 +32,9 @@ public class TimerManager {
         try {
 
             plugin.getTimerApi().deleteTimer("Seeking");
-            plugin.getLogger().info("Deleted seeking timer");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Deleted seeking timer");
+            }
         } catch (Exception ignored) {
 
         }
@@ -43,7 +47,9 @@ public class TimerManager {
 
         try {
             plugin.getTimerApi().deleteTimer(timerName);
-            plugin.getLogger().info("Deleted timer: " + timerName);
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Deleted timer: " + timerName);
+            }
         } catch (Exception ignored) {
 
         }
@@ -112,7 +118,9 @@ public class TimerManager {
             });
 
             timer.start();
-            plugin.getLogger().info("Hiding timer started with TimerAPI");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Hiding timer started with TimerAPI");
+            }
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to create hiding timer using Timer API, falling back to custom timer: " + e.getMessage());
             startHidingTimerFallback(plugin);
@@ -181,7 +189,9 @@ public class TimerManager {
             });
 
             timer.start();
-            plugin.getLogger().info("Seeking timer started with TimerAPI");
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Seeking timer started with TimerAPI");
+            }
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to create seeking timer using Timer API, falling back to custom timer: " + e.getMessage());
             startSeekingTimerFallback(plugin);
