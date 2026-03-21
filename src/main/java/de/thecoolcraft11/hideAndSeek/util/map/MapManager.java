@@ -14,15 +14,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class MapManager {
     private static final String WORKING_WORLD_PREFIX = "has_";
     private final HideAndSeek plugin;
     private final Map<String, MapData> mapDataCache;
+    private final Map<String, Object> previousSettingValues;
 
     public MapManager(HideAndSeek plugin) {
         this.plugin = plugin;
         this.mapDataCache = new HashMap<>();
+        this.previousSettingValues = new LinkedHashMap<>();
         loadMapConfigurations();
     }
 
@@ -104,6 +107,58 @@ public class MapManager {
 
     public MapData getMapData(String mapName) {
         return mapDataCache.get(mapName);
+    }
+
+    public void applySettingOverridesForMap(String mapName) {
+        clearAppliedSettingOverrides();
+
+        var useOverridesResult = plugin.getSettingService().getSetting("game.use_map_specific_setting_overrides");
+        Object useOverridesObj = useOverridesResult.isSuccess() ? useOverridesResult.getValue() : true;
+        boolean useOverrides = (useOverridesObj instanceof Boolean) ? (Boolean) useOverridesObj : true;
+        if (!useOverrides || mapName == null || mapName.isBlank()) {
+            return;
+        }
+
+        MapData mapData = getMapData(mapName);
+        if (mapData == null || mapData.getSettingOverrides().isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, Object> entry : mapData.getSettingOverrides().entrySet()) {
+            String settingKey = entry.getKey();
+            if (settingKey == null || settingKey.isBlank()) {
+                continue;
+            }
+
+            var currentValueResult = plugin.getSettingService().getSetting(settingKey);
+            if (!currentValueResult.isSuccess()) {
+                plugin.getLogger().warning("Skipping unknown map setting override '" + settingKey + "' on map " + mapName);
+                continue;
+            }
+
+            previousSettingValues.putIfAbsent(settingKey, currentValueResult.getValue());
+            Object overrideValue = entry.getValue();
+            var setResult = plugin.getSettingService().setSetting(settingKey, overrideValue == null ? "" : String.valueOf(overrideValue));
+            if (!setResult.isSuccess()) {
+                plugin.getLogger().warning("Failed to apply map setting override '" + settingKey + "' for map " + mapName + ": " + setResult.getErrorMessage());
+            }
+        }
+    }
+
+    public void clearAppliedSettingOverrides() {
+        if (previousSettingValues.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, Object> entry : previousSettingValues.entrySet()) {
+            Object value = entry.getValue();
+            var setResult = plugin.getSettingService().setSetting(entry.getKey(), value == null ? "" : String.valueOf(value));
+            if (!setResult.isSuccess()) {
+                plugin.getLogger().warning("Failed to restore setting '" + entry.getKey() + "' after map overrides: " + setResult.getErrorMessage());
+            }
+        }
+
+        previousSettingValues.clear();
     }
 
 
@@ -216,6 +271,18 @@ public class MapManager {
         }
 
 
+        mapData.setSeekerBreakBlocks(section.getStringList("seeker-break-blocks"));
+        mapData.setBlockInteractionExceptions(section.getStringList("block-interaction-exceptions"));
+        mapData.setBlockPhysicsExceptions(section.getStringList("block-physics-exceptions"));
+
+        ConfigurationSection settingOverridesSection = section.getConfigurationSection("setting-overrides");
+        if (settingOverridesSection != null) {
+            Map<String, Object> overrides = new LinkedHashMap<>();
+            flattenSettingOverrides(settingOverridesSection, "", overrides);
+            mapData.setSettingOverrides(overrides);
+        }
+
+
         ConfigurationSection playersSection = section.getConfigurationSection("players");
         if (playersSection != null) {
             if (playersSection.contains("min")) {
@@ -255,6 +322,22 @@ public class MapManager {
         }
 
         return mapData;
+    }
+
+    private void flattenSettingOverrides(ConfigurationSection section, String prefix, Map<String, Object> output) {
+        for (String key : section.getKeys(false)) {
+            if (key == null || key.isBlank()) {
+                continue;
+            }
+
+            String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
+            Object value = section.get(key);
+            if (value instanceof ConfigurationSection nestedSection) {
+                flattenSettingOverrides(nestedSection, fullKey, output);
+            } else {
+                output.put(fullKey, value);
+            }
+        }
     }
 
     public List<String> getAllowedBlocksForMap(String mapName) {
@@ -369,8 +452,8 @@ public class MapManager {
 
             File uidFile = new File(destDir, "uid.dat");
             if (uidFile.exists()) {
-                uidFile.delete();
-                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+
+                if (uidFile.delete() && plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                     plugin.getLogger().info("Deleted uid.dat from working world to prevent duplicate error");
                 }
             }
@@ -493,21 +576,36 @@ public class MapManager {
 
 
     private void deleteWorldIfExists(String worldName) {
-        try {
-            File worldDir = new File(Bukkit.getWorldContainer(), worldName);
-            if (worldDir.exists()) {
-                Files.walk(worldDir.toPath())
-                        .sorted(Comparator.reverseOrder())
-                        .forEach(path -> {
-                            try {
-                                Files.delete(path);
-                            } catch (IOException e) {
-                                plugin.getLogger().warning("Failed to delete: " + path);
-                            }
-                        });
+        World world = Bukkit.getWorld(worldName);
+        if (world != null) {
+            boolean success = Bukkit.unloadWorld(world, false);
+            if (!success) {
+                plugin.getLogger().warning("Failed to unload world: " + worldName);
+                return;
             }
+        }
+
+        File worldDir = new File(Bukkit.getWorldContainer(), worldName);
+
+        if (!worldDir.exists()) {
+            return;
+        }
+
+        try (Stream<Path> paths = Files.walk(worldDir.toPath())) {
+            paths.sorted(Comparator.reverseOrder())
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            plugin.getLogger().warning(
+                                    "Failed to delete: " + path + " (" + e.getMessage() + ")"
+                            );
+                        }
+                    });
         } catch (IOException e) {
-            plugin.getLogger().warning("Failed to delete world directory: " + e.getMessage());
+            plugin.getLogger().warning(
+                    "Failed to delete world directory: " + worldName + " (" + e.getMessage() + ")"
+            );
         }
     }
 

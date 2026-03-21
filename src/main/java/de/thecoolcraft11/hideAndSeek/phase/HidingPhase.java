@@ -32,7 +32,9 @@ import java.util.*;
 public class HidingPhase implements GamePhase {
     private BukkitTask pointsTask;
     private final Map<BukkitTask, Location> blockTasks = new HashMap<>();
-    Set<Material> allowedMaterials = new HashSet<>();
+    private final Set<Material> allowedMaterials = new HashSet<>();
+    private final Set<Material> blockInteractionExceptions = new LinkedHashSet<>();
+    private final Set<Material> blockPhysicsExceptions = new LinkedHashSet<>();
 
 
     @Override
@@ -50,7 +52,6 @@ public class HidingPhase implements GamePhase {
 
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
         hideAndSeekPlugin.getPointService().resetRoundState();
-        generateAllowedBreakBlocks(hideAndSeekPlugin);
 
         TimerManager.cleanupTimers(hideAndSeekPlugin);
 
@@ -92,6 +93,10 @@ public class HidingPhase implements GamePhase {
         if (currentMapName != null && !currentMapName.isEmpty()) {
             currentMapData = hideAndSeekPlugin.getMapManager().getMapData(currentMapName);
         }
+
+        hideAndSeekPlugin.getMapManager().applySettingOverridesForMap(currentMapName);
+        generateAllowedBreakBlocks(hideAndSeekPlugin, currentMapName);
+        generateBlockExceptionMaterials(hideAndSeekPlugin, currentMapName);
 
 
         int timeRemaining = MapConfigHelper.getHidingTime(plugin, currentMapData);
@@ -476,11 +481,7 @@ public class HidingPhase implements GamePhase {
 
     @Override
     public List<Material> getBlockInteractionExceptions() {
-        return new ArrayList<>(
-                Arrays.stream(Material.values())
-                        .filter(material -> material.name().endsWith("_DOOR") || material.name().endsWith("_FENCE_GATE") || material.name().endsWith("_TRAPDOOR") || material.name().endsWith("_BUTTON") || material.name().endsWith("_LEVER"))
-                        .toList()
-        );
+        return new ArrayList<>(blockInteractionExceptions);
     }
 
     @Override
@@ -505,11 +506,7 @@ public class HidingPhase implements GamePhase {
 
     @Override
     public List<Material> getBlockPhysicsExceptions() {
-        return new ArrayList<>(
-                Arrays.stream(Material.values())
-                        .filter(material -> material.name().endsWith("_DOOR") || material.name().endsWith("_FENCE_GATE") || material.name().endsWith("_TRAPDOOR") || material.name().endsWith("_BUTTON") || material.name().endsWith("_LEVER"))
-                        .toList()
-        );
+        return new ArrayList<>(blockPhysicsExceptions);
     }
 
     @Override
@@ -532,12 +529,21 @@ public class HidingPhase implements GamePhase {
         return false;
     }
 
-    private void generateAllowedBreakBlocks(HideAndSeek plugin) {
-        List<String> rawBlockList = plugin.getConfig().getStringList("seeker-break-blocks");
+    private void generateAllowedBreakBlocks(HideAndSeek plugin, String mapName) {
+        allowedMaterials.clear();
+        List<String> rawBlockList = MapConfigHelper.getSeekerBreakBlockPatterns(plugin, mapName);
 
         for (String entry : rawBlockList) {
             allowedMaterials.addAll(BlockListParser.parseBlockList(entry));
         }
+    }
+
+    private void generateBlockExceptionMaterials(HideAndSeek plugin, String mapName) {
+        blockInteractionExceptions.clear();
+        blockInteractionExceptions.addAll(MapConfigHelper.getBlockInteractionExceptions(plugin, mapName));
+
+        blockPhysicsExceptions.clear();
+        blockPhysicsExceptions.addAll(MapConfigHelper.getBlockPhysicsExceptions(plugin, mapName));
     }
 
     @Override

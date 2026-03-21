@@ -38,7 +38,9 @@ public class LobbyPhase implements GamePhase {
     public void onStart(MinigameFramework plugin) {
 
         HideAndSeek.getDataController().reset();
-        ((HideAndSeek) plugin).getVoteManager().resetVotes();
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+        hideAndSeekPlugin.getMapManager().clearAppliedSettingOverrides();
+        hideAndSeekPlugin.getVoteManager().resetVotes();
 
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -53,7 +55,6 @@ public class LobbyPhase implements GamePhase {
             player.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
         }
 
-        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info("Lobby phase started. Waiting for teams to be set up...");
         }

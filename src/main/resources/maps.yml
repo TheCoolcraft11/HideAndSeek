@@ -21,6 +21,19 @@
 #     - "*CANDLE{RED_CANDLE}"
 #     - "OAK_LOG[*]"
 #     - "OAK_TRAPDOOR[half,open,facing]"
+#   seeker-break-blocks:                            # Optional: Per-map seeker break list (falls back to config.yml)
+#     - "SHORT_GRASS"
+#     - "TALL_GRASS"
+#   block-interaction-exceptions:                   # Optional: Per-map interaction exception list
+#     - "*_DOOR"
+#     - "*_BUTTON"
+#   block-physics-exceptions:                       # Optional: Per-map physics exception list
+#     - "*_DOOR"
+#     - "*_BUTTON"
+#   setting-overrides:                              # Optional: Override any setting key for this map during rounds
+#     game:
+#       hider_invisibility: true
+#       hider_health: 16
 #   players:                                       # Optional: Player count recommendations
 #     min: 4                                       # Minimum players for this map
 #     recommended: 8                               # Recommended number of players
@@ -53,6 +66,25 @@ map1:
   world-borders: [ ]    # Optional, format: centerX,centerZ,radius
   preferred-modes:
     - "BLOCK"
+  seeker-break-blocks:
+    - "SHORT_GRASS"
+    - "TALL_GRASS"
+  block-interaction-exceptions:
+    - "*_DOOR"
+    - "*_FENCE_GATE"
+    - "*_TRAPDOOR"
+    - "*_BUTTON"
+    - "*_LEVER"
+  block-physics-exceptions:
+    - "*_DOOR"
+    - "*_FENCE_GATE"
+    - "*_TRAPDOOR"
+    - "*_BUTTON"
+    - "*_LEVER"
+  setting-overrides:
+    hider-items:
+      firework-rocket:
+        target-y: 64
   players:
     min: 4
     recommended: 8

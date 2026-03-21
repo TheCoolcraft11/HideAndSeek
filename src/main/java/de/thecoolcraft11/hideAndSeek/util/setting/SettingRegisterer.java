@@ -100,6 +100,8 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("maps", List.class, List.of("map1"));
         plugin.getConfigRegistry().register("disallowed-blockstates", List.class, List.of("waterlogged", "conditional"));
         plugin.getConfigRegistry().register("seeker-break-blocks", List.class, List.of("SHORT_GRASS", "TALL_GRASS", "SEAGRASS", "TALL_SEAGRASS"));
+        plugin.getConfigRegistry().register("block-interaction-exceptions", List.class, List.of("*_DOOR", "*_FENCE_GATE", "*_TRAPDOOR", "*_BUTTON", "*_LEVER"));
+        plugin.getConfigRegistry().register("block-physics-exceptions", List.class, List.of("*_DOOR", "*_FENCE_GATE", "*_TRAPDOOR", "*_BUTTON", "*_LEVER"));
         plugin.getConfigRegistry().register("game.apply-player-direction", Boolean.class, true);
         plugin.getConfigRegistry().register("game.max-air-above-liquid", Integer.class, 2);
         plugin.getConfigRegistry().register("nms.enabled", Boolean.class, true);
@@ -124,6 +126,7 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.game.use_map_specific_timings", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_map_specific_seeker_count", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.use_map_specific_player_limits", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.use_map_specific_setting_overrides", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.fixed_seeker_team", String.class, "");
         plugin.getConfigRegistry().register("settings.game.seeker_count", Integer.class, 1);
         plugin.getConfigRegistry().register("settings.game.hider_health", Integer.class, 20);
@@ -545,6 +548,16 @@ public class SettingRegisterer {
                 .valueIconStacks(Map.of(
                         true, setEnchanted(Material.PLAYER_HEAD, true),
                         false, setEnchanted(Material.PLAYER_HEAD, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.use_map_specific_setting_overrides", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.use_map_specific_setting_overrides", true))
+                .description("Apply map setting-overrides from maps.yml during a round")
+                .customIcon(Material.COMMAND_BLOCK)
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.COMMAND_BLOCK, true),
+                        false, setEnchanted(Material.COMMAND_BLOCK, false)
                 ))
                 .build());
 

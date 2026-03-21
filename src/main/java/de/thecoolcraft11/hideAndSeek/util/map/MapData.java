@@ -7,7 +7,9 @@ import org.bukkit.WorldBorder;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class MapData {
@@ -19,6 +21,10 @@ public class MapData {
     private final List<WorldBorderData> worldBorders;
     private final List<GameModeEnum> preferredModes;
     private final List<String> allowedBlocks;
+    private final List<String> seekerBreakBlocks;
+    private final List<String> blockInteractionExceptions;
+    private final List<String> blockPhysicsExceptions;
+    private final Map<String, Object> settingOverrides;
 
 
     private Integer minPlayers;
@@ -43,6 +49,10 @@ public class MapData {
         this.worldBorders = new ArrayList<>();
         this.preferredModes = new ArrayList<>();
         this.allowedBlocks = new ArrayList<>();
+        this.seekerBreakBlocks = new ArrayList<>();
+        this.blockInteractionExceptions = new ArrayList<>();
+        this.blockPhysicsExceptions = new ArrayList<>();
+        this.settingOverrides = new LinkedHashMap<>();
         this.minPlayers = null;
         this.recommendedPlayers = null;
         this.maxPlayers = null;
@@ -115,6 +125,50 @@ public class MapData {
         this.allowedBlocks.clear();
         if (blocks != null) {
             this.allowedBlocks.addAll(blocks);
+        }
+    }
+
+    public List<String> getSeekerBreakBlocks() {
+        return seekerBreakBlocks;
+    }
+
+    public void setSeekerBreakBlocks(List<String> blocks) {
+        this.seekerBreakBlocks.clear();
+        if (blocks != null) {
+            this.seekerBreakBlocks.addAll(blocks);
+        }
+    }
+
+    public List<String> getBlockInteractionExceptions() {
+        return blockInteractionExceptions;
+    }
+
+    public void setBlockInteractionExceptions(List<String> blockInteractionExceptions) {
+        this.blockInteractionExceptions.clear();
+        if (blockInteractionExceptions != null) {
+            this.blockInteractionExceptions.addAll(blockInteractionExceptions);
+        }
+    }
+
+    public List<String> getBlockPhysicsExceptions() {
+        return blockPhysicsExceptions;
+    }
+
+    public void setBlockPhysicsExceptions(List<String> blockPhysicsExceptions) {
+        this.blockPhysicsExceptions.clear();
+        if (blockPhysicsExceptions != null) {
+            this.blockPhysicsExceptions.addAll(blockPhysicsExceptions);
+        }
+    }
+
+    public Map<String, Object> getSettingOverrides() {
+        return settingOverrides;
+    }
+
+    public void setSettingOverrides(Map<String, Object> settingOverrides) {
+        this.settingOverrides.clear();
+        if (settingOverrides != null) {
+            this.settingOverrides.putAll(settingOverrides);
         }
     }
 

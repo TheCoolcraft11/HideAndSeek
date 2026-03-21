@@ -21,6 +21,20 @@ seeker-break-blocks:
   - "SEAGRASS"
   - "TALL_SEAGRASS"
 
+block-interaction-exceptions:
+  - "*_DOOR"
+  - "*_FENCE_GATE"
+  - "*_TRAPDOOR"
+  - "*_BUTTON"
+  - "*_LEVER"
+
+block-physics-exceptions:
+  - "*_DOOR"
+  - "*_FENCE_GATE"
+  - "*_TRAPDOOR"
+  - "*_BUTTON"
+  - "*_LEVER"
+
 nms:
   # Master switch: attempt to load NMS adapter. If true, plugin will try to enable NMS features
   # on startup. If adapter missing or fails, behavior depends on fallbacks.
@@ -42,5 +56,7 @@ settings:
 #  hider-items:
 #    random-block:
 #      uses: 10
+#  game:
+#    use_map_specific_setting_overrides: true
 # This will set the default value for the random-block setting to 10. Though this still can be changed in the
 # ingame settings menu.

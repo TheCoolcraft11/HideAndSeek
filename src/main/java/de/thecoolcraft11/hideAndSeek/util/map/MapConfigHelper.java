@@ -2,6 +2,13 @@ package de.thecoolcraft11.hideAndSeek.util.map;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
+import org.bukkit.Material;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class MapConfigHelper {
 
@@ -171,6 +178,65 @@ public class MapConfigHelper {
             plugin.getLogger().info("Filtered maps by player count: " + filteredMaps.size() + " out of " + availableMaps.size());
         }
         return filteredMaps;
+    }
+
+    public static List<String> getSeekerBreakBlockPatterns(HideAndSeek plugin, String mapName) {
+        MapData mapData = mapName == null ? null : plugin.getMapManager().getMapData(mapName);
+        if (mapData != null && !mapData.getSeekerBreakBlocks().isEmpty()) {
+            return new ArrayList<>(mapData.getSeekerBreakBlocks());
+        }
+        return plugin.getConfig().getStringList("seeker-break-blocks");
+    }
+
+    public static List<Material> getBlockInteractionExceptions(HideAndSeek plugin, String mapName) {
+        return resolveMaterialRules(plugin, mapName, "block-interaction-exceptions", true);
+    }
+
+    public static List<Material> getBlockPhysicsExceptions(HideAndSeek plugin, String mapName) {
+        return resolveMaterialRules(plugin, mapName, "block-physics-exceptions", false);
+    }
+
+    private static List<Material> resolveMaterialRules(HideAndSeek plugin, String mapName, String globalPath, boolean interactionRules) {
+        List<String> configuredRules;
+        MapData mapData = mapName == null ? null : plugin.getMapManager().getMapData(mapName);
+
+        if (mapData != null) {
+            configuredRules = interactionRules
+                    ? mapData.getBlockInteractionExceptions()
+                    : mapData.getBlockPhysicsExceptions();
+            if (!configuredRules.isEmpty()) {
+                return parseMaterialRules(configuredRules);
+            }
+        }
+
+        return parseMaterialRules(plugin.getConfig().getStringList(globalPath));
+    }
+
+    private static List<Material> parseMaterialRules(List<String> rules) {
+        Set<Material> resolved = new LinkedHashSet<>();
+        for (String rule : rules) {
+            if (rule == null || rule.isBlank()) {
+                continue;
+            }
+
+            String trimmed = rule.trim().toUpperCase();
+            if (trimmed.contains("*")) {
+                Pattern pattern = Pattern.compile(trimmed.replace("*", ".*"));
+                for (Material material : Material.values()) {
+                    if (pattern.matcher(material.name()).matches()) {
+                        resolved.add(material);
+                    }
+                }
+                continue;
+            }
+
+            Material material = Material.matchMaterial(trimmed);
+            if (material != null) {
+                resolved.add(material);
+            }
+        }
+
+        return new ArrayList<>(resolved);
     }
 }
 
