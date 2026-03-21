@@ -684,7 +684,7 @@ public class SettingRegisterer {
                 .build());
 
         plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking-visibility-range", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "anticheat.seeking-visibility-range", 24.0))
+                .defaultValue(getConfigValue(plugin, "anticheat.seeking-visibility-range", 12.0))
                 .rangeDouble(1.0, 128.0)
                 .description("Distance in blocks at which seekers can see hiders during SEEKING")
                 .customIcon(Material.COMPASS)

@@ -10,14 +10,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Fence;
+import org.bukkit.block.data.type.GlassPane;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
@@ -25,11 +27,16 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class CageTrapItem implements GameItem {
     public static final String ID = "has_seeker_cage_trap";
+
+
+    public static final Set<UUID> trappedPlayers = new HashSet<>();
 
     @Override
     public String getId() {
@@ -144,8 +151,13 @@ public class CageTrapItem implements GameItem {
         }
 
         if (laserGrid || iceBlockSkin) {
-            location.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, location, 12, 0.22, 0.12, 0.22, 0.02);
-            location.getWorld().spawnParticle(Particle.WAX_ON, location, 10, 0.2, 0.1, 0.2, 0.01);
+            HideAndSeek.getDataController().getSeekers().forEach(seekerUUID -> {
+                Player seeker1 = Bukkit.getPlayer(seekerUUID);
+                if (seeker1 != null && seeker1.isOnline() && seeker1.getWorld().equals(location.getWorld())) {
+                    seeker1.spawnParticle(Particle.ELECTRIC_SPARK, location, 12, 0.22, 0.12, 0.22, 0.02);
+                    seeker1.spawnParticle(Particle.WAX_ON, location, 10, 0.2, 0.1, 0.2, 0.01);
+                }
+            });
             context.getPlayer().playSound(location, Sound.BLOCK_BEACON_POWER_SELECT, 0.4f, 1.25f);
         }
 
@@ -167,12 +179,22 @@ public class CageTrapItem implements GameItem {
 
                 if ((laserGrid || iceBlockSkin) && readyToTrigger && System.currentTimeMillis() - lastPulseAt >= 1000L) {
                     lastPulseAt = System.currentTimeMillis();
-                    location.getWorld().spawnParticle(Particle.END_ROD, location, 4, 0.16, 0.05, 0.16, 0.01);
+                    HideAndSeek.getDataController().getSeekers().forEach(seekerUUID -> {
+                        Player seeker1 = Bukkit.getPlayer(seekerUUID);
+                        if (seeker1 != null && seeker1.isOnline() && seeker1.getWorld().equals(location.getWorld())) {
+                            seeker1.spawnParticle(Particle.END_ROD, location, 4, 0.16, 0.05, 0.16, 0.01);
+                        }
+                    });
                 }
 
                 if (trapDuration != -1 && elapsedTime > durationMs) {
                     if (laserGrid || iceBlockSkin) {
-                        location.getWorld().spawnParticle(Particle.SMOKE, location, 10, 0.2, 0.1, 0.2, 0.02);
+                        HideAndSeek.getDataController().getSeekers().forEach(seekerUUID -> {
+                            Player seeker1 = Bukkit.getPlayer(seekerUUID);
+                            if (seeker1 != null && seeker1.isOnline() && seeker1.getWorld().equals(location.getWorld())) {
+                                seeker1.spawnParticle(Particle.SMOKE, location, 10, 0.2, 0.1, 0.2, 0.02);
+                            }
+                        });
                         location.getWorld().playSound(location, Sound.BLOCK_GLASS_BREAK, 0.3f, 0.9f);
                     }
                     for (ItemDisplay trapIndicator : trapIndicators) {
@@ -210,7 +232,7 @@ public class CageTrapItem implements GameItem {
         }.runTaskTimer(plugin, 0L, 5L);
 
         String durationMsg = trapDuration == -1 ? "until round ends" : trapDuration + " seconds";
-        context.getPlayer().sendMessage(Component.text("Cage trap placed! (Ready in 5s, lasts " + durationMsg + ")", NamedTextColor.GREEN));
+        context.getPlayer().sendMessage(Component.text("Cage trap placed! (Ready in " + setupTime + "s, lasts " + durationMsg + ")", NamedTextColor.GREEN));
     }
 
     private static void triggerCageTrap(Player hider, Player seeker, HideAndSeek plugin, int paralyzeDuration) {
@@ -221,7 +243,13 @@ public class CageTrapItem implements GameItem {
         hider.teleport(hiderLoc);
 
         if (iceBlock) {
-            hiderLoc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hiderLoc.clone().add(0, 1, 0), 14, 0.3, 0.35, 0.3, 0.03);
+            HideAndSeek.getDataController().getSeekers().forEach(seekerUUID -> {
+                Player seeker1 = Bukkit.getPlayer(seekerUUID);
+                if (seeker1 != null && seeker1.isOnline() && seeker1.getWorld().equals(hiderLoc.getWorld())) {
+                    seeker1.spawnParticle(Particle.ELECTRIC_SPARK, hiderLoc.clone().add(0, 1, 0), 14, 0.3, 0.35, 0.3, 0.03);
+                }
+            });
+
             hiderLoc.getWorld().spawnParticle(Particle.WAX_ON, hiderLoc.clone().add(0, 1, 0), 12, 0.28, 0.32, 0.28, 0.01);
             hiderLoc.getWorld().playSound(hiderLoc, Sound.BLOCK_BEACON_DEACTIVATE, 0.45f, 0.85f);
         }
@@ -256,19 +284,19 @@ public class CageTrapItem implements GameItem {
                         final int fz = z;
 
                         BlockDisplay blockDisplay = blockLoc.getWorld().spawn(blockLoc, BlockDisplay.class, display -> {
-                            org.bukkit.block.data.BlockData blockData = blockMaterial.createBlockData();
+                            BlockData blockData = blockMaterial.createBlockData();
 
 
-                            if (blockData instanceof org.bukkit.block.data.type.Fence bars) {
-                                bars.setFace(org.bukkit.block.BlockFace.NORTH, isCageBar(fx, fz - 1, halfSize));
-                                bars.setFace(org.bukkit.block.BlockFace.SOUTH, isCageBar(fx, fz + 1, halfSize));
-                                bars.setFace(org.bukkit.block.BlockFace.EAST, isCageBar(fx + 1, fz, halfSize));
-                                bars.setFace(org.bukkit.block.BlockFace.WEST, isCageBar(fx - 1, fz, halfSize));
-                            } else if (blockData instanceof org.bukkit.block.data.type.GlassPane pane) {
-                                pane.setFace(org.bukkit.block.BlockFace.NORTH, isCageBar(fx, fz - 1, halfSize));
-                                pane.setFace(org.bukkit.block.BlockFace.SOUTH, isCageBar(fx, fz + 1, halfSize));
-                                pane.setFace(org.bukkit.block.BlockFace.EAST, isCageBar(fx + 1, fz, halfSize));
-                                pane.setFace(org.bukkit.block.BlockFace.WEST, isCageBar(fx - 1, fz, halfSize));
+                            if (blockData instanceof Fence bars) {
+                                bars.setFace(BlockFace.NORTH, isCageBar(fx, fz - 1, halfSize));
+                                bars.setFace(BlockFace.SOUTH, isCageBar(fx, fz + 1, halfSize));
+                                bars.setFace(BlockFace.EAST, isCageBar(fx + 1, fz, halfSize));
+                                bars.setFace(BlockFace.WEST, isCageBar(fx - 1, fz, halfSize));
+                            } else if (blockData instanceof GlassPane pane) {
+                                pane.setFace(BlockFace.NORTH, isCageBar(fx, fz - 1, halfSize));
+                                pane.setFace(BlockFace.SOUTH, isCageBar(fx, fz + 1, halfSize));
+                                pane.setFace(BlockFace.EAST, isCageBar(fx + 1, fz, halfSize));
+                                pane.setFace(BlockFace.WEST, isCageBar(fx - 1, fz, halfSize));
                             }
 
                             display.setBlock(blockData);
@@ -292,24 +320,11 @@ public class CageTrapItem implements GameItem {
             }
         }
 
-
+        trappedPlayers.add(hider.getUniqueId());
         hider.setVelocity(new Vector(0, 0, 0));
 
+        Bukkit.getScheduler().runTaskLater(plugin, () -> trappedPlayers.remove(hider.getUniqueId()), paralyzeDuration * 20L);
 
-        hider.addPotionEffect(new PotionEffect(
-                PotionEffectType.SLOWNESS,
-                paralyzeDuration * 20,
-                10,
-                false, false, false
-        ));
-
-
-        hider.addPotionEffect(new PotionEffect(
-                PotionEffectType.JUMP_BOOST,
-                paralyzeDuration * 20,
-                250,
-                false, false, false
-        ));
 
         hider.sendMessage(Component.text("You've been trapped by a cage!", NamedTextColor.DARK_RED));
         hider.playSound(hiderLoc, Sound.BLOCK_IRON_DOOR_CLOSE, 1.0f, 0.8f);

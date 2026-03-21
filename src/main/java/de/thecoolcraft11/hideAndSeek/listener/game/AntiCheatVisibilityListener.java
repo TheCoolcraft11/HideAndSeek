@@ -66,7 +66,7 @@ public class AntiCheatVisibilityListener implements Listener {
         String phase = plugin.getStateManager().getCurrentPhaseId();
         boolean hideDuringHiding = plugin.getSettingRegistry().get("anticheat.hiding-filter-enabled", true);
         boolean proximityDuringSeeking = plugin.getSettingRegistry().get("anticheat.seeking-filter-enabled", true);
-        double seekingRange = Math.max(1.0, plugin.getSettingRegistry().get("anticheat.seeking-visibility-range", 24.0));
+        double seekingRange = Math.max(1.0, plugin.getSettingRegistry().get("anticheat.seeking-visibility-range", 12.0));
         double seekingRangeSq = seekingRange * seekingRange;
         boolean seekingLosRevealEnabled = plugin.getSettingRegistry().get("anticheat.seeking-los-reveal-enabled", true);
         double seekingLosRevealRange = Math.max(seekingRange, plugin.getSettingRegistry().get("anticheat.seeking-los-reveal-range", 64.0));

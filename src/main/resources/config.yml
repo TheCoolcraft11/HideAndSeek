@@ -58,13 +58,5 @@ settings:
 #      uses: 10
 #  game:
 #    use_map_specific_setting_overrides: true
-#  anticheat:
-#    enabled: true
-#    hiding-filter-enabled: true
-#    seeking-filter-enabled: true
-#    seeking-visibility-range: 24.0
-#    seeking-los-reveal-enabled: true
-#    seeking-los-reveal-range: 64.0
-#    seeking-los-reveal-fov: 24.0
 # This will set the default value for the random-block setting to 10. Though this still can be changed in the
 # ingame settings menu.

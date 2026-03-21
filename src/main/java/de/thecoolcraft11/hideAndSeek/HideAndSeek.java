@@ -3,10 +3,7 @@ package de.thecoolcraft11.hideAndSeek;
 import de.thecoolcraft11.hideAndSeek.command.*;
 import de.thecoolcraft11.hideAndSeek.gui.*;
 import de.thecoolcraft11.hideAndSeek.items.*;
-import de.thecoolcraft11.hideAndSeek.listener.game.AntiCheatVisibilityListener;
-import de.thecoolcraft11.hideAndSeek.listener.game.BlockModeListener;
-import de.thecoolcraft11.hideAndSeek.listener.game.GameStateListener;
-import de.thecoolcraft11.hideAndSeek.listener.game.SetPhaseReadinessGuardListener;
+import de.thecoolcraft11.hideAndSeek.listener.game.*;
 import de.thecoolcraft11.hideAndSeek.listener.item.CrossbowTrackerListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.LightningListener;
 import de.thecoolcraft11.hideAndSeek.listener.item.SlownessBallListener;
@@ -108,6 +105,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new SmokeBombListener(this), this);
         Bukkit.getPluginManager().registerEvents(new SetPhaseReadinessGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerSpectateListener(), this);
+        Bukkit.getPluginManager().registerEvents(new TrapMovementListener(), this);
 
 
         worldBorderCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this,
