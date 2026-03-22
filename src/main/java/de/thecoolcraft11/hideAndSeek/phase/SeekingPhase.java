@@ -75,7 +75,7 @@ public class SeekingPhase implements GamePhase {
             }
         }
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
 
@@ -84,7 +84,7 @@ public class SeekingPhase implements GamePhase {
                 (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
         double seekerSize = 1.0;
         if (gameMode == GameModeEnum.SMALL) {
-            var seekerSizeResult = plugin.getSettingService().getSetting("game.small_mode_seeker_size");
+            var seekerSizeResult = plugin.getSettingService().getSetting("game.small-mode.seeker-size");
             Object seekerSizeObj = seekerSizeResult.isSuccess() ? seekerSizeResult.getValue() : 1.0;
             seekerSize = (seekerSizeObj instanceof Number) ? ((Number) seekerSizeObj).doubleValue() : 1.0;
         }

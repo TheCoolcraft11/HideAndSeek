@@ -51,7 +51,7 @@ public class SeekerKillModeListener implements Listener {
         }
 
 
-        SeekerKillModeEnum killModeObj = plugin.getSettingRegistry().get("game.seeker_kill_mode", SeekerKillModeEnum.NORMAL);
+        SeekerKillModeEnum killModeObj = plugin.getSettingRegistry().get("game.seekers.kill-mode", SeekerKillModeEnum.NORMAL);
         SeekerKillModeEnum killMode = (killModeObj != null) ?
                 killModeObj : SeekerKillModeEnum.NORMAL;
 
@@ -82,7 +82,7 @@ public class SeekerKillModeListener implements Listener {
         }
 
 
-        SeekerKillModeEnum killModeObj = plugin.getSettingRegistry().get("game.seeker_kill_mode", SeekerKillModeEnum.NORMAL);
+        SeekerKillModeEnum killModeObj = plugin.getSettingRegistry().get("game.seekers.kill-mode", SeekerKillModeEnum.NORMAL);
         SeekerKillModeEnum killMode = (killModeObj != null) ?
                 killModeObj : SeekerKillModeEnum.NORMAL;
 
@@ -98,9 +98,9 @@ public class SeekerKillModeListener implements Listener {
             return;
         }
 
-        double maxDistance = plugin.getSettingRegistry().get("game.gaze_kill_max_distance", 10.0);
-        double fovDegrees = plugin.getSettingRegistry().get("game.gaze_kill_fov", 30.0);
-        boolean showParticles = plugin.getSettingRegistry().get("game.gaze_kill_show_particles", true);
+        double maxDistance = plugin.getSettingRegistry().get("game.seekers.gaze-kill.max-distance", 10.0);
+        double fovDegrees = plugin.getSettingRegistry().get("game.seekers.gaze-kill.fov", 30.0);
+        boolean showParticles = plugin.getSettingRegistry().get("game.seekers.gaze-kill.show-particles", true);
 
 
         for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {

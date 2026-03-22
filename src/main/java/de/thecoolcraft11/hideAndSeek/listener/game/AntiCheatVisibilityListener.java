@@ -64,14 +64,14 @@ public class AntiCheatVisibilityListener implements Listener {
         }
 
         String phase = plugin.getStateManager().getCurrentPhaseId();
-        boolean hideDuringHiding = plugin.getSettingRegistry().get("anticheat.hiding-filter-enabled", true);
-        boolean proximityDuringSeeking = plugin.getSettingRegistry().get("anticheat.seeking-filter-enabled", true);
-        double seekingRange = Math.max(1.0, plugin.getSettingRegistry().get("anticheat.seeking-visibility-range", 12.0));
+        boolean hideDuringHiding = plugin.getSettingRegistry().get("anticheat.hiding.filter.enabled", true);
+        boolean proximityDuringSeeking = plugin.getSettingRegistry().get("anticheat.seeking.filter.enabled", true);
+        double seekingRange = Math.max(1.0, plugin.getSettingRegistry().get("anticheat.seeking.visibility-range", 12.0));
         double seekingRangeSq = seekingRange * seekingRange;
-        boolean seekingLosRevealEnabled = plugin.getSettingRegistry().get("anticheat.seeking-los-reveal-enabled", true);
-        double seekingLosRevealRange = Math.max(seekingRange, plugin.getSettingRegistry().get("anticheat.seeking-los-reveal-range", 64.0));
-        double seekingLosRevealFov = Math.max(5.0, plugin.getSettingRegistry().get("anticheat.seeking-los-reveal-fov", 24.0));
-        boolean blockMode = String.valueOf(plugin.getSettingRegistry().get("game.gametype", "NORMAL")).equals("BLOCK");
+        boolean seekingLosRevealEnabled = plugin.getSettingRegistry().get("anticheat.seeking.line-of-sight.enabled", true);
+        double seekingLosRevealRange = Math.max(seekingRange, plugin.getSettingRegistry().get("anticheat.seeking.line-of-sight.range", 64.0));
+        double seekingLosRevealFov = Math.max(5.0, plugin.getSettingRegistry().get("anticheat.seeking.line-of-sight.fov", 24.0));
+        boolean blockMode = String.valueOf(plugin.getSettingRegistry().get("game.mode", "NORMAL")).equals("BLOCK");
 
         List<UUID> seekers = new ArrayList<>(HideAndSeek.getDataController().getSeekers());
         List<UUID> hiders = new ArrayList<>(HideAndSeek.getDataController().getHiders());

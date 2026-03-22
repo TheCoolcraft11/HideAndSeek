@@ -285,8 +285,4 @@ public final class HideAndSeek extends MinigameFramework {
     public AntiCheatVisibilityListener getAntiCheatVisibilityListener() {
         return antiCheatVisibilityListener;
     }
-
-    public PlayerHitListener getPlayerHitListener() {
-        return playerHitListener;
-    }
 }

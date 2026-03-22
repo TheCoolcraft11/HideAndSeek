@@ -85,7 +85,7 @@ public class LobbyPhase implements GamePhase {
 
         if (result.winningGamemode() != null) {
             GameModeEnum winningMode = result.winningGamemode();
-            var setResult = plugin.getSettingService().setSetting("game.gametype", winningMode.name());
+            var setResult = plugin.getSettingService().setSetting("game.mode", winningMode.name());
             if (setResult.isSuccess()) {
                 if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                     plugin.getLogger().info("Applied voted gamemode: " + winningMode.name());
@@ -123,7 +123,7 @@ public class LobbyPhase implements GamePhase {
         Team seekersTeam;
 
 
-        var randomDistResult = plugin.getSettingService().getSetting("game.random_team_distribution");
+        var randomDistResult = plugin.getSettingService().getSetting("game.team-distribution.random");
         Object randomDistObj = randomDistResult.isSuccess() ? randomDistResult.getValue() : true;
         boolean randomDistribution = (randomDistObj instanceof Boolean) ? (Boolean) randomDistObj : true;
 
@@ -200,7 +200,7 @@ public class LobbyPhase implements GamePhase {
                 plugin.getLogger().info("Fixed team distribution enabled");
             }
 
-            var fixedSeekerTeamResult = plugin.getSettingService().getSetting("game.fixed_seeker_team");
+            var fixedSeekerTeamResult = plugin.getSettingService().getSetting("game.teams.fixed-seeker-team");
             String fixedSeekerTeamName = (fixedSeekerTeamResult.isSuccess() && fixedSeekerTeamResult.getValue() instanceof String) ?
                     (String) fixedSeekerTeamResult.getValue() : "";
 

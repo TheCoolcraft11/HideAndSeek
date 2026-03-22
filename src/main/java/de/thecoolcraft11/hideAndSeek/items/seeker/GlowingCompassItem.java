@@ -142,7 +142,7 @@ public class GlowingCompassItem implements GameItem {
         boolean oracleEye = seeker != null && ItemSkinSelectionService.isSelected(seeker, ID, "skin_eye_of_the_oracle");
         boolean dowsingRod = seeker != null && ItemSkinSelectionService.isSelected(seeker, ID, "skin_dowsing_rod");
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
 

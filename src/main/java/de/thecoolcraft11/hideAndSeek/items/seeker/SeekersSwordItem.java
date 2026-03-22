@@ -315,7 +315,7 @@ public class SeekersSwordItem implements GameItem {
                 if (blockTrace != null) {
                     Block hitBlock = blockTrace.getHitBlock();
                     if (hitBlock != null) {
-                        boolean gazeKill = plugin.getSettingRegistry().get("game.seeker_kill_mode").equals("GAZE_KILL");
+                        boolean gazeKill = plugin.getSettingRegistry().get("game.seekers.kill-mode").equals("GAZE_KILL");
                         plugin.getBlockModeListener().damageHiddenPlayer(seeker, hitBlock, gazeKill);
                     }
 

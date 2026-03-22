@@ -105,7 +105,7 @@ public class HidingPhase implements GamePhase {
         }
 
 
-        var invisibilityResult = plugin.getSettingService().getSetting("game.hider_invisibility");
+        var invisibilityResult = plugin.getSettingService().getSetting("game.hider-invisibility");
         Object invisibilityObj = invisibilityResult.isSuccess() ? invisibilityResult.getValue() : false;
         boolean grantInvisibility = (invisibilityObj instanceof Boolean) ? (Boolean) invisibilityObj : false;
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
@@ -113,7 +113,7 @@ public class HidingPhase implements GamePhase {
         }
 
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : GameModeEnum.NORMAL;
         GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
                 (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
@@ -121,7 +121,7 @@ public class HidingPhase implements GamePhase {
 
 
         if (gameMode == GameModeEnum.SMALL) {
-            var seekerSizeResult = plugin.getSettingService().getSetting("game.small_mode_seeker_size");
+            var seekerSizeResult = plugin.getSettingService().getSetting("game.small-mode.seeker-size");
             Object seekerSizeObj = seekerSizeResult.isSuccess() ? seekerSizeResult.getValue() : 1.0;
             if ((seekerSizeObj instanceof Number)) {
                 ((Number) seekerSizeObj).doubleValue();
@@ -151,7 +151,7 @@ public class HidingPhase implements GamePhase {
         }
 
 
-        var sizeResult = plugin.getSettingService().getSetting("game.small_mode_size");
+        var sizeResult = plugin.getSettingService().getSetting("game.small-mode.hider-size");
         Object sizeObj = sizeResult.isSuccess() ? sizeResult.getValue() : 0.5;
         double sizeModifier = (sizeObj instanceof Double) ? (Double) sizeObj : 0.5;
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
@@ -159,7 +159,7 @@ public class HidingPhase implements GamePhase {
         }
 
 
-        var hiderHealthResult = plugin.getSettingService().getSetting("game.hider_health");
+        var hiderHealthResult = plugin.getSettingService().getSetting("game.hiders.health");
         Object hiderHealthObj = hiderHealthResult.isSuccess() ? hiderHealthResult.getValue() : 20;
         double hiderHealth = (hiderHealthObj instanceof Integer) ? (Integer) hiderHealthObj : 20;
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
@@ -335,7 +335,7 @@ public class HidingPhase implements GamePhase {
             pointsTask.cancel();
         }
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : GameModeEnum.NORMAL;
         GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
                 (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;

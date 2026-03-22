@@ -63,7 +63,7 @@ public class MapManager {
         List<String> allMaps = getAvailableMaps();
 
 
-        var usePreferredModesResult = plugin.getSettingService().getSetting("game.use_preferred_modes");
+        var usePreferredModesResult = plugin.getSettingService().getSetting("game.maps.use-preferred-modes");
         Object usePreferredModesObj = usePreferredModesResult.isSuccess() ? usePreferredModesResult.getValue() : true;
         boolean usePreferredModes = (usePreferredModesObj instanceof Boolean) ? (Boolean) usePreferredModesObj : true;
 
@@ -72,7 +72,7 @@ public class MapManager {
         }
 
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : GameModeEnum.NORMAL;
         GameModeEnum currentMode = (gameModeObj instanceof GameModeEnum) ? (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
 
@@ -112,7 +112,7 @@ public class MapManager {
     public void applySettingOverridesForMap(String mapName) {
         clearAppliedSettingOverrides();
 
-        var useOverridesResult = plugin.getSettingService().getSetting("game.use_map_specific_setting_overrides");
+        var useOverridesResult = plugin.getSettingService().getSetting("game.maps.use-map-setting-overrides");
         Object useOverridesObj = useOverridesResult.isSuccess() ? useOverridesResult.getValue() : true;
         boolean useOverrides = (useOverridesObj instanceof Boolean) ? (Boolean) useOverridesObj : true;
         if (!useOverrides || mapName == null || mapName.isBlank()) {

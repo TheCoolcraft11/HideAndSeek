@@ -64,7 +64,7 @@ public class EndedPhase implements GamePhase {
         announceWinner(plugin, hidersWin, coinGains);
 
 
-        boolean autoCleanup = plugin.getSettingRegistry().get("game.auto_cleanup_after_round", true);
+        boolean autoCleanup = plugin.getSettingRegistry().get("game.round.auto-cleanup", true);
 
         if (autoCleanup) {
 

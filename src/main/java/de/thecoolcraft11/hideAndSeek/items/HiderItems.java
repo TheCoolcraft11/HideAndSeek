@@ -75,7 +75,7 @@ public final class HiderItems {
     public static void giveItems(Player player, HideAndSeek plugin, boolean isHiding) {
         removeItems(player);
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
 
         if (!isHiding) {

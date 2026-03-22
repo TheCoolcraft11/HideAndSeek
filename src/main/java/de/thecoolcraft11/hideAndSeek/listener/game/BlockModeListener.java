@@ -316,6 +316,15 @@ public class BlockModeListener implements Listener {
         handleInteractionHit(attacker, interaction);
     }
 
+    private static double calculateViewHeight(BlockData blockData, Block targetBlock, HideAndSeek plugin) {
+        BoundingBox blockBox = getBlockBoundingBox(blockData, targetBlock.getLocation());
+        double blockMaxY = blockBox.getMaxY();
+        double configuredHeight = plugin.getSettingRegistry().get("game.block-form.view-height", 0.1f);
+
+
+        return Math.max(configuredHeight, blockMaxY + 0.05);
+    }
+
     private void handleInteractionHit(Player attacker, Interaction interaction) {
         String hiderId = interaction.getPersistentDataContainer().get(
                 new NamespacedKey(plugin, "hidingBlock"),
@@ -344,7 +353,7 @@ public class BlockModeListener implements Listener {
                 Location hiddenLocation = HideAndSeek.getDataController().getLastLocation(hiderUUID);
                 if (hiddenLocation != null) {
                     Block hiddenBlock = hiddenLocation.getBlock();
-                    boolean gazeKill = plugin.getSettingRegistry().get("game.seeker_kill_mode").equals("GAZE_KILL");
+                    boolean gazeKill = plugin.getSettingRegistry().get("game.seekers.kill-mode").equals("GAZE_KILL");
                     damageHiddenPlayer(attacker, hiddenBlock, gazeKill);
                     if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                         plugin.getLogger().info(attacker.getName() + " hit hidden hider " + hider.getName() + " via interaction entity");
@@ -374,112 +383,10 @@ public class BlockModeListener implements Listener {
             return true;
         }
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
 
         return gameModeObj == null || !gameModeObj.toString().equals("BLOCK");
-    }
-
-
-    private void updateBlockDisplay(Player player) {
-        Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
-        if (chosenBlock == null) {
-            return;
-        }
-
-        BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
-        Location playerLoc = player.getLocation();
-
-        boolean needsNewDisplay = false;
-
-        if (display == null || !display.isValid()) {
-            needsNewDisplay = true;
-        } else {
-            String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
-            if (tempGlowId != null) {
-                display.remove();
-                needsNewDisplay = true;
-            } else {
-                try {
-                    Material currentBlockType = display.getBlock().getMaterial();
-                    if (currentBlockType != chosenBlock) {
-
-                        display.remove();
-                        needsNewDisplay = true;
-                    }
-                } catch (Exception e) {
-
-                    display.remove();
-                    needsNewDisplay = true;
-                }
-            }
-        }
-
-        if (needsNewDisplay) {
-
-            BlockData blockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
-            if (blockData == null) {
-                blockData = chosenBlock.createBlockData();
-            }
-            display = createBlockDisplay(player, playerLoc, blockData);
-            HideAndSeek.getDataController().setBlockDisplay(player.getUniqueId(), display);
-
-
-            ensureInteractionPassenger(player, display);
-        } else {
-
-            display.teleport(playerLoc.setRotation(playerLoc.getYaw(), 0));
-            display.setBrightness(new Display.Brightness(player.getLocation().getBlock().getLightFromBlocks(), player.getLocation().getBlock().getLightFromSky()));
-
-
-            boolean shouldGlow = HideAndSeek.getDataController().isGlowing(player.getUniqueId());
-            if (shouldGlow && !display.isGlowing()) {
-                display.setGlowing(true);
-            }
-            if (shouldGlow) {
-                Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                Team hiderTeam = scoreboard.getEntryTeam(player.getName());
-                display.setGlowColorOverride(toGlowColor(hiderTeam));
-            }
-
-            Entity interactionEntity = HideAndSeek.getDataController().getInteractionEntity(player.getUniqueId());
-
-            if (interactionEntity != null && interactionEntity.isValid() && interactionEntity instanceof Interaction interaction) {
-                BlockData interactionBlockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
-                if (interactionBlockData == null) {
-                    interactionBlockData = chosenBlock.createBlockData();
-                }
-                scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(interactionBlockData, player.getLocation()));
-            }
-
-            ensureInteractionPassenger(player, display);
-        }
-
-        boolean scaleToBlock = plugin.getSettingRegistry().get("game.block_size_to_block", false);
-        if (scaleToBlock && !HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
-            try {
-                BlockData blockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
-                if (blockData == null) {
-                    blockData = chosenBlock.createBlockData();
-                }
-                double scale = getHeightFactorComparedToPlayer(getCombinedBoundingBox(blockData, playerLoc));
-                scale = Math.max(0.1, Math.min(2.0, scale));
-                Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).setBaseValue(scale);
-            } catch (Exception e) {
-                plugin.getLogger().warning("Failed to scale player to block size: " + e.getMessage());
-            }
-        }
-
-        if (!player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-            player.addPotionEffect(new PotionEffect(
-                    PotionEffectType.INVISIBILITY,
-                    Integer.MAX_VALUE,
-                    0,
-                    false,
-                    false,
-                    false
-            ));
-        }
     }
 
     private BlockDisplay createBlockDisplay(Player player, Location location, BlockData blockData) {
@@ -761,59 +668,104 @@ public class BlockModeListener implements Listener {
         }
     }
 
-    private void unhidePlayer(Player player) {
-        if (!HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
+    private void updateBlockDisplay(Player player) {
+        Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
+        if (chosenBlock == null) {
             return;
         }
 
+        BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
+        Location playerLoc = player.getLocation();
 
-        if (player.isInsideVehicle()) {
-            player.leaveVehicle();
-        }
+        boolean needsNewDisplay = false;
 
-        Location lastLoc = HideAndSeek.getDataController().getLastLocation(player.getUniqueId());
-        if (lastLoc != null) {
-            Block block = lastLoc.getBlock();
-            Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
+        if (display == null || !display.isValid()) {
+            needsNewDisplay = true;
+        } else {
+            String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
+            if (tempGlowId != null) {
+                display.remove();
+                needsNewDisplay = true;
+            } else {
+                try {
+                    Material currentBlockType = display.getBlock().getMaterial();
+                    if (currentBlockType != chosenBlock) {
 
+                        display.remove();
+                        needsNewDisplay = true;
+                    }
+                } catch (Exception e) {
 
-            if (block.getType() == chosenBlock) {
-                block.setType(Material.AIR);
-                HideAndSeek.getDataController().removePlacedBlockKey(block.getLocation());
+                    display.remove();
+                    needsNewDisplay = true;
+                }
             }
         }
 
+        if (needsNewDisplay) {
 
-        cleanupSittingEntity(player);
-        cleanupInteractionEntity(player);
+            BlockData blockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
+            if (blockData == null) {
+                blockData = chosenBlock.createBlockData();
+            }
+            display = createBlockDisplay(player, playerLoc, blockData);
+            HideAndSeek.getDataController().setBlockDisplay(player.getUniqueId(), display);
 
-        HideAndSeek.getDataController().setHidden(player.getUniqueId(), false);
-        HideAndSeek.getDataController().removeHiddenBlock(player.getUniqueId());
 
-        boolean scaleToBlock = plugin.getSettingRegistry().get("game.block_size_to_block", false);
-        if (scaleToBlock) {
+            ensureInteractionPassenger(player, display);
+        } else {
+
+            display.teleport(playerLoc.setRotation(playerLoc.getYaw(), 0));
+            display.setBrightness(new Display.Brightness(player.getLocation().getBlock().getLightFromBlocks(), player.getLocation().getBlock().getLightFromSky()));
+
+
+            boolean shouldGlow = HideAndSeek.getDataController().isGlowing(player.getUniqueId());
+            if (shouldGlow && !display.isGlowing()) {
+                display.setGlowing(true);
+            }
+            if (shouldGlow) {
+                Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+                Team hiderTeam = scoreboard.getEntryTeam(player.getName());
+                display.setGlowColorOverride(toGlowColor(hiderTeam));
+            }
+
+            Entity interactionEntity = HideAndSeek.getDataController().getInteractionEntity(player.getUniqueId());
+
+            if (interactionEntity != null && interactionEntity.isValid() && interactionEntity instanceof Interaction interaction) {
+                BlockData interactionBlockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
+                if (interactionBlockData == null) {
+                    interactionBlockData = chosenBlock.createBlockData();
+                }
+                scaleInteractionToBoundingBox(interaction, getCombinedBoundingBox(interactionBlockData, player.getLocation()));
+            }
+
+            ensureInteractionPassenger(player, display);
+        }
+
+        boolean scaleToBlock = plugin.getSettingRegistry().get("game.block-form.scale-to-block", false);
+        if (scaleToBlock && !HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
             try {
-                Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).setBaseValue(1.0);
+                BlockData blockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
+                if (blockData == null) {
+                    blockData = chosenBlock.createBlockData();
+                }
+                double scale = getHeightFactorComparedToPlayer(getCombinedBoundingBox(blockData, playerLoc));
+                scale = Math.max(0.1, Math.min(2.0, scale));
+                Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).setBaseValue(scale);
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to reset player scale: " + e.getMessage());
+                plugin.getLogger().warning("Failed to scale player to block size: " + e.getMessage());
             }
         }
 
-
-        player.setCollidable(true);
-
-        player.sendMessage(Component.text("You are no longer hidden!", NamedTextColor.YELLOW));
-
-
-        updateBlockDisplay(player);
-
-
-        if (HideAndSeek.getDataController().isGlowing(player.getUniqueId())) {
-            BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
-            if (display != null && display.isValid()) {
-
-                plugin.getLogger().fine("Hider " + player.getName() + " unhid while glowing - existing display glows");
-            }
+        if (!player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+            player.addPotionEffect(new PotionEffect(
+                    PotionEffectType.INVISIBILITY,
+                    Integer.MAX_VALUE,
+                    0,
+                    false,
+                    false,
+                    false
+            ));
         }
     }
 
@@ -951,13 +903,60 @@ public class BlockModeListener implements Listener {
         return combined;
     }
 
-    private static double calculateViewHeight(BlockData blockData, Block targetBlock, HideAndSeek plugin) {
-        BoundingBox blockBox = getBlockBoundingBox(blockData, targetBlock.getLocation());
-        double blockMaxY = blockBox.getMaxY();
-        double configuredHeight = plugin.getSettingRegistry().get("game.block_view_height", 0.1f);
+    private void unhidePlayer(Player player) {
+        if (!HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
+            return;
+        }
 
 
-        return Math.max(configuredHeight, blockMaxY + 0.05);
+        if (player.isInsideVehicle()) {
+            player.leaveVehicle();
+        }
+
+        Location lastLoc = HideAndSeek.getDataController().getLastLocation(player.getUniqueId());
+        if (lastLoc != null) {
+            Block block = lastLoc.getBlock();
+            Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
+
+
+            if (block.getType() == chosenBlock) {
+                block.setType(Material.AIR);
+                HideAndSeek.getDataController().removePlacedBlockKey(block.getLocation());
+            }
+        }
+
+
+        cleanupSittingEntity(player);
+        cleanupInteractionEntity(player);
+
+        HideAndSeek.getDataController().setHidden(player.getUniqueId(), false);
+        HideAndSeek.getDataController().removeHiddenBlock(player.getUniqueId());
+
+        boolean scaleToBlock = plugin.getSettingRegistry().get("game.block-form.scale-to-block", false);
+        if (scaleToBlock) {
+            try {
+                Objects.requireNonNull(player.getAttribute(Attribute.SCALE)).setBaseValue(1.0);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to reset player scale: " + e.getMessage());
+            }
+        }
+
+
+        player.setCollidable(true);
+
+        player.sendMessage(Component.text("You are no longer hidden!", NamedTextColor.YELLOW));
+
+
+        updateBlockDisplay(player);
+
+
+        if (HideAndSeek.getDataController().isGlowing(player.getUniqueId())) {
+            BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
+            if (display != null && display.isValid()) {
+
+                plugin.getLogger().fine("Hider " + player.getName() + " unhid while glowing - existing display glows");
+            }
+        }
     }
 
     private static Color toGlowColor(Team team) {

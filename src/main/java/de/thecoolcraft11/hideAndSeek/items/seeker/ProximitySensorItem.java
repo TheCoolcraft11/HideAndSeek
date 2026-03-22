@@ -363,7 +363,7 @@ public class ProximitySensorItem implements GameItem {
     private static void applyProximitySensorGlow(Player hider, HideAndSeek plugin) {
         UUID hiderId = hider.getUniqueId();
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
 
@@ -421,7 +421,7 @@ public class ProximitySensorItem implements GameItem {
         UUID hiderId = hider.getUniqueId();
         HideAndSeek.getDataController().removeGlowing(hiderId);
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
 

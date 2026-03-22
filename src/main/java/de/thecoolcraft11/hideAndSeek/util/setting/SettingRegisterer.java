@@ -6,6 +6,9 @@ import de.thecoolcraft11.minigameframework.config.SectionDefinition;
 import de.thecoolcraft11.minigameframework.config.SettingDefinition;
 import de.thecoolcraft11.minigameframework.config.SettingType;
 import de.thecoolcraft11.timer.AnimationType;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -107,45 +110,45 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("nms.enabled", Boolean.class, true);
 
 
-        plugin.getConfigRegistry().register("settings.game.gametype", String.class, "NORMAL");
-        plugin.getConfigRegistry().register("settings.game.gamestyle", String.class, "SPECTATOR");
-        plugin.getConfigRegistry().register("settings.game.hiding_time", Integer.class, 60);
-        plugin.getConfigRegistry().register("settings.game.seeking_time", Integer.class, 300);
-        plugin.getConfigRegistry().register("settings.game.hider_invisibility", Boolean.class, false);
-        plugin.getConfigRegistry().register("settings.game.damage_hiders_outside_worldborder", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.worldborder_damage_timeout", Integer.class, 10);
-        plugin.getConfigRegistry().register("settings.game.worldborder_damage_amount", Double.class, 2.0);
-        plugin.getConfigRegistry().register("settings.game.worldborder_damage_cooldown", Integer.class, 20);
-        plugin.getConfigRegistry().register("settings.game.small_mode_size", Double.class, 0.5);
-        plugin.getConfigRegistry().register("settings.game.random_team_distribution", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.vote_gamemode_enabled", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.vote_map_enabled", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.vote_show_counts", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.readiness_enabled", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.use_preferred_modes", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.use_map_specific_timings", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.use_map_specific_seeker_count", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.use_map_specific_player_limits", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.use_map_specific_setting_overrides", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.fixed_seeker_team", String.class, "");
-        plugin.getConfigRegistry().register("settings.game.seeker_count", Integer.class, 1);
-        plugin.getConfigRegistry().register("settings.game.hider_health", Integer.class, 20);
-        plugin.getConfigRegistry().register("settings.game.block_view_height", Float.class, 0.1f);
-        plugin.getConfigRegistry().register("settings.game.block_size_to_block", Boolean.class, false);
-        plugin.getConfigRegistry().register("settings.game.seeker_kill_mode", String.class, "NORMAL");
-        plugin.getConfigRegistry().register("settings.game.gaze_kill_max_distance", Double.class, 10.0);
-        plugin.getConfigRegistry().register("settings.game.gaze_kill_fov", Double.class, 30.0);
-        plugin.getConfigRegistry().register("settings.game.gaze_kill_show_particles", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.auto_cleanup_after_round", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.game.small_mode_seeker_size", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.game.mode", String.class, "NORMAL");
+        plugin.getConfigRegistry().register("settings.game.style", String.class, "SPECTATOR");
+        plugin.getConfigRegistry().register("settings.game.hiding-time", Integer.class, 60);
+        plugin.getConfigRegistry().register("settings.game.seeking-time", Integer.class, 300);
+        plugin.getConfigRegistry().register("settings.game.hider-invisibility", Boolean.class, false);
+        plugin.getConfigRegistry().register("settings.game.world-border.damage-hiders-outside", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.world-border.damage-delay-seconds", Integer.class, 10);
+        plugin.getConfigRegistry().register("settings.game.world-border.damage-amount", Double.class, 2.0);
+        plugin.getConfigRegistry().register("settings.game.world-border.damage-cooldown-ticks", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.game.small-mode.hider-size", Double.class, 0.5);
+        plugin.getConfigRegistry().register("settings.game.team-distribution.random", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.voting.game-mode-enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.voting.map-enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.voting.show-counts", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.lobby.readiness-enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.maps.use-preferred-modes", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.maps.use-map-timings", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.maps.use-map-seeker-count", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.maps.use-map-player-limits", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.maps.use-map-setting-overrides", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.teams.fixed-seeker-team", String.class, "");
+        plugin.getConfigRegistry().register("settings.game.teams.seeker-count", Integer.class, 1);
+        plugin.getConfigRegistry().register("settings.game.hiders.health", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.game.block-form.view-height", Float.class, 0.1f);
+        plugin.getConfigRegistry().register("settings.game.block-form.scale-to-block", Boolean.class, false);
+        plugin.getConfigRegistry().register("settings.game.seekers.kill-mode", String.class, "NORMAL");
+        plugin.getConfigRegistry().register("settings.game.seekers.gaze-kill.max-distance", Double.class, 10.0);
+        plugin.getConfigRegistry().register("settings.game.seekers.gaze-kill.fov", Double.class, 30.0);
+        plugin.getConfigRegistry().register("settings.game.seekers.gaze-kill.show-particles", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.round.auto-cleanup", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.small-mode.seeker-size", Double.class, 1.0);
 
         plugin.getConfigRegistry().register("settings.anticheat.enabled", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.anticheat.hiding-filter-enabled", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.anticheat.seeking-filter-enabled", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.anticheat.seeking-visibility-range", Double.class, 12.0);
-        plugin.getConfigRegistry().register("settings.anticheat.seeking-los-reveal-enabled", Boolean.class, true);
-        plugin.getConfigRegistry().register("settings.anticheat.seeking-los-reveal-range", Double.class, 64.0);
-        plugin.getConfigRegistry().register("settings.anticheat.seeking-los-reveal-fov", Double.class, 24.0);
+        plugin.getConfigRegistry().register("settings.anticheat.hiding.filter.enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.anticheat.seeking.filter.enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.anticheat.seeking.visibility-range", Double.class, 12.0);
+        plugin.getConfigRegistry().register("settings.anticheat.seeking.line-of-sight.enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.anticheat.seeking.line-of-sight.range", Double.class, 64.0);
+        plugin.getConfigRegistry().register("settings.anticheat.seeking.line-of-sight.fov", Double.class, 24.0);
         plugin.getConfigRegistry().register("settings.anticheat.hider-camping.enabled", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.anticheat.hider-camping.max-duration", Integer.class, 90);
         plugin.getConfigRegistry().register("settings.anticheat.hider-camping.warn-time", Integer.class, 15);
@@ -155,7 +158,7 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.anticheat.hider-camping.seeker-reward-points", Integer.class, 50);
 
 
-        plugin.getConfigRegistry().register("settings.blockstats.show-names", Boolean.class, false);
+        plugin.getConfigRegistry().register("settings.game.blockstats.show-names", Boolean.class, false);
 
 
         plugin.getConfigRegistry().register("settings.hider-items.random-block.uses", Integer.class, 5);
@@ -332,25 +335,51 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.points.seeker.first-blood.amount", Integer.class, 100);
         plugin.getConfigRegistry().register("settings.points.seeker.environmental-elimination.amount", Integer.class, 50);
 
-        plugin.getConfigRegistry().register("settings.timer.hiding_color1", String.class, "#FF0000");
-        plugin.getConfigRegistry().register("settings.timer.hiding_color2", String.class, "#0000FF");
-        plugin.getConfigRegistry().register("settings.timer.seeking_color1", String.class, "#FFFF00");
-        plugin.getConfigRegistry().register("settings.timer.seeking_color2", String.class, "#00FFFF");
-        plugin.getConfigRegistry().register("settings.timer.animation_type", String.class, "WAVE");
-        plugin.getConfigRegistry().register("settings.timer.animation_speed", Double.class, 0.5);
+        plugin.getConfigRegistry().register("settings.timer.hiding.primary-color", String.class, "#FF0000");
+        plugin.getConfigRegistry().register("settings.timer.hiding.secondary-color", String.class, "#0000FF");
+        plugin.getConfigRegistry().register("settings.timer.seeking.primary-color", String.class, "#FFFF00");
+        plugin.getConfigRegistry().register("settings.timer.seeking.secondary-color", String.class, "#00FFFF");
+        plugin.getConfigRegistry().register("settings.timer.animation.type", String.class, "WAVE");
+        plugin.getConfigRegistry().register("settings.timer.animation.speed", Double.class, 0.5);
     }
 
 
     private static void registerSections(HideAndSeek plugin) {
         plugin.getSectionRegistry().register(SectionDefinition.builder("game").icon(Material.COMPARATOR).build());
-        plugin.getSectionRegistry().register(SectionDefinition.builder("blockstats").icon(Material.BOOKSHELF).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.block-form").icon(Material.BRICKS).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.blockstats").icon(Material.BOOKSHELF).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.hiders").icon(Material.PLAYER_HEAD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.lobby").icon(Material.LIME_STAINED_GLASS_PANE).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.maps").icon(Material.MAP).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.round").icon(Material.CLOCK).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.seekers").icon(Material.IRON_SWORD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.seekers.gaze-kill").icon(Material.ENDER_EYE).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.small-mode").icon(Material.SLIME_BALL).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.team-distribution").icon(Material.PLAYER_HEAD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.teams").icon(Material.WHITE_BANNER).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.voting").icon(Material.PAPER).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.world-border").icon(Material.BARRIER).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items").icon(Material.PLAYER_HEAD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.crossbow").icon(Material.CROSSBOW).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.random-block").icon(Material.COBBLESTONE).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.sound").icon(Material.CAT_SPAWN_EGG).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.sound.variants").icon(Material.JUKEBOX).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.sound.variants.default").icon(Material.NOTE_BLOCK).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.sound.variants.skin_megaphone").icon(Material.BELL).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.sound.variants.skin_rubber_chicken").icon(Material.EGG).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.explosion").icon(Material.RED_CANDLE).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.explosion.variants").icon(Material.FIREWORK_STAR).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.explosion.variants.default").icon(Material.TNT).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.explosion.variants.skin_bubble_popper").icon(Material.WATER_BUCKET).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.explosion.variants.skin_confetti_popper").icon(Material.FIREWORK_ROCKET).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.speed-boost").icon(Material.WOODEN_HOE).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.knockback-stick").icon(Material.STICK).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.block-swap").icon(Material.ENDER_PEARL).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.big-firecracker").icon(Material.TNT).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.big-firecracker.variants").icon(Material.TNT).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.big-firecracker.variants.default").icon(Material.FIREWORK_STAR).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.big-firecracker.variants.skin_boombox").icon(Material.JUKEBOX).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.big-firecracker.variants.skin_giant_present").icon(Material.CHEST).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.firework-rocket").icon(Material.FIREWORK_ROCKET).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.medkit").icon(Material.GOLDEN_APPLE).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.totem").icon(Material.TOTEM_OF_UNDYING).build());
@@ -359,6 +388,9 @@ public class SettingRegisterer {
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.smoke-bomb").icon(Material.GRAY_DYE).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.ghost-essence").icon(Material.GHAST_TEAR).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("timer").icon(Material.CLOCK).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("timer.animation").icon(Material.AMETHYST_SHARD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("timer.hiding").icon(Material.RED_CONCRETE).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("timer.seeking").icon(Material.YELLOW_CONCRETE).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items").icon(Material.ENDER_EYE).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.grappling-hook").icon(Material.FISHING_ROD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.ink-splash").icon(Material.INK_SAC).build());
@@ -373,7 +405,7 @@ public class SettingRegisterer {
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.seeker-sword-throw").icon(Material.DIAMOND_SWORD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("loadout").icon(Material.ARMOR_STAND).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("loadout.token-cost").icon(Material.GOLD_BLOCK).build());
-        plugin.getSectionRegistry().register(SectionDefinition.builder("skin-shop").icon(Material.EMERALD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("skin-shop").icon(Material.DIAMOND).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points").icon(Material.EMERALD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.tracking").icon(Material.CLOCK).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.hider").icon(Material.PLAYER_HEAD).build());
@@ -390,13 +422,21 @@ public class SettingRegisterer {
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.seeker.interception").icon(Material.IRON_SWORD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.seeker.kill").icon(Material.NETHERITE_SWORD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.seeker.assist").icon(Material.CHAINMAIL_CHESTPLATE).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("points.seeker.environmental-elimination").icon(Material.LAVA_BUCKET).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("points.seeker.first-blood").icon(Material.REDSTONE).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.seeker.special").icon(Material.WOLF_SPAWN_EGG).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat").icon(Material.SHIELD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.hider-camping").icon(Material.CAMPFIRE).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.hiding").icon(Material.SHIELD).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.hiding.filter").icon(Material.HOPPER).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.seeking").icon(Material.ENDER_EYE).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.seeking.filter").icon(Material.HOPPER).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.seeking.line-of-sight").icon(Material.SPYGLASS).build());
     }
 
     public static void registerSettings(HideAndSeek plugin) {
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.gametype", SettingType.ENUM, GameModeEnum.class)
-                .defaultValue(getEnumConfigValue(plugin, "game.gametype", GameModeEnum.class, GameModeEnum.NORMAL))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.mode", SettingType.ENUM, GameModeEnum.class)
+                .defaultValue(getEnumConfigValue(plugin, "game.mode", GameModeEnum.class, GameModeEnum.NORMAL))
                 .customIcon(Material.COMMAND_BLOCK)
                 .description("Gamemode of the game")
                 .valueIcons(Map.of(
@@ -406,8 +446,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.gamestyle", SettingType.ENUM, GameStyleEnum.class)
-                .defaultValue(getEnumConfigValue(plugin, "game.gamestyle", GameStyleEnum.class, GameStyleEnum.SPECTATOR))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.style", SettingType.ENUM, GameStyleEnum.class)
+                .defaultValue(getEnumConfigValue(plugin, "game.style", GameStyleEnum.class, GameStyleEnum.SPECTATOR))
                 .customIcon(Material.NETHER_STAR)
                 .description("Gamemode of the game")
                 .valueIcons(Map.of(
@@ -417,22 +457,22 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.hiding_time", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "game.hiding_time", 60))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.hiding-time", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "game.hiding-time", 60))
                 .range(10, 600)
                 .description("Hiding phase duration in seconds")
                 .customIcon(Material.CLOCK)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seeking_time", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "game.seeking_time", 300))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seeking-time", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "game.seeking-time", 300))
                 .range(60, 1800)
                 .description("Seeking phase duration in seconds")
                 .customIcon(Material.CLOCK)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.hider_invisibility", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.hider_invisibility", false))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.hider-invisibility", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.hider-invisibility", false))
                 .description("Grant hiders invisibility during hiding phase")
                 .customIcon(Material.POTION)
                 .valueIconStacks(Map.of(
@@ -441,8 +481,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.damage_hiders_outside_worldborder", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.damage_hiders_outside_worldborder", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.world-border.damage-hiders-outside", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.world-border.damage-hiders-outside", true))
                 .description("Damage hiders when they go outside the world border")
                 .customIcon(Material.BARRIER)
                 .valueIconStacks(Map.of(
@@ -451,35 +491,35 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.worldborder_damage_timeout", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "game.worldborder_damage_timeout", 10))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.world-border.damage-delay-seconds", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "game.world-border.damage-delay-seconds", 10))
                 .range(1, 60)
                 .description("Seconds a hider must be outside the border before taking damage")
                 .customIcon(Material.CLOCK)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.worldborder_damage_amount", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "game.worldborder_damage_amount", 2.0))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.world-border.damage-amount", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "game.world-border.damage-amount", 2.0))
                 .rangeDouble(0.5, 20.0)
                 .description("Damage per tick dealt to hiders outside the border")
                 .customIcon(Material.REDSTONE)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.worldborder_damage_cooldown", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "game.worldborder_damage_cooldown", 20))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.world-border.damage-cooldown-ticks", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "game.world-border.damage-cooldown-ticks", 20))
                 .range(1, 100)
                 .description("Ticks between damage hits (20 = 1 second)")
                 .customIcon(Material.GOLDEN_APPLE)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.small_mode_size", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "game.small_mode_size", 0.5))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.small-mode.hider-size", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "game.small-mode.hider-size", 0.5))
                 .description("Size scale for SMALL mode hiders (0.1 = tiny, 1.0 = normal)")
                 .customIcon(Material.SLIME_BALL)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.random_team_distribution", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.random_team_distribution", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.team-distribution.random", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.team-distribution.random", true))
                 .description("Enable random distribution of players into hider/seeker teams")
                 .customIcon(Material.PLAYER_HEAD)
                 .valueIconStacks(Map.of(
@@ -488,8 +528,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.vote_gamemode_enabled", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.vote_gamemode_enabled", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.voting.game-mode-enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.voting.game-mode-enabled", true))
                 .description("Allow players to vote for gamemodes in lobby")
                 .customIcon(Material.COMMAND_BLOCK)
                 .valueIconStacks(Map.of(
@@ -498,8 +538,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.vote_map_enabled", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.vote_map_enabled", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.voting.map-enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.voting.map-enabled", true))
                 .description("Allow players to vote for maps in lobby")
                 .customIcon(Material.MAP)
                 .valueIconStacks(Map.of(
@@ -508,8 +548,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.vote_show_counts", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.vote_show_counts", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.voting.show-counts", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.voting.show-counts", true))
                 .description("Show current vote counts in the voting GUI")
                 .customIcon(Material.PAPER)
                 .valueIconStacks(Map.of(
@@ -518,8 +558,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.readiness_enabled", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.readiness_enabled", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.lobby.readiness-enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.lobby.readiness-enabled", true))
                 .description("Require players to ready up before the round can start")
                 .customIcon(Material.LIME_STAINED_GLASS_PANE)
                 .valueIconStacks(Map.of(
@@ -528,8 +568,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.use_preferred_modes", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.use_preferred_modes", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.maps.use-preferred-modes", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.maps.use-preferred-modes", true))
                 .description("Only select maps that have the current game mode in their preferred modes list")
                 .customIcon(Material.MAP)
                 .valueIconStacks(Map.of(
@@ -538,8 +578,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.use_map_specific_timings", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.use_map_specific_timings", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.maps.use-map-timings", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.maps.use-map-timings", true))
                 .description("Use hiding/seeking times from map config if available, otherwise use global settings")
                 .customIcon(Material.CLOCK)
                 .valueIconStacks(Map.of(
@@ -548,8 +588,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.use_map_specific_seeker_count", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.use_map_specific_seeker_count", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.maps.use-map-seeker-count", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.maps.use-map-seeker-count", true))
                 .description("Use seeker configuration from map config if available, otherwise use global settings")
                 .customIcon(Material.IRON_SWORD)
                 .valueIconStacks(Map.of(
@@ -558,8 +598,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.use_map_specific_player_limits", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.use_map_specific_player_limits", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.maps.use-map-player-limits", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.maps.use-map-player-limits", true))
                 .description("Use player count recommendations from map config if available")
                 .customIcon(Material.PLAYER_HEAD)
                 .valueIconStacks(Map.of(
@@ -568,8 +608,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.use_map_specific_setting_overrides", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.use_map_specific_setting_overrides", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.maps.use-map-setting-overrides", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.maps.use-map-setting-overrides", true))
                 .description("Apply map setting-overrides from maps.yml during a round")
                 .customIcon(Material.COMMAND_BLOCK)
                 .valueIconStacks(Map.of(
@@ -578,35 +618,74 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.fixed_seeker_team", SettingType.STRING, String.class)
-                .defaultValue(getConfigValue(plugin, "game.fixed_seeker_team", ""))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.teams.fixed-seeker-team", SettingType.STRING, String.class)
+                .defaultValue(getConfigValue(plugin, "game.teams.fixed-seeker-team", ""))
                 .description("Fixed seeker team (leave empty for random). Set to a team name to always use that team as seekers")
                 .customIcon(Material.WHITE_BANNER)
+                .itemProvider(value -> {
+                    String teamName = value instanceof String stringValue ? stringValue.trim() : "";
+                    if (teamName.isEmpty()) {
+                        return new ItemStack(Material.WHITE_BANNER);
+                    }
+
+                    var team = plugin.getTeamManager().getTeam(teamName);
+                    if (team == null) {
+                        return new ItemStack(Material.WHITE_BANNER);
+                    }
+
+                    TextColor textColor = team.color();
+
+                    DyeColor dyeColor = mapToNearestDye(textColor);
+
+                    Material banner = Material.valueOf(dyeColor.name() + "_BANNER");
+
+                    return new ItemStack(banner);
+                })
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seeker_count", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "game.seeker_count", 1))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.teams.seeker-count", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "game.teams.seeker-count", 1))
                 .range(1, 10)
                 .description("Number of seekers (if random distribution is enabled)")
                 .customIcon(Material.IRON_SWORD)
+                .itemProvider(value -> {
+                    int count = value instanceof Number number ? number.intValue() : 1;
+                    if (count <= 1) {
+                        return new ItemStack(Material.IRON_SWORD);
+                    }
+                    if (count <= 3) {
+                        return new ItemStack(Material.DIAMOND_SWORD);
+                    }
+                    return new ItemStack(Material.NETHERITE_SWORD);
+                })
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.hider_health", SettingType.INTEGER, Integer.class)
-                .defaultValue(getConfigValue(plugin, "game.hider_health", 20))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.hiders.health", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "game.hiders.health", 20))
                 .range(1, 20)
                 .description("Health of hiders (in half-hearts)")
                 .customIcon(Material.GOLDEN_APPLE)
+                .itemProvider(value -> {
+                    int health = value instanceof Number number ? number.intValue() : 20;
+                    if (health <= 6) {
+                        return new ItemStack(Material.POISONOUS_POTATO);
+                    }
+                    if (health <= 14) {
+                        return new ItemStack(Material.APPLE);
+                    }
+                    return new ItemStack(Material.GOLDEN_APPLE);
+                })
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.block_view_height", SettingType.FLOAT, Float.class)
-                .defaultValue(getConfigValue(plugin, "game.block_view_height", 0.1f))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.block-form.view-height", SettingType.FLOAT, Float.class)
+                .defaultValue(getConfigValue(plugin, "game.block-form.view-height", 0.1f))
                 .rangeFloat(0f, 1.5f)
                 .description("View Height of player when they hide in a block")
                 .customIcon(Material.LADDER)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.block_size_to_block", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.block_size_to_block", false))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.block-form.scale-to-block", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.block-form.scale-to-block", false))
                 .description("Scale hiders to the hidden block's height while hidden in BLOCK mode")
                 .customIcon(Material.SCAFFOLDING)
                 .valueIconStacks(Map.of(
@@ -615,8 +694,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seeker_kill_mode", SettingType.ENUM, SeekerKillModeEnum.class)
-                .defaultValue(getEnumConfigValue(plugin, "game.seeker_kill_mode", SeekerKillModeEnum.class, SeekerKillModeEnum.NORMAL))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seekers.kill-mode", SettingType.ENUM, SeekerKillModeEnum.class)
+                .defaultValue(getEnumConfigValue(plugin, "game.seekers.kill-mode", SeekerKillModeEnum.class, SeekerKillModeEnum.NORMAL))
                 .description("How seekers kill hiders")
                 .valueIcons(Map.of(
                         SeekerKillModeEnum.NORMAL, Material.IRON_SWORD,
@@ -625,22 +704,22 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.gaze_kill_max_distance", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "game.gaze_kill_max_distance", 10.0))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seekers.gaze-kill.max-distance", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "game.seekers.gaze-kill.max-distance", 10.0))
                 .rangeDouble(5.0, 50.0)
                 .description("Maximum distance for gaze kill in blocks")
                 .customIcon(Material.SPYGLASS)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.gaze_kill_fov", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "game.gaze_kill_fov", 30.0))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seekers.gaze-kill.fov", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "game.seekers.gaze-kill.fov", 30.0))
                 .rangeDouble(10.0, 180.0)
                 .description("Field of view angle for gaze kill in degrees")
                 .customIcon(Material.BOW)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.gaze_kill_show_particles", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.gaze_kill_show_particles", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.seekers.gaze-kill.show-particles", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.seekers.gaze-kill.show-particles", true))
                 .description("Show particles when looking at hiders during gaze kill mode")
                 .customIcon(Material.REDSTONE)
                 .valueIconStacks(Map.of(
@@ -649,14 +728,18 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.auto_cleanup_after_round", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "game.auto_cleanup_after_round", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.round.auto-cleanup", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.round.auto-cleanup", true))
                 .description("Automatically teleport players to lobby and delete map after round")
                 .customIcon(ItemStack.of(Material.LAVA_BUCKET))
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.LAVA_BUCKET, true),
+                        false, setEnchanted(Material.BUCKET, false)
+                ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("game.small_mode_seeker_size", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "game.small_mode_seeker_size", 1.0))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.small-mode.seeker-size", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "game.small-mode.seeker-size", 1.0))
                 .rangeDouble(0.1, 2.0)
                 .description("Size scale for seekers in SMALL mode (1.0 = normal size)")
                 .customIcon(Material.MAGMA_CREAM)
@@ -672,8 +755,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.hiding-filter-enabled", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "anticheat.hiding-filter-enabled", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.hiding.filter.enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "anticheat.hiding.filter.enabled", true))
                 .description("During HIDING: hide all hider entities from seekers while keeping tab entries")
                 .customIcon(Material.ENDER_EYE)
                 .valueIconStacks(Map.of(
@@ -682,8 +765,8 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking-filter-enabled", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "anticheat.seeking-filter-enabled", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking.filter.enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "anticheat.seeking.filter.enabled", true))
                 .description("During SEEKING: seekers only see nearby hiders and never hidden BLOCK-mode hiders")
                 .customIcon(Material.SPYGLASS)
                 .valueIconStacks(Map.of(
@@ -692,15 +775,15 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking-visibility-range", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "anticheat.seeking-visibility-range", 12.0))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking.visibility-range", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "anticheat.seeking.visibility-range", 12.0))
                 .rangeDouble(1.0, 128.0)
                 .description("Distance in blocks at which seekers can see hiders during SEEKING")
                 .customIcon(Material.COMPASS)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking-los-reveal-enabled", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "anticheat.seeking-los-reveal-enabled", true))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking.line-of-sight.enabled", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "anticheat.seeking.line-of-sight.enabled", true))
                 .description("Allow seeker line-of-sight reveal outside base anti-cheat visibility range")
                 .customIcon(Material.SPYGLASS)
                 .valueIconStacks(Map.of(
@@ -709,15 +792,15 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking-los-reveal-range", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "anticheat.seeking-los-reveal-range", 64.0))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking.line-of-sight.range", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "anticheat.seeking.line-of-sight.range", 64.0))
                 .rangeDouble(8.0, 256.0)
                 .description("Maximum range for line-of-sight reveal checks")
                 .customIcon(Material.COMPASS)
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking-los-reveal-fov", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "anticheat.seeking-los-reveal-fov", 24.0))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("anticheat.seeking.line-of-sight.fov", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "anticheat.seeking.line-of-sight.fov", 24.0))
                 .rangeDouble(5.0, 90.0)
                 .description("Seeker view angle in degrees for line-of-sight reveal checks")
                 .customIcon(Material.ENDER_EYE)
@@ -769,8 +852,8 @@ public class SettingRegisterer {
                 .build());
 
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("blockstats.show-names", SettingType.BOOLEAN, Boolean.class)
-                .defaultValue(getConfigValue(plugin, "blockstats.show-names", false))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.blockstats.show-names", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.blockstats.show-names", false))
                 .description("Show player names in Block Statistics GUI")
                 .customIcon(Material.NAME_TAG)
                 .valueIconStacks(Map.of(
@@ -794,32 +877,32 @@ public class SettingRegisterer {
                 .build());
 
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.hiding_color1", SettingType.STRING, String.class)
-                .defaultValue(getConfigValue(plugin, "timer.hiding_color1", "#FF0000"))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.hiding.primary-color", SettingType.STRING, String.class)
+                .defaultValue(getConfigValue(plugin, "timer.hiding.primary-color", "#FF0000"))
                 .description("Primary color for hiding timer (hex code)")
                 .itemProvider(value -> colorIconFromHex(value, "CONCRETE_POWDER", Material.RED_CONCRETE_POWDER))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.hiding_color2", SettingType.STRING, String.class)
-                .defaultValue(getConfigValue(plugin, "timer.hiding_color2", "#0000FF"))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.hiding.secondary-color", SettingType.STRING, String.class)
+                .defaultValue(getConfigValue(plugin, "timer.hiding.secondary-color", "#0000FF"))
                 .description("Secondary color for hiding timer (hex code)")
                 .itemProvider(value -> colorIconFromHex(value, "CONCRETE", Material.BLUE_CONCRETE))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.seeking_color1", SettingType.STRING, String.class)
-                .defaultValue(getConfigValue(plugin, "timer.seeking_color1", "#FFFF00"))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.seeking.primary-color", SettingType.STRING, String.class)
+                .defaultValue(getConfigValue(plugin, "timer.seeking.primary-color", "#FFFF00"))
                 .description("Primary color for seeking timer (hex code)")
                 .itemProvider(value -> colorIconFromHex(value, "WOOL", Material.YELLOW_WOOL))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.seeking_color2", SettingType.STRING, String.class)
-                .defaultValue(getConfigValue(plugin, "timer.seeking_color2", "#00FFFF"))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.seeking.secondary-color", SettingType.STRING, String.class)
+                .defaultValue(getConfigValue(plugin, "timer.seeking.secondary-color", "#00FFFF"))
                 .description("Secondary color for seeking timer (hex code)")
                 .itemProvider(value -> colorIconFromHex(value, "STAINED_GLASS", Material.CYAN_STAINED_GLASS))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.animation_type", SettingType.ENUM, AnimationType.class)
-                .defaultValue(getEnumConfigValue(plugin, "timer.animation_type", AnimationType.class, AnimationType.WAVE))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.animation.type", SettingType.ENUM, AnimationType.class)
+                .defaultValue(getEnumConfigValue(plugin, "timer.animation.type", AnimationType.class, AnimationType.WAVE))
                 .description("Timer animation type")
                 .customIcon(Material.AMETHYST_SHARD)
                 .valueIcons(Map.of(
@@ -829,11 +912,21 @@ public class SettingRegisterer {
                 ))
                 .build());
 
-        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.animation_speed", SettingType.DOUBLE, Double.class)
-                .defaultValue(getConfigValue(plugin, "timer.animation_speed", 0.5))
+        plugin.getSettingRegistry().register(SettingDefinition.builder("timer.animation.speed", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "timer.animation.speed", 0.5))
                 .range(0, 2)
                 .description("Timer animation speed (0.1 = slow, 2.0 = fast)")
                 .customIcon(Material.REDSTONE)
+                .itemProvider(value -> {
+                    double speed = value instanceof Number number ? number.doubleValue() : 0.5;
+                    if (speed < 0.75) {
+                        return new ItemStack(Material.SOUL_TORCH);
+                    }
+                    if (speed < 1.5) {
+                        return new ItemStack(Material.REDSTONE_TORCH);
+                    }
+                    return new ItemStack(Material.BLAZE_POWDER);
+                })
                 .build());
 
 
@@ -1885,6 +1978,32 @@ public class SettingRegisterer {
         meta.setEnchantmentGlintOverride(enchanted);
         itemStack.setItemMeta(meta);
         return itemStack;
+    }
+
+    private static DyeColor mapToNearestDye(TextColor color) {
+        int r = color.red();
+        int g = color.green();
+        int b = color.blue();
+
+        DyeColor closest = DyeColor.WHITE;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (DyeColor dye : DyeColor.values()) {
+            Color dyeColor = dye.getColor();
+
+            int dr = dyeColor.getRed() - r;
+            int dg = dyeColor.getGreen() - g;
+            int db = dyeColor.getBlue() - b;
+
+            double distance = dr * dr + dg * dg + db * db;
+
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = dye;
+            }
+        }
+
+        return closest;
     }
 }
 

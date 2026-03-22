@@ -86,7 +86,7 @@ public final class SeekerItems {
         int slot = 1;
 
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
 
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
 
@@ -241,7 +241,7 @@ public final class SeekerItems {
         ItemSkinSelectionService.applySelectedVariants(player, plugin);
 
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
 

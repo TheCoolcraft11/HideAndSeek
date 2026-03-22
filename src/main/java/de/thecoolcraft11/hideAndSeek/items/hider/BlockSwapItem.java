@@ -85,7 +85,7 @@ public class BlockSwapItem implements GameItem {
             context.skipCooldown();
             return;
         }
-        if (!"BLOCK".equals(String.valueOf(plugin.getSettingService().getSetting("game.gametype").getValue()))) {
+        if (!"BLOCK".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
             player.sendMessage(Component.text("Block swap is only available in BLOCK mode.", NamedTextColor.RED));
             context.skipCooldown();
             return;

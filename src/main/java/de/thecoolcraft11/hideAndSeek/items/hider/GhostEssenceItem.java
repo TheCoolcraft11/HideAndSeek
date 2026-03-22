@@ -199,7 +199,7 @@ public class GhostEssenceItem implements GameItem {
 
 
         boolean restoreBlockDisplayVisible = true;
-        var modeResult = plugin.getSettingService().getSetting("game.gametype");
+        var modeResult = plugin.getSettingService().getSetting("game.mode");
         Object modeObj = modeResult.isSuccess() ? modeResult.getValue() : null;
         if ("BLOCK".equals(modeObj != null ? modeObj.toString() : "")) {
             var blockDisplay = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());

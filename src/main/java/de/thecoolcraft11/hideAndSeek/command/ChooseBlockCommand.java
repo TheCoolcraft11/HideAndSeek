@@ -52,7 +52,7 @@ public class ChooseBlockCommand implements MinigameSubcommand {
         }
 
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
 
         if (gameModeObj == null || !gameModeObj.toString().equals("BLOCK")) {

@@ -79,7 +79,7 @@ public class PlayerHitListener implements Listener {
                 plugin.getPointService().award(seekerId, PointAction.SEEKER_ENVIRONMENTAL_ELIMINATION);
             }
 
-            var gameStyleResult = plugin.getSettingService().getSetting("game.gamestyle");
+            var gameStyleResult = plugin.getSettingService().getSetting("game.style");
             Object gameStyleObj = gameStyleResult.isSuccess() ? gameStyleResult.getValue() : GameStyleEnum.SPECTATOR;
             GameStyleEnum gameStyle = (gameStyleObj instanceof GameStyleEnum) ?
                     (GameStyleEnum) gameStyleObj : GameStyleEnum.SPECTATOR;
@@ -95,7 +95,7 @@ public class PlayerHitListener implements Listener {
                     HideAndSeek.getDataController().getHiders().contains(deceased.getUniqueId())) {
 
 
-                var gameStyleResult = plugin.getSettingService().getSetting("game.gamestyle");
+                var gameStyleResult = plugin.getSettingService().getSetting("game.style");
                 Object gameStyleObj = gameStyleResult.isSuccess() ? gameStyleResult.getValue() : GameStyleEnum.SPECTATOR;
                 GameStyleEnum gameStyle = (gameStyleObj instanceof GameStyleEnum) ?
                         (GameStyleEnum) gameStyleObj : GameStyleEnum.SPECTATOR;
@@ -163,7 +163,7 @@ public class PlayerHitListener implements Listener {
 
         if (victimIsHider && HideAndSeek.getDataController().isHidden(victim.getUniqueId())) {
             if (!HideAndSeek.getDataController().isBlockDamageOverrideActive(victim.getUniqueId())) {
-                boolean gazeKill = plugin.getSettingRegistry().get("game.seeker_kill_mode").equals("GAZE_KILL");
+                boolean gazeKill = plugin.getSettingRegistry().get("game.seekers.kill-mode").equals("GAZE_KILL");
                 plugin.getBlockModeListener().damageHiddenPlayer(attacker, victim.getUniqueId(), gazeKill);
                 event.setCancelled(true);
                 return;
@@ -198,7 +198,7 @@ public class PlayerHitListener implements Listener {
 
     public void checkWorldBorderDamage() {
 
-        boolean damageEnabled = plugin.getSettingRegistry().get("game.damage_hiders_outside_worldborder", true);
+        boolean damageEnabled = plugin.getSettingRegistry().get("game.world-border.damage-hiders-outside", true);
         if (!damageEnabled) {
             return;
         }
@@ -213,9 +213,9 @@ public class PlayerHitListener implements Listener {
         }
 
 
-        int damageTimeoutSeconds = plugin.getSettingRegistry().get("game.worldborder_damage_timeout", 10);
-        double damageAmount = plugin.getSettingRegistry().get("game.worldborder_damage_amount", 2.0);
-        int damageCooldownTicks = plugin.getSettingRegistry().get("game.worldborder_damage_cooldown", 20);
+        int damageTimeoutSeconds = plugin.getSettingRegistry().get("game.world-border.damage-delay-seconds", 10);
+        double damageAmount = plugin.getSettingRegistry().get("game.world-border.damage-amount", 2.0);
+        int damageCooldownTicks = plugin.getSettingRegistry().get("game.world-border.damage-cooldown-ticks", 20);
         long currentTime = System.currentTimeMillis();
 
 
@@ -280,7 +280,7 @@ public class PlayerHitListener implements Listener {
 
 
         if (plugin.getStateManager().getCurrentPhaseId().equals("seeking")) {
-            var gameStyleResult = plugin.getSettingService().getSetting("game.gamestyle");
+            var gameStyleResult = plugin.getSettingService().getSetting("game.style");
             Object gameStyleObj = gameStyleResult.isSuccess() ? gameStyleResult.getValue() : GameStyleEnum.SPECTATOR;
             GameStyleEnum gameStyle = (gameStyleObj instanceof GameStyleEnum) ?
                     (GameStyleEnum) gameStyleObj : GameStyleEnum.SPECTATOR;

@@ -137,7 +137,7 @@ public class CurseSpellItem implements GameItem {
         long until = System.currentTimeMillis() + (duration * 1000L);
         hiderCursedUntil.put(hider.getUniqueId(), until);
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         String mode = gameModeObj != null ? gameModeObj.toString() : "";
 
@@ -150,7 +150,7 @@ public class CurseSpellItem implements GameItem {
         }
 
         if ("SMALL".equals(mode)) {
-            var smallSizeResult = plugin.getSettingService().getSetting("game.small_mode_size");
+            var smallSizeResult = plugin.getSettingService().getSetting("game.small-mode.hider-size");
             Object sizeObj = smallSizeResult.isSuccess() ? smallSizeResult.getValue() : 0.5;
             double smallSize = (sizeObj instanceof Number) ? ((Number) sizeObj).doubleValue() : 0.5;
 

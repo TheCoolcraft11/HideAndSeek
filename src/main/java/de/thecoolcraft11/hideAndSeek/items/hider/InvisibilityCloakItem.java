@@ -63,7 +63,7 @@ public class InvisibilityCloakItem implements GameItem {
         boolean cardboard = ItemSkinSelectionService.isSelected(player, ID, "skin_cardboard_box");
         boolean camo = ItemSkinSelectionService.isSelected(player, ID, "skin_camo_netting");
 
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         String gameMode = gameModeObj != null ? gameModeObj.toString() : "";
 

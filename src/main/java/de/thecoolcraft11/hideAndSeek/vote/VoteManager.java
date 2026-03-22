@@ -22,25 +22,25 @@ public class VoteManager {
     }
 
     public boolean isGamemodeVotingEnabled() {
-        var result = plugin.getSettingService().getSetting("game.vote_gamemode_enabled");
+        var result = plugin.getSettingService().getSetting("game.voting.game-mode-enabled");
         Object value = result.isSuccess() ? result.getValue() : true;
         return value instanceof Boolean enabled ? enabled : true;
     }
 
     public boolean isMapVotingEnabled() {
-        var result = plugin.getSettingService().getSetting("game.vote_map_enabled");
+        var result = plugin.getSettingService().getSetting("game.voting.map-enabled");
         Object value = result.isSuccess() ? result.getValue() : true;
         return value instanceof Boolean enabled ? enabled : true;
     }
 
     public boolean showVoteCounts() {
-        var result = plugin.getSettingService().getSetting("game.vote_show_counts");
+        var result = plugin.getSettingService().getSetting("game.voting.show-counts");
         Object value = result.isSuccess() ? result.getValue() : true;
         return value instanceof Boolean enabled ? enabled : true;
     }
 
     public boolean isReadinessEnabled() {
-        var result = plugin.getSettingService().getSetting("game.readiness_enabled");
+        var result = plugin.getSettingService().getSetting("game.lobby.readiness-enabled");
         Object value = result.isSuccess() ? result.getValue() : true;
         return value instanceof Boolean enabled ? enabled : true;
     }

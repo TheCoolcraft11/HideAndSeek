@@ -69,7 +69,7 @@ public class BlockRandomizerItem implements GameItem {
     }
 
     private static void randomizeAllBlocks(Player seeker, HideAndSeek plugin) {
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         if (gameModeObj == null || !gameModeObj.toString().equals("BLOCK")) {
             seeker.sendMessage(Component.text("Block Randomizer is only available in BLOCK mode.", NamedTextColor.RED));

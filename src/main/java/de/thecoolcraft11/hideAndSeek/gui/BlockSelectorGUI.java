@@ -38,7 +38,7 @@ public class BlockSelectorGUI {
             player.sendMessage(Component.text("Only hiders can use this!", NamedTextColor.RED));
             return;
         }
-        var gameModeResult = plugin.getSettingService().getSetting("game.gametype");
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         if (gameModeObj == null || !gameModeObj.toString().equals("BLOCK")) {
             player.sendMessage(Component.text("Block mode is not enabled!", NamedTextColor.RED));

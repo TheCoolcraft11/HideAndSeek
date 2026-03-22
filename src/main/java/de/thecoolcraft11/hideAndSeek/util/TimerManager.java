@@ -66,10 +66,10 @@ public class TimerManager {
 
         try {
             int hidingTime = resolveHidingTime(plugin);
-            String color1 = plugin.getSettingRegistry().get("timer.hiding_color1");
-            String color2 = plugin.getSettingRegistry().get("timer.hiding_color2");
-            Object animationTypeObj = plugin.getSettingRegistry().get("timer.animation_type");
-            Number animationSpeed = plugin.getSettingRegistry().get("timer.animation_speed");
+            String color1 = plugin.getSettingRegistry().get("timer.hiding.primary-color");
+            String color2 = plugin.getSettingRegistry().get("timer.hiding.secondary-color");
+            Object animationTypeObj = plugin.getSettingRegistry().get("timer.animation.type");
+            Number animationSpeed = plugin.getSettingRegistry().get("timer.animation.speed");
 
 
             if (color1 == null) color1 = "#FF0000";
@@ -137,10 +137,10 @@ public class TimerManager {
 
         try {
             int seekingTime = resolveSeekingTime(plugin);
-            String color1 = plugin.getSettingRegistry().get("timer.seeking_color1");
-            String color2 = plugin.getSettingRegistry().get("timer.seeking_color2");
-            Object animationTypeObj = plugin.getSettingRegistry().get("timer.animation_type");
-            Number animationSpeed = plugin.getSettingRegistry().get("timer.animation_speed");
+            String color1 = plugin.getSettingRegistry().get("timer.seeking.primary-color");
+            String color2 = plugin.getSettingRegistry().get("timer.seeking.secondary-color");
+            Object animationTypeObj = plugin.getSettingRegistry().get("timer.animation.type");
+            Number animationSpeed = plugin.getSettingRegistry().get("timer.animation.speed");
 
 
             if (color1 == null) color1 = "#FFFF00";

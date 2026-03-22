@@ -14,7 +14,7 @@ public class MapConfigHelper {
 
     public static int calculateSeekerCount(MinigameFramework plugin, int playerCount, MapData mapData) {
 
-        var useMapSpecificResult = plugin.getSettingService().getSetting("game.use_map_specific_seeker_count");
+        var useMapSpecificResult = plugin.getSettingService().getSetting("game.maps.use-map-seeker-count");
         Object useMapSpecificObj = useMapSpecificResult.isSuccess() ? useMapSpecificResult.getValue() : true;
         boolean useMapSpecific = (useMapSpecificObj instanceof Boolean) ? (Boolean) useMapSpecificObj : true;
 
@@ -54,7 +54,7 @@ public class MapConfigHelper {
     }
 
     public static int getGlobalSeekerCount(MinigameFramework plugin) {
-        var seekerCountResult = plugin.getSettingService().getSetting("game.seeker_count");
+        var seekerCountResult = plugin.getSettingService().getSetting("game.teams.seeker-count");
         Object seekerCountObj = seekerCountResult.isSuccess() ? seekerCountResult.getValue() : 1;
         int seekerCount = (seekerCountObj instanceof Integer) ? (Integer) seekerCountObj : 1;
 
@@ -67,7 +67,7 @@ public class MapConfigHelper {
 
     public static int getHidingTime(MinigameFramework plugin, MapData mapData) {
 
-        var useMapSpecificResult = plugin.getSettingService().getSetting("game.use_map_specific_timings");
+        var useMapSpecificResult = plugin.getSettingService().getSetting("game.maps.use-map-timings");
         Object useMapSpecificObj = useMapSpecificResult.isSuccess() ? useMapSpecificResult.getValue() : true;
         boolean useMapSpecific = (useMapSpecificObj instanceof Boolean) ? (Boolean) useMapSpecificObj : true;
 
@@ -81,7 +81,7 @@ public class MapConfigHelper {
         }
 
 
-        var hidingTimeResult = plugin.getSettingService().getSetting("game.hiding_time");
+        var hidingTimeResult = plugin.getSettingService().getSetting("game.hiding-time");
         Object hidingTimeObj = hidingTimeResult.isSuccess() ? hidingTimeResult.getValue() : 60;
         int hidingTime = (hidingTimeObj instanceof Integer) ? (Integer) hidingTimeObj : 60;
 
@@ -93,7 +93,7 @@ public class MapConfigHelper {
 
     public static int getSeekingTime(MinigameFramework plugin, MapData mapData) {
 
-        var useMapSpecificResult = plugin.getSettingService().getSetting("game.use_map_specific_timings");
+        var useMapSpecificResult = plugin.getSettingService().getSetting("game.maps.use-map-timings");
         Object useMapSpecificObj = useMapSpecificResult.isSuccess() ? useMapSpecificResult.getValue() : true;
         boolean useMapSpecific = (useMapSpecificObj instanceof Boolean) ? (Boolean) useMapSpecificObj : true;
 
@@ -107,7 +107,7 @@ public class MapConfigHelper {
         }
 
 
-        var seekingTimeResult = plugin.getSettingService().getSetting("game.seeking_time");
+        var seekingTimeResult = plugin.getSettingService().getSetting("game.seeking-time");
         Object seekingTimeObj = seekingTimeResult.isSuccess() ? seekingTimeResult.getValue() : 300;
         int seekingTime = (seekingTimeObj instanceof Integer) ? (Integer) seekingTimeObj : 300;
 
@@ -123,7 +123,7 @@ public class MapConfigHelper {
             int playerCount) {
 
 
-        var useMapSpecificResult = plugin.getSettingService().getSetting("game.use_map_specific_player_limits");
+        var useMapSpecificResult = plugin.getSettingService().getSetting("game.maps.use-map-player-limits");
         Object useMapSpecificObj = useMapSpecificResult.isSuccess() ? useMapSpecificResult.getValue() : true;
         boolean useMapSpecific = (useMapSpecificObj instanceof Boolean) ? (Boolean) useMapSpecificObj : true;
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
