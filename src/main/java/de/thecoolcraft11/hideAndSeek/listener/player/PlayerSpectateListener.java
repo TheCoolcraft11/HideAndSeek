@@ -10,7 +10,7 @@ public class PlayerSpectateListener implements Listener {
 
     @EventHandler
     public void onStartSpectate(PlayerStartSpectatingEntityEvent event) {
-        if (DataController.getInstance().getHiders().contains(event.getPlayer().getUniqueId())) {
+        if (DataController.getInstance().getHiders().contains(event.getPlayer().getUniqueId()) && DataController.getInstance().getAllowedSpectators().contains(event.getPlayer().getUniqueId())) {
             event.setCancelled(true);
             event.getPlayer().setSpectatorTarget(null);
         }
@@ -18,7 +18,7 @@ public class PlayerSpectateListener implements Listener {
 
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event) {
-        if (DataController.getInstance().getHiders().contains(event.getPlayer().getUniqueId())) {
+        if (DataController.getInstance().getHiders().contains(event.getPlayer().getUniqueId()) && DataController.getInstance().getAllowedSpectators().contains(event.getPlayer().getUniqueId())) {
             if (event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE) {
                 event.setCancelled(true);
             }
