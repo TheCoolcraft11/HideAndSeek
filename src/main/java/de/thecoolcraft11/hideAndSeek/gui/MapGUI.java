@@ -98,8 +98,11 @@ public class MapGUI {
 
         HideAndSeek.getDataController().setCurrentMapName(mapName);
 
+        MapData mapData = plugin.getMapManager().getMapData(mapName);
+        String displayName = (mapData != null) ? mapData.getDisplayName() : mapName;
+
         player.sendMessage(Component.text("Map selected: ", NamedTextColor.GREEN)
-                .append(Component.text(mapName, NamedTextColor.GOLD)));
+                .append(Component.text(displayName, NamedTextColor.GOLD)));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
         player.closeInventory();
 
@@ -140,8 +143,9 @@ public class MapGUI {
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             NamedTextColor nameColor = isCurrentMap ? NamedTextColor.GREEN : NamedTextColor.AQUA;
+            String displayName = mapData != null ? mapData.getDisplayName() : mapName;
 
-            meta.displayName(Component.text(mapName, nameColor, TextDecoration.BOLD)
+            meta.displayName(Component.text(displayName, nameColor, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));
 
             List<Component> lore = new ArrayList<>();
@@ -237,6 +241,10 @@ public class MapGUI {
                 lore.add(Component.text("Selected", NamedTextColor.GREEN)
                         .decoration(TextDecoration.ITALIC, false));
             }
+
+            lore.add(Component.empty());
+            lore.add(Component.text("ID: " + mapName, NamedTextColor.DARK_GRAY)
+                    .decoration(TextDecoration.ITALIC, false));
 
             meta.lore(lore);
             item.setItemMeta(meta);

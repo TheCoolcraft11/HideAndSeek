@@ -14,6 +14,7 @@ import java.util.Map;
 
 public class MapData {
     private final String name;
+    private String prettyName;
     private String description;
     private String author;
     private String size;
@@ -42,6 +43,7 @@ public class MapData {
 
     public MapData(String name) {
         this.name = name;
+        this.prettyName = null;
         this.description = "";
         this.author = null;
         this.size = null;
@@ -65,6 +67,18 @@ public class MapData {
 
     public String getName() {
         return name;
+    }
+
+    public void setPrettyName(String prettyName) {
+        if (prettyName == null || prettyName.trim().isEmpty()) {
+            this.prettyName = null;
+            return;
+        }
+        this.prettyName = prettyName.trim();
+    }
+
+    public String getDisplayName() {
+        return prettyName != null ? prettyName : name;
     }
 
     public String getDescription() {

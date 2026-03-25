@@ -6,6 +6,7 @@ import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 import de.thecoolcraft11.hideAndSeek.items.seeker.SeekersSwordItem;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.MapInfoDisplayMode;
 import de.thecoolcraft11.hideAndSeek.util.TimerManager;
 import de.thecoolcraft11.hideAndSeek.util.map.MapConfigHelper;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
@@ -103,6 +104,11 @@ public class HidingPhase implements GamePhase {
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info("Hiding phase started - " + timeRemaining + " seconds");
         }
+
+        sendRoundStartAnnouncementChat(plugin, currentMapData, currentMapName);
+        final MapData mapDataForAnnouncement = currentMapData;
+        final String mapNameForAnnouncement = currentMapName;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> showRoundStartMapInfoTitle(plugin, mapDataForAnnouncement, mapNameForAnnouncement), 90L);
 
 
         var invisibilityResult = plugin.getSettingService().getSetting("game.hider-invisibility");
@@ -546,6 +552,145 @@ public class HidingPhase implements GamePhase {
 
         blockPhysicsExceptions.clear();
         blockPhysicsExceptions.addAll(MapConfigHelper.getBlockPhysicsExceptions(plugin, mapName));
+    }
+
+    private void showRoundStartMapInfoTitle(MinigameFramework plugin, MapData mapData, String mapName) {
+        var enabledResult = plugin.getSettingService().getSetting("game.maps.show-round-start-map-info-title");
+        Object enabledObj = enabledResult.isSuccess() ? enabledResult.getValue() : true;
+        boolean showTitle = (enabledObj instanceof Boolean) ? (Boolean) enabledObj : true;
+
+        if (!showTitle) {
+            return;
+        }
+
+        MapInfoDisplayMode displayMode = resolveMapInfoDisplayMode(plugin);
+
+        String resolvedMapName = mapData != null && hasText(mapData.getDisplayName()) ? mapData.getDisplayName() : mapName;
+        if (!hasText(resolvedMapName)) {
+            resolvedMapName = "Unknown Map";
+        }
+
+        List<String> subtitleParts = new ArrayList<>();
+        if (displayMode == MapInfoDisplayMode.NAME_AND_AUTHOR || displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
+            subtitleParts.add("By " + resolveAuthor(mapData));
+        }
+
+        if (displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
+            subtitleParts.add(trimForTitle(resolveDescription(mapData)));
+        }
+
+        String subtitle = String.join(" | ", subtitleParts);
+        Title title = Title.title(
+                Component.text(resolvedMapName, NamedTextColor.AQUA),
+                Component.text(subtitle, NamedTextColor.GRAY),
+                Title.Times.times(Duration.ofMillis(400), Duration.ofSeconds(4), Duration.ofMillis(500))
+        );
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.showTitle(title);
+        }
+    }
+
+    private void sendRoundStartAnnouncementChat(MinigameFramework plugin, MapData mapData, String mapName) {
+        Set<UUID> seekerIds = new HashSet<>(HideAndSeek.getDataController().getSeekers());
+        Set<UUID> hiderIds = new HashSet<>(HideAndSeek.getDataController().getHiders());
+        MapInfoDisplayMode displayMode = resolveMapInfoDisplayMode(plugin);
+
+        Set<UUID> spectatorIds = new HashSet<>();
+        for (Player spectator : plugin.getTeamManager().getPlayersInTeam(plugin.getTeamManager().getSpectatorTeam())) {
+            spectatorIds.add(spectator.getUniqueId());
+        }
+
+        String displayMapName = mapData != null && hasText(mapData.getDisplayName()) ? mapData.getDisplayName() : mapName;
+        if (!hasText(displayMapName)) {
+            displayMapName = "Unknown Map";
+        }
+
+        String author = resolveAuthor(mapData);
+        String description = resolveDescription(mapData);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+
+            Component roleText;
+            if (seekerIds.contains(player.getUniqueId())) {
+                roleText = Component.text("SEEKER", NamedTextColor.RED);
+            } else if (hiderIds.contains(player.getUniqueId())) {
+                roleText = Component.text("HIDER", NamedTextColor.GREEN);
+            } else if (spectatorIds.contains(player.getUniqueId())) {
+                roleText = Component.text("SPECTATOR", NamedTextColor.GRAY);
+            } else {
+                roleText = Component.text("UNASSIGNED", NamedTextColor.DARK_GRAY);
+            }
+
+
+            Component roleMessage = Component.text("You're a ", NamedTextColor.AQUA)
+                    .append(roleText);
+            player.sendMessage(roleMessage);
+
+
+            Component mapMessage = Component.text("You're playing on ", NamedTextColor.AQUA)
+                    .append(Component.text(displayMapName, NamedTextColor.YELLOW));
+
+            if (displayMode == MapInfoDisplayMode.NAME_AND_AUTHOR || displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
+                mapMessage = mapMessage.append(Component.text(" by ", NamedTextColor.AQUA))
+                        .append(Component.text(author, NamedTextColor.GOLD));
+            }
+
+            Component mapBoxLine = Component.text("═══════════════════════════════", NamedTextColor.AQUA);
+            player.sendMessage(mapBoxLine);
+            player.sendMessage(mapMessage);
+
+            if (displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
+                player.sendMessage(Component.text(description, NamedTextColor.GRAY));
+            }
+            player.sendMessage(mapBoxLine);
+        }
+    }
+
+    private MapInfoDisplayMode resolveMapInfoDisplayMode(MinigameFramework plugin) {
+        var displayModeResult = plugin.getSettingService().getSetting("game.maps.round-start-map-info-display-mode");
+        if (!displayModeResult.isSuccess()) {
+            return MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION;
+        }
+
+        Object value = displayModeResult.getValue();
+        if (value instanceof MapInfoDisplayMode mode) {
+            return mode;
+        }
+        if (value instanceof String modeString) {
+            try {
+                return MapInfoDisplayMode.valueOf(modeString.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException ignored) {
+                return MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION;
+            }
+        }
+        return MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION;
+    }
+
+    private String resolveAuthor(MapData mapData) {
+        if (mapData != null && hasText(mapData.getAuthor())) {
+            return mapData.getAuthor().trim();
+        }
+        return "Unknown author";
+    }
+
+    private String resolveDescription(MapData mapData) {
+        if (mapData != null && hasText(mapData.getDescription())) {
+            return mapData.getDescription().trim();
+        }
+        return "No description.";
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
+    private String trimForTitle(String input) {
+        String cleaned = input.trim();
+        if (cleaned.length() <= 90) {
+            return cleaned;
+        }
+        return cleaned.substring(0, 90 - 3) + "...";
     }
 
     @Override

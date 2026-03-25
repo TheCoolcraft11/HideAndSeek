@@ -130,6 +130,8 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.game.maps.use-map-seeker-count", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.maps.use-map-player-limits", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.maps.use-map-setting-overrides", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.maps.show-round-start-map-info-title", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.game.maps.round-start-map-info-display-mode", String.class, "NAME_AUTHOR_DESCRIPTION");
         plugin.getConfigRegistry().register("settings.game.teams.fixed-seeker-team", String.class, "");
         plugin.getConfigRegistry().register("settings.game.teams.seeker-count", Integer.class, 1);
         plugin.getConfigRegistry().register("settings.game.hiders.health", Integer.class, 20);
@@ -626,6 +628,27 @@ public class SettingRegisterer {
                 .valueIconStacks(Map.of(
                         true, setEnchanted(Material.COMMAND_BLOCK, true),
                         false, setEnchanted(Material.COMMAND_BLOCK, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.maps.show-round-start-map-info-title", SettingType.BOOLEAN, Boolean.class)
+                .defaultValue(getConfigValue(plugin, "game.maps.show-round-start-map-info-title", true))
+                .description("Show a map info title when the HIDING phase starts")
+                .customIcon(Material.NAME_TAG)
+                .valueIconStacks(Map.of(
+                        true, setEnchanted(Material.NAME_TAG, true),
+                        false, setEnchanted(Material.NAME_TAG, false)
+                ))
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("game.maps.round-start-map-info-display-mode", SettingType.ENUM, MapInfoDisplayMode.class)
+                .defaultValue(getEnumConfigValue(plugin, "game.maps.round-start-map-info-display-mode", MapInfoDisplayMode.class, MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION))
+                .description("Which map info fields should be shown in the HIDING start title")
+                .customIcon(Material.WRITABLE_BOOK)
+                .valueIcons(Map.of(
+                        MapInfoDisplayMode.NAME_ONLY, Material.MAP,
+                        MapInfoDisplayMode.NAME_AND_AUTHOR, Material.NAME_TAG,
+                        MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION, Material.BOOK
                 ))
                 .build());
 

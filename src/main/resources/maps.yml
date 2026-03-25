@@ -4,6 +4,7 @@
 
 # Format:
 # world-name:
+#   pretty-name: "Ancient Ruins"                    # Optional: Player-facing map title shown in GUI/titles
 #   description: "A brief description of the map"
 #   author: "Map Creator"                          # Optional: Name of the map creator
 #   size: "MEDIUM"                                 # Optional: Map size - SMALL, MEDIUM, LARGE
@@ -58,6 +59,7 @@
 
 # Map 1: Default map
 map1:
+  pretty-name: "Starter Valley"
   description: "Default map"
   author: "Server Admin"
   size: "MEDIUM"

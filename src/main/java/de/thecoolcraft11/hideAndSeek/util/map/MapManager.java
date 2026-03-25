@@ -205,6 +205,13 @@ public class MapManager {
         MapData mapData = new MapData(mapName);
 
 
+        String prettyName = section.getString("pretty-name");
+        if (prettyName == null || prettyName.isBlank()) {
+            prettyName = section.getString("prettyName");
+        }
+        mapData.setPrettyName(prettyName);
+
+
         String description = section.getString("description", "");
         mapData.setDescription(description);
 
