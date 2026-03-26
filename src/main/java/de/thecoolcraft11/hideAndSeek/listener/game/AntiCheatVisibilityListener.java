@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
@@ -92,17 +93,23 @@ public class AntiCheatVisibilityListener implements Listener {
                     continue;
                 }
 
+                
+                boolean isGlowing = hider.hasPotionEffect(PotionEffectType.GLOWING)
+                        || HideAndSeek.getDataController().isGlowing(hiderId);
+
                 boolean shouldSee = true;
-                if (phase.equals("hiding") && hideDuringHiding) {
-                    shouldSee = false;
-                } else if (phase.equals("seeking") && proximityDuringSeeking) {
-                    if (!seeker.getWorld().equals(hider.getWorld())) {
+                if (!isGlowing) {
+                    if (phase.equals("hiding") && hideDuringHiding) {
                         shouldSee = false;
-                    } else if (blockMode && HideAndSeek.getDataController().isHidden(hiderId)) {
-                        shouldSee = false;
-                    } else {
-                        shouldSee = seeker.getLocation().distanceSquared(hider.getLocation()) <= seekingRangeSq
-                                || (seekingLosRevealEnabled && hasLineOfSightReveal(seeker, hider, seekingLosRevealRange, seekingLosRevealFov));
+                    } else if (phase.equals("seeking") && proximityDuringSeeking) {
+                        if (!seeker.getWorld().equals(hider.getWorld())) {
+                            shouldSee = false;
+                        } else if (blockMode && HideAndSeek.getDataController().isHidden(hiderId)) {
+                            shouldSee = false;
+                        } else {
+                            shouldSee = seeker.getLocation().distanceSquared(hider.getLocation()) <= seekingRangeSq
+                                    || (seekingLosRevealEnabled && hasLineOfSightReveal(seeker, hider, seekingLosRevealRange, seekingLosRevealFov));
+                        }
                     }
                 }
 
