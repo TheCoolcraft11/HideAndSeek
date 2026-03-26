@@ -127,9 +127,6 @@ public final class HideAndSeek extends MinigameFramework {
         registerLoadoutMenu();
         registerSkinMenu();
 
-        MinigameSubcommandRegistry.register(new ChooseBlockCommand(this));
-        MinigameSubcommandRegistry.register(new ChooseAppearanceCommand(this));
-        MinigameSubcommandRegistry.register(new BlockStatsCommand(this));
         MinigameSubcommandRegistry.register(new MapCommand(this));
         MinigameSubcommandRegistry.register(new LoadoutCommand(this));
         MinigameSubcommandRegistry.register(new ItemSkinCommand(this));
