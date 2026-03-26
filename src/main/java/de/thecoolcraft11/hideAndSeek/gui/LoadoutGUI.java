@@ -164,6 +164,7 @@ public class LoadoutGUI {
         } else {
             loadout.removeSeekerItem(itemToRemove);
         }
+        loadoutManager.saveLoadout(player.getUniqueId());
 
         int cost = loadoutManager.getItemCost(itemToRemove);
         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
@@ -181,6 +182,7 @@ public class LoadoutGUI {
         if (isHiderView) {
             if (loadout.getHiderItems().contains(clickedItem)) {
                 loadout.removeHiderItem(clickedItem);
+                loadoutManager.saveLoadout(player.getUniqueId());
                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
                 player.sendMessage(Component.text("Removed ", NamedTextColor.RED)
                         .append(Component.text(formatName(clickedItem.name()), getRarityColor(clickedItem.getRarity())))
@@ -188,6 +190,7 @@ public class LoadoutGUI {
             } else {
                 if (loadout.addHiderItem(clickedItem, loadoutManager.getMaxHiderItems(),
                         loadoutManager.getMaxHiderTokens(), cost)) {
+                    loadoutManager.saveLoadout(player.getUniqueId());
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
                     player.sendMessage(Component.text("Added ", NamedTextColor.GREEN)
                             .append(Component.text(formatName(clickedItem.name()), getRarityColor(clickedItem.getRarity())))
@@ -204,6 +207,7 @@ public class LoadoutGUI {
         } else {
             if (loadout.getSeekerItems().contains(clickedItem)) {
                 loadout.removeSeekerItem(clickedItem);
+                loadoutManager.saveLoadout(player.getUniqueId());
                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
                 player.sendMessage(Component.text("Removed ", NamedTextColor.RED)
                         .append(Component.text(formatName(clickedItem.name()), getRarityColor(clickedItem.getRarity())))
@@ -211,6 +215,7 @@ public class LoadoutGUI {
             } else {
                 if (loadout.addSeekerItem(clickedItem, loadoutManager.getMaxSeekerItems(),
                         loadoutManager.getMaxSeekerTokens(), cost)) {
+                    loadoutManager.saveLoadout(player.getUniqueId());
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
                     player.sendMessage(Component.text("Added ", NamedTextColor.GREEN)
                             .append(Component.text(formatName(clickedItem.name()), getRarityColor(clickedItem.getRarity())))

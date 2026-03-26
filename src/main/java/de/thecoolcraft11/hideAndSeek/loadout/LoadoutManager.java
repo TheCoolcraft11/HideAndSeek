@@ -17,7 +17,17 @@ public class LoadoutManager {
     }
 
     public PlayerLoadout getLoadout(UUID playerId) {
-        return loadouts.computeIfAbsent(playerId, k -> new PlayerLoadout());
+        return loadouts.computeIfAbsent(playerId, k -> {
+            PlayerLoadout loadout = LoadoutDataService.getLoadout(playerId);
+            return loadout != null ? loadout : new PlayerLoadout();
+        });
+    }
+
+    public void saveLoadout(UUID playerId) {
+        if (!plugin.getConfig().getBoolean("persistence.save-loadout-data", true)) {
+            return;
+        }
+        LoadoutDataService.savePlayer(plugin, playerId);
     }
 
     public int getMaxHiderItems() {

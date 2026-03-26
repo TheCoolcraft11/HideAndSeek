@@ -8,6 +8,7 @@ import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
 import de.thecoolcraft11.hideAndSeek.listener.game.*;
 import de.thecoolcraft11.hideAndSeek.listener.item.*;
 import de.thecoolcraft11.hideAndSeek.listener.player.*;
+import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsLoader;
@@ -56,6 +57,7 @@ public final class HideAndSeek extends MinigameFramework {
 
         DataController.getInstance().setup();
         ItemSkinSelectionService.initialize(this);
+        LoadoutDataService.initialize(this);
         mapManager = new MapManager(this);
         blockSelectorGUI = new BlockSelectorGUI(this);
         loadoutManager = new LoadoutManager(this);
@@ -161,6 +163,7 @@ public final class HideAndSeek extends MinigameFramework {
         }
         KillEffectManager.clear();
         ItemSkinSelectionService.shutdown(this);
+        LoadoutDataService.shutdown(this);
     }
 
     @Override

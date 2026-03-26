@@ -19,79 +19,6 @@ import java.util.Map;
 
 public class SettingRegisterer {
 
-    @SuppressWarnings("unchecked")
-    private static <T> T getConfigValue(HideAndSeek plugin, String path, T fallback) {
-        Object value = plugin.getConfig().get("settings." + path);
-        if (value == null) {
-            return fallback;
-        }
-        try {
-
-            if (fallback instanceof Float) {
-                if (value instanceof Number) {
-                    return (T) Float.valueOf(((Number) value).floatValue());
-                }
-                if (value instanceof String) {
-                    return (T) Float.valueOf(Float.parseFloat((String) value));
-                }
-            }
-            if (fallback instanceof Double) {
-                if (value instanceof Number) {
-                    return (T) Double.valueOf(((Number) value).doubleValue());
-                }
-                if (value instanceof String) {
-                    return (T) Double.valueOf(Double.parseDouble((String) value));
-                }
-            }
-            if (fallback instanceof Integer) {
-                if (value instanceof Number) {
-                    return (T) Integer.valueOf(((Number) value).intValue());
-                }
-                if (value instanceof String) {
-                    return (T) Integer.valueOf(Integer.parseInt((String) value));
-                }
-            }
-            if (fallback instanceof Long) {
-                if (value instanceof Number) {
-                    return (T) Long.valueOf(((Number) value).longValue());
-                }
-                if (value instanceof String) {
-                    return (T) Long.valueOf(Long.parseLong((String) value));
-                }
-            }
-            if (fallback instanceof Boolean) {
-                if (value instanceof Boolean) {
-                    return (T) value;
-                }
-                if (value instanceof String) {
-                    return (T) Boolean.valueOf((String) value);
-                }
-            }
-            if (fallback instanceof String) {
-                return (T) value.toString();
-            }
-
-            return (T) value;
-        } catch (Exception e) {
-            plugin.getLogger().warning("Invalid config value for " + path + ", using fallback: " + fallback + " (error: " + e.getMessage() + ")");
-            return fallback;
-        }
-    }
-
-    private static <E extends Enum<E>> E getEnumConfigValue(HideAndSeek plugin, String path, Class<E> enumClass, E fallback) {
-        String value = plugin.getConfig().getString("settings." + path);
-        if (value == null) {
-            return fallback;
-        }
-        try {
-            return Enum.valueOf(enumClass, value);
-        } catch (IllegalArgumentException e) {
-            plugin.getLogger().warning("Invalid enum config value for " + path + ", using fallback: " + fallback);
-            return fallback;
-        }
-    }
-
-
     public static void registerAll(HideAndSeek plugin) {
         registerSections(plugin);
         registerConfig(plugin);
@@ -108,6 +35,8 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("game.apply-player-direction", Boolean.class, true);
         plugin.getConfigRegistry().register("game.max-air-above-liquid", Integer.class, 2);
         plugin.getConfigRegistry().register("nms.enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("persistence.save-skin-data", Boolean.class, true);
+        plugin.getConfigRegistry().register("persistence.save-loadout-data", Boolean.class, true);
 
 
         plugin.getConfigRegistry().register("settings.game.mode", String.class, "NORMAL");
@@ -418,6 +347,7 @@ public class SettingRegisterer {
         plugin.getSectionRegistry().register(SectionDefinition.builder("loadout").icon(Material.ARMOR_STAND).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("loadout.token-cost").icon(Material.GOLD_BLOCK).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("skin-shop").icon(Material.DIAMOND).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("persistence").icon(Material.CHEST_MINECART).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points").icon(Material.EMERALD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.tracking").icon(Material.CLOCK).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("points.hider").icon(Material.PLAYER_HEAD).build());
@@ -2115,5 +2045,76 @@ public class SettingRegisterer {
 
         return closest;
     }
-}
 
+    @SuppressWarnings("unchecked")
+    private static <T> T getConfigValue(HideAndSeek plugin, String path, T fallback) {
+        Object value = plugin.getConfig().get("settings." + path);
+        if (value == null) {
+            return fallback;
+        }
+        try {
+
+            if (fallback instanceof Float) {
+                if (value instanceof Number) {
+                    return (T) Float.valueOf(((Number) value).floatValue());
+                }
+                if (value instanceof String) {
+                    return (T) Float.valueOf(Float.parseFloat((String) value));
+                }
+            }
+            if (fallback instanceof Double) {
+                if (value instanceof Number) {
+                    return (T) Double.valueOf(((Number) value).doubleValue());
+                }
+                if (value instanceof String) {
+                    return (T) Double.valueOf(Double.parseDouble((String) value));
+                }
+            }
+            if (fallback instanceof Integer) {
+                if (value instanceof Number) {
+                    return (T) Integer.valueOf(((Number) value).intValue());
+                }
+                if (value instanceof String) {
+                    return (T) Integer.valueOf(Integer.parseInt((String) value));
+                }
+            }
+            if (fallback instanceof Long) {
+                if (value instanceof Number) {
+                    return (T) Long.valueOf(((Number) value).longValue());
+                }
+                if (value instanceof String) {
+                    return (T) Long.valueOf(Long.parseLong((String) value));
+                }
+            }
+            if (fallback instanceof Boolean) {
+                if (value instanceof Boolean) {
+                    return (T) value;
+                }
+                if (value instanceof String) {
+                    return (T) Boolean.valueOf((String) value);
+                }
+            }
+            if (fallback instanceof String) {
+                return (T) value.toString();
+            }
+
+            return (T) value;
+        } catch (Exception e) {
+            plugin.getLogger().warning("Invalid config value for " + path + ", using fallback: " + fallback + " (error: " + e.getMessage() + ")");
+            return fallback;
+        }
+    }
+
+    private static <E extends Enum<E>> E getEnumConfigValue(HideAndSeek plugin, String path, Class<E> enumClass, E fallback) {
+        String value = plugin.getConfig().getString("settings." + path);
+        if (value == null) {
+            return fallback;
+        }
+        try {
+            return Enum.valueOf(enumClass, value);
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning("Invalid enum config value for " + path + ", using fallback: " + fallback);
+            return fallback;
+        }
+    }
+}

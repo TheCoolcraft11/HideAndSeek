@@ -212,6 +212,10 @@ public final class ItemSkinSelectionService {
     }
 
     public static void savePlayer(HideAndSeek plugin, UUID playerId, boolean flush) {
+        if (!plugin.getConfig().getBoolean("persistence.save-skin-data", true)) {
+            return;
+        }
+
         if (dataConfig == null) {
             initialize(plugin);
         }
