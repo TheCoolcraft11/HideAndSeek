@@ -1,1 +1,25 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            name = "papermc-repo"
+            url = "https://repo.papermc.io/repository/maven-public/"
+        }
+        mavenLocal()
+    }
+}
+
 rootProject.name = 'HideAndSeek'
+include 'nms'
+include 'nms-v1_21_R7'
+include 'plugin'
+
+project(':plugin').name = 'HideAndSeek'

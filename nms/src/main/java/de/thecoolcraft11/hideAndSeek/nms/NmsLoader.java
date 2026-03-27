@@ -1,6 +1,5 @@
 package de.thecoolcraft11.hideAndSeek.nms;
 
-import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import org.bukkit.Bukkit;
 
 import java.io.File;
@@ -15,9 +14,7 @@ public final class NmsLoader {
     private NmsLoader() {
     }
 
-    public static NmsAdapter load(HideAndSeek plugin) {
-        Logger logger = plugin.getLogger();
-        boolean enabled = plugin.getConfig().getBoolean("nms.enabled");
+    public static NmsAdapter load(Logger logger, boolean enabled) {
         if (!enabled) {
             logger.info("NMS is disabled. Using Paper fallback.");
             return new NoopNmsAdapter();
@@ -26,7 +23,7 @@ public final class NmsLoader {
         String packageName = "de.thecoolcraft11.hideAndSeek.nms.impl";
         String path = packageName.replace('.', '/');
         try {
-            File jarFile = new File(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+            File jarFile = new File(NmsLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
             try (JarFile jar = new JarFile(jarFile)) {
                 Enumeration<JarEntry> entries = jar.entries();

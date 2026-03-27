@@ -70,7 +70,7 @@ public final class HideAndSeek extends MinigameFramework {
         readyGUI = new ReadyGUI(this);
         seekingBossBarService = new SeekingBossBarService(this);
 
-        nmsAdapter = NmsLoader.load(this);
+        nmsAdapter = NmsLoader.load(getLogger(), getConfig().getBoolean("nms.enabled", true));
 
         mapManager.loadDisallowedBlockStates();
 

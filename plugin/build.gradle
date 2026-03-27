@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id("xyz.jpenilla.run-paper") version "2.3.1"
+    id "com.gradleup.shadow" version "9.3.2"
+}
+
+dependencies {
+    implementation project(":nms")
+    implementation project(":nms-v1_21_R7")
+
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+
+    compileOnly("de.thecoolcraft11:minigameframework:1.0-SNAPSHOT")
+    compileOnly("de.thecoolcraft11:timer:1.0-SNAPSHOT")
+}
+
+tasks {
+    runServer {
+        minecraftVersion("1.21")
+    }
+}
+
+tasks.named('shadowJar') {
+    archiveBaseName.set('HideAndSeek')
+    archiveVersion.set(project.version.toString())
+    archiveClassifier.set('')
+}
