@@ -21,15 +21,6 @@ permissions:
   hideandseek.command.loadout:
     description: Allows using /mg loadout command
     default: true
-  hideandseek.command.chooseblock:
-    description: Allows choosing a block (hiders)
-    default: op
-  hideandseek.command.chooseappearance:
-    description: Allows choosing appearance (hiders)
-    default: op
-  hideandseek.command.blockstats:
-    description: Allows viewing block stats (seekers)
-    default: true
   hideandseek.command.map:
     description: Allows selecting and setting maps
     default: op
