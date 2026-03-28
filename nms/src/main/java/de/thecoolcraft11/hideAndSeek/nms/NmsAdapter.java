@@ -7,11 +7,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public interface NmsAdapter {
@@ -23,6 +25,8 @@ public interface NmsAdapter {
     boolean isCompatible(String version);
 
     Set<NmsCapabilities> capabilities();
+
+    boolean hasNmsCapabilities();
 
     default boolean hasCapability(NmsCapabilities capability) {
         return capabilities().contains(capability);
@@ -54,6 +58,12 @@ public interface NmsAdapter {
     boolean resetCamera(Player viewer);
 
     boolean setEntityGlowingForViewer(Player viewer, Player target, boolean glowing);
+
+    Entity spawnSeekerAssistant(Plugin plugin, Player seeker, Location location);
+
+    void removeAllAssistants(Plugin plugin, UUID seekerId);
+
+    void sendAssistantBeamToAll(Plugin plugin, Location hiderLocation, String color);
 
     void clearVisibilityFilters();
 

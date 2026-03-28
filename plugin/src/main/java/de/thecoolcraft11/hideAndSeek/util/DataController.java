@@ -1,5 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.util;
 
+import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 
@@ -123,6 +124,19 @@ public class DataController {
             }
         }
         interactionEntities.clear();
+
+        ItemStateManager.activeAssistants.forEach((seekerId, assistants) -> {
+            for (UUID assistantId : assistants) {
+                org.bukkit.entity.Entity assistant = org.bukkit.Bukkit.getEntity(assistantId);
+                if (assistant != null && assistant.isValid()) {
+                    assistant.remove();
+                }
+            }
+        });
+        ItemStateManager.activeAssistants.clear();
+        ItemStateManager.assistantOrigins.clear();
+        ItemStateManager.assistantSpawnTimes.clear();
+        ItemStateManager.assistantHitCounts.clear();
     }
 
     public void addHider(UUID uuid) {

@@ -63,6 +63,11 @@ public class CameraItem implements GameItem {
         Block clickedBlock = context.getLocation().getBlock();
         Player player = context.getPlayer();
 
+        if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
+            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.", NamedTextColor.RED));
+            return;
+        }
+
         if (!clickedBlock.getType().isSolid()) {
             player.sendMessage(Component.text("Cannot place camera - need solid block!", NamedTextColor.RED));
             context.skipCooldown();
@@ -499,10 +504,18 @@ public class CameraItem implements GameItem {
         if (meta != null) {
             meta.displayName(Component.text("Camera", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
+
+            List<Component> lore = new LinkedList<>(List.of(
                     Component.text("Shift + right click block to place", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                     Component.text("Right click to watch your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
             ));
+
+            if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
+                lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)
+                        .decoration(TextDecoration.ITALIC, false));
+            }
+
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
@@ -516,6 +529,10 @@ public class CameraItem implements GameItem {
 
     @Override
     public void register(HideAndSeek plugin) {
+        if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
+            return;
+        }
+
         int cooldown = plugin.getSettingRegistry().get("seeker-items.camera.cooldown", 2);
 
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())

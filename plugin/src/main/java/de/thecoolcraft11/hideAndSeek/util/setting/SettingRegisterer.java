@@ -223,6 +223,50 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.max-flight-seconds", Integer.class, 6);
         plugin.getConfigRegistry().register("settings.seeker-items.seeker-sword-throw.stuck-seconds", Integer.class, 12);
 
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.cooldown", Integer.class, 120);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.lifetime", Integer.class, 90);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.health", Double.class, 6.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.speed", Double.class, 0.38);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.pathfind-speed-multiplier", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.standoff-range", Double.class, 6.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.standoff-tolerance", Double.class, 1.5);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.max-per-seeker", Integer.class, 2);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.max-hits", Integer.class, 4);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.sniff-interval", Integer.class, 15);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.sniff-range-front", Double.class, 35.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.sniff-range-rear", Double.class, 15.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.sniff-hidden-multiplier", Double.class, 0.5);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.alert-range", Double.class, 12.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.alert-cooldown", Integer.class, 80);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.shoot-range", Double.class, 18.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.shoot-cooldown", Integer.class, 70);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-speed", Double.class, 0.3);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-gravity", Double.class, 0.03);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-lifetime", Integer.class, 70);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-homing", Double.class, 6.5);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-homing-range", Double.class, 18.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-aim-spread", Double.class, 0.12);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-aim-spread-stationary", Double.class, 0.06);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.projectile-aim-spread-moving", Double.class, 0.22);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-direct-threshold", Double.class, 0.6);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-near-threshold", Double.class, 2.5);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-direct-threshold-stationary", Double.class, 1.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-direct-threshold-moving", Double.class, 0.35);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-moving-speed-threshold", Double.class, 0.05);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-moving-lucky-direct-chance", Double.class, 0.);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-direct-slowness-duration", Integer.class, 120);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-direct-nausea-duration", Integer.class, 100);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-direct-blindness-duration", Integer.class, 100);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-near-slowness-base", Integer.class, 80);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-near-nausea-base", Integer.class, 60);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-near-blindness-base", Integer.class, 60);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-direct-points", Integer.class, 60);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.hit-near-points", Integer.class, 20);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.beam-duration", Integer.class, 120);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.wander-radius-phase1", Double.class, 15.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.wander-radius-phase2", Double.class, 25.0);
+        plugin.getConfigRegistry().register("settings.seeker-items.assistant.wander-radius-phase3", Double.class, 40.0);
+
 
         plugin.getConfigRegistry().register("settings.loadout.hider-max-items", Integer.class, 3);
         plugin.getConfigRegistry().register("settings.loadout.seeker-max-items", Integer.class, 4);
@@ -341,6 +385,7 @@ public class SettingRegisterer {
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.block-randomizer").icon(Material.BLAZE_POWDER).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.chain-pull").icon(Material.LEAD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.proximity-sensor").icon(Material.REDSTONE_TORCH).build());
+        plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.assistant").icon(Material.ZOMBIE_HEAD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.cage-trap").icon(Material.IRON_BARS).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.sword-of-seeking").icon(Material.IRON_SWORD).build());
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.seeker-sword-throw").icon(Material.DIAMOND_SWORD).build());
@@ -1591,6 +1636,294 @@ public class SettingRegisterer {
                 .description("Time in seconds the cage trap takes to set up before it can trap a player")
                 .customIcon(Material.CLOCK)
                 .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.cooldown", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.cooldown", 120))
+                .range(0, 600)
+                .description("Cooldown for summoning an assistant in seconds")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.lifetime", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.lifetime", 90))
+                .range(5, 600)
+                .description("How long each assistant stays active in seconds")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.max-per-seeker", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.max-per-seeker", 2))
+                .range(1, 5)
+                .description("Maximum active assistants per seeker")
+                .customIcon(Material.ZOMBIE_HEAD)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.shoot-range", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.shoot-range", 18.0))
+                .rangeDouble(2.0, 64.0)
+                .description("Range where an assistant can fire projectiles")
+                .customIcon(Material.BOW)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.shoot-cooldown", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.shoot-cooldown", 70))
+                .range(1, 400)
+                .description("Ticks between assistant shots")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-speed", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-speed", 0.3))
+                .rangeDouble(0.1, 3.0)
+                .description("Assistant projectile speed")
+                .customIcon(Material.SNOWBALL)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.max-hits", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.max-hits", 2))
+                .range(1, 10)
+                .description("Projectile hits required to destroy an assistant")
+                .customIcon(Material.SHIELD)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-direct-points", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-direct-points", 60))
+                .range(0, 500)
+                .description("Points awarded for a direct assistant projectile hit")
+                .customIcon(Material.EMERALD)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-near-points", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-near-points", 20))
+                .range(0, 500)
+                .description("Points awarded for a near assistant projectile hit")
+                .customIcon(Material.EMERALD)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-aim-spread-stationary", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-aim-spread-stationary", 0.06))
+                .rangeDouble(0.0, 0.5)
+                .description("Projectile spread for stationary targets (lower = more accurate)")
+                .customIcon(Material.SNOWBALL)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-aim-spread-moving", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-aim-spread-moving", 0.22))
+                .rangeDouble(0.0, 0.5)
+                .description("Projectile spread for moving targets (higher = less accurate)")
+                .customIcon(Material.SNOWBALL)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-direct-threshold-stationary", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-direct-threshold-stationary", 1.0))
+                .rangeDouble(0.5, 3.0)
+                .description("Distance threshold for direct hits on stationary targets")
+                .customIcon(Material.TARGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-direct-threshold-moving", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-direct-threshold-moving", 0.35))
+                .rangeDouble(0.1, 1.5)
+                .description("Distance threshold for direct hits on moving targets")
+                .customIcon(Material.TARGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-moving-speed-threshold", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-moving-speed-threshold", 0.05))
+                .rangeDouble(0.01, 0.5)
+                .description("Horizontal speed threshold to consider a target as moving")
+                .customIcon(Material.FEATHER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-moving-lucky-direct-chance", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-moving-lucky-direct-chance", 0.1))
+                .rangeDouble(0.0, 1.0)
+                .description("Chance (0.0-1.0) for moving targets to be lucky-hit as direct despite distance")
+                .customIcon(Material.EMERALD)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.health", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.health", 6.0))
+                .rangeDouble(1.0, 50.0)
+                .description("Assistant mob max health")
+                .customIcon(Material.REDSTONE)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.speed", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.speed", 0.38))
+                .rangeDouble(0.1, 1.0)
+                .description("Assistant mob movement speed multiplier")
+                .customIcon(Material.FEATHER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.pathfind-speed-multiplier", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.pathfind-speed-multiplier", 1.0))
+                .rangeDouble(0.5, 2.0)
+                .description("Pathfinding speed multiplier (relative to base speed)")
+                .customIcon(Material.IRON_BOOTS)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.standoff-range", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.standoff-range", 6.0))
+                .rangeDouble(2.0, 20.0)
+                .description("Distance assistant maintains from target when shooting")
+                .customIcon(Material.BOW)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.standoff-tolerance", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.standoff-tolerance", 1.5))
+                .rangeDouble(0.5, 5.0)
+                .description("Tolerance range for standoff distance")
+                .customIcon(Material.TARGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.sniff-interval", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.sniff-interval", 15))
+                .range(1, 100)
+                .description("Ticks between target scans")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.sniff-range-front", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.sniff-range-front", 35.0))
+                .rangeDouble(5.0, 100.0)
+                .description("Detection range in front of assistant")
+                .customIcon(Material.COMPASS)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.sniff-range-rear", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.sniff-range-rear", 15.0))
+                .rangeDouble(2.0, 50.0)
+                .description("Detection range behind assistant")
+                .customIcon(Material.COMPASS)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.sniff-hidden-multiplier", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.sniff-hidden-multiplier", 0.5))
+                .rangeDouble(0.1, 1.0)
+                .description("Range multiplier for hidden (block-mode) targets")
+                .customIcon(Material.DEEPSLATE_BRICKS)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.alert-range", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.alert-range", 12.0))
+                .rangeDouble(2.0, 50.0)
+                .description("Range where assistant triggers an alert message")
+                .customIcon(Material.BELL)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.alert-cooldown", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.alert-cooldown", 80))
+                .range(1, 400)
+                .description("Ticks between alert triggers")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-homing", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-homing", 6.5))
+                .rangeDouble(0.0, 45.0)
+                .description("Projectile homing angle adjustment per tick in degrees")
+                .customIcon(Material.ARROW)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-homing-range", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-homing-range", 18.0))
+                .rangeDouble(5.0, 100.0)
+                .description("Max distance for projectile homing to be active")
+                .customIcon(Material.ARROW)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-gravity", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-gravity", 0.03))
+                .rangeDouble(0.0, 0.1)
+                .description("Per-tick gravity on projectile")
+                .customIcon(Material.FEATHER)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-lifetime", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-lifetime", 70))
+                .range(10, 400)
+                .description("Projectile lifetime in ticks before despawn")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.projectile-aim-spread", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.projectile-aim-spread", 0.12))
+                .rangeDouble(0.0, 0.5)
+                .description("Base projectile aim spread")
+                .customIcon(Material.SNOWBALL)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-direct-threshold", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-direct-threshold", 0.6))
+                .rangeDouble(0.1, 3.0)
+                .description("Distance threshold for any direct hit")
+                .customIcon(Material.TARGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-near-threshold", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-near-threshold", 2.5))
+                .rangeDouble(0.5, 10.0)
+                .description("Distance threshold for near hit")
+                .customIcon(Material.TARGET)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-direct-slowness-duration", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-direct-slowness-duration", 120))
+                .range(1, 600)
+                .description("Slowness duration on direct hit (ticks)")
+                .customIcon(Material.REDSTONE)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-direct-nausea-duration", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-direct-nausea-duration", 100))
+                .range(1, 600)
+                .description("Nausea duration on direct hit (ticks)")
+                .customIcon(Material.REDSTONE)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-near-slowness-base", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-near-slowness-base", 80))
+                .range(1, 600)
+                .description("Base slowness duration on near hit (scales with distance)")
+                .customIcon(Material.REDSTONE)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.hit-near-nausea-base", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.hit-near-nausea-base", 60))
+                .range(1, 600)
+                .description("Base nausea duration on near hit (scales with distance)")
+                .customIcon(Material.REDSTONE)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.beam-duration", SettingType.INTEGER, Integer.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.beam-duration", 120))
+                .range(10, 400)
+                .description("Duration of test block beam display (ticks)")
+                .customIcon(Material.CLOCK)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.wander-radius-phase1", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.wander-radius-phase1", 15.0))
+                .rangeDouble(5.0, 100.0)
+                .description("Wander radius phase 1 (first 20 seconds)")
+                .customIcon(Material.COMPASS)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.wander-radius-phase2", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.wander-radius-phase2", 25.0))
+                .rangeDouble(5.0, 100.0)
+                .description("Wander radius phase 2 (20-50 seconds)")
+                .customIcon(Material.COMPASS)
+                .build());
+
+        plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.assistant.wander-radius-phase3", SettingType.DOUBLE, Double.class)
+                .defaultValue(getConfigValue(plugin, "seeker-items.assistant.wander-radius-phase3", 40.0))
+                .rangeDouble(5.0, 100.0)
+                .description("Wander radius phase 3 (after 50 seconds)")
+                .customIcon(Material.COMPASS)
+                .build());
+
         plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.sword-of-seeking.cooldown", SettingType.INTEGER, Integer.class)
                 .defaultValue(getConfigValue(plugin, "seeker-items.cage-trap.setup-time", 5))
                 .range(0, 60)

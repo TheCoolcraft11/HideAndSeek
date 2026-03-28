@@ -4,6 +4,7 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.block.BlockListParser;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
+import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.seeker.SeekersSwordItem;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.TimerManager;
@@ -194,6 +195,14 @@ public class SeekingPhase implements GamePhase {
 
         HiderItems.removeFromAllPlayers();
         SeekerItems.removeFromAllPlayers();
+
+        for (UUID seekerId : new ArrayList<>(ItemStateManager.activeAssistants.keySet())) {
+            hideAndSeekPlugin.getNmsAdapter().removeAllAssistants(hideAndSeekPlugin, seekerId);
+        }
+        ItemStateManager.activeAssistants.clear();
+        ItemStateManager.assistantOrigins.clear();
+        ItemStateManager.assistantSpawnTimes.clear();
+        ItemStateManager.assistantHitCounts.clear();
 
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info("Seeking phase ended");

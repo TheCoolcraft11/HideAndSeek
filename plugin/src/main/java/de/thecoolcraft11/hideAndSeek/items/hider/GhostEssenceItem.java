@@ -41,10 +41,18 @@ public class GhostEssenceItem implements GameItem {
         if (meta != null) {
             meta.displayName(Component.text("Ghostly Essence", NamedTextColor.AQUA, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
+
+            List<Component> lore = new java.util.ArrayList<>(List.of(
                     Component.text("Pass through walls for " + duration + " seconds", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                     Component.text("You cannot descend while ghostly!", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)
             ));
+
+            if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
+                lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)
+                        .decoration(TextDecoration.ITALIC, false));
+            }
+
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
@@ -58,6 +66,10 @@ public class GhostEssenceItem implements GameItem {
 
     @Override
     public void register(HideAndSeek plugin) {
+        if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
+            return;
+        }
+
         int cooldown = plugin.getSettingRegistry().get("hider-items.ghost-essence.cooldown", 25);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, ctx -> useGhostEssence(ctx.getPlayer(), plugin))
@@ -140,6 +152,12 @@ public class GhostEssenceItem implements GameItem {
     }
 
     private void useGhostEssence(Player player, HideAndSeek plugin) {
+
+        if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
+            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.", NamedTextColor.RED));
+            return;
+        }
+
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) return;
 
         final Location startLoc = player.getLocation().clone();

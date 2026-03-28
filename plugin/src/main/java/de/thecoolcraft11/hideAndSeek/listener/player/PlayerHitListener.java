@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek.listener.player;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
+import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectService;
 import de.thecoolcraft11.hideAndSeek.model.GameStyleEnum;
 import de.thecoolcraft11.hideAndSeek.util.PlayerStateResetUtil;
@@ -12,16 +13,20 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
@@ -112,6 +117,17 @@ public class PlayerHitListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamage(EntityDamageEvent event) {
+        if (isAssistant(event.getEntity())) {
+            EntityDamageEvent.DamageCause cause = event.getCause();
+            boolean combatDamage = cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                    || cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK
+                    || cause == EntityDamageEvent.DamageCause.PROJECTILE;
+            if (!combatDamage) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+
         if (!(event.getEntity() instanceof Player)) {
             return;
         }
@@ -131,6 +147,30 @@ public class PlayerHitListener implements Listener {
             return;
         }
 
+        if (isAssistant(event.getEntity())) {
+            Player attacker = resolveAttacker(event);
+            if (attacker == null) {
+                event.setCancelled(true);
+                return;
+            }
+
+            boolean attackerIsSeeker = HideAndSeek.getDataController().getSeekers().contains(attacker.getUniqueId());
+            boolean attackerIsHider = HideAndSeek.getDataController().getHiders().contains(attacker.getUniqueId());
+
+            if (attackerIsSeeker) {
+                event.setCancelled(true);
+                return;
+            }
+
+            if (!attackerIsHider) {
+                event.setCancelled(true);
+                return;
+            }
+
+            event.setCancelled(false);
+            return;
+        }
+
         if (event.getDamager() instanceof Player damager && !(event.getEntity() instanceof Player)) {
             if (HideAndSeek.getDataController().getHiders().contains(damager.getUniqueId())) {
                 event.setCancelled(true);
@@ -142,19 +182,7 @@ public class PlayerHitListener implements Listener {
             return;
         }
 
-        Player attacker = null;
-
-
-        if (event.getDamager() instanceof Player p) {
-            attacker = p;
-        }
-
-
-        if (event.getDamager() instanceof org.bukkit.entity.Projectile projectile) {
-            if (projectile.getShooter() instanceof Player p) {
-                attacker = p;
-            }
-        }
+        Player attacker = resolveAttacker(event);
 
         if (attacker == null) {
             event.setCancelled(true);
@@ -199,6 +227,64 @@ public class PlayerHitListener implements Listener {
 
 
         event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onAssistantDeath(EntityDeathEvent event) {
+        if (!isAssistant(event.getEntity())) {
+            return;
+        }
+
+        event.getDrops().clear();
+        event.setDroppedExp(0);
+
+        UUID assistantId = event.getEntity().getUniqueId();
+        Player killer = event.getEntity().getKiller();
+        Location loc = event.getEntity().getLocation();
+
+        playAssistantDeathEffects(loc);
+
+        if (killer != null && HideAndSeek.getDataController().getHiders().contains(killer.getUniqueId())) {
+            killer.sendMessage(Component.text("You destroyed a Seeker Assistant!", NamedTextColor.GREEN));
+        }
+
+        ItemStateManager.removeAssistant(assistantId);
+    }
+
+    private void playAssistantDeathEffects(Location loc) {
+        if (loc == null || loc.getWorld() == null) {
+            return;
+        }
+
+        loc.getWorld().spawnParticle(org.bukkit.Particle.SOUL_FIRE_FLAME, loc, 24, 0.4, 0.6, 0.4, 0.05);
+        loc.getWorld().spawnParticle(org.bukkit.Particle.SMOKE, loc, 18, 0.3, 0.3, 0.3, 0.02);
+        loc.getWorld().spawnParticle(org.bukkit.Particle.ELECTRIC_SPARK, loc, 12, 0.3, 0.3, 0.3, 0.03);
+        loc.getWorld().playSound(loc, org.bukkit.Sound.ENTITY_WITHER_DEATH, 0.6f, 1.4f);
+        loc.getWorld().playSound(loc, org.bukkit.Sound.ENTITY_BLAZE_DEATH, 0.5f, 0.8f);
+    }
+
+    private Player resolveAttacker(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player) {
+            return player;
+        }
+
+        if (event.getDamager() instanceof org.bukkit.entity.Projectile projectile
+                && projectile.getShooter() instanceof Player player) {
+            return player;
+        }
+
+        return null;
+    }
+
+    private boolean isAssistant(Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+
+        return entity.getPersistentDataContainer().has(
+                new NamespacedKey(plugin, "assistant_entity"),
+                PersistentDataType.BOOLEAN
+        );
     }
 
     public void checkWorldBorderDamage() {

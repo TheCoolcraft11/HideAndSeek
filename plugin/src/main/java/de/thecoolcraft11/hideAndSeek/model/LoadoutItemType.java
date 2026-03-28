@@ -34,8 +34,9 @@ public enum LoadoutItemType {
     BLOCK_RANDOMIZER(false, true, ItemRarity.EPIC, BlockRandomizerItem.ID),
     CHAIN_PULL(false, true, ItemRarity.UNCOMMON, ChainPullItem.ID),
     PROXIMITY_SENSOR(false, true, ItemRarity.RARE, ProximitySensorItem.ID),
-    CAMERA(false, true, ItemRarity.EPIC, CameraItem.ID, NmsCapabilities.CLIENT_GAMEMODE_SPOOFING, NmsCapabilities.CLIENT_ENTITY_GLOWING, NmsCapabilities.CLIENT_ENTITY_SPAWNING),
+    CAMERA(false, true, ItemRarity.EPIC, CameraItem.ID, NmsCapabilities.CLIENT_CAMERA_SPOOFING, NmsCapabilities.CLIENT_ENTITY_GLOWING, NmsCapabilities.CLIENT_ENTITY_SPAWNING),
     CAGE_TRAP(false, true, ItemRarity.RARE, CageTrapItem.ID),
+    SEEKER_ASSISTANT(false, true, ItemRarity.LEGENDARY, SeekerAssistantItem.ID, NmsCapabilities.MOB_PATHFINDING, NmsCapabilities.CLIENT_TEST_BLOCK_BEAM, NmsCapabilities.CUSTOM_ENTITY_GOALS),
     ;
 
     private final boolean forHiders;

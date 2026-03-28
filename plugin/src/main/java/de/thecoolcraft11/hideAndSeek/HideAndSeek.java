@@ -107,6 +107,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new HiderEquipmentChangeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CrossbowTrackerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CameraViewListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new AssistantProjectileListener(this), this);
 
         Bukkit.getPluginManager().registerEvents(new SeekerKillModeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new HiderTotemListener(), this);

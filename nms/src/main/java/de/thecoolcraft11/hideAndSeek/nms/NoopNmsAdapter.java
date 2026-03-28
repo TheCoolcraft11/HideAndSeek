@@ -7,12 +7,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public class NoopNmsAdapter implements NmsAdapter {
@@ -35,6 +37,11 @@ public class NoopNmsAdapter implements NmsAdapter {
     @Override
     public Set<NmsCapabilities> capabilities() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public boolean hasNmsCapabilities() {
+        return false;
     }
 
     @Override
@@ -98,6 +105,19 @@ public class NoopNmsAdapter implements NmsAdapter {
     @Override
     public boolean setEntityGlowingForViewer(Player viewer, Player target, boolean glowing) {
         return false;
+    }
+
+    @Override
+    public Entity spawnSeekerAssistant(Plugin plugin, Player seeker, Location location) {
+        return null;
+    }
+
+    @Override
+    public void removeAllAssistants(Plugin plugin, UUID seekerId) {
+    }
+
+    @Override
+    public void sendAssistantBeamToAll(Plugin plugin, Location hiderLocation, String color) {
     }
 
     @Override

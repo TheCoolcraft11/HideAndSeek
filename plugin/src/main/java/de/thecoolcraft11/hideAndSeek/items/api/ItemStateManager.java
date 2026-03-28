@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.api;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.BlockDisplay;
@@ -9,10 +10,8 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public record ItemStateManager(HideAndSeek plugin) {
     public static final Map<UUID, Long> seekerCurseActiveUntil = new HashMap<>();
@@ -38,6 +37,39 @@ public record ItemStateManager(HideAndSeek plugin) {
     public static final Map<UUID, BukkitTask> inkSplashXpTasks = new HashMap<>();
     public static final Map<UUID, BukkitTask> inkSplashSeekerXpTasks = new HashMap<>();
     public static final Map<UUID, BukkitTask> ghostEssenceXpTasks = new HashMap<>();
+
+
+    public static final Map<UUID, List<UUID>> activeAssistants = new ConcurrentHashMap<>();
+    public static final Map<UUID, Location> assistantOrigins = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> assistantSpawnTimes = new ConcurrentHashMap<>();
+    public static final Map<UUID, Integer> assistantHitCounts = new ConcurrentHashMap<>();
+
+    public static void removeAssistant(UUID assistantId) {
+        if (assistantId == null) {
+            return;
+        }
+
+        activeAssistants.values().forEach(list -> list.remove(assistantId));
+        activeAssistants.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+
+        assistantHitCounts.remove(assistantId);
+        assistantOrigins.remove(assistantId);
+        assistantSpawnTimes.remove(assistantId);
+    }
+
+    public static void pruneInvalidAssistants(UUID seekerId) {
+        List<UUID> assistants = activeAssistants.get(seekerId);
+        if (assistants == null || assistants.isEmpty()) {
+            return;
+        }
+
+        for (UUID assistantId : List.copyOf(assistants)) {
+            var entity = Bukkit.getEntity(assistantId);
+            if (!(entity instanceof org.bukkit.entity.LivingEntity living) || !entity.isValid() || living.isDead()) {
+                removeAssistant(assistantId);
+            }
+        }
+    }
 
     public record PlacedCamera(UUID ownerId, Location torchLocation, BlockFace facing, float placementYaw,
                                ItemDisplay headDisplay) {

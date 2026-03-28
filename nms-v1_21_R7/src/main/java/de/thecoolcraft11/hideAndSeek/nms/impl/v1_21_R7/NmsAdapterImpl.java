@@ -2,11 +2,15 @@ package de.thecoolcraft11.hideAndSeek.nms.impl.v1_21_R7;
 
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
+import de.thecoolcraft11.hideAndSeek.nms.impl.v1_21_R7.assistant.SeekerAssistantEntity;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
@@ -19,11 +23,15 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
@@ -34,6 +42,8 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
@@ -60,10 +70,13 @@ public class NmsAdapterImpl implements NmsAdapter {
                     NmsCapabilities.ANTI_CHEAT_PACKET_FILTER,
                     NmsCapabilities.CLIENT_ENTITY_SPAWNING,
                     NmsCapabilities.CLIENT_ENTITY_GLOWING,
-                    NmsCapabilities.CLIENT_CAMERA_SPOOFING
+                    NmsCapabilities.CLIENT_CAMERA_SPOOFING,
+                    NmsCapabilities.CLIENT_TEST_BLOCK_BEAM,
+                    NmsCapabilities.CUSTOM_ENTITY_GOALS
             );
     private final Map<UUID, Set<Integer>> blockedEntityIdsByViewer = new ConcurrentHashMap<>();
     private final Map<UUID, Map<Integer, net.minecraft.world.entity.Entity>> clientCameraEntities = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<UUID>> assistantIdsBySeeker = new ConcurrentHashMap<>();
 
     @Override
     public String name() {
@@ -83,6 +96,11 @@ public class NmsAdapterImpl implements NmsAdapter {
     @Override
     public Set<NmsCapabilities> capabilities() {
         return CAPS;
+    }
+
+    @Override
+    public boolean hasNmsCapabilities() {
+        return true;
     }
 
     @Override
@@ -670,6 +688,225 @@ public class NmsAdapterImpl implements NmsAdapter {
         } catch (Throwable ignored) {
             return false;
         }
+    }
+
+    @Override
+    public Entity spawnSeekerAssistant(Plugin plugin, Player seeker, Location location) {
+        if (plugin == null || seeker == null || location == null || location.getWorld() == null) {
+            return null;
+        }
+
+        try {
+            net.minecraft.world.level.Level nmsLevel = ((CraftWorld) location.getWorld()).getHandle();
+            SeekerAssistantEntity assistant = new SeekerAssistantEntity(plugin, seeker.getUniqueId(), location, nmsLevel);
+
+            assistant.injectGoals();
+            assistant.setPos(location.getX(), location.getY(), location.getZ());
+            nmsLevel.addFreshEntity(assistant);
+
+            Entity bukkit = assistant.getBukkitEntity();
+            if (bukkit instanceof org.bukkit.entity.Mob mob) {
+                mob.setCanPickupItems(false);
+                mob.setSilent(false);
+                mob.setRemoveWhenFarAway(false);
+                mob.customName(net.kyori.adventure.text.Component.text("Seeker's Assistant"));
+                mob.setCustomNameVisible(true);
+
+                var speed = mob.getAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED);
+                if (speed != null) {
+                    speed.setBaseValue(0.38D);
+                }
+                var health = mob.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+                if (health != null) {
+                    health.setBaseValue(6.0D);
+                    mob.setHealth(6.0D);
+                }
+            }
+
+            if (bukkit instanceof org.bukkit.entity.Creeper creeper) {
+                creeper.setPowered(false);
+                creeper.setExplosionRadius(0);
+                creeper.setMaxFuseTicks(Short.MAX_VALUE);
+            }
+
+            bukkit.getPersistentDataContainer().set(new org.bukkit.NamespacedKey(plugin, "assistant_entity"), PersistentDataType.BOOLEAN, true);
+            bukkit.getPersistentDataContainer().set(new org.bukkit.NamespacedKey(plugin, "assistant_owner"), PersistentDataType.STRING, seeker.getUniqueId().toString());
+
+            assistantIdsBySeeker
+                    .computeIfAbsent(seeker.getUniqueId(), ignored -> ConcurrentHashMap.newKeySet())
+                    .add(bukkit.getUniqueId());
+
+
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                Entity entity = plugin.getServer().getEntity(bukkit.getUniqueId());
+                if (entity != null && entity.isValid()) {
+                    entity.remove();
+                }
+                Set<UUID> ids = assistantIdsBySeeker.get(seeker.getUniqueId());
+                if (ids != null) {
+                    ids.remove(bukkit.getUniqueId());
+                    if (ids.isEmpty()) {
+                        assistantIdsBySeeker.remove(seeker.getUniqueId());
+                    }
+                }
+            }, 90L * 20L);
+
+            return bukkit;
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    @Override
+    public void removeAllAssistants(Plugin plugin, UUID seekerId) {
+        if (plugin == null) {
+            return;
+        }
+
+        if (seekerId != null) {
+            removeAssistantsForSeeker(plugin, seekerId);
+            return;
+        }
+
+        for (UUID id : new HashSet<>(assistantIdsBySeeker.keySet())) {
+            removeAssistantsForSeeker(plugin, id);
+        }
+    }
+
+    private void removeAssistantsForSeeker(Plugin plugin, UUID seekerId) {
+        Set<UUID> ids = assistantIdsBySeeker.remove(seekerId);
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+
+        for (UUID assistantId : ids) {
+            Entity entity = plugin.getServer().getEntity(assistantId);
+            if (entity != null) {
+                Location loc = entity.getLocation();
+                if (loc.getWorld() != null) {
+                    loc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, 20, 0.4, 0.5, 0.4, 0.03);
+                    loc.getWorld().playSound(loc, Sound.ENTITY_BLAZE_DEATH, 0.7f, 0.8f);
+                }
+                entity.remove();
+            }
+        }
+    }
+
+    @Override
+    public void sendAssistantBeamToAll(Plugin plugin, Location hiderLocation, String color) {
+        if (plugin == null || hiderLocation == null || hiderLocation.getWorld() == null) {
+            return;
+        }
+
+        int minY = hiderLocation.getWorld().getMinHeight();
+        BlockPos pos = new BlockPos(hiderLocation.getBlockX(), minY, hiderLocation.getBlockZ());
+
+        if ("alert".equalsIgnoreCase(color)) {
+            int switches = 6;
+            int interval = 4;
+            for (int i = 0; i < switches; i++) {
+                final String stepColor = (i % 2 == 0) ? "red" : "green";
+                final long delay = (long) i * interval;
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+
+                    for (Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+                        if (player.isOnline() && player.getWorld().equals(hiderLocation.getWorld())) {
+                            sendBeamPackets(player, pos, stepColor);
+                        }
+                    }
+                }, delay);
+            }
+
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                for (Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+                    if (player.isOnline() && player.getWorld().equals(hiderLocation.getWorld())) {
+                        removeBeam(player, pos);
+                    }
+                }
+            }, (long) switches * interval + 8L);
+            return;
+        }
+
+
+        for (Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+            if (player.isOnline() && player.getWorld().equals(hiderLocation.getWorld())) {
+                sendBeamPackets(player, pos, color);
+            }
+        }
+
+        int durationTicks = 40;
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            for (Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+                if (player.isOnline() && player.getWorld().equals(hiderLocation.getWorld())) {
+                    removeBeam(player, pos);
+                }
+            }
+        }, durationTicks);
+    }
+
+    private void sendBeamPackets(Player player, BlockPos pos, String color) {
+        var conn = ((CraftPlayer) player).getHandle().connection;
+
+        conn.send(new ClientboundBlockUpdatePacket(pos, Blocks.TEST_INSTANCE_BLOCK.defaultBlockState()));
+
+        CompoundTag data = buildBeamData(color);
+        CompoundTag root = new CompoundTag();
+        root.put("data", data);
+
+        conn.send(new ClientboundBlockEntityDataPacket(pos, BlockEntityType.TEST_INSTANCE_BLOCK, root));
+    }
+
+    private void removeBeam(Player player, BlockPos pos) {
+        var conn = ((CraftPlayer) player).getHandle().connection;
+        var serverLevel = ((CraftWorld) player.getWorld()).getHandle();
+        conn.send(new ClientboundBlockUpdatePacket(serverLevel, pos));
+    }
+
+    private CompoundTag buildBeamData(String color) {
+        CompoundTag data = new CompoundTag();
+        data.putString("rotation", "none");
+        data.putByte("ignore_entities", (byte) 0);
+        data.putIntArray("size", new int[]{1, 1, 1});
+
+        if ("green".equalsIgnoreCase(color)) {
+            data.putString("status", "finished");
+            return data;
+        }
+
+        if ("red".equalsIgnoreCase(color)) {
+            data.putString("status", "finished");
+            data.put("error_message", buildErrorMessage());
+            return data;
+        }
+
+        if ("gray".equalsIgnoreCase(color)) {
+            data.putString("status", "running");
+            return data;
+        }
+
+        data.putString("status", "cleared");
+        return data;
+    }
+
+    private CompoundTag buildErrorMessage() {
+        CompoundTag innerInner = new CompoundTag();
+        innerInner.putString("translate", "test_block.mode.accept");
+
+        ListTag innerWith = new ListTag();
+        innerWith.add(innerInner);
+
+        CompoundTag inner = new CompoundTag();
+        inner.putString("translate", "test_block.error.missing");
+        inner.put("with", innerWith);
+
+        ListTag outerWith = new ListTag();
+        outerWith.add(inner);
+        outerWith.add(IntTag.valueOf(0));
+
+        CompoundTag error = new CompoundTag();
+        error.putString("translate", "test.error.tick");
+        error.put("with", outerWith);
+        return error;
     }
 
     @Override
