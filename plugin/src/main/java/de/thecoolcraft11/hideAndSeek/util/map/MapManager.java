@@ -490,6 +490,48 @@ public class MapManager {
         return selectedMap;
     }
 
+    private static void applySafeGameRules(World world) {
+        boolean oldFieldsExist = fieldExists();
+
+        if (oldFieldsExist) {
+            setGamerulesForOlderVersion(world);
+        } else {
+            setGamerulesForNewVersion(world);
+        }
+    }
+
+    private static boolean fieldExists() {
+        try {
+            GameRule.class.getDeclaredField("DO_IMMEDIATE_RESPAWN");
+            return true;
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
+    }
+
+    @SuppressWarnings("removal")
+    private static void setGamerulesForOlderVersion(World world) {
+        world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRule.LOCATOR_BAR, false);
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+        world.setGameRule(GameRule.NATURAL_REGENERATION, false);
+        world.setGameRule(GameRule.DO_TILE_DROPS, false);
+        world.setGameRule(GameRule.DO_ENTITY_DROPS, false);
+        world.setGameRule(GameRule.DO_MOB_LOOT, false);
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+    }
+
+    private static void setGamerulesForNewVersion(World world) {
+        world.setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRules.LOCATOR_BAR, false);
+        world.setGameRule(GameRules.SPAWN_MOBS, false);
+        world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
+        world.setGameRule(GameRules.BLOCK_DROPS, false);
+        world.setGameRule(GameRules.ENTITY_DROPS, false);
+        world.setGameRule(GameRules.MOB_DROPS, false);
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+    }
+
     public World copyMapToWorkingWorld(String mapName) {
         try {
             String workingWorldName = WORKING_WORLD_PREFIX + mapName;
@@ -528,14 +570,8 @@ public class MapManager {
                     plugin.getLogger().info("Created working world: " + workingWorldName);
                 }
                 workingWorld.setAutoSave(false);
-                workingWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-                workingWorld.setGameRule(GameRule.LOCATOR_BAR, false);
-                workingWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-                workingWorld.setGameRule(GameRule.NATURAL_REGENERATION, false);
-                workingWorld.setGameRule(GameRule.DO_TILE_DROPS, false);
-                workingWorld.setGameRule(GameRule.DO_ENTITY_DROPS, false);
-                workingWorld.setGameRule(GameRule.DO_MOB_LOOT, false);
-                workingWorld.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+
+                applySafeGameRules(workingWorld);
 
                 workingWorld.getWorldBorder().setDamageAmount(0);
                 workingWorld.getWorldBorder().setDamageBuffer(0);
