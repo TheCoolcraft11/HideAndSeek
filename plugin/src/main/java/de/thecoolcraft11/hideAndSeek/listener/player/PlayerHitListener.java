@@ -92,7 +92,7 @@ public class PlayerHitListener implements Listener {
             GameStyleEnum gameStyle = (gameStyleObj instanceof GameStyleEnum) ?
                     (GameStyleEnum) gameStyleObj : GameStyleEnum.SPECTATOR;
 
-            handleHiderElimination(deceased, null, gameStyle);
+            handleHiderElimination(deceased, null, gameStyle, environmentalCause);
             return;
         }
 
@@ -110,7 +110,7 @@ public class PlayerHitListener implements Listener {
 
                 killEffectService.triggerKillEffect(killer, deceased, deceased.getLocation());
 
-                handleHiderElimination(deceased, killer, gameStyle);
+                handleHiderElimination(deceased, killer, gameStyle, null);
             }
         }
     }
@@ -422,7 +422,7 @@ public class PlayerHitListener implements Listener {
         }
     }
 
-    private void handleHiderElimination(Player hider, Player seeker, GameStyleEnum gameStyle) {
+    private void handleHiderElimination(Player hider, Player seeker, GameStyleEnum gameStyle, EnvironmentalDeathCause environmentalCause) {
 
         int seekerPoints = plugin.getPointService().onHiderEliminated(hider, seeker);
 
@@ -437,9 +437,16 @@ public class PlayerHitListener implements Listener {
                     .append(Component.text(hider.getName(), NamedTextColor.GREEN))
                     .append(Component.text("!", NamedTextColor.YELLOW));
         } else {
+            String reason = switch (environmentalCause) {
+                case CAMPING -> " was struck down for camping too long!";
+                case WORLD_BORDER -> " was eliminated by the world border!";
+                case PERK_DEATH_ZONE -> " did not escape the Death Zone!";
+                case PERK_RELOCATE -> " did not relocate in time!";
+                default -> " was eliminated by the environment!";
+            };
 
             announcement = Component.text(hider.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" was eliminated by the world border!", NamedTextColor.YELLOW));
+                    .append(Component.text(reason, NamedTextColor.YELLOW));
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -621,6 +628,9 @@ public class PlayerHitListener implements Listener {
 
     public enum EnvironmentalDeathCause {
         WORLD_BORDER,
-        CAMPING
+        CAMPING,
+        PERK_DEATH_ZONE,
+        PERK_RELOCATE,
+        PERK_GENERIC
     }
 }

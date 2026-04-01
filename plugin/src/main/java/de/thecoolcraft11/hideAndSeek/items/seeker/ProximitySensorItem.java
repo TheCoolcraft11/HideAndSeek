@@ -35,6 +35,7 @@ import org.joml.Vector3f;
 
 import java.util.*;
 
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.proximitySensorEntities;
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.sensorDisplays;
 
 public class ProximitySensorItem implements GameItem {
@@ -156,6 +157,7 @@ public class ProximitySensorItem implements GameItem {
                     new AxisAngle4f(0, 0, 0, 0)
             ));
             sensorDisplays.put(torchBlock.getLocation(), display);
+            proximitySensorEntities.add(display.getUniqueId());
 
         } else {
 
@@ -181,6 +183,7 @@ public class ProximitySensorItem implements GameItem {
 
                 display.setTransformation(getWallTorchTransformation(clickedFace));
                 sensorDisplays.put(torchBlock.getLocation(), display);
+                proximitySensorEntities.add(display.getUniqueId());
             } else {
                 torchBlock.setType(torchType);
             }
@@ -234,6 +237,7 @@ public class ProximitySensorItem implements GameItem {
 
                     BlockDisplay display = sensorDisplays.remove(torchBlock.getLocation());
                     if (display != null && display.isValid()) {
+                        proximitySensorEntities.remove(display.getUniqueId());
                         display.remove();
                     }
 
@@ -258,6 +262,7 @@ public class ProximitySensorItem implements GameItem {
 
                     BlockDisplay display = sensorDisplays.remove(torchBlock.getLocation());
                     if (display != null && display.isValid()) {
+                        proximitySensorEntities.remove(display.getUniqueId());
                         display.remove();
                     }
 

@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
+import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -84,6 +85,7 @@ public class CageTrapItem implements GameItem {
 
     private static void placeCageTrap(ItemInteractionContext context, HideAndSeek plugin) {
         Location location = context.getLocation().clone().add(0.5, 1, 0.5);
+        ItemStateManager.cageTrapLocations.put(location.getBlock().getLocation(), context.getPlayer().getUniqueId());
         double range = plugin.getSettingRegistry().get("seeker-items.cage-trap.range", 3.0);
         int paralyzeDuration = plugin.getSettingRegistry().get("seeker-items.cage-trap.paralyze-duration", 5);
         int trapDuration = plugin.getSettingRegistry().get("seeker-items.cage-trap.duration", -1);
@@ -134,12 +136,18 @@ public class CageTrapItem implements GameItem {
                     new Vector3f(1.2f, 1.2f, 1.2f),
                     new AxisAngle4f(0, 0, 0, 0)
             ));
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "cage_trap_indicator"), PersistentDataType.BOOLEAN, true);
 
         });
 
         trapIndicators[0] = trapIndicator1;
         trapIndicators[1] = trapIndicator2;
         trapIndicators[2] = trapIndicator3;
+        for (ItemDisplay indicator : trapIndicators) {
+            if (indicator != null) {
+                ItemStateManager.cageTrapIndicatorEntities.add(indicator.getUniqueId());
+            }
+        }
 
         for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
             Player seeker = Bukkit.getPlayer(seekerId);
@@ -188,6 +196,7 @@ public class CageTrapItem implements GameItem {
                 }
 
                 if (trapDuration != -1 && elapsedTime > durationMs) {
+                    ItemStateManager.cageTrapLocations.remove(location.getBlock().getLocation());
                     if (laserGrid || iceBlockSkin) {
                         HideAndSeek.getDataController().getSeekers().forEach(seekerUUID -> {
                             Player seeker1 = Bukkit.getPlayer(seekerUUID);
@@ -199,6 +208,7 @@ public class CageTrapItem implements GameItem {
                     }
                     for (ItemDisplay trapIndicator : trapIndicators) {
                         if (trapIndicator != null && trapIndicator.isValid()) {
+                            ItemStateManager.cageTrapIndicatorEntities.remove(trapIndicator.getUniqueId());
                             trapIndicator.remove();
                         }
                     }
@@ -219,8 +229,10 @@ public class CageTrapItem implements GameItem {
                     if (distance < range && !triggered) {
                         triggered = true;
                         triggerCageTrap(hider, trapOwner, plugin, paralyzeDuration);
+                        ItemStateManager.cageTrapLocations.remove(location.getBlock().getLocation());
                         for (ItemDisplay trapIndicator : trapIndicators) {
                             if (trapIndicator != null && trapIndicator.isValid()) {
+                                ItemStateManager.cageTrapIndicatorEntities.remove(trapIndicator.getUniqueId());
                                 trapIndicator.remove();
                             }
                         }

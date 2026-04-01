@@ -57,7 +57,13 @@ public interface NmsAdapter {
 
     void resetCamera(Player viewer);
 
+    void setEntityGlowingForViewer(Player viewer, Entity target, boolean glowing);
+
     void setEntityGlowingForViewer(Player viewer, Player target, boolean glowing);
+
+    void showWarningBorder(Player viewer, float strength);
+
+    void resetWarningBorder(Player viewer);
 
     Entity spawnSeekerAssistant(Plugin plugin, Player seeker, Location location);
 

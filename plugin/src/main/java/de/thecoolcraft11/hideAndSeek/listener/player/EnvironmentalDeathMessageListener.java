@@ -16,10 +16,17 @@ public class EnvironmentalDeathMessageListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
         PlayerHitListener.EnvironmentalDeathCause cause = playerHitListener.peekEnvironmentalDeathCause(event.getEntity().getUniqueId());
-        if (cause != PlayerHitListener.EnvironmentalDeathCause.CAMPING) {
+        if (cause == null) {
             return;
         }
 
-        event.deathMessage(Component.text(event.getEntity().getName() + " was struck down for camping too long."));
+        String message = switch (cause) {
+            case CAMPING -> event.getEntity().getName() + " was struck down for camping too long.";
+            case WORLD_BORDER -> event.getEntity().getName() + " was consumed by the world border.";
+            case PERK_DEATH_ZONE -> event.getEntity().getName() + " failed to escape the Death Zone.";
+            case PERK_RELOCATE -> event.getEntity().getName() + " did not relocate in time.";
+            default -> event.getEntity().getName() + " was eliminated by the environment.";
+        };
+        event.deathMessage(Component.text(message));
     }
 }

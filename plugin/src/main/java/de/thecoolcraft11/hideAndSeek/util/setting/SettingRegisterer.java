@@ -73,6 +73,12 @@ public class SettingRegisterer {
         plugin.getConfigRegistry().register("settings.game.round.auto-cleanup", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.game.small-mode.seeker-size", Double.class, 1.0);
 
+        plugin.getConfigRegistry().register("settings.perks.enabled", Boolean.class, true);
+        plugin.getConfigRegistry().register("settings.perks.shop-mode", String.class, "INVENTORY");
+        plugin.getConfigRegistry().register("settings.perks.perks-per-round", Integer.class, 3);
+        plugin.getConfigRegistry().register("settings.perks.inventory-slots", List.class, List.of(9, 10, 11, 12, 13, 14, 15, 16, 17));
+        plugin.getConfigRegistry().register("settings.perks.open-during-hiding", Boolean.class, false);
+
         plugin.getConfigRegistry().register("settings.anticheat.enabled", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.anticheat.hiding.filter.enabled", Boolean.class, true);
         plugin.getConfigRegistry().register("settings.anticheat.seeking.filter.enabled", Boolean.class, true);

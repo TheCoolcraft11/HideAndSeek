@@ -100,7 +100,19 @@ public class NoopNmsAdapter implements NmsAdapter {
     }
 
     @Override
+    public void setEntityGlowingForViewer(Player viewer, Entity target, boolean glowing) {
+    }
+
+    @Override
     public void setEntityGlowingForViewer(Player viewer, Player target, boolean glowing) {
+    }
+
+    @Override
+    public void showWarningBorder(Player viewer, float strength) {
+    }
+
+    @Override
+    public void resetWarningBorder(Player viewer) {
     }
 
     @Override

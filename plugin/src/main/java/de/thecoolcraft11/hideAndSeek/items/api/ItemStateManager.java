@@ -38,6 +38,11 @@ public record ItemStateManager(HideAndSeek plugin) {
     public static final Map<UUID, BukkitTask> inkSplashSeekerXpTasks = new HashMap<>();
     public static final Map<UUID, BukkitTask> ghostEssenceXpTasks = new HashMap<>();
 
+    public static final Map<Location, UUID> cageTrapLocations = new ConcurrentHashMap<>();
+    public static final Set<UUID> cageTrapIndicatorEntities = ConcurrentHashMap.newKeySet();
+    public static final Set<UUID> proximitySensorEntities = ConcurrentHashMap.newKeySet();
+    public static final Set<UUID> cameraEntities = ConcurrentHashMap.newKeySet();
+
 
     public static final Map<UUID, List<UUID>> activeAssistants = new ConcurrentHashMap<>();
     public static final Map<UUID, Location> assistantOrigins = new ConcurrentHashMap<>();

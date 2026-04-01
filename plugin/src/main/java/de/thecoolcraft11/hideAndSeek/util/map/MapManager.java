@@ -381,6 +381,8 @@ public class MapManager {
             }
         }
 
+        mapData.setVendingMachineLocations(section.getStringList("vending-machine-locations"));
+
         return mapData;
     }
 

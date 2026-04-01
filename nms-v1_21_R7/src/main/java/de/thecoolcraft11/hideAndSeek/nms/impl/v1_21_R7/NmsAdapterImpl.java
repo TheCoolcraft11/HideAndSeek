@@ -70,6 +70,8 @@ public class NmsAdapterImpl implements NmsAdapter {
                     NmsCapabilities.ANTI_CHEAT_PACKET_FILTER,
                     NmsCapabilities.CLIENT_ENTITY_SPAWNING,
                     NmsCapabilities.CLIENT_ENTITY_GLOWING,
+                    NmsCapabilities.ENTITY_GLIDE_FLAG,
+                    NmsCapabilities.CLIENT_FAKE_BORDER_WARNING,
                     NmsCapabilities.CLIENT_CAMERA_SPOOFING,
                     NmsCapabilities.CLIENT_TEST_BLOCK_BEAM,
                     NmsCapabilities.CUSTOM_ENTITY_GOALS
@@ -655,14 +657,14 @@ public class NmsAdapterImpl implements NmsAdapter {
     }
 
     @Override
-    public void setEntityGlowingForViewer(Player viewer, Player target, boolean glowing) {
-        if (viewer == null || target == null || !viewer.isOnline() || !target.isOnline()) {
+    public void setEntityGlowingForViewer(Player viewer, Entity target, boolean glowing) {
+        if (viewer == null || target == null || !viewer.isOnline() || !target.isValid()) {
             return;
         }
 
         try {
             ServerPlayer viewerHandle = ((CraftPlayer) viewer).getHandle();
-            ServerPlayer targetHandle = ((CraftPlayer) target).getHandle();
+            net.minecraft.world.entity.Entity targetHandle = ((CraftEntity) target).getHandle();
 
             EntityDataAccessor<Byte> sharedFlagsAccessor = getSharedFlagsAccessor();
             if (sharedFlagsAccessor == null) {
@@ -678,6 +680,40 @@ public class NmsAdapterImpl implements NmsAdapter {
             );
 
             viewerHandle.connection.send(new ClientboundSetEntityDataPacket(targetHandle.getId(), List.of(value)));
+        } catch (Throwable ignored) {
+        }
+    }
+
+    @Override
+    public void setEntityGlowingForViewer(Player viewer, Player target, boolean glowing) {
+        setEntityGlowingForViewer(viewer, (Entity) target, glowing);
+    }
+
+    @Override
+    public void showWarningBorder(Player viewer, float strength) {
+        if (viewer == null || !viewer.isOnline()) {
+            return;
+        }
+        try {
+            ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
+            net.minecraft.world.level.border.WorldBorder border = new net.minecraft.world.level.border.WorldBorder();
+            border.setCenter(border.getCenterX(), border.getCenterZ());
+            border.setSize(viewer.getWorld().getWorldBorder().getSize());
+            border.setWarningBlocks((int) (viewer.getWorld().getWorldBorder().getSize() * strength));
+            border.setWarningTime(0);
+            handle.connection.send(new ClientboundInitializeBorderPacket(border));
+        } catch (Throwable ignored) {
+        }
+    }
+
+    @Override
+    public void resetWarningBorder(Player viewer) {
+        if (viewer == null || !viewer.isOnline()) {
+            return;
+        }
+        try {
+            ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
+            handle.connection.send(new ClientboundInitializeBorderPacket(handle.level().getWorldBorder()));
         } catch (Throwable ignored) {
         }
     }

@@ -133,6 +133,10 @@ public class DataController {
         ItemStateManager.assistantOrigins.clear();
         ItemStateManager.assistantSpawnTimes.clear();
         ItemStateManager.assistantHitCounts.clear();
+        ItemStateManager.cageTrapLocations.clear();
+        ItemStateManager.cageTrapIndicatorEntities.clear();
+        ItemStateManager.proximitySensorEntities.clear();
+        ItemStateManager.cameraEntities.clear();
     }
 
     public void addHider(UUID uuid) {
@@ -256,6 +260,10 @@ public class DataController {
 
     public Map<UUID, Integer> getAllPoints() {
         return new HashMap<>(playerPoints);
+    }
+
+    public int getPoints(UUID playerId) {
+        return playerPoints.getOrDefault(playerId, 0);
     }
 
     public void setCurrentMapName(String mapName) {

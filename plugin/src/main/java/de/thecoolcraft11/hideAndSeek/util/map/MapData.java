@@ -26,6 +26,7 @@ public class MapData {
     private final List<String> seekerBreakBlocks;
     private final List<String> blockInteractionExceptions;
     private final List<String> blockPhysicsExceptions;
+    private final List<String> vendingMachineLocations;
     private final Map<String, Object> settingOverrides;
 
 
@@ -56,6 +57,7 @@ public class MapData {
         this.seekerBreakBlocks = new ArrayList<>();
         this.blockInteractionExceptions = new ArrayList<>();
         this.blockPhysicsExceptions = new ArrayList<>();
+        this.vendingMachineLocations = new ArrayList<>();
         this.settingOverrides = new LinkedHashMap<>();
         this.minPlayers = null;
         this.recommendedPlayers = null;
@@ -182,6 +184,17 @@ public class MapData {
         this.blockPhysicsExceptions.clear();
         if (blockPhysicsExceptions != null) {
             this.blockPhysicsExceptions.addAll(blockPhysicsExceptions);
+        }
+    }
+
+    public List<String> getVendingMachineLocations() {
+        return vendingMachineLocations;
+    }
+
+    public void setVendingMachineLocations(List<String> locations) {
+        this.vendingMachineLocations.clear();
+        if (locations != null) {
+            this.vendingMachineLocations.addAll(locations);
         }
     }
 

@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.activeCameraSessions;
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.cameraEntities;
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.seekerCameras;
 
 public class CameraItem implements GameItem {
@@ -101,6 +102,7 @@ public class CameraItem implements GameItem {
         placeTorchBase(torchBlock, clickedFace);
         float placementYaw = normalizeYaw(player.getLocation().getYaw());
         ItemDisplay display = spawnCameraDisplay(plugin, torchBlock.getLocation(), clickedFace, placementYaw);
+        cameraEntities.add(display.getUniqueId());
 
         ItemStateManager.PlacedCamera camera = new ItemStateManager.PlacedCamera(
                 player.getUniqueId(),
@@ -393,6 +395,7 @@ public class CameraItem implements GameItem {
         }
 
         if (camera.headDisplay() != null && camera.headDisplay().isValid()) {
+            cameraEntities.remove(camera.headDisplay().getUniqueId());
             camera.headDisplay().remove();
         }
     }

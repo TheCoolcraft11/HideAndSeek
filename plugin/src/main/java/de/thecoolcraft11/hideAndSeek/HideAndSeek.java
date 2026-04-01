@@ -7,7 +7,9 @@ import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
 import de.thecoolcraft11.hideAndSeek.listener.game.*;
 import de.thecoolcraft11.hideAndSeek.listener.item.*;
+import de.thecoolcraft11.hideAndSeek.listener.perk.GlideListener;
 import de.thecoolcraft11.hideAndSeek.listener.player.*;
+import de.thecoolcraft11.hideAndSeek.listener.perk.PlaceholderItemProtectionListener;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
@@ -16,6 +18,10 @@ import de.thecoolcraft11.hideAndSeek.phase.EndedPhase;
 import de.thecoolcraft11.hideAndSeek.phase.HidingPhase;
 import de.thecoolcraft11.hideAndSeek.phase.LobbyPhase;
 import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
+import de.thecoolcraft11.hideAndSeek.perk.PerkRegistry;
+import de.thecoolcraft11.hideAndSeek.perk.PerkService;
+import de.thecoolcraft11.hideAndSeek.perk.PerkShopUI;
+import de.thecoolcraft11.hideAndSeek.perk.PerkStateManager;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.SeekingBossBarService;
 import de.thecoolcraft11.hideAndSeek.util.map.MapManager;
@@ -51,6 +57,7 @@ public final class HideAndSeek extends MinigameFramework {
     private AntiCheatVisibilityListener antiCheatVisibilityListener;
     private HiderCampingListener hiderCampingListener;
     private SeekingBossBarService seekingBossBarService;
+    private PerkService perkService;
 
     @Override
     protected void onGameEnable() {
@@ -65,6 +72,7 @@ public final class HideAndSeek extends MinigameFramework {
         mapGUI = new MapGUI(this);
         skinGUI = new SkinGUI(this);
         pointService = new PointService(this);
+        perkService = new PerkService(this);
         voteManager = new VoteManager(this);
         voteGUI = new VoteGUI(this);
         readyGUI = new ReadyGUI(this);
@@ -117,6 +125,8 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new SetPhaseReadinessGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerSpectateListener(), this);
         Bukkit.getPluginManager().registerEvents(new TrapMovementListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlaceholderItemProtectionListener(), this);
+        Bukkit.getPluginManager().registerEvents(new GlideListener(), this);
 
 
         worldBorderCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this,
@@ -162,6 +172,9 @@ public final class HideAndSeek extends MinigameFramework {
         }
         if (seekingBossBarService != null) {
             seekingBossBarService.stopSeekingSession();
+        }
+        if (perkService != null) {
+            perkService.shutdown();
         }
         KillEffectManager.clear();
         ItemSkinSelectionService.shutdown(this);
@@ -296,8 +309,28 @@ public final class HideAndSeek extends MinigameFramework {
         return antiCheatVisibilityListener;
     }
 
+    public PlayerHitListener getPlayerHitListener() {
+        return playerHitListener;
+    }
+
     public SeekingBossBarService getSeekingBossBarService() {
         return seekingBossBarService;
+    }
+
+    public PerkService getPerkService() {
+        return perkService;
+    }
+
+    public PerkRegistry getPerkRegistry() {
+        return perkService.getRegistry();
+    }
+
+    public PerkStateManager getPerkStateManager() {
+        return perkService.getStateManager();
+    }
+
+    public PerkShopUI getPerkShopUI() {
+        return perkService.getShopUI();
     }
 
     public void updateWorldIconsForAllMaps() {
