@@ -17,6 +17,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,25 @@ public class CameraViewListener implements Listener {
     public void onCameraClicks(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+
         if (!activeCameraSessions.containsKey(player.getUniqueId())) {
+            return;
+        }
+
+        Action action = event.getAction();
+        var state = activeCameraSessions.get(player.getUniqueId());
+        if (state == null) {
+            return;
+        }
+
+        if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
+                && state.activatedAtMs() > 0L
+                && System.currentTimeMillis() - state.activatedAtMs() < 250L) {
+            state.activatedAtMs(0L);
+            event.setCancelled(true);
             return;
         }
 
@@ -62,7 +81,6 @@ public class CameraViewListener implements Listener {
             return;
         }
 
-        Action action = event.getAction();
 
         if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
             cycleCameraWithDebounce(player);

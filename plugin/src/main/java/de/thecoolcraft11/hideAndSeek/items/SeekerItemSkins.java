@@ -39,7 +39,7 @@ public final class SeekerItemSkins {
         register(vm, plugin, CageTrapItem.ID, "skin_laser_grid", "Laser Grid", "redstone_torch", 0, ItemRarity.RARE);
         register(vm, plugin, CageTrapItem.ID, "skin_ice_block", "Ice Block", "blue_ice", -1, ItemRarity.EPIC);
 
-        register(vm, plugin, ProximitySensorItem.ID, "skin_cctv_camera", "CCTV Camera", "player_head", 0, ItemRarity.UNCOMMON);
+        register(vm, plugin, ProximitySensorItem.ID, "skin_cctv_camera", "CCTV Camera", "observer", 0, ItemRarity.UNCOMMON);
         register(vm, plugin, ProximitySensorItem.ID, "skin_alarm_bell", "Alarm Bell", "bell", -1, ItemRarity.RARE);
 
         register(vm, plugin, CurseSpellItem.ID, "skin_voodoo_magic", "Voodoo Magic", "player_head", 0, ItemRarity.RARE);

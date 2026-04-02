@@ -85,6 +85,7 @@ public record ItemStateManager(HideAndSeek plugin) {
         private boolean nightVision;
         private int fakeEntityId = Integer.MIN_VALUE;
         private float rotationYaw;
+        private long activatedAtMs = System.currentTimeMillis();
 
         public CameraSessionState(int currentIndex, float rotationYaw) {
             this.currentIndex = currentIndex;
@@ -121,6 +122,14 @@ public record ItemStateManager(HideAndSeek plugin) {
 
         public void rotationYaw(float rotationYaw) {
             this.rotationYaw = rotationYaw;
+        }
+
+        public long activatedAtMs() {
+            return activatedAtMs;
+        }
+
+        public void activatedAtMs(long activatedAtMs) {
+            this.activatedAtMs = activatedAtMs;
         }
     }
 }

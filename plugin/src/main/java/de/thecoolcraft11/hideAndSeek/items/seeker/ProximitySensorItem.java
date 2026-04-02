@@ -490,7 +490,7 @@ public class ProximitySensorItem implements GameItem {
             return Material.BELL.createBlockData();
         } else if (ItemSkinSelectionService.isSelected(player, ProximitySensorItem.ID, "skin_cctv_camera")) {
 
-            return Material.DAYLIGHT_DETECTOR.createBlockData();
+            return Material.OBSERVER.createBlockData();
         }
         return Material.SCULK_SENSOR.createBlockData();
     }

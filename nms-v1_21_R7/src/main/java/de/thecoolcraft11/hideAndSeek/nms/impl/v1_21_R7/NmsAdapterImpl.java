@@ -79,6 +79,7 @@ public class NmsAdapterImpl implements NmsAdapter {
     private final Map<UUID, Set<Integer>> blockedEntityIdsByViewer = new ConcurrentHashMap<>();
     private final Map<UUID, Map<Integer, net.minecraft.world.entity.Entity>> clientCameraEntities = new ConcurrentHashMap<>();
     private final Map<UUID, Set<UUID>> assistantIdsBySeeker = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> hadAllowedFlight = new ConcurrentHashMap<>();
 
     @Override
     public String name() {
@@ -635,6 +636,8 @@ public class NmsAdapterImpl implements NmsAdapter {
             viewerHandle.connection.send(new ClientboundSetCameraPacket(cameraEntity));
         } catch (Throwable ignored) {
         }
+        hadAllowedFlight.put(viewer.getUniqueId(), viewer.getAllowFlight());
+        viewer.setAllowFlight(true);
     }
 
     @Override
@@ -654,6 +657,7 @@ public class NmsAdapterImpl implements NmsAdapter {
             }
         } catch (Throwable ignored) {
         }
+        viewer.setAllowFlight(hadAllowedFlight.getOrDefault(viewer.getUniqueId(), false));
     }
 
     @Override

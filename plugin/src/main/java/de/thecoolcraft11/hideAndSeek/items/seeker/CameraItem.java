@@ -39,9 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.activeCameraSessions;
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.cameraEntities;
-import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.seekerCameras;
+import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.*;
 
 public class CameraItem implements GameItem {
     public static final String ID = "has_seeker_camera";
@@ -259,6 +257,8 @@ public class CameraItem implements GameItem {
         float baseYaw = getBaseYaw(camera);
 
         ItemStateManager.CameraSessionState state = new ItemStateManager.CameraSessionState(idx, baseYaw);
+        state.nightVision(false);
+        state.activatedAtMs(System.currentTimeMillis());
         activeCameraSessions.put(seeker.getUniqueId(), state);
 
         return attachToCurrentCamera(seeker, plugin);
@@ -510,7 +510,9 @@ public class CameraItem implements GameItem {
 
             List<Component> lore = new LinkedList<>(List.of(
                     Component.text("Shift + right click block to place", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Right click to watch your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                    Component.text("Right click to watch your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                    Component.text("Cycle trough your cameras with LMB and toggle Night Vision with RMB", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                    Component.text("Sneak to stop watching your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
             ));
 
             if (!plugin.getNmsAdapter().hasNmsCapabilities()) {

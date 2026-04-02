@@ -233,7 +233,7 @@ public class AssistantProjectileListener implements Listener {
         }
 
         int hits = ItemStateManager.assistantHitCounts.merge(assistantUUID, 1, Integer::sum);
-        int maxHits = plugin.getSettingRegistry().get("seeker-items.assistant.max-hits", 2);
+        int maxHits = plugin.getSettingRegistry().get("seeker-items.assistant.max-hits", 4);
         if (hits < maxHits) {
             return;
         }
@@ -255,7 +255,7 @@ public class AssistantProjectileListener implements Listener {
 
         Component msg = Component.text()
                 .append(Component.text("Seeker's Assistant", NamedTextColor.RED).decorate(TextDecoration.BOLD))
-                .append(Component.text(" was destroyed (2 hits)!", NamedTextColor.GRAY))
+                .append(Component.text(" was destroyed (" + maxHits + " hits)!", NamedTextColor.GRAY))
                 .build();
         Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(msg));
     }
