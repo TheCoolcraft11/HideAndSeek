@@ -10,20 +10,17 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class AntiCheatVisibilityListener implements Listener {
     private final HideAndSeek plugin;
     private BukkitTask reconcileTask;
+    private final Set<VisibilityPair> hiddenPairs = new HashSet<>();
 
     public AntiCheatVisibilityListener(HideAndSeek plugin) {
         this.plugin = plugin;
@@ -36,6 +33,7 @@ public class AntiCheatVisibilityListener implements Listener {
             reconcileTask = null;
         }
         restoreAllVisibility();
+        hiddenPairs.clear();
         plugin.getNmsAdapter().clearVisibilityFilters();
     }
 
@@ -46,6 +44,7 @@ public class AntiCheatVisibilityListener implements Listener {
     public void resetNow() {
         Bukkit.getScheduler().runTask(plugin, () -> {
             restoreAllVisibility();
+            hiddenPairs.clear();
             plugin.getNmsAdapter().clearVisibilityFilters();
         });
     }
@@ -58,6 +57,21 @@ public class AntiCheatVisibilityListener implements Listener {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Bukkit.getScheduler().runTaskLater(plugin, this::reconcileVisibility, 2L);
+    }
+
+    @EventHandler
+    public void onChangedWorld(PlayerChangedWorldEvent event) {
+        refreshSoon();
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event) {
+        refreshSoon();
+    }
+
+    @EventHandler
+    public void onGameModeChange(PlayerGameModeChangeEvent event) {
+        refreshSoon();
     }
 
     @EventHandler
@@ -80,11 +94,13 @@ public class AntiCheatVisibilityListener implements Listener {
         double seekingRangeSq = seekingRange * seekingRange;
         boolean seekingLosRevealEnabled = plugin.getSettingRegistry().get("anticheat.seeking.line-of-sight.enabled", true);
         double seekingLosRevealRange = Math.max(seekingRange, plugin.getSettingRegistry().get("anticheat.seeking.line-of-sight.range", 64.0));
-        double seekingLosRevealFov = Math.max(5.0, plugin.getSettingRegistry().get("anticheat.seeking.line-of-sight.fov", 24.0));
+        double seekingLosRevealFov = Math.max(5.0, plugin.getSettingRegistry().get("anticheat.seeking.line-of-sight.fov", 60.0));
         boolean blockMode = String.valueOf(plugin.getSettingRegistry().get("game.mode", "NORMAL")).equals("BLOCK");
 
         List<UUID> seekers = new ArrayList<>(HideAndSeek.getDataController().getSeekers());
         List<UUID> hiders = new ArrayList<>(HideAndSeek.getDataController().getHiders());
+
+        Set<VisibilityPair> desiredHiddenPairs = new HashSet<>();
 
         for (UUID seekerId : seekers) {
             Player seeker = Bukkit.getPlayer(seekerId);
@@ -142,16 +158,53 @@ public class AntiCheatVisibilityListener implements Listener {
                     }
                 }
 
+                VisibilityPair pair = new VisibilityPair(seekerId, hiderId);
+                boolean wasHidden = hiddenPairs.contains(pair);
+
                 try {
                     if (nmsPacketFilter) {
                         boolean applied = plugin.getNmsAdapter().setEntityVisibilityForViewer(seeker, hider, shouldSee);
-                        if (!applied) {
+                        if (!applied || (shouldSee && wasHidden)) {
                             applyBukkitVisibility(seeker, hider, shouldSee, true);
                         }
                     } else {
                         applyBukkitVisibility(seeker, hider, shouldSee, false);
                     }
-                } catch (Exception ignored) {
+                } catch (Exception ex) {
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().warning("Anti-cheat visibility apply failed for " + seeker.getName() + " -> " + hider.getName() + ": " + ex.getMessage());
+                    }
+                }
+
+                if (!shouldSee) {
+                    desiredHiddenPairs.add(pair);
+                }
+            }
+        }
+
+        restoreStalePairs(desiredHiddenPairs);
+        hiddenPairs.clear();
+        hiddenPairs.addAll(desiredHiddenPairs);
+    }
+
+    private void restoreStalePairs(Set<VisibilityPair> desiredHiddenPairs) {
+        for (VisibilityPair pair : new HashSet<>(hiddenPairs)) {
+            if (desiredHiddenPairs.contains(pair)) {
+                continue;
+            }
+
+            Player viewer = Bukkit.getPlayer(pair.viewerId());
+            Player target = Bukkit.getPlayer(pair.targetId());
+            if (viewer == null || !viewer.isOnline() || target == null || !target.isOnline()) {
+                continue;
+            }
+
+            try {
+                plugin.getNmsAdapter().setEntityVisibilityForViewer(viewer, target, true);
+                applyBukkitVisibility(viewer, target, true, true);
+            } catch (Exception ex) {
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().warning("Anti-cheat stale visibility restore failed for " + viewer.getName() + " -> " + target.getName() + ": " + ex.getMessage());
                 }
             }
         }
@@ -228,32 +281,33 @@ public class AntiCheatVisibilityListener implements Listener {
     }
 
     private void restoreAllVisibility() {
-        List<UUID> seekers = new ArrayList<>(HideAndSeek.getDataController().getSeekers());
-        List<UUID> hiders = new ArrayList<>(HideAndSeek.getDataController().getHiders());
+        List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
 
-        for (UUID seekerId : seekers) {
-            Player seeker = Bukkit.getPlayer(seekerId);
-            if (seeker == null || !seeker.isOnline()) {
+        for (Player viewer : onlinePlayers) {
+            if (viewer == null || !viewer.isOnline()) {
                 continue;
             }
 
-            for (UUID hiderId : hiders) {
-                if (seekerId.equals(hiderId)) {
-                    continue;
-                }
-
-                Player hider = Bukkit.getPlayer(hiderId);
-                if (hider == null || !hider.isOnline()) {
+            for (Player target : onlinePlayers) {
+                if (target == null || !target.isOnline() || viewer.getUniqueId().equals(target.getUniqueId())) {
                     continue;
                 }
 
                 try {
-                    plugin.getNmsAdapter().setEntityVisibilityForViewer(seeker, hider, true);
-                    seeker.hideEntity(plugin, hider);
-                    seeker.showEntity(plugin, hider);
-                } catch (Exception ignored) {
+                    plugin.getNmsAdapter().setEntityVisibilityForViewer(viewer, target, true);
+                    viewer.hideEntity(plugin, target);
+                    viewer.showEntity(plugin, target);
+                } catch (Exception ex) {
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().warning("Anti-cheat visibility restore failed for " + viewer.getName() + " -> " + target.getName() + ": " + ex.getMessage());
+                    }
                 }
             }
         }
+
+        hiddenPairs.clear();
+    }
+
+    private record VisibilityPair(UUID viewerId, UUID targetId) {
     }
 }

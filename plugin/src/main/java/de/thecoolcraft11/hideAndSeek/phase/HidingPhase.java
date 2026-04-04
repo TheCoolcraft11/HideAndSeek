@@ -52,6 +52,7 @@ public class HidingPhase implements GamePhase {
     public void onStart(MinigameFramework plugin) {
 
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+        hideAndSeekPlugin.getAntiCheatVisibilityListener().resetNow();
         hideAndSeekPlugin.getPointService().resetRoundState();
 
         TimerManager.cleanupTimers(hideAndSeekPlugin);

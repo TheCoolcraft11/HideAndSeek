@@ -33,8 +33,9 @@ public class EndedPhase implements GamePhase {
     @Override
     public void onStart(MinigameFramework plugin) {
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
-        CameraItem.clearAllCameraState(hideAndSeekPlugin);
+
         hideAndSeekPlugin.getAntiCheatVisibilityListener().resetNow();
+        CameraItem.clearAllCameraState(hideAndSeekPlugin);
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info("Game ended");
         }

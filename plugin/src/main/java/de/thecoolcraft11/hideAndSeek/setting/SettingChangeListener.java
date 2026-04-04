@@ -28,6 +28,14 @@ public class SettingChangeListener {
         plugin.getSettingRegistry().onSettingChange("game.seeking-bossbar.color.static-color", listener::onSettingChange);
         plugin.getSettingRegistry().onSettingChange("game.seeking-bossbar.animation.enabled", listener::onSettingChange);
         plugin.getSettingRegistry().onSettingChange("game.seeking-bossbar.animation.speed-ticks", listener::onSettingChange);
+
+        plugin.getSettingRegistry().onSettingChange("anticheat.enabled", listener::onSettingChange);
+        plugin.getSettingRegistry().onSettingChange("anticheat.hiding.filter.enabled", listener::onSettingChange);
+        plugin.getSettingRegistry().onSettingChange("anticheat.seeking.filter.enabled", listener::onSettingChange);
+        plugin.getSettingRegistry().onSettingChange("anticheat.seeking.visibility-range", listener::onSettingChange);
+        plugin.getSettingRegistry().onSettingChange("anticheat.seeking.line-of-sight.enabled", listener::onSettingChange);
+        plugin.getSettingRegistry().onSettingChange("anticheat.seeking.line-of-sight.range", listener::onSettingChange);
+        plugin.getSettingRegistry().onSettingChange("anticheat.seeking.line-of-sight.fov", listener::onSettingChange);
     }
 
     public void onSettingChange(String key, Object oldValue, Object newValue) {
@@ -36,6 +44,10 @@ public class SettingChangeListener {
 
         if (key.startsWith("game.seeking-bossbar.")) {
             plugin.getSeekingBossBarService().reloadSettings();
+        }
+
+        if (key.startsWith("anticheat.")) {
+            plugin.getAntiCheatVisibilityListener().refreshSoon();
         }
     }
 }
