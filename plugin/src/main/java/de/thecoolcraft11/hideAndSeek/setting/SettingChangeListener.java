@@ -1,4 +1,4 @@
-package de.thecoolcraft11.hideAndSeek.util.setting;
+package de.thecoolcraft11.hideAndSeek.setting;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;

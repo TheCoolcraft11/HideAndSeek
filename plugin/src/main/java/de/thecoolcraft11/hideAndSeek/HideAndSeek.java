@@ -8,26 +8,26 @@ import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
 import de.thecoolcraft11.hideAndSeek.listener.game.*;
 import de.thecoolcraft11.hideAndSeek.listener.item.*;
 import de.thecoolcraft11.hideAndSeek.listener.perk.GlideListener;
-import de.thecoolcraft11.hideAndSeek.listener.player.*;
 import de.thecoolcraft11.hideAndSeek.listener.perk.PlaceholderItemProtectionListener;
+import de.thecoolcraft11.hideAndSeek.listener.player.*;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsLoader;
-import de.thecoolcraft11.hideAndSeek.phase.EndedPhase;
-import de.thecoolcraft11.hideAndSeek.phase.HidingPhase;
-import de.thecoolcraft11.hideAndSeek.phase.LobbyPhase;
-import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
 import de.thecoolcraft11.hideAndSeek.perk.PerkRegistry;
 import de.thecoolcraft11.hideAndSeek.perk.PerkService;
 import de.thecoolcraft11.hideAndSeek.perk.PerkShopUI;
 import de.thecoolcraft11.hideAndSeek.perk.PerkStateManager;
+import de.thecoolcraft11.hideAndSeek.phase.EndedPhase;
+import de.thecoolcraft11.hideAndSeek.phase.HidingPhase;
+import de.thecoolcraft11.hideAndSeek.phase.LobbyPhase;
+import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
+import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
+import de.thecoolcraft11.hideAndSeek.setting.SettingRegistrar;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.SeekingBossBarService;
 import de.thecoolcraft11.hideAndSeek.util.map.MapManager;
 import de.thecoolcraft11.hideAndSeek.util.points.PointService;
-import de.thecoolcraft11.hideAndSeek.util.setting.SettingChangeListener;
-import de.thecoolcraft11.hideAndSeek.util.setting.SettingRegisterer;
 import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
@@ -91,7 +91,7 @@ public final class HideAndSeek extends MinigameFramework {
 
         getStateManager().setPhase("lobby");
 
-        SettingRegisterer.registerAll(this);
+        SettingRegistrar.registerAll(this);
         SettingChangeListener.register(this);
 
         HiderItems.registerItems(this);

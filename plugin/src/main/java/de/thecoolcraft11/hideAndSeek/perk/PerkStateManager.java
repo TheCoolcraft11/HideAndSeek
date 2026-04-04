@@ -39,7 +39,7 @@ public class PerkStateManager {
         this.plugin = plugin;
     }
 
-    public boolean purchase(Player player, PerkDefinition perk) {
+    public void purchase(Player player, PerkDefinition perk) {
         UUID id = player.getUniqueId();
         boolean isSeekerPerk = perk.getTarget() == PerkTarget.SEEKER;
         boolean isFinitePerk = perk.getTarget() == PerkTarget.HIDER
@@ -47,7 +47,7 @@ public class PerkStateManager {
 
         if (isFinitePerk && hasPurchased(id, perk.getId())) {
             player.sendMessage(Component.text("You already have this perk.", NamedTextColor.RED));
-            return false;
+            return;
         }
 
         if (isFinitePerk) {
@@ -56,7 +56,7 @@ public class PerkStateManager {
                 Set<UUID> owners = finiteOwners.computeIfAbsent(perk.getId(), ignored -> ConcurrentHashMap.newKeySet());
                 if (owners.size() >= limit && !owners.contains(id)) {
                     player.sendMessage(Component.text("That perk is already at the global player limit.", NamedTextColor.RED));
-                    return false;
+                    return;
                 }
             }
         } else if (isSeekerPerk) {
@@ -64,7 +64,7 @@ public class PerkStateManager {
             if (remainingTicks > 0) {
                 long seconds = Math.max(1L, (remainingTicks + 19L) / 20L);
                 player.sendMessage(Component.text("You can buy that perk again in " + seconds + "s.", NamedTextColor.RED));
-                return false;
+                return;
             }
         }
 
@@ -72,7 +72,7 @@ public class PerkStateManager {
         int balance = HideAndSeek.getDataController().getPoints(id);
         if (balance < cost) {
             player.sendMessage(Component.text("Not enough points! Need " + cost + ", have " + balance + ".", NamedTextColor.RED));
-            return false;
+            return;
         }
 
         HideAndSeek.getDataController().addPoints(id, -cost);
@@ -93,7 +93,7 @@ public class PerkStateManager {
             if (!(perk instanceof DelayedActivationPerk)) {
                 plugin.getLogger().warning("Perk activation failed for " + perk.getId() + ": " + ex.getMessage());
             }
-            return false;
+            return;
         }
 
         if (!(perk instanceof DelayedActivationPerk)) {
@@ -108,7 +108,6 @@ public class PerkStateManager {
         } else {
             plugin.getPerkShopUI().refreshForPlayer(player);
         }
-        return true;
     }
 
     public void refundPurchase(UUID playerId, String perkId, int amount) {
@@ -226,7 +225,7 @@ public class PerkStateManager {
 
     private void setPurchaseCooldown(UUID playerId, PerkDefinition perk) {
         long cooldownTicks = Math.max(0L, plugin.getPerkRegistry().getRebuyCooldownTicks(perk));
-        if (cooldownTicks <= 0L) {
+        if (cooldownTicks == 0L) {
             return;
         }
 
