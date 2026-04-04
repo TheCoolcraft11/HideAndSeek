@@ -66,6 +66,7 @@ public class ProximityMeterPerk extends BasePerk {
     @Override
     public void onExpire(Player player, HideAndSeek plugin) {
         plugin.getPerkStateManager().cancelTask(player, getId());
+        plugin.getPerkStateManager().proximityMeterNearest.remove(player.getUniqueId());
         player.showTitle(Title.title(Component.empty(), Component.empty(),
                 Title.Times.times(Duration.ZERO, Duration.ofMillis(1), Duration.ZERO)));
     }
@@ -86,7 +87,11 @@ public class ProximityMeterPerk extends BasePerk {
             }
         }
 
-        plugin.getPerkStateManager().proximityMeterNearest.put(seeker.getUniqueId(), nearestId);
+        if (nearestId == null) {
+            plugin.getPerkStateManager().proximityMeterNearest.remove(seeker.getUniqueId());
+        } else {
+            plugin.getPerkStateManager().proximityMeterNearest.put(seeker.getUniqueId(), nearestId);
+        }
         PingTier tier = tierFor(nearestDist, plugin);
 
         seeker.showTitle(Title.title(

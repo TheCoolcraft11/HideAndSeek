@@ -59,7 +59,7 @@ public class ElytraRushPerk extends BasePerk {
 
     @Override
     public void onPurchase(Player player, HideAndSeek plugin) {
-        int durationTicks = plugin.getSettingRegistry().get("perks.perk.seeker_elytra_rush.duration-ticks", 600);
+        long durationTicks = plugin.getSettingRegistry().get("perks.perk.seeker_elytra_rush.duration-ticks", 600L);
         double launchPower = plugin.getSettingRegistry().get("perks.perk.seeker_elytra_rush.launch-power", 1.8d);
         boolean fallbackToLevitation = plugin.getSettingRegistry().get("perks.perk.seeker_elytra_rush.fallback-to-levitation", true);
 
@@ -77,7 +77,7 @@ public class ElytraRushPerk extends BasePerk {
                     return;
                 }
                 if (!player.isGliding()) {
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, Math.min(60, durationTicks), 0, false, false, true));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, (int) Math.min(60L, durationTicks), 0, false, false, true));
                 }
             }, 1L);
         }

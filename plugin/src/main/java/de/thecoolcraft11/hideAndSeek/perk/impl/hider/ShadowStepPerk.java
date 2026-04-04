@@ -80,7 +80,7 @@ public class ShadowStepPerk extends BasePerk {
 
             plugin.getPerkStateManager().cancelTask(player, getId());
 
-            int chargeTicks = plugin.getSettingRegistry().get("perks.perk.hider_shadow_step.charge-ticks", 30);
+            long chargeTicks = plugin.getSettingRegistry().get("perks.perk.hider_shadow_step.charge-ticks", 30L);
             BukkitTask chargeTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 plugin.getPerkStateManager().shadowStepChargeTask.remove(player.getUniqueId());
                 if (!player.isOnline() || player.getGameMode() == GameMode.SPECTATOR || player.isDead()) {

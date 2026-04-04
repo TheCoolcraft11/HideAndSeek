@@ -6,20 +6,11 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ScentTrailPerk extends BasePerk {
 
@@ -63,7 +54,7 @@ public class ScentTrailPerk extends BasePerk {
 
     @Override
     public void onPurchase(Player seeker, HideAndSeek plugin) {
-        int interval = plugin.getSettingRegistry().get("perks.perk.seeker_scent_trail.trail-interval-ticks", 5);
+        long interval = plugin.getSettingRegistry().get("perks.perk.seeker_scent_trail.trail-interval-ticks", 5L);
         double moveThreshold = plugin.getSettingRegistry().get("perks.perk.seeker_scent_trail.move-threshold", 0.3d);
         int lifeSeconds = plugin.getSettingRegistry().get("perks.perk.seeker_scent_trail.particle-lifetime-seconds", 10);
 

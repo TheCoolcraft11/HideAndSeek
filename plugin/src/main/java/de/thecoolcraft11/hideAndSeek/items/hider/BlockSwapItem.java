@@ -185,8 +185,8 @@ public class BlockSwapItem implements GameItem {
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
                 finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
             } else {
-                player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05);
-                finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3, 0.3, 0.05);
+                player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05, 1);
+                finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3, 0.3, 0.05, 1);
                 player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
                 finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
