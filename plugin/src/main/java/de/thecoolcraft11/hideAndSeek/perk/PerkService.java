@@ -127,14 +127,15 @@ public class PerkService implements Listener {
         if (!stateManager.hasPurchased(player.getUniqueId(), "hider_double_jump")) {
             return;
         }
-        if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            return;
-        }
-        if (HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
+        event.setCancelled(true);
+
+        if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())
+                || HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
+            player.setFlying(false);
+            player.setAllowFlight(false);
             return;
         }
 
-        event.setCancelled(true);
 
         double jumpPower = plugin.getSettingRegistry().get("perks.perk.hider_double_jump.jump-power", 0.7d);
         double horizontalBoost = plugin.getSettingRegistry().get("perks.perk.hider_double_jump.horizontal-boost", 0.1d);

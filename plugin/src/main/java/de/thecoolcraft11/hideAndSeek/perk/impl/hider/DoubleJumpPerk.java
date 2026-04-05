@@ -12,6 +12,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.UUID;
+
 public class DoubleJumpPerk extends BasePerk {
     @Override
     public String getId() {
@@ -52,18 +54,28 @@ public class DoubleJumpPerk extends BasePerk {
     public void onPurchase(Player player, HideAndSeek plugin) {
         if (player.getGameMode() == GameMode.SURVIVAL) {
             player.setAllowFlight(true);
+            player.setFlying(false);
         }
 
         BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (!player.isOnline() || player.getGameMode() != GameMode.SURVIVAL) {
                 return;
             }
-            if (HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
+            UUID playerId = player.getUniqueId();
+            if (!HideAndSeek.getDataController().getHiders().contains(playerId)
+                    || HideAndSeek.getDataController().isHidden(playerId)) {
                 player.setAllowFlight(false);
+                player.setFlying(false);
                 return;
             }
             if (player.isOnGround()) {
                 player.setAllowFlight(true);
+                player.setFlying(false);
+                return;
+            }
+
+
+            if (player.isFlying()) {
                 player.setFlying(false);
             }
         }, 0L, 5L);
@@ -75,6 +87,7 @@ public class DoubleJumpPerk extends BasePerk {
     public void onExpire(Player player, HideAndSeek plugin) {
         plugin.getPerkStateManager().cancelTask(player, getId());
         if (player.getGameMode() == GameMode.SURVIVAL) {
+            player.setFlying(false);
             player.setAllowFlight(false);
         }
     }

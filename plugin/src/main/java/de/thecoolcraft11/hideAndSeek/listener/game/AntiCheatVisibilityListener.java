@@ -7,6 +7,7 @@ import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -170,6 +171,8 @@ public class AntiCheatVisibilityListener implements Listener {
                     } else {
                         applyBukkitVisibility(seeker, hider, shouldSee, false);
                     }
+
+                    applyAuxiliaryHiderVisibility(seeker, hiderId, shouldSee, shouldSee && wasHidden);
                 } catch (Exception ex) {
                     if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                         plugin.getLogger().warning("Anti-cheat visibility apply failed for " + seeker.getName() + " -> " + hider.getName() + ": " + ex.getMessage());
@@ -202,6 +205,7 @@ public class AntiCheatVisibilityListener implements Listener {
             try {
                 plugin.getNmsAdapter().setEntityVisibilityForViewer(viewer, target, true);
                 applyBukkitVisibility(viewer, target, true, true);
+                applyAuxiliaryHiderVisibility(viewer, pair.targetId(), true, true);
             } catch (Exception ex) {
                 if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                     plugin.getLogger().warning("Anti-cheat stale visibility restore failed for " + viewer.getName() + " -> " + target.getName() + ": " + ex.getMessage());
@@ -211,6 +215,29 @@ public class AntiCheatVisibilityListener implements Listener {
     }
 
     private void applyBukkitVisibility(Player viewer, Player target, boolean shouldSee, boolean forceRefreshShow) {
+        if (shouldSee) {
+            if (forceRefreshShow) {
+                viewer.hideEntity(plugin, target);
+            }
+            viewer.showEntity(plugin, target);
+        } else {
+            viewer.hideEntity(plugin, target);
+        }
+    }
+
+    private void applyAuxiliaryHiderVisibility(Player viewer, UUID hiderId, boolean shouldSee, boolean forceRefreshShow) {
+        Entity blockDisplay = HideAndSeek.getDataController().getBlockDisplay(hiderId);
+        applyAuxiliaryEntityVisibility(viewer, blockDisplay, shouldSee, forceRefreshShow);
+
+        Entity interactionEntity = HideAndSeek.getDataController().getInteractionEntity(hiderId);
+        applyAuxiliaryEntityVisibility(viewer, interactionEntity, shouldSee, forceRefreshShow);
+    }
+
+    private void applyAuxiliaryEntityVisibility(Player viewer, Entity target, boolean shouldSee, boolean forceRefreshShow) {
+        if (target == null || !target.isValid() || target.equals(viewer)) {
+            return;
+        }
+
         if (shouldSee) {
             if (forceRefreshShow) {
                 viewer.hideEntity(plugin, target);
@@ -297,6 +324,7 @@ public class AntiCheatVisibilityListener implements Listener {
                     plugin.getNmsAdapter().setEntityVisibilityForViewer(viewer, target, true);
                     viewer.hideEntity(plugin, target);
                     viewer.showEntity(plugin, target);
+                    applyAuxiliaryHiderVisibility(viewer, target.getUniqueId(), true, true);
                 } catch (Exception ex) {
                     if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                         plugin.getLogger().warning("Anti-cheat visibility restore failed for " + viewer.getName() + " -> " + target.getName() + ": " + ex.getMessage());
