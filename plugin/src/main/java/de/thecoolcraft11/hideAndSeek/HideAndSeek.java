@@ -7,7 +7,7 @@ import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
 import de.thecoolcraft11.hideAndSeek.listener.game.*;
 import de.thecoolcraft11.hideAndSeek.listener.item.*;
-import de.thecoolcraft11.hideAndSeek.listener.perk.GlideListener;
+import de.thecoolcraft11.hideAndSeek.listener.perk.PerkListener;
 import de.thecoolcraft11.hideAndSeek.listener.perk.PlaceholderItemProtectionListener;
 import de.thecoolcraft11.hideAndSeek.listener.player.*;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
@@ -125,8 +125,8 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new SetPhaseReadinessGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerSpectateListener(), this);
         Bukkit.getPluginManager().registerEvents(new TrapMovementListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PlaceholderItemProtectionListener(), this);
-        Bukkit.getPluginManager().registerEvents(new GlideListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlaceholderItemProtectionListener(perkService.getShopUI()), this);
+        Bukkit.getPluginManager().registerEvents(new PerkListener(this, perkService), this);
 
 
         worldBorderCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this,

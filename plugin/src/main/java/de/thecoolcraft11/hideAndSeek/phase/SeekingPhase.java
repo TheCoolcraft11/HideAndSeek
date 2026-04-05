@@ -393,4 +393,9 @@ public class SeekingPhase implements GamePhase {
     public boolean allowHunger() {
         return false;
     }
+
+    @Override
+    public boolean allowEntityPortals() {
+        return false;
+    }
 }

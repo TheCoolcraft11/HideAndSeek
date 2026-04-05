@@ -27,6 +27,7 @@ import java.util.UUID;
 public class PerkShopUI {
 
     public static final Component SHOP_TITLE = Component.text("Perk Shop", NamedTextColor.GOLD);
+    private static final String SHOP_LIGHT_KEY = "perk_shop_light";
 
     private final HideAndSeek plugin;
 
@@ -75,7 +76,7 @@ public class PerkShopUI {
     public void removePerkItems(Player player) {
         for (int slot : getConfiguredSlots()) {
             ItemStack current = player.getInventory().getItem(slot);
-            if (current != null && (isPerkShopItem(current) || current.getType() == Material.LIGHT)) {
+            if (current != null && (isPerkShopItem(current) || isProtectedShopLight(current))) {
                 player.getInventory().setItem(slot, null);
             }
         }
@@ -164,6 +165,7 @@ public class PerkShopUI {
             sold.setItemMeta(meta);
 
             sold.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.BLOCK_DATA).build());
+            markProtectedShopLight(sold);
 
             return sold;
         }
@@ -335,6 +337,7 @@ public class PerkShopUI {
     private ItemStack buildPlaceholderItem() {
         ItemStack lightBlock = new ItemStack(Material.LIGHT);
         lightBlock.unsetData(DataComponentTypes.BLOCK_DATA);
+        markProtectedShopLight(lightBlock);
 
         lightBlock.setData(
                 DataComponentTypes.TOOLTIP_DISPLAY,
@@ -342,6 +345,23 @@ public class PerkShopUI {
         );
 
         return lightBlock;
+    }
+
+    public boolean isProtectedShopLight(ItemStack item) {
+        if (item == null || !item.hasItemMeta() || item.getType() != Material.LIGHT) {
+            return false;
+        }
+        return item.getItemMeta().getPersistentDataContainer()
+                .has(new NamespacedKey(plugin, SHOP_LIGHT_KEY), PersistentDataType.BOOLEAN);
+    }
+
+    private void markProtectedShopLight(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return;
+        }
+        meta.getPersistentDataContainer().set(new NamespacedKey(plugin, SHOP_LIGHT_KEY), PersistentDataType.BOOLEAN, true);
+        item.setItemMeta(meta);
     }
 }
 

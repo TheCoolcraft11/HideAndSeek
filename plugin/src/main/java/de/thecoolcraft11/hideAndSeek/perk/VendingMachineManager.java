@@ -8,16 +8,12 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
-public class VendingMachineManager implements Listener {
+public class VendingMachineManager {
 
     private final HideAndSeek plugin;
     private final Set<String> vendingLocations = new HashSet<>();
@@ -25,7 +21,6 @@ public class VendingMachineManager implements Listener {
 
     public VendingMachineManager(HideAndSeek plugin) {
         this.plugin = plugin;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     public void placeVendingMachines() {
@@ -85,38 +80,8 @@ public class VendingMachineManager implements Listener {
         labelEntities.clear();
     }
 
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) {
-            return;
-        }
-        if (event.getClickedBlock().getType() != Material.DROPPER) {
-            return;
-        }
-
-        String key = blockKey(event.getClickedBlock().getLocation());
-        if (!vendingLocations.contains(key)) {
-            return;
-        }
-
-        event.setCancelled(true);
-
-        if (!"seeking".equals(plugin.getStateManager().getCurrentPhaseId())) {
-            event.getPlayer().sendMessage(Component.text("The perk shop is only open during the seeking phase.", NamedTextColor.RED));
-            return;
-        }
-
-        boolean isHider = HideAndSeek.getDataController().getHiders().contains(event.getPlayer().getUniqueId());
-        boolean isSeeker = HideAndSeek.getDataController().getSeekers().contains(event.getPlayer().getUniqueId());
-        PerkShopMode shopMode = isHider
-                ? plugin.getSettingRegistry().get("perks.hider-shop-mode", PerkShopMode.INVENTORY)
-                : plugin.getSettingRegistry().get("perks.seeker-shop-mode", PerkShopMode.INVENTORY);
-        if (!isHider && !isSeeker || shopMode != PerkShopMode.VENDING_MACHINE) {
-            event.getPlayer().sendMessage(Component.text("Your perk shop is configured to use the inventory instead.", NamedTextColor.GRAY));
-            return;
-        }
-
-        plugin.getPerkShopUI().openShopInventory(event.getPlayer());
+    public boolean isVendingMachine(Location location) {
+        return location != null && vendingLocations.contains(blockKey(location));
     }
 
     private void spawnShopLabel(Location loc) {
