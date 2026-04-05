@@ -110,6 +110,68 @@ public class PerkStateManager {
         }
     }
 
+    public boolean grantDebug(Player player, PerkDefinition perk, boolean bypassCooldown) {
+        UUID id = player.getUniqueId();
+        boolean isSeekerPerk = perk.getTarget() == PerkTarget.SEEKER;
+        boolean isFinitePerk = perk.getTarget() == PerkTarget.HIDER
+                || (isSeekerPerk && plugin.getPerkRegistry().isFiniteSeekerPerk(perk.getId()));
+
+        if (isFinitePerk && hasPurchased(id, perk.getId())) {
+            player.sendMessage(Component.text("You already have this perk.", NamedTextColor.RED));
+            return false;
+        }
+
+        if (isFinitePerk) {
+            int limit = plugin.getPerkRegistry().getFinitePlayerLimit(perk.getTarget());
+            if (limit > 0) {
+                Set<UUID> owners = finiteOwners.computeIfAbsent(perk.getId(), ignored -> ConcurrentHashMap.newKeySet());
+                if (owners.size() >= limit && !owners.contains(id)) {
+                    player.sendMessage(Component.text("That perk is already at the global player limit.", NamedTextColor.RED));
+                    return false;
+                }
+            }
+        } else if (isSeekerPerk && !bypassCooldown) {
+            long remainingTicks = getPurchaseCooldownRemainingTicks(id, perk.getId());
+            if (remainingTicks > 0) {
+                long seconds = Math.max(1L, (remainingTicks + 19L) / 20L);
+                player.sendMessage(Component.text("You can buy that perk again in " + seconds + "s.", NamedTextColor.RED));
+                return false;
+            }
+        }
+
+        purchased.computeIfAbsent(id, ignored -> new HashSet<>()).add(perk.getId());
+        if (isFinitePerk) {
+            finiteOwners.computeIfAbsent(perk.getId(), ignored -> ConcurrentHashMap.newKeySet()).add(id);
+        } else if (isSeekerPerk) {
+            setPurchaseCooldown(id, perk);
+        }
+
+        try {
+            perk.onPurchase(player, plugin);
+        } catch (RuntimeException ex) {
+            player.sendMessage(Component.text("That perk could not be activated.", NamedTextColor.RED));
+            removePurchased(id, perk.getId());
+            if (!(perk instanceof DelayedActivationPerk)) {
+                plugin.getLogger().warning("Perk activation failed for " + perk.getId() + ": " + ex.getMessage());
+            }
+            return false;
+        }
+
+        if (!(perk instanceof DelayedActivationPerk)) {
+            player.sendMessage(Component.text()
+                    .append(Component.text("Perk activated: ", NamedTextColor.GOLD))
+                    .append(perk.getDisplayName())
+                    .build());
+        }
+
+        if (isFinitePerk) {
+            plugin.getPerkShopUI().refreshAllPlayersWithShopItems();
+        } else {
+            plugin.getPerkShopUI().refreshForPlayer(player);
+        }
+        return true;
+    }
+
     public void refundPurchase(UUID playerId, String perkId, int amount) {
         if (amount > 0) {
             HideAndSeek.getDataController().addPoints(playerId, amount);
@@ -198,6 +260,10 @@ public class PerkStateManager {
             return owners.iterator().next();
         }
         return null;
+    }
+
+    public Map<UUID, Set<String>> getPurchased() {
+        return purchased;
     }
 
     public long getPurchaseCooldownRemainingTicks(UUID playerId, String perkId) {

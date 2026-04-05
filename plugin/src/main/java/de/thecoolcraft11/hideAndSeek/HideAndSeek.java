@@ -144,6 +144,7 @@ public final class HideAndSeek extends MinigameFramework {
         MinigameSubcommandRegistry.register(new ItemSkinCommand(this));
         MinigameSubcommandRegistry.register(new VoteCommand(this));
         MinigameSubcommandRegistry.register(new ReadyCommand(this));
+        MinigameSubcommandRegistry.register(new DebugCommand(this));
 
         timerPlugin = (Timer) Bukkit.getPluginManager().getPlugin("Timer");
         if (timerPlugin != null) {

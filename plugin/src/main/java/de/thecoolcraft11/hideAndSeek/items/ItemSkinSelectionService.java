@@ -109,10 +109,16 @@ public final class ItemSkinSelectionService {
     }
 
     public static void addCoins(HideAndSeek plugin, UUID playerId, int amount) {
-        if (amount <= 0) {
-            getCoins(playerId);
-            return;
-        }
+        if (amount <= 0) return;
+
+        int updated = getCoins(playerId) + amount;
+        PLAYER_COINS.put(playerId, updated);
+        savePlayer(plugin, playerId);
+    }
+
+    public static void addCoins(HideAndSeek plugin, UUID playerId, int amount, boolean force) {
+        if (amount <= 0 && !force) return;
+
         int updated = getCoins(playerId) + amount;
         PLAYER_COINS.put(playerId, updated);
         savePlayer(plugin, playerId);
