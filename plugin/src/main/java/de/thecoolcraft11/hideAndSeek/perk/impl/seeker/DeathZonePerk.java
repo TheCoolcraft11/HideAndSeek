@@ -23,11 +23,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
+
+    private static final Map<UUID, List<AreaWarnHelper>> sessions = new HashMap<>();
 
     @Override
     public String getId() {
@@ -64,6 +65,20 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
         return 350;
     }
 
+    public static void clearWarningsFor(UUID playerId) {
+        for (List<AreaWarnHelper> helpers : sessions.values()) {
+            for (AreaWarnHelper helper : helpers) {
+                helper.clearForPlayer(playerId);
+            }
+        }
+    }
+
+    private void refundPurchase(Player player, HideAndSeek plugin, int cost) {
+        plugin.getPerkService().getStateManager().removePurchased(player.getUniqueId(), getId());
+        HideAndSeek.getDataController().addPoints(player.getUniqueId(), cost);
+        plugin.getPerkShopUI().refreshForPlayer(player);
+    }
+
     @Override
     public void onPurchase(Player player, HideAndSeek plugin) {
         if (!"seeking".equals(plugin.getStateManager().getCurrentPhaseId())) {
@@ -85,6 +100,8 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
 
 
         try {
+            List<AreaWarnHelper> helpers = sessions.computeIfAbsent(player.getUniqueId(), ignored -> new ArrayList<>());
+
             MapPickerBuilder.forPlayer(plugin, player)
                     .world(player.getWorld())
                     .area(minX, minZ, maxX, maxZ)
@@ -113,6 +130,7 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
 
                             AreaWarnHelper helper = new AreaWarnHelper(plugin, center, radius, escapeSeconds * 20);
                             helper.start(hidersSnapshot);
+                            helpers.add(helper);
 
                             for (UUID hiderId : hidersSnapshot) {
                                 Player hider = Bukkit.getPlayer(hiderId);
@@ -129,12 +147,19 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
                                     if (hider == null || !hider.isOnline() || hider.getGameMode() == GameMode.SPECTATOR) {
                                         continue;
                                     }
+                                    if (!HideAndSeek.getDataController().getHiders().contains(hiderId)) {
+                                        continue;
+                                    }
                                     if (helper.isInsideZone(hider.getLocation())) {
                                         plugin.getPlayerHitListener().markEnvironmentalDeath(hiderId, PlayerHitListener.EnvironmentalDeathCause.PERK_DEATH_ZONE);
                                         hider.setHealth(0.0);
                                     }
                                 }
                                 helper.stop();
+                                helpers.remove(helper);
+                                if (helpers.isEmpty()) {
+                                    sessions.remove(player.getUniqueId());
+                                }
                             }, escapeSeconds * 20L);
                         }
 
@@ -150,10 +175,16 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
         }
     }
 
-    private void refundPurchase(Player player, HideAndSeek plugin, int cost) {
-        plugin.getPerkService().getStateManager().removePurchased(player.getUniqueId(), getId());
-        HideAndSeek.getDataController().addPoints(player.getUniqueId(), cost);
-        plugin.getPerkShopUI().refreshForPlayer(player);
+    @Override
+    public void onExpire(Player player, HideAndSeek plugin) {
+        List<AreaWarnHelper> helpers = sessions.remove(player.getUniqueId());
+        if (helpers == null) {
+            return;
+        }
+
+        for (AreaWarnHelper helper : helpers) {
+            helper.stop();
+        }
     }
 }
 

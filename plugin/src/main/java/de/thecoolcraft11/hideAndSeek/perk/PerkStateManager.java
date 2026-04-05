@@ -184,6 +184,11 @@ public class PerkStateManager {
     }
 
     public void removePurchased(UUID playerId, String perkId) {
+        BukkitTask task = activeTasks.remove(playerId + ":" + perkId);
+        if (task != null) {
+            task.cancel();
+        }
+
         Set<String> perks = purchased.get(playerId);
         if (perks == null) {
             return;
@@ -208,6 +213,56 @@ public class PerkStateManager {
                 purchaseCooldownEnds.remove(playerId);
             }
         }
+    }
+
+    public int clearPurchasedPerks(UUID playerId, PerkTarget targetFilter, boolean refundPoints) {
+        Set<String> ownedPerks = purchased.get(playerId);
+        if (ownedPerks == null || ownedPerks.isEmpty()) {
+            return 0;
+        }
+
+        Player player = Bukkit.getPlayer(playerId);
+        int refundedPoints = 0;
+
+        for (String perkId : Set.copyOf(ownedPerks)) {
+            PerkDefinition perk = plugin.getPerkRegistry().getAllPerks().stream()
+                    .filter(definition -> definition.getId().equals(perkId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (perk == null) {
+                removePurchased(playerId, perkId);
+                continue;
+            }
+
+            if (targetFilter != null && perk.getTarget() != targetFilter) {
+                continue;
+            }
+
+            if (player != null && player.isOnline()) {
+                try {
+                    perk.onExpire(player, plugin);
+                } catch (RuntimeException ex) {
+                    plugin.getLogger().warning("Perk expiry failed for " + perk.getId() + ": " + ex.getMessage());
+                }
+            }
+
+            if (refundPoints) {
+                refundedPoints += plugin.getSettingRegistry().get("perks.perk." + perk.getId() + ".cost", perk.getCost());
+            }
+
+            removePurchased(playerId, perkId);
+        }
+
+        if (refundPoints && refundedPoints > 0) {
+            HideAndSeek.getDataController().addPoints(playerId, refundedPoints);
+        }
+
+        if (player != null && player.isOnline()) {
+            plugin.getPerkShopUI().refreshForPlayer(player);
+        }
+
+        return refundedPoints;
     }
 
     public void storeTask(Player player, String perkId, BukkitTask task) {

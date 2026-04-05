@@ -120,6 +120,8 @@ public class SettingRegistrar {
 
         plugin.getConfigRegistry().register("settings.perks.finite-player-limit", Integer.class, 1);
 
+        plugin.getConfigRegistry().register("settings.perks.refund-hider-perks-on-convert", Boolean.class, false);
+
         plugin.getConfigRegistry().register("settings.perks.perk.global.map-picker.view-height", Integer.class, 350);
 
 

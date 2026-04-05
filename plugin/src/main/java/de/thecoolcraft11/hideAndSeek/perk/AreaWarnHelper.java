@@ -85,6 +85,12 @@ public class AreaWarnHelper {
                 continue;
             }
 
+            if (!HideAndSeek.getDataController().getHiders().contains(uid)) {
+                hideBossBar(p);
+                clearBorderWarning(p);
+                continue;
+            }
+
             if (isInsideZone(p.getLocation())) {
                 applyWarnEffect(p);
                 showBossBar(p);
@@ -158,6 +164,25 @@ public class AreaWarnHelper {
         if (borderWarningActive.remove(player.getUniqueId()) != null) {
             plugin.getNmsAdapter().resetWarningBorder(player);
         }
+    }
+
+    public void clearForPlayer(UUID playerId) {
+        if (playerId == null) {
+            return;
+        }
+
+        Player player = Bukkit.getPlayer(playerId);
+        if (player != null) {
+            hideBossBar(player);
+            clearBorderWarning(player);
+            return;
+        }
+
+        BossBar bar = bossBars.remove(playerId);
+        if (bar != null) {
+            bar.removeAll();
+        }
+        borderWarningActive.remove(playerId);
     }
 
     public boolean isInsideZone(Location loc) {

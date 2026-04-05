@@ -100,6 +100,13 @@ public final class PerkCoreSettingGroup implements SettingGroup {
                         20,
                         "Default player limit for finite perks",
                         Material.BARRIER
+                ),
+                new BooleanSettingSpec(
+                        "perks.refund-hider-perks-on-convert",
+                        false,
+                        "Refund hider perk costs when they are converted after elimination",
+                        Material.EMERALD,
+                        true
                 )
         );
     }

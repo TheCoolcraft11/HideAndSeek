@@ -1,11 +1,11 @@
 package de.thecoolcraft11.hideAndSeek.perk.impl.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.listener.player.PlayerHitListener;
 import de.thecoolcraft11.hideAndSeek.perk.AreaWarnHelper;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import de.thecoolcraft11.hideAndSeek.listener.player.PlayerHitListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -55,6 +55,24 @@ public class RelocatePerk extends BasePerk {
         return 280;
     }
 
+    public static void clearWarningsFor(UUID playerId) {
+        for (List<AreaWarnHelper> helpers : sessions.values()) {
+            for (AreaWarnHelper helper : helpers) {
+                helper.clearForPlayer(playerId);
+            }
+        }
+    }
+
+    @Override
+    public void onExpire(Player player, HideAndSeek plugin) {
+        List<AreaWarnHelper> helpers = sessions.remove(player.getUniqueId());
+        if (helpers != null) {
+            for (AreaWarnHelper helper : helpers) {
+                helper.stop();
+            }
+        }
+    }
+
     @Override
     public void onPurchase(Player seeker, HideAndSeek plugin) {
         int escapeSeconds = plugin.getSettingRegistry().get("perks.perk.seeker_relocate.escape-seconds", 60);
@@ -86,23 +104,24 @@ public class RelocatePerk extends BasePerk {
                     helpers.remove(helper);
                     return;
                 }
+                if (!HideAndSeek.getDataController().getHiders().contains(hiderId)) {
+                    helper.stop();
+                    helpers.remove(helper);
+                    if (helpers.isEmpty()) {
+                        sessions.remove(seeker.getUniqueId());
+                    }
+                    return;
+                }
                 if (helper.isInsideZone(hider.getLocation())) {
                     plugin.getPlayerHitListener().markEnvironmentalDeath(hiderId, PlayerHitListener.EnvironmentalDeathCause.PERK_RELOCATE);
                     hider.setHealth(0.0);
                 }
                 helper.stop();
                 helpers.remove(helper);
+                if (helpers.isEmpty()) {
+                    sessions.remove(seeker.getUniqueId());
+                }
             }, escapeSeconds * 20L);
-        }
-    }
-
-    @Override
-    public void onExpire(Player player, HideAndSeek plugin) {
-        List<AreaWarnHelper> helpers = sessions.remove(player.getUniqueId());
-        if (helpers != null) {
-            for (AreaWarnHelper helper : helpers) {
-                helper.stop();
-            }
         }
     }
 }

@@ -6,6 +6,9 @@ import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectService;
 import de.thecoolcraft11.hideAndSeek.model.GameStyleEnum;
+import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
+import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.DeathZonePerk;
+import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.RelocatePerk;
 import de.thecoolcraft11.hideAndSeek.util.PlayerStateResetUtil;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import net.kyori.adventure.text.Component;
@@ -396,6 +399,8 @@ public class PlayerHitListener implements Listener {
 
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         PlayerStateResetUtil.resetPlayerCompletely(player, false);
+                        SeekerItems.giveItemsWithLoadout(player, plugin);
+                        plugin.getPerkShopUI().refreshForPlayer(player);
                         player.sendMessage(Component.text("You were transformed! You're now a seeker!", NamedTextColor.GREEN));
                         plugin.getAntiCheatVisibilityListener().refreshSoon();
                     }, 1L);
@@ -414,6 +419,7 @@ public class PlayerHitListener implements Listener {
 
 
                     HiderItems.giveItems(player, plugin, false);
+                    plugin.getPerkShopUI().refreshForPlayer(player);
 
                     player.sendMessage(Component.text("You respawned! Keep hiding!", NamedTextColor.GREEN));
                     plugin.getAntiCheatVisibilityListener().refreshSoon();
@@ -453,6 +459,10 @@ public class PlayerHitListener implements Listener {
             player.sendMessage(announcement);
         }
 
+
+        if (gameStyle == GameStyleEnum.INVASION || gameStyle == GameStyleEnum.INFINITE) {
+            clearHiderPerksAfterElimination(hider);
+        }
 
         switch (gameStyle) {
             case SPECTATOR:
@@ -534,6 +544,8 @@ public class PlayerHitListener implements Listener {
         HideAndSeek.getDataController().removeHider(hider.getUniqueId());
         HideAndSeek.getDataController().addSeeker(hider.getUniqueId());
 
+        clearConvertedPlayerAreaWarnings(hider);
+
 
         Team seekerTeam = null;
         for (Team team : plugin.getTeamManager().getAllTeams()) {
@@ -576,6 +588,7 @@ public class PlayerHitListener implements Listener {
 
 
             SeekerItems.giveItemsWithLoadout(hider, plugin);
+            plugin.getPerkShopUI().refreshForPlayer(hider);
 
 
             hider.addPotionEffect(new org.bukkit.potion.PotionEffect(
@@ -624,6 +637,20 @@ public class PlayerHitListener implements Listener {
 
 
         hider.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
+    }
+
+    private void clearHiderPerksAfterElimination(Player hider) {
+        boolean refund = plugin.getSettingRegistry().get("perks.refund-hider-perks-on-convert", false);
+        int refunded = plugin.getPerkStateManager().clearPurchasedPerks(hider.getUniqueId(), PerkTarget.HIDER, refund);
+        if (refund && refunded > 0) {
+            hider.sendMessage(Component.text("Your hider perks were removed and " + refunded + " points were refunded.", NamedTextColor.YELLOW));
+        }
+    }
+
+    private void clearConvertedPlayerAreaWarnings(Player player) {
+        UUID playerId = player.getUniqueId();
+        DeathZonePerk.clearWarningsFor(playerId);
+        RelocatePerk.clearWarningsFor(playerId);
     }
 
     public enum EnvironmentalDeathCause {
