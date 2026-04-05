@@ -64,6 +64,8 @@ public class SettingRegistrar {
 
         plugin.getConfigRegistry().register("settings.game.voting.map-enabled", Boolean.class, true);
 
+        plugin.getConfigRegistry().register("settings.game.voting.role-preference-enabled", Boolean.class, false);
+
         plugin.getConfigRegistry().register("settings.game.voting.show-counts", Boolean.class, true);
 
         plugin.getConfigRegistry().register("settings.game.lobby.readiness-enabled", Boolean.class, true);

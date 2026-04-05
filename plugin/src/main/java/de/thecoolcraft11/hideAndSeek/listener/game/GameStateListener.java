@@ -43,6 +43,7 @@ public class GameStateListener implements Listener {
             PlayerStateResetUtil.resetPlayerCompletely(player, false);
             plugin.getVoteManager().setReady(player.getUniqueId(), false);
             teleportNextTick(player, resolveLobbySpawn());
+            scheduleLobbyStartRecheck();
         }
     }
 
@@ -109,6 +110,12 @@ public class GameStateListener implements Listener {
                 plugin.getLogger().info(player.getName() + " (seeker) left the game");
             }
         }
+
+        scheduleLobbyStartRecheck();
+    }
+
+    private void scheduleLobbyStartRecheck() {
+        Bukkit.getScheduler().runTask(plugin, () -> plugin.getVoteManager().tryAutoStartIfEveryoneReady());
     }
 
     @EventHandler

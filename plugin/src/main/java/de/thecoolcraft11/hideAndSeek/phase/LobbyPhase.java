@@ -6,6 +6,7 @@ import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.PlayerStateResetUtil;
 import de.thecoolcraft11.hideAndSeek.util.map.MapConfigHelper;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
+import de.thecoolcraft11.hideAndSeek.vote.PreferredRole;
 import de.thecoolcraft11.hideAndSeek.vote.VotingResult;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.game.GamePhase;
@@ -18,9 +19,7 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class LobbyPhase implements GamePhase {
     @Override
@@ -128,6 +127,8 @@ public class LobbyPhase implements GamePhase {
             }
         }
 
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+
         Team hidersTeam;
         Team seekersTeam;
 
@@ -146,7 +147,7 @@ public class LobbyPhase implements GamePhase {
             currentMapName = HideAndSeek.getDataController().getCurrentMapName();
             MapData currentMapData = null;
             if (currentMapName != null && !currentMapName.isEmpty()) {
-                currentMapData = ((HideAndSeek) plugin).getMapManager().getMapData(currentMapName);
+                currentMapData = hideAndSeekPlugin.getMapManager().getMapData(currentMapName);
             }
 
 
@@ -168,16 +169,19 @@ public class LobbyPhase implements GamePhase {
 
             java.util.Collections.shuffle(allPlayers);
 
-            int seekersToAssign = Math.min(seekerCount, allPlayers.size() - 1);
+            int seekersToAssign = Math.clamp(seekerCount, 0, Math.max(0, allPlayers.size() - 1));
 
-            for (int i = 0; i < allPlayers.size(); i++) {
-                Player player = allPlayers.get(i);
+            Set<UUID> selectedSeekerIds = hideAndSeekPlugin.getVoteManager().isRolePreferenceVotingEnabled()
+                    ? selectSeekersByPreference(allPlayers, seekersToAssign, hideAndSeekPlugin)
+                    : selectFirstPlayersAsSeekers(allPlayers, seekersToAssign);
+
+            for (Player player : allPlayers) {
                 if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                     plugin.getLogger().info("Removing player " + player.getName() + " from team");
                 }
                 plugin.getTeamManager().removePlayerFromTeam(player);
 
-                if (i < seekersToAssign) {
+                if (selectedSeekerIds.contains(player.getUniqueId())) {
 
                     plugin.getTeamManager().addPlayerToTeam(player, seekersTeam.getName());
                     HideAndSeek.getDataController().addSeeker(player.getUniqueId());
@@ -290,6 +294,73 @@ public class LobbyPhase implements GamePhase {
                 }
             }
         }
+    }
+
+    private Set<UUID> selectFirstPlayersAsSeekers(List<Player> allPlayers, int seekersToAssign) {
+        Set<UUID> selectedSeekerIds = new HashSet<>();
+        for (int i = 0; i < seekersToAssign && i < allPlayers.size(); i++) {
+            selectedSeekerIds.add(allPlayers.get(i).getUniqueId());
+        }
+        return selectedSeekerIds;
+    }
+
+    private Set<UUID> selectSeekersByPreference(List<Player> allPlayers, int seekersToAssign, HideAndSeek hideAndSeekPlugin) {
+        Set<UUID> selectedSeekerIds = new HashSet<>();
+        if (seekersToAssign <= 0 || allPlayers.isEmpty()) {
+            return selectedSeekerIds;
+        }
+
+        List<Player> remaining = new ArrayList<>(allPlayers);
+        for (int i = 0; i < seekersToAssign && !remaining.isEmpty(); i++) {
+            Player chosen = pickWeightedPlayer(remaining, hideAndSeekPlugin);
+            selectedSeekerIds.add(chosen.getUniqueId());
+            remaining.remove(chosen);
+        }
+        return selectedSeekerIds;
+    }
+
+    private Player pickWeightedPlayer(List<Player> candidates, HideAndSeek hideAndSeekPlugin) {
+        if (candidates.size() == 1) {
+            return candidates.getFirst();
+        }
+
+        double totalWeight = 0.0;
+        double[] weights = new double[candidates.size()];
+        for (int i = 0; i < candidates.size(); i++) {
+            weights[i] = getWeightForPreferredRole(candidates.get(i), hideAndSeekPlugin);
+            totalWeight += weights[i];
+        }
+
+        Random random = new Random();
+        if (totalWeight <= 0.0) {
+            return candidates.get(random.nextInt(candidates.size()));
+        }
+
+        double roll = random.nextDouble() * totalWeight;
+        double cumulative = 0.0;
+        for (int i = 0; i < candidates.size(); i++) {
+            cumulative += weights[i];
+            if (roll < cumulative) {
+                return candidates.get(i);
+            }
+        }
+
+        Player lastCandidate = null;
+        for (Player candidate : candidates) {
+            lastCandidate = candidate;
+        }
+        return lastCandidate;
+    }
+
+    private double getWeightForPreferredRole(Player player, HideAndSeek hideAndSeekPlugin) {
+        PreferredRole preferredRole = hideAndSeekPlugin.getVoteManager().getPreferredRoleVote(player.getUniqueId()).orElse(null);
+        if (preferredRole == PreferredRole.SEEKER) {
+            return 4.0;
+        }
+        if (preferredRole == PreferredRole.HIDER) {
+            return 0.35;
+        }
+        return 1.0;
     }
 
 

@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek.gui;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
+import de.thecoolcraft11.hideAndSeek.vote.PreferredRole;
 import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
@@ -42,20 +43,23 @@ public class VoteGUI {
         }
         boolean gamemodeEnabled = voteManager.isGamemodeVotingEnabled();
         boolean mapEnabled = voteManager.isMapVotingEnabled();
+        boolean rolePreferenceEnabled = voteManager.isRolePreferenceVotingEnabled();
         GameModeEnum selectedGamemode = voteManager.getGamemodeVote(player.getUniqueId()).orElse(null);
         String selectedMap = voteManager.getMapVote(player.getUniqueId()).orElse(null);
+        PreferredRole selectedRole = voteManager.getPreferredRoleVote(player.getUniqueId()).orElse(null);
         List<String> allMaps = plugin.getMapManager().getMapsForVoting();
         List<String> displayMaps = getDisplayMaps(gamemodeEnabled, selectedGamemode, allMaps);
         int gamemodeRows = gamemodeEnabled ? getRows(GameModeEnum.values().length) : 0;
         int separatorRows = gamemodeEnabled && mapEnabled ? 1 : 0;
+        int roleRows = rolePreferenceEnabled ? 1 : 0;
         int readinessRows = voteManager.isReadinessEnabled() ? 1 : 0;
         int mapRows = 0;
         if (mapEnabled) {
             int requestedRows = getRows(Math.max(displayMaps.size(), 1));
-            int maxMapRows = Math.max(1, 6 - gamemodeRows - separatorRows - readinessRows);
+            int maxMapRows = Math.max(1, 6 - gamemodeRows - separatorRows - roleRows - readinessRows);
             mapRows = Math.min(requestedRows, maxMapRows);
         }
-        int totalRows = Math.clamp(gamemodeRows + separatorRows + mapRows + readinessRows, 1, 6);
+        int totalRows = Math.clamp(gamemodeRows + separatorRows + mapRows + roleRows + readinessRows, 1, 6);
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("vote_menu_" + player.getUniqueId() + "_" + System.currentTimeMillis())
@@ -76,10 +80,16 @@ public class VoteGUI {
             fillSeparatorRow(inventory, rowOffset);
             rowOffset++;
         }
-        int mapEndRowExclusive = totalRows - readinessRows;
+        int mapEndRowExclusive = totalRows - readinessRows - roleRows;
         if (mapEnabled && rowOffset < mapEndRowExclusive) {
             boolean lockMapVotes = gamemodeEnabled && selectedGamemode == null;
             addMapRows(inventory, rowOffset, mapEndRowExclusive, displayMaps, selectedMap, selectedGamemode, lockMapVotes, eligibleVoters, voteManager);
+        }
+        if (rolePreferenceEnabled) {
+            int roleRow = totalRows - readinessRows - 1;
+            if (roleRow >= 0 && roleRow < totalRows) {
+                fillRolePreferenceRow(inventory, roleRow, selectedRole, eligibleVoters, voteManager);
+            }
         }
         if (readinessRows == 1) {
             fillReadinessRow(inventory, player, totalRows - 1, voteManager);
@@ -191,8 +201,9 @@ public class VoteGUI {
                 voteManager.castMapVote(p.getUniqueId(), clickedMap);
                 boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
                 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.1f);
+                String clickedMapDisplay = mapData != null ? mapData.getDisplayName() : clickedMap;
                 p.sendMessage(Component.text("Voted map: ", NamedTextColor.GREEN)
-                        .append(Component.text(clickedMap, NamedTextColor.GOLD)));
+                        .append(Component.text(clickedMapDisplay, NamedTextColor.GOLD)));
                 if (autoReady) {
                     p.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
                 }
@@ -246,6 +257,67 @@ public class VoteGUI {
         toggleItem.setAllowTakeout(false);
         toggleItem.setAllowInsert(false);
         inventory.setItem(toggleSlot, toggleItem);
+    }
+
+    private void fillRolePreferenceRow(
+            FrameworkInventory inventory,
+            int row,
+            PreferredRole selectedRole,
+            Set<UUID> eligibleVoters,
+            VoteManager voteManager
+    ) {
+        int rowStart = row * 9;
+        for (int i = 0; i < 9; i++) {
+            InventoryItem sepItem = new InventoryItem(createSeparatorItem());
+            sepItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
+            sepItem.setAllowTakeout(false);
+            sepItem.setAllowInsert(false);
+            inventory.setItem(rowStart + i, sepItem);
+        }
+
+        Map<PreferredRole, Long> roleVotes = voteManager.countRolePreferenceVotes(eligibleVoters);
+        int hiderSlot = rowStart + 3;
+        int seekerSlot = rowStart + 5;
+
+        InventoryItem hiderItem = new InventoryItem(createRolePreferenceItem(PreferredRole.HIDER, selectedRole == PreferredRole.HIDER, roleVotes.getOrDefault(PreferredRole.HIDER, 0L)));
+        hiderItem.setClickHandler((p, item, event, slot) -> {
+            voteManager.castRolePreferenceVote(p.getUniqueId(), PreferredRole.HIDER);
+            boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
+            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+            p.sendMessage(Component.text("Preferred role: ", NamedTextColor.GREEN)
+                    .append(Component.text("HIDER", NamedTextColor.GOLD)));
+            if (autoReady) {
+                p.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+            }
+            if (voteManager.tryAutoStartIfEveryoneReady()) {
+                Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+            }
+            open(p);
+            event.setCancelled(true);
+        });
+        hiderItem.setAllowTakeout(false);
+        hiderItem.setAllowInsert(false);
+        inventory.setItem(hiderSlot, hiderItem);
+
+        InventoryItem seekerItem = new InventoryItem(createRolePreferenceItem(PreferredRole.SEEKER, selectedRole == PreferredRole.SEEKER, roleVotes.getOrDefault(PreferredRole.SEEKER, 0L)));
+        seekerItem.setClickHandler((p, item, event, slot) -> {
+            voteManager.castRolePreferenceVote(p.getUniqueId(), PreferredRole.SEEKER);
+            boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
+            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+            p.sendMessage(Component.text("Preferred role: ", NamedTextColor.GREEN)
+                    .append(Component.text("SEEKER", NamedTextColor.GOLD)));
+            if (autoReady) {
+                p.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+            }
+            if (voteManager.tryAutoStartIfEveryoneReady()) {
+                Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+            }
+            open(p);
+            event.setCancelled(true);
+        });
+        seekerItem.setAllowTakeout(false);
+        seekerItem.setAllowInsert(false);
+        inventory.setItem(seekerSlot, seekerItem);
     }
 
 
@@ -311,7 +383,8 @@ public class VoteGUI {
             return item;
         }
         NamedTextColor nameColor = selected ? NamedTextColor.GREEN : NamedTextColor.AQUA;
-        meta.displayName(Component.text(mapName, nameColor, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+        String displayName = mapData != null ? mapData.getDisplayName() : mapName;
+        meta.displayName(Component.text(displayName, nameColor, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         if (lockedNoGamemode) {
             lore.add(Component.text("Select a gamemode first to vote for maps.", NamedTextColor.RED)
@@ -323,6 +396,10 @@ public class VoteGUI {
             if (mapData != null) {
                 if (!mapData.getDescription().isEmpty()) {
                     lore.add(Component.text(mapData.getDescription(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+                }
+                if (mapData.getSize() != null && !mapData.getSize().isEmpty()) {
+                    lore.add(Component.text("Size: " + mapData.getSize(), NamedTextColor.YELLOW)
+                            .decoration(TextDecoration.ITALIC, false));
                 }
                 Integer minPlayers = mapData.getMinPlayers();
                 Integer recommendedPlayers = mapData.getRecommendedPlayers();
@@ -350,6 +427,34 @@ public class VoteGUI {
         if (selected) {
             lore.add(Component.text("Selected", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
         }
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        applySelectionGlow(item, selected);
+        return item;
+    }
+
+    private ItemStack createRolePreferenceItem(PreferredRole role, boolean selected, long votes) {
+        Material icon = role == PreferredRole.HIDER ? Material.LIME_WOOL : Material.RED_WOOL;
+        ItemStack item = new ItemStack(icon);
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return item;
+        }
+
+        NamedTextColor nameColor = role == PreferredRole.HIDER ? NamedTextColor.GREEN : NamedTextColor.RED;
+        meta.displayName(Component.text(role.displayName(), nameColor, TextDecoration.BOLD)
+                .decoration(TextDecoration.ITALIC, false));
+
+        List<Component> lore = new ArrayList<>();
+        if (plugin.getVoteManager().showVoteCounts()) {
+            lore.add(Component.text("Votes: " + votes, NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+        }
+        lore.add(Component.text("Influences the role assignment", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        if (selected) {
+            lore.add(Component.text("Selected", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+        }
+        lore.add(Component.text("Click to vote", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+
         meta.lore(lore);
         item.setItemMeta(meta);
         applySelectionGlow(item, selected);

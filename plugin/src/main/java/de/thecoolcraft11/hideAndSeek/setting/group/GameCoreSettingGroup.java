@@ -53,6 +53,7 @@ public final class GameCoreSettingGroup implements SettingGroup {
                 new BooleanSettingSpec("game.team-distribution.random", true, "Enable random distribution of players into hider/seeker teams", Material.PLAYER_HEAD, true),
                 new BooleanSettingSpec("game.voting.game-mode-enabled", true, "Allow players to vote for gamemodes in lobby", Material.COMMAND_BLOCK, true),
                 new BooleanSettingSpec("game.voting.map-enabled", true, "Allow players to vote for maps in lobby", Material.MAP, true),
+                new BooleanSettingSpec("game.voting.role-preference-enabled", false, "Allow players to vote for a preferred hider/seeker role in lobby", Material.PLAYER_HEAD, true),
                 new BooleanSettingSpec("game.voting.show-counts", true, "Show current vote counts in the voting GUI", Material.PAPER, true),
                 new BooleanSettingSpec("game.lobby.readiness-enabled", true, "Require players to ready up before the round can start", Material.LIME_STAINED_GLASS_PANE, true),
                 new BooleanSettingSpec("game.maps.use-preferred-modes", true, "Only select maps that have the current game mode in their preferred modes list", Material.MAP, true),

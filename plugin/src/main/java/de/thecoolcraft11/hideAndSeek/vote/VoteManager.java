@@ -15,6 +15,7 @@ public class VoteManager {
     private final Object readinessLock = new Object();
     private final Vote<GameModeEnum> gamemodeVote = new Vote<>();
     private final Vote<String> mapVote = new Vote<>();
+    private final Vote<PreferredRole> preferredRoleVote = new Vote<>();
     private final ConcurrentMap<UUID, Boolean> readyStates = new ConcurrentHashMap<>();
 
     public VoteManager(HideAndSeek plugin) {
@@ -33,6 +34,12 @@ public class VoteManager {
         return value instanceof Boolean enabled ? enabled : true;
     }
 
+    public boolean isRolePreferenceVotingEnabled() {
+        var result = plugin.getSettingService().getSetting("game.voting.role-preference-enabled");
+        Object value = result.isSuccess() ? result.getValue() : false;
+        return value instanceof Boolean enabled ? enabled : false;
+    }
+
     public boolean showVoteCounts() {
         var result = plugin.getSettingService().getSetting("game.voting.show-counts");
         Object value = result.isSuccess() ? result.getValue() : true;
@@ -46,7 +53,7 @@ public class VoteManager {
     }
 
     public boolean isVotingEnabled() {
-        return isGamemodeVotingEnabled() || isMapVotingEnabled();
+        return isGamemodeVotingEnabled() || isMapVotingEnabled() || isRolePreferenceVotingEnabled();
     }
 
     public boolean isNotLobbyPhase() {
@@ -59,6 +66,10 @@ public class VoteManager {
 
     public Optional<String> getMapVote(UUID playerId) {
         return mapVote.getVote(playerId);
+    }
+
+    public Optional<PreferredRole> getPreferredRoleVote(UUID playerId) {
+        return preferredRoleVote.getVote(playerId);
     }
 
     public boolean isReady(UUID playerId) {
@@ -109,18 +120,30 @@ public class VoteManager {
         }
     }
 
+    public void castRolePreferenceVote(UUID playerId, PreferredRole role) {
+        if (playerId == null || role == null) {
+            return;
+        }
+        preferredRoleVote.castVote(playerId, role);
+        if (isReadinessEnabled()) {
+            setReady(playerId, false);
+        }
+    }
+
     public void clearVotes(UUID playerId) {
         if (playerId == null) {
             return;
         }
         gamemodeVote.clearVote(playerId);
         mapVote.clearVote(playerId);
+        preferredRoleVote.clearVote(playerId);
         readyStates.remove(playerId);
     }
 
     public void resetVotes() {
         gamemodeVote.reset();
         mapVote.reset();
+        preferredRoleVote.reset();
         readyStates.clear();
     }
 
@@ -170,7 +193,8 @@ public class VoteManager {
         }
         boolean hasGamemodeVote = !isGamemodeVotingEnabled() || gamemodeVote.hasVote(playerId);
         boolean hasMapVote = !isMapVotingEnabled() || mapVote.hasVote(playerId);
-        return hasGamemodeVote && hasMapVote;
+        boolean hasRolePreferenceVote = !isRolePreferenceVotingEnabled() || preferredRoleVote.hasVote(playerId);
+        return hasGamemodeVote && hasMapVote && hasRolePreferenceVote;
     }
 
     public boolean markReadyIfVoteComplete(UUID playerId) {
@@ -204,9 +228,20 @@ public class VoteManager {
         return mapVote.countVotes(eligibleVoters, eligibleMaps);
     }
 
+    public Map<PreferredRole, Long> countRolePreferenceVotes(Set<UUID> eligibleVoters) {
+        return preferredRoleVote.countVotes(eligibleVoters);
+    }
+
     public VotingResult resolveVotingResult(Set<UUID> eligibleVoters) {
         boolean anyVotes = false;
         GameModeEnum winningGamemode = null;
+
+        if (isRolePreferenceVotingEnabled()) {
+            Map<PreferredRole, Long> roleCounts = countRolePreferenceVotes(eligibleVoters);
+            if (!roleCounts.isEmpty()) {
+                anyVotes = true;
+            }
+        }
 
         if (isGamemodeVotingEnabled()) {
             Map<GameModeEnum, Long> modeCounts = countGamemodeVotes(eligibleVoters);
