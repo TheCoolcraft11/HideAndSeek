@@ -88,6 +88,7 @@ public class NmsAdapterImpl implements NmsAdapter {
     private final Map<UUID, Map<Integer, net.minecraft.world.entity.Entity>> clientCameraEntities = new ConcurrentHashMap<>();
     private final Map<UUID, Set<UUID>> assistantIdsBySeeker = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> hadAllowedFlight = new ConcurrentHashMap<>();
+    private Predicate<UUID> cameraSessionChecker = uuid -> false;
 
     @Override
     public String name() {
@@ -997,8 +998,49 @@ public class NmsAdapterImpl implements NmsAdapter {
         }
     }
 
-    private boolean ensurePacketFilterInstalled(ServerPlayer viewerHandle, UUID viewerId) {
+    private static int getEntityId(ServerboundInteractPacket packet) {
+        try {
+            for (Method m : packet.getClass().getMethods()) {
+                if (m.getParameterCount() == 0 && m.getReturnType() == int.class) {
+                    String name = m.getName().toLowerCase();
+                    if (name.contains("entity") || name.contains("id")) {
+                        return (int) m.invoke(packet);
+                    }
+                }
+            }
+
+            for (Field f : packet.getClass().getDeclaredFields()) {
+                if (f.getType() == int.class) {
+                    f.setAccessible(true);
+                    return f.getInt(packet);
+                }
+            }
+
+        } catch (Throwable ignored) {
+        }
+
+        return Integer.MIN_VALUE;
+    }
+
+    @Override
+    public void setCameraSessionChecker(Predicate<UUID> checker) {
+        this.cameraSessionChecker = checker != null ? checker : uuid -> false;
+    }
+
+    private void removePacketFilter(ServerPlayer viewerHandle, UUID viewerId) {
         Channel channel = getChannel(viewerHandle);
+        if (channel == null) {
+            return;
+        }
+
+        String handlerName = FILTER_PREFIX + viewerId;
+        if (channel.pipeline().get(handlerName) != null) {
+            channel.pipeline().remove(handlerName);
+        }
+    }
+
+    private boolean ensurePacketFilterInstalled(ServerPlayer player, UUID viewerId) {
+        Channel channel = getChannel(player);
         if (channel == null || !channel.isActive()) {
             return false;
         }
@@ -1011,6 +1053,36 @@ public class NmsAdapterImpl implements NmsAdapter {
         try {
             if (channel.pipeline().get(handlerName) == null) {
                 channel.pipeline().addBefore("packet_handler", handlerName, new ChannelDuplexHandler() {
+
+                    @Override
+                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+                        try {
+                            if (msg instanceof ServerboundInteractPacket packet) {
+
+                                int targetId = getEntityId(packet);
+
+                                if (targetId == player.getId()) {
+                                    return;
+                                }
+
+                                if (cameraSessionChecker.test(player.getUUID())) {
+                                    return;
+                                }
+
+                                Map<Integer, net.minecraft.world.entity.Entity> map =
+                                        clientCameraEntities.get(player.getUUID());
+
+                                if (map != null && map.containsKey(targetId)) {
+                                    return;
+                                }
+                            }
+                        } catch (Throwable ignored) {
+                        }
+
+                        super.channelRead(ctx, msg);
+                    }
+
                     @Override
                     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                         Set<Integer> blocked = blockedEntityIdsByViewer.get(viewerId);
@@ -1028,15 +1100,4 @@ public class NmsAdapterImpl implements NmsAdapter {
         }
     }
 
-    private void removePacketFilter(ServerPlayer viewerHandle, UUID viewerId) {
-        Channel channel = getChannel(viewerHandle);
-        if (channel == null) {
-            return;
-        }
-
-        String handlerName = FILTER_PREFIX + viewerId;
-        if (channel.pipeline().get(handlerName) != null) {
-            channel.pipeline().remove(handlerName);
-        }
-    }
 }

@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek;
 import de.thecoolcraft11.hideAndSeek.command.*;
 import de.thecoolcraft11.hideAndSeek.gui.*;
 import de.thecoolcraft11.hideAndSeek.items.*;
+import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
 import de.thecoolcraft11.hideAndSeek.items.effects.death.DeathMessageManager;
@@ -83,6 +84,8 @@ public final class HideAndSeek extends MinigameFramework {
         seekingBossBarService = new SeekingBossBarService(this);
 
         nmsAdapter = NmsLoader.load(getLogger(), getConfig().getBoolean("nms.enabled", true));
+
+        nmsAdapter.setCameraSessionChecker(ItemStateManager.activeCameraSessions::containsKey);
 
         mapManager.loadDisallowedBlockStates();
 

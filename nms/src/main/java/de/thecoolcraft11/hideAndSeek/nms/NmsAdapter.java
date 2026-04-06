@@ -73,4 +73,6 @@ public interface NmsAdapter {
 
     void clearVisibilityFilters();
 
+    void setCameraSessionChecker(Predicate<UUID> checker);
+
 }

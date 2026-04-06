@@ -131,4 +131,8 @@ public class NoopNmsAdapter implements NmsAdapter {
     @Override
     public void clearVisibilityFilters() {
     }
+
+    @Override
+    public void setCameraSessionChecker(Predicate<UUID> checker) {
+    }
 }
