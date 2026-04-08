@@ -70,6 +70,10 @@ public final class HideAndSeek extends MinigameFramework {
     @Override
     protected void onGameEnable() {
 
+        if (getResource("maps.yml") != null) {
+            saveResource("maps.yml", false);
+        }
+
         DataController.getInstance().setup();
         ItemSkinSelectionService.initialize(this);
         LoadoutDataService.initialize(this);
@@ -93,6 +97,11 @@ public final class HideAndSeek extends MinigameFramework {
         nmsAdapter.setCameraSessionChecker(ItemStateManager.activeCameraSessions::containsKey);
 
         mapManager.loadDisallowedBlockStates();
+
+        timerPlugin = (Timer) Bukkit.getPluginManager().getPlugin("Timer");
+        if (timerPlugin != null) {
+            api = timerPlugin.getAPI();
+        }
 
         getStateManager().registerPhases(
                 new LobbyPhase(),
@@ -163,10 +172,6 @@ public final class HideAndSeek extends MinigameFramework {
 
         unstuckManager.startTrackingTask();
 
-        timerPlugin = (Timer) Bukkit.getPluginManager().getPlugin("Timer");
-        if (timerPlugin != null) {
-            api = timerPlugin.getAPI();
-        }
 
         updateWorldIconsForAllMaps();
 
