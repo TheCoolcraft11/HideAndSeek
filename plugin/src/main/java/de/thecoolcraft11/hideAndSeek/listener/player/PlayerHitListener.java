@@ -200,7 +200,6 @@ public class PlayerHitListener implements Listener {
                 return;
             }
 
-            event.setCancelled(false);
             return;
         }
 
