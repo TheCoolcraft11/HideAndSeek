@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -559,6 +560,12 @@ public class NmsAdapterImpl implements NmsAdapter {
                 creeper.setNoAi(true);
                 creeper.setSilent(true);
                 creeper.setInvisible(true);
+            }
+
+            if (fake instanceof EnderMan enderMan) {
+                enderMan.setNoAi(true);
+                enderMan.setSilent(true);
+                enderMan.setInvisible(true);
             }
 
             if (fake instanceof ArmorStand stand) {

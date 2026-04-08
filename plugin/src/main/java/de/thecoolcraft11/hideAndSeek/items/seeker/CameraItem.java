@@ -261,7 +261,7 @@ public class CameraItem implements GameItem {
         float baseYaw = getBaseYaw(camera);
 
         ItemStateManager.CameraSessionState state = new ItemStateManager.CameraSessionState(idx, baseYaw);
-        state.nightVision(false);
+        state.visionMode(CameraVisionMode.NORMAL);
         state.skinVariant(resolveActiveCameraSkin(seeker));
         state.activatedAtMs(System.currentTimeMillis());
         activeCameraSessions.put(seeker.getUniqueId(), state);
@@ -292,7 +292,11 @@ public class CameraItem implements GameItem {
         }
 
         Location viewLocation = getViewLocation(camera);
-        EntityType entityType = state.nightVision() ? EntityType.CREEPER : EntityType.ARMOR_STAND;
+        EntityType entityType = switch (state.visionMode()) {
+            case NIGHT_VISION -> EntityType.CREEPER;
+            case TERMINAL_VISION -> EntityType.ENDERMAN;
+            default -> EntityType.ARMOR_STAND;
+        };
 
         int entityId = plugin.getNmsAdapter().spawnClientCameraEntity(
                 seeker,
@@ -312,7 +316,7 @@ public class CameraItem implements GameItem {
         plugin.getNmsAdapter().setCameraEntity(seeker, entityId);
         updateTorchIndicators(seeker.getUniqueId());
 
-        if (state.nightVision()) {
+        if (state.visionMode() == CameraVisionMode.TERMINAL_VISION || state.visionMode() == CameraVisionMode.NIGHT_VISION) {
             setViewerGlow(seeker, plugin, true);
         } else {
             playCameraSkinCosmetics(seeker, state.skinVariant());
@@ -341,13 +345,11 @@ public class CameraItem implements GameItem {
             case SKIN_OWL_EYE -> {
                 seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().clone().add(0, 1.2, 0), 10, 0.35, 0.45, 0.35, 0.01);
                 seeker.playSound(seeker.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.3f);
-                return;
             }
             case SKIN_ORBITAL_SPY -> {
                 seeker.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, seeker.getLocation().clone().add(0, 1.2, 0), 12, 0.45, 0.55, 0.45, 0.02);
                 seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().clone().add(0, 1.2, 0), 10, 0.35, 0.45, 0.35, 0.01);
                 seeker.sendActionBar(Component.text("Orbital scan active", NamedTextColor.GOLD));
-                return;
             }
             case SKIN_SPY_LENS -> {
                 seeker.getWorld().spawnParticle(Particle.WITCH, seeker.getLocation().clone().add(0, 1.1, 0), 10, 0.3, 0.35, 0.3, 0.01);
@@ -380,7 +382,7 @@ public class CameraItem implements GameItem {
         center.getWorld().spawnParticle(Particle.SMOKE, center.clone().add(0, 0.2, 0), 8, 0.2, 0.15, 0.2, 0.01);
     }
 
-    public static void playNightVisionToggleSound(Player seeker, String skinVariant, boolean enabled) {
+    public static void playVisionModeSwitchSound(Player seeker, String skinVariant, CameraVisionMode visionMode) {
         if (seeker == null) {
             return;
         }
@@ -390,14 +392,38 @@ public class CameraItem implements GameItem {
         float pitch;
 
         if (SKIN_OWL_EYE.equals(skinVariant)) {
-            sound = enabled ? Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM : Sound.BLOCK_AMETHYST_BLOCK_CHIME;
-            pitch = enabled ? 1.45f : 0.85f;
+            sound = switch (visionMode) {
+                case NIGHT_VISION -> Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM;
+                case TERMINAL_VISION -> Sound.BLOCK_RESPAWN_ANCHOR_CHARGE;
+                default -> Sound.BLOCK_AMETHYST_BLOCK_CHIME;
+            };
+            pitch = switch (visionMode) {
+                case NIGHT_VISION -> 1.45f;
+                case TERMINAL_VISION -> 1.1f;
+                default -> 0.85f;
+            };
         } else if (SKIN_ORBITAL_SPY.equals(skinVariant)) {
-            sound = enabled ? Sound.BLOCK_BEACON_POWER_SELECT : Sound.BLOCK_BEACON_DEACTIVATE;
-            pitch = enabled ? 1.2f : 0.9f;
+            sound = switch (visionMode) {
+                case NIGHT_VISION -> Sound.BLOCK_BEACON_POWER_SELECT;
+                case TERMINAL_VISION -> Sound.BLOCK_BEACON_ACTIVATE;
+                default -> Sound.BLOCK_BEACON_DEACTIVATE;
+            };
+            pitch = switch (visionMode) {
+                case NIGHT_VISION -> 1.2f;
+                case TERMINAL_VISION -> 0.7f;
+                default -> 0.9f;
+            };
         } else {
-            sound = enabled ? Sound.BLOCK_NOTE_BLOCK_BIT : Sound.BLOCK_NOTE_BLOCK_BASS;
-            pitch = enabled ? 1.4f : 0.7f;
+            sound = switch (visionMode) {
+                case NIGHT_VISION -> Sound.BLOCK_NOTE_BLOCK_BIT;
+                case TERMINAL_VISION -> Sound.ENTITY_ENDERMAN_STARE;
+                default -> Sound.BLOCK_NOTE_BLOCK_BASS;
+            };
+            pitch = switch (visionMode) {
+                case NIGHT_VISION -> 1.4f;
+                case TERMINAL_VISION -> 0.6f;
+                default -> 0.7f;
+            };
         }
 
         seeker.playSound(seeker.getLocation(), sound, volume, pitch);
@@ -600,7 +626,8 @@ public class CameraItem implements GameItem {
             List<Component> lore = new LinkedList<>(List.of(
                     Component.text("Shift + right click block to place", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                     Component.text("Right click to watch your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Cycle trough your cameras with LMB and toggle Night Vision with RMB", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                    Component.text("Cycle through cameras with LMB and vision modes with RMB", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                    Component.text("Modes: Normal, Night Vision, Terminal Vision (glow)", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
                     Component.text("Sneak to stop watching your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
             ));
 

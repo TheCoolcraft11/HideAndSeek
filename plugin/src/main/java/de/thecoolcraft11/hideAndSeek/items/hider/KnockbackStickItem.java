@@ -68,6 +68,7 @@ public class KnockbackStickItem implements GameItem {
                     .allowOffHand(false)
                     .allowArmor(false)
                     .cancelDefaultAction(true)
+                    .cancelAttackOnCooldown(true)
                     .build());
         }
     }

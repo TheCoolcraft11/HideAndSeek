@@ -80,9 +80,20 @@ public record ItemStateManager(HideAndSeek plugin) {
                                ItemDisplay headDisplay) {
     }
 
+    public enum CameraVisionMode {
+        NORMAL,
+        NIGHT_VISION,
+        TERMINAL_VISION;
+
+        public CameraVisionMode next() {
+            CameraVisionMode[] values = values();
+            return values[(this.ordinal() + 1) % values.length];
+        }
+    }
+
     public static final class CameraSessionState {
         private int currentIndex;
-        private boolean nightVision;
+        private CameraVisionMode visionMode = CameraVisionMode.NORMAL;
         private int fakeEntityId = Integer.MIN_VALUE;
         private float rotationYaw;
         private long activatedAtMs = System.currentTimeMillis();
@@ -101,12 +112,12 @@ public record ItemStateManager(HideAndSeek plugin) {
             this.currentIndex = currentIndex;
         }
 
-        public boolean nightVision() {
-            return nightVision;
+        public CameraVisionMode visionMode() {
+            return visionMode;
         }
 
-        public void nightVision(boolean nightVision) {
-            this.nightVision = nightVision;
+        public void visionMode(CameraVisionMode visionMode) {
+            this.visionMode = visionMode == null ? CameraVisionMode.NORMAL : visionMode;
         }
 
         public int fakeEntityId() {

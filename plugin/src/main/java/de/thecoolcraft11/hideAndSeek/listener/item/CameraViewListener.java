@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.listener.item;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.CameraVisionMode;
 import de.thecoolcraft11.hideAndSeek.items.seeker.CameraItem;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import net.kyori.adventure.text.Component;
@@ -89,7 +90,7 @@ public class CameraViewListener implements Listener {
         }
 
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-            toggleNightVisionMode(player);
+            cycleVisionMode(player);
             event.setCancelled(true);
         }
     }
@@ -180,7 +181,7 @@ public class CameraViewListener implements Listener {
 
         for (Map.Entry<UUID, de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.CameraSessionState> entry : activeCameraSessions.entrySet()) {
             var session = entry.getValue();
-            if (!session.nightVision()) {
+            if (session.visionMode() != CameraVisionMode.TERMINAL_VISION && session.visionMode() != CameraVisionMode.NIGHT_VISION) {
                 continue;
             }
 
@@ -262,25 +263,29 @@ public class CameraViewListener implements Listener {
         player.sendActionBar(Component.text("Camera " + (state.currentIndex() + 1) + "/" + size, NamedTextColor.AQUA));
     }
 
-    private void toggleNightVisionMode(Player player) {
+    private void cycleVisionMode(Player player) {
         var state = activeCameraSessions.get(player.getUniqueId());
         if (state == null) {
             return;
         }
 
-        state.nightVision(!state.nightVision());
+        state.visionMode(state.visionMode().next());
 
-        if (!state.nightVision()) {
+        if (state.visionMode() != CameraVisionMode.TERMINAL_VISION && state.visionMode() != CameraVisionMode.NIGHT_VISION) {
             CameraItem.setViewerGlow(player, plugin, false);
         }
 
         CameraItem.attachToCurrentCamera(player, plugin);
-        CameraItem.playNightVisionToggleSound(player, state.skinVariant(), state.nightVision());
+        CameraItem.playVisionModeSwitchSound(player, state.skinVariant(), state.visionMode());
 
-        if (state.nightVision()) {
-            player.sendActionBar(Component.text("Night vision camera: ON", NamedTextColor.GREEN));
-        } else {
-            player.sendActionBar(Component.text("Night vision camera: OFF", NamedTextColor.RED));
-        }
+        String modeLabel = switch (state.visionMode()) {
+            case NIGHT_VISION -> "Night Vision";
+            case TERMINAL_VISION -> "Terminal Vision";
+            default -> "Normal";
+        };
+        NamedTextColor color = state.visionMode() == CameraVisionMode.TERMINAL_VISION
+                ? NamedTextColor.LIGHT_PURPLE
+                : state.visionMode() == CameraVisionMode.NIGHT_VISION ? NamedTextColor.GREEN : NamedTextColor.AQUA;
+        player.sendActionBar(Component.text("Camera mode: " + modeLabel, color));
     }
 }

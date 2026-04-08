@@ -487,7 +487,7 @@ public class ProximitySensorItem implements GameItem {
 
     private static BlockData getSensorBlockData(Player player) {
         if (ItemSkinSelectionService.isSelected(player, ProximitySensorItem.ID, "skin_alarm_bell")) {
-            return Material.BELL.createBlockData();
+            return Material.GOLD_BLOCK.createBlockData();
         } else if (ItemSkinSelectionService.isSelected(player, ProximitySensorItem.ID, "skin_cctv_camera")) {
 
             return Material.OBSERVER.createBlockData();
