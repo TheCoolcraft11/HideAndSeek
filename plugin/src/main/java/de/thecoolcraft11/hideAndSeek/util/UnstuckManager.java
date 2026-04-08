@@ -637,14 +637,7 @@ public final class UnstuckManager {
         }
     }
 
-    private static final class ScoredLocation {
-        private final Location location;
-        private final double score;
-
-        private ScoredLocation(Location location, double score) {
-            this.location = location;
-            this.score = score;
-        }
+    private record ScoredLocation(Location location, double score) {
     }
 }
 

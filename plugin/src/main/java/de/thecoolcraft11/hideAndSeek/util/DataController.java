@@ -10,7 +10,7 @@ public class DataController {
 
     private static DataController instance;
     private final List<UUID> hiders;
-    private final List<UUID> allHiders;
+    private final Set<UUID> allHiders;
     private final List<UUID> seekers;
     private final Map<UUID, Block> hiddenBlocks;
     private final Map<UUID, org.bukkit.Material> chosenBlocks;
@@ -34,7 +34,7 @@ public class DataController {
 
     public DataController() {
         this.hiders = new ArrayList<>();
-        this.allHiders = new ArrayList<>();
+        this.allHiders = new HashSet<>();
         this.seekers = new ArrayList<>();
         this.hiddenBlocks = new HashMap<>();
         this.chosenBlocks = new HashMap<>();
@@ -84,8 +84,8 @@ public class DataController {
         return hiders;
     }
 
-    public List<UUID> getAllHiders() {
-        return Collections.unmodifiableList(allHiders);
+    public Set<UUID> getAllHiders() {
+        return Collections.unmodifiableSet(allHiders);
     }
 
     public void removeHiddenBlock(UUID uuid) {
