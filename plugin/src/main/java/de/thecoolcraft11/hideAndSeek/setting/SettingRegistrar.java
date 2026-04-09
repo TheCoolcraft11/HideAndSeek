@@ -928,6 +928,8 @@ public class SettingRegistrar {
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.ghost-essence").icon(Material.GHAST_TEAR).build());
 
+        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.remote-gateway").icon(Material.ENDER_EYE).build());
+
         plugin.getSectionRegistry().register(SectionDefinition.builder("timer").icon(Material.CLOCK).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("timer.animation").icon(Material.AMETHYST_SHARD).build());
@@ -961,6 +963,10 @@ public class SettingRegistrar {
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.sword-of-seeking").icon(Material.IRON_SWORD).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.seeker-sword-throw").icon(Material.DIAMOND_SWORD).build());
+
+        plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.phantom-viewer").icon(Material.FILLED_MAP).build());
+
+        plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.crowbar").icon(Material.IRON_PICKAXE).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("loadout").icon(Material.ARMOR_STAND).build());
 

@@ -522,6 +522,23 @@ public final class SeekerItemsSettingGroup implements SettingGroup {
                         .range(1, 60)
                         .description("How long the sword remains stuck in a block")
                         .customIcon(Material.CLOCK)
+                        .build()),
+                (plugin, resolver, iconHelper) -> plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.crowbar.enabled", SettingType.BOOLEAN, Boolean.class)
+                        .defaultValue(getConfigValue(plugin, "seeker-items.crowbar.enabled", true))
+                        .description("Enable or disable the crowbar item")
+                        .customIcon(Material.IRON_PICKAXE)
+                        .build()),
+                (plugin, resolver, iconHelper) -> plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.crowbar.cooldown", SettingType.INTEGER, Integer.class)
+                        .defaultValue(getConfigValue(plugin, "seeker-items.crowbar.cooldown", 30))
+                        .range(0, 60)
+                        .description("Cooldown for crowbar block breaking in seconds")
+                        .customIcon(Material.CLOCK)
+                        .build()),
+                (plugin, resolver, iconHelper) -> plugin.getSettingRegistry().register(SettingDefinition.builder("seeker-items.crowbar.breaking-ticks", SettingType.INTEGER, Integer.class)
+                        .defaultValue(getConfigValue(plugin, "seeker-items.crowbar.breaking-ticks", 100))
+                        .range(20, 200)
+                        .description("Ticks it takes for the crowbar to break a block")
+                        .customIcon(Material.CLOCK)
                         .build())
         );
     }

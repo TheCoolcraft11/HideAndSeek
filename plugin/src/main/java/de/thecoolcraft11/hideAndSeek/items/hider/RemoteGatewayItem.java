@@ -239,8 +239,8 @@ public class RemoteGatewayItem implements GameItem {
             }, releaseTicks);
 
             playTeleportEffects(sourceCenter, target.center(), skinVariant, plugin, chargeProgress);
-            sourceCenter.getWorld().playSound(sourceCenter, Sound.BLOCK_PORTAL_TRAVEL, 0.2f, 1.2f);
-            target.center().getWorld().playSound(target.center(), Sound.BLOCK_PORTAL_TRAVEL, 0.2f, 1.2f);
+            sourceCenter.getWorld().playSound(sourceCenter, Sound.BLOCK_PORTAL_TRAVEL, 0.1f, 1.2f);
+            target.center().getWorld().playSound(target.center(), Sound.BLOCK_PORTAL_TRAVEL, 0.1f, 1.2f);
             break;
         }
     }

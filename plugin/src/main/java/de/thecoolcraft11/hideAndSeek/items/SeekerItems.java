@@ -40,6 +40,7 @@ public final class SeekerItems {
         add(new SeekersSwordItem());
         add(new SeekersMaskItem());
         add(new BlockStatsItem());
+        add(new CrowbarItem());
     }
 
     private static void add(GameItem item) {
@@ -94,12 +95,18 @@ public final class SeekerItems {
 
 
         var gameModeResult = plugin.getSettingService().getSetting("game.mode");
-
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
-
+        var blockSmallResult = plugin.getSettingService().getSetting("game.block-form.scale-to-block");
+        Object blockSmallObj = blockSmallResult.isSuccess() ? blockSmallResult.getValue() : null;
+        var blockStatsEnabledResult = plugin.getSettingService().getSetting("blockstats.enabled");
+        Object blockStatsEnabledObj = blockStatsEnabledResult.isSuccess() ? blockStatsEnabledResult.getValue() : null;
+        var crowBarEnabledResult = plugin.getSettingService().getSetting("seeker-items.crowbar.enabled");
+        Object crowbarEnabledObj = crowBarEnabledResult.isSuccess() ? crowBarEnabledResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
-
-        boolean blockStatsEnabled = plugin.getSettingRegistry().get("blockstats.enabled", true);
+        boolean isSmallMode = gameModeObj != null && gameModeObj.toString().equals("SMALL");
+        boolean isBlockSmall = blockSmallObj != null && blockSmallObj.toString().equals("true");
+        boolean blockStatsEnabled = blockStatsEnabledObj != null && blockStatsEnabledObj.toString().equals("true");
+        boolean crowBarEnabled = crowbarEnabledObj != null && crowbarEnabledObj.toString().equals("true");
 
 
         Set<LoadoutItemType> itemsToGive = loadout.getSeekerItems();
@@ -202,6 +209,21 @@ public final class SeekerItems {
 
         }
 
+        if (isSmallMode || (isBlockMode && isBlockSmall)) {
+            if (!crowBarEnabled) return;
+            ItemStack slot7Item = player.getInventory().getItem(7);
+            if (slot7Item == null || slot7Item.getType().isAir()) {
+                ItemStack blockStats = plugin.getCustomItemManager().getIdentifiedItemStack(CrowbarItem.ID, player);
+                if (blockStats != null) {
+                    CustomModelDataUtil.setCustomModelData(blockStats, CrowbarItem.ID);
+                    player.getInventory().setItem(7, blockStats);
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info("Gave Crowbar to " + player.getName() + " in slot 7");
+                    }
+                }
+            }
+        }
+
 
         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info("Finished giving loadout items to " + player.getName() + " (" + (slot - 1) + " items placed)");
@@ -253,13 +275,23 @@ public final class SeekerItems {
 
         ItemSkinSelectionService.applySelectedVariants(player, plugin);
 
-
         var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
+        var blockSmallResult = plugin.getSettingService().getSetting("game.block-form.scale-to-block");
+        Object blockSmallObj = blockSmallResult.isSuccess() ? blockSmallResult.getValue() : null;
+        var blockStatsEnabledResult = plugin.getSettingService().getSetting("blockstats.enabled");
+        Object blockStatsEnabledObj = blockStatsEnabledResult.isSuccess() ? blockStatsEnabledResult.getValue() : null;
+        var crowBarEnabledResult = plugin.getSettingService().getSetting("seeker-items.crowbar.enabled");
+        Object crowbarEnabledObj = crowBarEnabledResult.isSuccess() ? crowBarEnabledResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
+        boolean isSmallMode = gameModeObj != null && gameModeObj.toString().equals("SMALL");
+        boolean isBlockSmall = blockSmallObj != null && blockSmallObj.toString().equals("true");
+        boolean blockStatsEnabled = blockStatsEnabledObj != null && blockStatsEnabledObj.toString().equals("true");
+        boolean crowBarEnabled = crowbarEnabledObj != null && crowbarEnabledObj.toString().equals("true");
+
+
 
         if (isBlockMode) {
-            boolean blockStatsEnabled = plugin.getSettingRegistry().get("blockstats.enabled", true);
             if (blockStatsEnabled) {
 
                 ItemStack slot8Item = player.getInventory().getItem(8);
@@ -275,6 +307,22 @@ public final class SeekerItems {
                 }
             }
         }
+
+        if (isSmallMode || (isBlockMode && isBlockSmall)) {
+            if (!crowBarEnabled) return;
+            ItemStack slot7Item = player.getInventory().getItem(7);
+            if (slot7Item == null || slot7Item.getType().isAir()) {
+                ItemStack blockStats = plugin.getCustomItemManager().getIdentifiedItemStack(CrowbarItem.ID, player);
+                if (blockStats != null) {
+                    CustomModelDataUtil.setCustomModelData(blockStats, CrowbarItem.ID);
+                    player.getInventory().setItem(7, blockStats);
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info("Gave Crowbar to " + player.getName() + " in slot 7");
+                    }
+                }
+            }
+        }
+
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 4, false, false, false));
     }
