@@ -6,6 +6,7 @@ import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 
 public class SettingChangeListener {
     private final HideAndSeek plugin;
+    static int registered = 0;
 
     public SettingChangeListener(HideAndSeek plugin) {
         this.plugin = plugin;
@@ -14,11 +15,15 @@ public class SettingChangeListener {
     public static void register(HideAndSeek plugin) {
         SettingChangeListener listener = new SettingChangeListener(plugin);
 
-        SeekerItems.getAllConfigKeys().forEach(key ->
-                plugin.getSettingRegistry().onSettingChange(key, listener::onSettingChange));
+        SeekerItems.getAllConfigKeys().forEach(key -> {
+            plugin.getSettingRegistry().onSettingChange(key, listener::onSettingChange);
+            registered++;
+        });
 
-        HiderItems.getAllConfigKeys().forEach(key ->
-                plugin.getSettingRegistry().onSettingChange(key, listener::onSettingChange));
+        HiderItems.getAllConfigKeys().forEach(key -> {
+            plugin.getSettingRegistry().onSettingChange(key, listener::onSettingChange);
+            registered++;
+        });
 
 
         plugin.getSettingRegistry().onSettingChange("game.seeking-bossbar.enabled", listener::onSettingChange);
@@ -36,6 +41,8 @@ public class SettingChangeListener {
         plugin.getSettingRegistry().onSettingChange("anticheat.seeking.line-of-sight.enabled", listener::onSettingChange);
         plugin.getSettingRegistry().onSettingChange("anticheat.seeking.line-of-sight.range", listener::onSettingChange);
         plugin.getSettingRegistry().onSettingChange("anticheat.seeking.line-of-sight.fov", listener::onSettingChange);
+
+        plugin.getLogger().info("Registered " + registered + " setting change listeners");
     }
 
     public void onSettingChange(String key, Object oldValue, Object newValue) {
@@ -49,5 +56,6 @@ public class SettingChangeListener {
         if (key.startsWith("anticheat.")) {
             plugin.getAntiCheatVisibilityListener().refreshSoon();
         }
+        registered++;
     }
 }

@@ -44,6 +44,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
+
 public final class HideAndSeek extends MinigameFramework {
     private MapManager mapManager;
     private BlockSelectorGUI blockSelectorGUI;
@@ -71,7 +73,7 @@ public final class HideAndSeek extends MinigameFramework {
     @Override
     protected void onGameEnable() {
 
-        if (getResource("maps.yml") != null) {
+        if (getResource("maps.yml") != null && !(new File(getDataFolder(), "maps.yml").exists())) {
             saveResource("maps.yml", false);
         }
 

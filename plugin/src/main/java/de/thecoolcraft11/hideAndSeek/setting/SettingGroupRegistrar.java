@@ -14,11 +14,15 @@ public final class SettingGroupRegistrar {
         SettingValueResolver resolver = new SettingValueResolver();
         SettingIconHelper iconHelper = new SettingIconHelper();
 
+        int registered = 0;
+
         for (SettingGroup group : groups) {
             for (var spec : group.settings()) {
                 spec.register(plugin, resolver, iconHelper);
+                registered++;
             }
         }
+        plugin.getLogger().info("Registered " + registered + " settings");
     }
 }
 

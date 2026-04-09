@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public final class SeekerItems {
@@ -48,13 +49,20 @@ public final class SeekerItems {
     }
 
     public static void registerItems(HideAndSeek plugin) {
+        AtomicInteger registered = new AtomicInteger(0);
+        AtomicInteger failed = new AtomicInteger(0);
         ITEM_REGISTRY.values().forEach(item -> {
             if (item.getId() != null && !item.getId().isEmpty() && item.createItem(plugin) != null) {
                 item.register(plugin);
+                registered.incrementAndGet();
             } else {
                 plugin.getLogger().warning("Failed to register item: " + item.getClass().getSimpleName() + " - Invalid ID or null ItemStack");
+                failed.incrementAndGet();
             }
         });
+        plugin.getLogger().info("Registered " + registered.get() + " seeker items");
+        if (failed.get() > 0)
+            plugin.getLogger().warning("Failed to register " + failed.get() + " seeker items. Check previous warnings for details.");
     }
 
 
