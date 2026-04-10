@@ -71,15 +71,15 @@ public class DebugCommand implements MinigameSubcommand {
     }
 
     @Override
-    public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
+    public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!sender.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (args.length == 0) {
             sendHelp(sender);
-            return true;
+            return;
         }
 
         String subcommandName = args[0].toLowerCase();
@@ -88,11 +88,11 @@ public class DebugCommand implements MinigameSubcommand {
         if (subcommand == null) {
             sender.sendMessage(Component.text("Unknown debug subcommand: " + subcommandName, NamedTextColor.RED));
             sendHelp(sender);
-            return true;
+            return;
         }
 
         String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
-        return subcommand.handle(sender, subArgs);
+        subcommand.handle(sender, subArgs);
     }
 
     private void sendHelp(CommandSender sender) {

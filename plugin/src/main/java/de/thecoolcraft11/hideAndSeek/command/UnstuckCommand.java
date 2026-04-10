@@ -50,64 +50,63 @@ public class UnstuckCommand implements MinigameSubcommand {
     }
 
     @Override
-    public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
+    public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         boolean isHider = dataController.getHiders().contains(player.getUniqueId());
         boolean isSeeker = dataController.getSeekers().contains(player.getUniqueId());
         if (!isHider && !isSeeker) {
             player.sendMessage(Component.text("Only hiders and seekers can use /mg unstuck.", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (!"seeking".equals(plugin.getStateManager().getCurrentPhaseId())) {
             player.sendMessage(Component.text("You can only use this during the seeking phase.", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (pendingTeleports.containsKey(player.getUniqueId())) {
             player.sendMessage(Component.text("Unstuck is already charging. Wait, move, or sneak to cancel.", NamedTextColor.YELLOW));
-            return true;
+            return;
         }
 
         long cooldownMs = unstuckManager.getRemainingCooldownMs(player.getUniqueId());
         if (cooldownMs > 0L) {
             long secondsLeft = (long) Math.ceil(cooldownMs / 1000.0);
             player.sendMessage(Component.text("Unstuck is on cooldown for " + secondsLeft + "s.", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         boolean worldSpawnMode = args.length > 0 && isWorldSpawnArgument(args[0]);
         if (args.length > 0 && !worldSpawnMode) {
             player.sendMessage(Component.text("Usage: /mg unstuck [spawn]", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (!isSeeker) {
             double seekerRange = plugin.getSettingRegistry().get("game.unstuck.seeker-range", 15.0);
             if (unstuckManager.hasNearbyOpponents(player, seekerRange)) {
                 player.sendMessage(Component.text("A seeker is too close. Try again when it is safe.", NamedTextColor.RED));
-                return true;
+                return;
             }
         }
 
         if (worldSpawnMode) {
             startWorldSpawnUnstuck(player);
-            return true;
+            return;
         }
 
         UnstuckManager.UnstuckResult result = unstuckManager.tryFindSafePosition(player, dataController.getRoundSpawnPoint());
         if (!result.success() || result.location() == null || result.method() == null) {
             String message = result.message() == null ? "No safe unstuck position found." : result.message();
             player.sendMessage(Component.text(message, NamedTextColor.RED));
-            return true;
+            return;
         }
 
         startDelayedTeleport(player, result.location(), result.cooldownSeconds(), result.method(), false, result.message());
-        return true;
     }
 
     private void startWorldSpawnUnstuck(Player player) {

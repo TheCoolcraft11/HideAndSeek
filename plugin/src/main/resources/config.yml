@@ -54,6 +54,8 @@ persistence:
   save-skin-data: true
   save-loadout-data: true
 
+inject-datapack: true
+
 settings:
 # Leave this section empty to use plugins defaults. To override a specific
 # default value for a setting, add the key under this node and set the desired value. For example:

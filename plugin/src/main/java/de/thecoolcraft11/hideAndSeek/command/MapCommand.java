@@ -37,21 +37,21 @@ public class MapCommand implements MinigameSubcommand {
     }
 
     @Override
-    public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
+    public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (!sender.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
 
         if (args.length == 0) {
             plugin.getMapGUI().open(player);
-            return true;
+            return;
         }
 
 
@@ -62,14 +62,14 @@ public class MapCommand implements MinigameSubcommand {
         if (!availableMaps.contains(mapName)) {
             player.sendMessage(Component.text("Map '" + mapName + "' not found!", NamedTextColor.RED));
             player.sendMessage(Component.text("Available maps: " + String.join(", ", availableMaps), NamedTextColor.GRAY));
-            return true;
+            return;
         }
 
 
         World sourceWorld = Bukkit.getWorld(mapName);
         if (sourceWorld == null) {
             player.sendMessage(Component.text("Map world '" + mapName + "' is not loaded!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
 
@@ -78,7 +78,6 @@ public class MapCommand implements MinigameSubcommand {
                 .append(Component.text(mapName, NamedTextColor.GOLD)));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
-        return true;
     }
 
     @Override

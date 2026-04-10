@@ -41,37 +41,37 @@ public class ReadyCommand implements MinigameSubcommand {
     }
 
     @Override
-    public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
+    public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         VoteManager voteManager = plugin.getVoteManager();
         if (!voteManager.isReadinessEnabled()) {
             sender.sendMessage(Component.text("Readiness is disabled.", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (args.length > 0 && args[0].equalsIgnoreCase("gui")) {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
-                return true;
+                return;
             }
             if (!sender.hasPermission(GUI_PERMISSION)) {
                 sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-                return true;
+                return;
             }
             plugin.getReadyGUI().open(player);
-            return true;
+            return;
         }
 
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
-            return true;
+            return;
         }
         if (!sender.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-            return true;
+            return;
         }
         if (voteManager.isNotLobbyPhase()) {
             player.sendMessage(Component.text("Ready status can only be changed in the lobby.", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         boolean ready = voteManager.toggleReady(player.getUniqueId());
@@ -82,7 +82,6 @@ public class ReadyCommand implements MinigameSubcommand {
         if (voteManager.tryAutoStartIfEveryoneReady()) {
             Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
         }
-        return true;
     }
 
     @Override

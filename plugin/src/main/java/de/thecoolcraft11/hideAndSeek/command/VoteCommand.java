@@ -35,19 +35,18 @@ public class VoteCommand implements MinigameSubcommand {
     }
 
     @Override
-    public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
+    public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (!sender.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         plugin.getVoteGUI().open(player);
-        return true;
     }
 }
 

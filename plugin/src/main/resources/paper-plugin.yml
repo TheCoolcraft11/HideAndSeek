@@ -1,21 +1,20 @@
 name: HideAndSeek
 version: '1.0-SNAPSHOT'
 main: de.thecoolcraft11.hideAndSeek.HideAndSeek
+bootstrapper: de.thecoolcraft11.hideAndSeek.HideAndSeekBootstrapper
 api-version: '1.21'
 description: A minigame plugin
-author: TheCoolcraft11
+authors:
+  - TheCoolcraft11
 
-depend:
-  - MinigameFramework
-soft-depend:
-  - Timer
-
-commands:
-  minigame:
-    description: Game configuration and management
-    usage: /minigame [subcommand] [args...]
-    aliases:
-      - mg
+dependencies:
+  server:
+    MinigameFramework:
+      required: true
+      load: BEFORE
+    Timer:
+      required: false
+      load: BEFORE
 
 permissions:
   hideandseek.command.loadout:

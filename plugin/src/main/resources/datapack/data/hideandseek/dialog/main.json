@@ -1,0 +1,169 @@
+{
+  "type": "minecraft:multi_action",
+  "title": {
+    "atlas": "minecraft:items",
+    "sprite": "minecraft:item/spyglass",
+    "extra": [
+      " ",
+      {
+        "text": "HideAndSeek Game Menu",
+        "color": "blue",
+        "bold": true,
+        "underlined": true
+      }
+    ]
+  },
+  "body": [],
+  "inputs": [],
+  "can_close_with_escape": true,
+  "after_action": "none",
+  "pause": false,
+  "exit_action": {
+    "label": "Exit",
+    "tooltip": "Click to close this dialog"
+  },
+  "actions": [
+    {
+      "label": {
+        "atlas": "minecraft:items",
+        "sprite": "minecraft:item/barrier",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Unstuck",
+            "color": "dark_red",
+            "bold": true
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Unstuck yourself",
+        "type": "text",
+        "extra": [
+          "\n",
+          {
+            "text": "Teleports you either to your last known safe position, a safe position near you or back to the world spawn",
+            "color": "red",
+            "bold": false,
+            "italic": true
+          }
+        ],
+        "color": "dark_red"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg unstuck"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:items",
+        "sprite": "minecraft:item/knowledge_book",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Wiki",
+            "color": "aqua"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Click to open the wiki",
+        "type": "text",
+        "color": "aqua"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg wiki"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:items",
+        "sprite": "minecraft:item/emerald",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Vote",
+            "color": "green"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Click to open the vote menu",
+        "type": "text",
+        "color": "green"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg vote"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:items",
+        "sprite": "minecraft:item/golden_sword",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Loadout",
+            "color": "gold"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Click to open the loadout menu",
+        "type": "text",
+        "color": "gold"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg loadout"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:blocks",
+        "sprite": "minecraft:block/yellow_wool",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Skins",
+            "color": "yellow"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Click to open the Skin menu",
+        "type": "text",
+        "color": "yellow"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg skin"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:items",
+        "sprite": "minecraft:item/book",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Information",
+            "color": "gray"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Open the Plugins Page in your browser",
+        "type": "text",
+        "color": "gray"
+      },
+      "action": {
+        "type": "minecraft:open_url",
+        "url": "https://github.com/TheCoolcraft11/HideAndSeek"
+      }
+    }
+  ]
+}

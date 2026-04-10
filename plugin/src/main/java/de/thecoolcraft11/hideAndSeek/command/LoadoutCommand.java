@@ -36,27 +36,26 @@ public class LoadoutCommand implements MinigameSubcommand {
     }
 
     @Override
-    public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
+    public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (!sender.hasPermission(PERMISSION)) {
             sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-            return true;
+            return;
         }
 
         if (args.length > 0 && "admin".equalsIgnoreCase(args[0])) {
             if (!sender.hasPermission(ADMIN_PERMISSION)) {
                 sender.sendMessage(Component.text("You don't have permission to use admin loadout management!", NamedTextColor.RED));
-                return true;
+                return;
             }
             plugin.getAdminLoadoutManagementGUI().open(player);
-            return true;
+            return;
         }
 
         plugin.getLoadoutGUI().open(player);
-        return true;
     }
 }
