@@ -56,6 +56,20 @@ persistence:
 
 inject-datapack: true
 
+tab:
+  enable-header: true
+  enable-footer: true
+  server-ip: "yourserver.com"
+  title-colors:
+    - "#FF0000" # Red
+    - "#FFFF00" # Yellow
+  title-speed: 0.5
+  ip-colors:
+    - "#00FF00" # Green
+    - "#00FFFF" # Aqua
+    - "#0088FF" # Light Blue
+  ip-speed: 0.3
+
 settings:
 # Leave this section empty to use plugins defaults. To override a specific
 # default value for a setting, add the key under this node and set the desired value. For example:

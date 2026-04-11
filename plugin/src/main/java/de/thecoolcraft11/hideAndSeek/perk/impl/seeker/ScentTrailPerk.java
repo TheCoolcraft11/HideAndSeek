@@ -75,7 +75,7 @@ public class ScentTrailPerk extends BasePerk {
                     continue;
                 }
 
-                
+
                 seeker.spawnParticle(Particle.DUST,
                         point.location(),
                         8, 0.22, 0.02, 0.22, 0,

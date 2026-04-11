@@ -93,7 +93,7 @@ public class TrapSensePerk extends BasePerk {
             boolean canGlow = plugin.getNmsAdapter().hasCapability(NmsCapabilities.CLIENT_ENTITY_GLOWING);
             if (canGlow) {
                 updateTrapIndicatorVisibility(player, shownIndicators, glowRange, plugin);
-                
+
                 updateGlowSet(player, ItemStateManager.proximitySensorEntities, glowRange, plugin, Color.RED);
                 updateGlowSet(player, ItemStateManager.cageTrapIndicatorEntities, glowRange, plugin, Color.YELLOW);
                 updateGlowSet(player, ItemStateManager.cameraEntities, glowRange, plugin, Color.BLUE);
@@ -159,7 +159,7 @@ public class TrapSensePerk extends BasePerk {
 
             if (shownIndicators.remove(id)) {
                 viewer.hideEntity(plugin, entity);
-                
+
                 plugin.getNmsAdapter().setEntityGlowingForViewer(viewer, entity, false);
                 if (entity instanceof Display display) {
                     display.setGlowColorOverride(null);

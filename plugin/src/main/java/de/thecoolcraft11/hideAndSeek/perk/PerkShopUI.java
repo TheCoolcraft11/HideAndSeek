@@ -60,7 +60,7 @@ public class PerkShopUI {
         List<PerkDefinition> perks = getRoundPerksForPlayer(player);
         List<Integer> rowSlots = getConfiguredSlots();
 
-        
+
         for (int slot : rowSlots) {
             player.getInventory().setItem(slot, buildPlaceholderItem());
         }

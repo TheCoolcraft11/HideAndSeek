@@ -30,6 +30,7 @@ import de.thecoolcraft11.hideAndSeek.phase.LobbyPhase;
 import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
 import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
 import de.thecoolcraft11.hideAndSeek.setting.SettingRegistrar;
+import de.thecoolcraft11.hideAndSeek.tab.CustomTabProvider;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.SeekingBossBarService;
 import de.thecoolcraft11.hideAndSeek.util.UnstuckManager;
@@ -43,6 +44,7 @@ import de.thecoolcraft11.timer.api.TimerAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 
@@ -69,6 +71,7 @@ public final class HideAndSeek extends MinigameFramework {
     private SeekingBossBarService seekingBossBarService;
     private PerkService perkService;
     private UnstuckManager unstuckManager;
+    private CustomTabProvider tabProvider;
 
     @Override
     protected void onGameEnable() {
@@ -131,6 +134,7 @@ public final class HideAndSeek extends MinigameFramework {
         playerHitListener = new PlayerHitListener(this);
         antiCheatVisibilityListener = new AntiCheatVisibilityListener(this);
         hiderCampingListener = new HiderCampingListener(this, playerHitListener);
+        tabProvider = new CustomTabProvider(getConfig());
 
         Bukkit.getPluginManager().registerEvents(playerHitListener, this);
         Bukkit.getPluginManager().registerEvents(new EnvironmentalDeathMessageListener(playerHitListener, playerHitListener.getDeathMessageService()), this);
@@ -178,6 +182,14 @@ public final class HideAndSeek extends MinigameFramework {
 
 
         updateWorldIconsForAllMaps();
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                Bukkit.getOnlinePlayers().forEach(tabProvider::updateTab);
+            }
+        }.runTaskTimer(this, 0L, 1L);
 
         getLogger().info("Hide and Seek enabled with all features!");
     }

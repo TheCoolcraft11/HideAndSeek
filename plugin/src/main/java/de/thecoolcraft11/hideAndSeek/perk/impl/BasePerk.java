@@ -52,7 +52,7 @@ public abstract class BasePerk implements PerkDefinition {
 
     @Override
     public void onExpire(Player player, HideAndSeek plugin) {
-        
+
     }
 }
 
