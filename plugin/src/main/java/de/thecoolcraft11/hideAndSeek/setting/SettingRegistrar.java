@@ -698,6 +698,7 @@ public class SettingRegistrar {
 
         plugin.getConfigRegistry().register("settings.seeker-items.assistant.wander-radius-phase3", Double.class, 40.0);
 
+        plugin.getConfigRegistry().register("settings.game.blockstats.enabled", Boolean.class, true);
 
         plugin.getConfigRegistry().register("settings.loadout.hider-max-items", Integer.class, 3);
 

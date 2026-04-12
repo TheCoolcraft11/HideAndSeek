@@ -151,13 +151,14 @@ public class PlayerHitListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDamage(EntityDamageEvent event) {
         if (isAssistant(event.getEntity())) {
-            EntityDamageEvent.DamageCause cause = event.getCause();
-            boolean combatDamage = cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
-                    || cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK
-                    || cause == EntityDamageEvent.DamageCause.PROJECTILE;
-            if (!combatDamage) {
-                event.setCancelled(true);
-            }
+            return;
+        }
+
+        EntityDamageEvent.DamageCause cause = event.getCause();
+        boolean combatDamage = cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                || cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK
+                || cause == EntityDamageEvent.DamageCause.PROJECTILE;
+        if (combatDamage) {
             return;
         }
 
@@ -253,10 +254,8 @@ public class PlayerHitListener implements Listener {
         }
 
         if (attackerIsHider && victimIsSeeker) {
-            event.setCancelled(false);
             return;
         }
-
 
         event.setCancelled(true);
     }

@@ -120,12 +120,34 @@ public class KnockbackStickItem implements GameItem {
         }
     }
 
-    public static void upgradeKnockbackItem(Player player) {
+    public static void upgradeKnockbackItem(Player player, HideAndSeek plugin) {
         int level = Math.min(5, getKnockbackLevel(player.getUniqueId()) + 1);
         knockbackLevels.put(player.getUniqueId(), level);
+
+        ItemStack upgradedItem = null;
+        if (plugin != null) {
+            String runtimeItemId = ID + "_" + level;
+            var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
+            if (customItem != null) {
+                upgradedItem = customItem.getItemStack();
+
+                String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
+                if (selectedVariant != null) {
+                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId, selectedVariant);
+                    if (variant != null && variant.getItemStack() != null) {
+                        upgradedItem = variant.getItemStack().clone();
+                    }
+                }
+            }
+        }
+
+        if (upgradedItem == null) {
+            upgradedItem = createKnockbackStickItem(level);
+        }
+
         removeKnockbackItems(player);
-        player.getInventory().addItem(createKnockbackStickItem(level));
-        player.sendMessage(Component.text("Knockback stick upgraded!", NamedTextColor.GOLD));
+        player.getInventory().addItem(upgradedItem);
+        player.sendMessage(Component.text("Upgraded to Level " + level + "!", NamedTextColor.GOLD));
     }
 
     public static int getKnockbackLevel(UUID playerId) {

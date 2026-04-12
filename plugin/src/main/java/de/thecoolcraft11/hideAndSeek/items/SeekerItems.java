@@ -106,7 +106,7 @@ public final class SeekerItems {
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         var blockSmallResult = plugin.getSettingService().getSetting("game.block-form.scale-to-block");
         Object blockSmallObj = blockSmallResult.isSuccess() ? blockSmallResult.getValue() : null;
-        var blockStatsEnabledResult = plugin.getSettingService().getSetting("blockstats.enabled");
+        var blockStatsEnabledResult = plugin.getSettingService().getSetting("game.blockstats.enabled");
         Object blockStatsEnabledObj = blockStatsEnabledResult.isSuccess() ? blockStatsEnabledResult.getValue() : null;
         var crowBarEnabledResult = plugin.getSettingService().getSetting("seeker-items.crowbar.enabled");
         Object crowbarEnabledObj = crowBarEnabledResult.isSuccess() ? crowBarEnabledResult.getValue() : null;
@@ -287,7 +287,7 @@ public final class SeekerItems {
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         var blockSmallResult = plugin.getSettingService().getSetting("game.block-form.scale-to-block");
         Object blockSmallObj = blockSmallResult.isSuccess() ? blockSmallResult.getValue() : null;
-        var blockStatsEnabledResult = plugin.getSettingService().getSetting("blockstats.enabled");
+        var blockStatsEnabledResult = plugin.getSettingService().getSetting("game.blockstats.enabled");
         Object blockStatsEnabledObj = blockStatsEnabledResult.isSuccess() ? blockStatsEnabledResult.getValue() : null;
         var crowBarEnabledResult = plugin.getSettingService().getSetting("seeker-items.crowbar.enabled");
         Object crowbarEnabledObj = crowBarEnabledResult.isSuccess() ? crowBarEnabledResult.getValue() : null;

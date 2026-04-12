@@ -99,6 +99,9 @@ public class SpeedBoostItem implements GameItem {
 
         if (meta != null) {
             meta.displayName(Component.text("Speed Boost", NamedTextColor.YELLOW, TextDecoration.BOLD)
+                    .append(Component.space())
+                    .append(Component.text("(Level " + (level + 1) + ")", NamedTextColor.GOLD)
+                            .decoration(TextDecoration.ITALIC, false))
                     .decoration(TextDecoration.ITALIC, false));
             meta.lore(List.of(
                     Component.text("Right click for a speed boost", NamedTextColor.GRAY)
@@ -216,12 +219,34 @@ public class SpeedBoostItem implements GameItem {
         }
     }
 
-    public static void upgradeSpeedItem(Player player) {
+    public static void upgradeSpeedItem(Player player, HideAndSeek plugin) {
         int level = Math.min(5, getSpeedLevel(player.getUniqueId()) + 1);
         speedLevels.put(player.getUniqueId(), level);
+
+        ItemStack upgradedItem = null;
+        if (plugin != null) {
+            String runtimeItemId = ID + "_" + level;
+            var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
+            if (customItem != null) {
+                upgradedItem = customItem.getItemStack();
+
+                String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
+                if (selectedVariant != null) {
+                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId, selectedVariant);
+                    if (variant != null && variant.getItemStack() != null) {
+                        upgradedItem = variant.getItemStack().clone();
+                    }
+                }
+            }
+        }
+
+        if (upgradedItem == null) {
+            upgradedItem = createSpeedBoostItem(level);
+        }
+
         removeSpeedItems(player);
-        player.getInventory().addItem(createSpeedBoostItem(level));
-        player.sendMessage(Component.text("Speed boost upgraded!", NamedTextColor.GOLD));
+        player.getInventory().addItem(upgradedItem);
+        player.sendMessage(Component.text("Upgraded to Level " + (level + 1) + "!", NamedTextColor.GOLD));
     }
 
     public static int getSpeedLevel(UUID playerId) {

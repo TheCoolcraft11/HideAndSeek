@@ -50,6 +50,7 @@ public class CustomTabProvider {
     public void updateTab(Player player) {
 
         String role = HideAndSeek.getDataController().getHiders().contains(player.getUniqueId()) ? "Hider" : "Seeker";
+        if (HideAndSeek.getActiveInstance().getStateManager().isPhase("lobby")) role = "N/A";
         int total = Bukkit.getOnlinePlayers().size();
         int h = HideAndSeek.getDataController().getHiders().size();
         int s = HideAndSeek.getDataController().getSeekers().size();
@@ -105,7 +106,7 @@ public class CustomTabProvider {
     }
 
     private Component buildFooter(String role, int total, int h, int s, int p, int c) {
-        TextColor roleColor = role.equals("Hider") ? NamedTextColor.BLUE : NamedTextColor.RED;
+        TextColor roleColor = role.equals("N/A") ? NamedTextColor.GRAY : role.equals("Hider") ? NamedTextColor.BLUE : NamedTextColor.RED;
 
         return Component.text()
                 .append(Component.text("\nRole: ", NamedTextColor.DARK_GRAY))

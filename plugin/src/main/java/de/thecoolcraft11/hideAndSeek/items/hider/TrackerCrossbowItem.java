@@ -113,11 +113,11 @@ public class TrackerCrossbowItem implements GameItem {
         boolean hasKnockbackStick = hiderItems.contains(de.thecoolcraft11.hideAndSeek.model.LoadoutItemType.KNOCKBACK_STICK);
 
         if (hasSpeedBoost) {
-            SpeedBoostItem.upgradeSpeedItem(player);
+            SpeedBoostItem.upgradeSpeedItem(player, plugin);
         }
 
         if (hasKnockbackStick) {
-            KnockbackStickItem.upgradeKnockbackItem(player);
+            KnockbackStickItem.upgradeKnockbackItem(player, plugin);
         }
 
         if (!hasSpeedBoost && !hasKnockbackStick) {

@@ -20,6 +20,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -305,6 +306,11 @@ public class SeekingPhase implements GamePhase {
     @Override
     public boolean allowBlockInteraction() {
         return false;
+    }
+
+    @Override
+    public List<EntityType> getEntityInteractionExceptions() {
+        return List.of(EntityType.PLAYER);
     }
 
     @Override

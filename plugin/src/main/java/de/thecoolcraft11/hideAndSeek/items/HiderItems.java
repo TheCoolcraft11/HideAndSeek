@@ -203,7 +203,7 @@ public final class HiderItems {
             return;
         }
         if (!player.getInventory().contains(Material.ARROW)) {
-            player.getInventory().setItem(9, new ItemStack(Material.ARROW, 1));
+            player.getInventory().setItem(18, new ItemStack(Material.ARROW, 1));
         }
     }
 

@@ -78,6 +78,15 @@ public final class GameAdvancedSettingGroup implements SettingGroup {
                                 false, iconHelper.enchanted(Material.NAME_TAG, false)
                         ))
                         .build()),
+                (plugin, resolver, iconHelper) -> plugin.getSettingRegistry().register(SettingDefinition.builder("game.blockstats.enabled", SettingType.BOOLEAN, Boolean.class)
+                        .defaultValue(resolver.get(plugin, "game.blockstats.enabled", true))
+                        .description("If the Blockstats GUI should be enabled (Only relevant when playing in BLOCK Mode)")
+                        .customIcon(Material.BOOK)
+                        .valueIconStacks(Map.of(
+                                true, iconHelper.enchanted(Material.BOOK, true),
+                                false, iconHelper.enchanted(Material.BOOK, false)
+                        ))
+                        .build()),
                 (plugin, resolver, iconHelper) -> plugin.getSettingRegistry().register(SettingDefinition.builder("game.seeking-bossbar.enabled", SettingType.BOOLEAN, Boolean.class)
                         .defaultValue(resolver.get(plugin, "game.seeking-bossbar.enabled", true))
                         .description("Enable the seeking phase bossbar")
