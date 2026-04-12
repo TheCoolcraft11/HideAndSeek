@@ -7,6 +7,7 @@ import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,6 +19,7 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class AntiCheatVisibilityListener implements Listener {
     private final HideAndSeek plugin;
     private BukkitTask reconcileTask;
@@ -288,7 +290,10 @@ public class AntiCheatVisibilityListener implements Listener {
             return false;
         }
 
-        var blockHit = eye.getWorld().rayTraceBlocks(eye, dir, distance, FluidCollisionMode.NEVER, true);
+        var blockHit = eye.getWorld().rayTraceBlocks(eye, dir, distance, FluidCollisionMode.NEVER, true, block -> {
+            Material mat = block.getType();
+            return mat.isOccluding();
+        });
         if (blockHit != null) {
             return false;
         }

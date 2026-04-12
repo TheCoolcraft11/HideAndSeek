@@ -183,7 +183,7 @@ public class PhantomViewerItem implements GameItem {
             }
 
             BlockData blockData = getSnapshotMaterial(context.snapshots(), x, blockY, z);
-            if (blockData != null && !blockData.getMaterial().isAir() && (blockData.getMaterial().isSolid() || isVisualHitMaterial(blockData.getMaterial()))) {
+            if (blockData != null && blockData.getMaterial().isOccluding()) {
                 return blockData;
             }
         }
@@ -577,8 +577,3 @@ public class PhantomViewerItem implements GameItem {
         }
     }
 }
-
-
-
-
-
