@@ -23,7 +23,7 @@ public class CustomTabProvider {
     private final boolean enableFooter;
     private int animationTick = 0;
 
-    public CustomTabProvider(FileConfiguration config) {
+    public CustomTabProvider(HideAndSeek plugin, FileConfiguration config) {
 
         this.serverIp = config.getString("tab.server-ip", "yoursever.com");
         this.speedTitle = config.getDouble("tab.title-speed", 0.5);
@@ -34,6 +34,8 @@ public class CustomTabProvider {
 
         loadColors(config.getStringList("tab.title-colors"), titleColors, 0xFF0000, 0xFFFF00);
         loadColors(config.getStringList("tab.ip-colors"), ipColors, 0x00FF00, 0x00FFFF);
+
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> animationTick++, 1L, 1L);
     }
 
     private void loadColors(List<String> hexStrings, List<TextColor> targetList, int def1, int def2) {
@@ -62,7 +64,6 @@ public class CustomTabProvider {
 
         if (enableHeader) player.sendPlayerListHeader(header);
         if (enableFooter) player.sendPlayerListFooter(footer);
-        animationTick++;
     }
 
     private Component buildHeader(String playerName) {

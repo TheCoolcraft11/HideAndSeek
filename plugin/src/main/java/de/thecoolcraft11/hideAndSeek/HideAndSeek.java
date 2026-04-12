@@ -134,7 +134,7 @@ public final class HideAndSeek extends MinigameFramework {
         playerHitListener = new PlayerHitListener(this);
         antiCheatVisibilityListener = new AntiCheatVisibilityListener(this);
         hiderCampingListener = new HiderCampingListener(this, playerHitListener);
-        tabProvider = new CustomTabProvider(getConfig());
+        tabProvider = new CustomTabProvider(this, getConfig());
 
         Bukkit.getPluginManager().registerEvents(playerHitListener, this);
         Bukkit.getPluginManager().registerEvents(new EnvironmentalDeathMessageListener(playerHitListener, playerHitListener.getDeathMessageService()), this);
