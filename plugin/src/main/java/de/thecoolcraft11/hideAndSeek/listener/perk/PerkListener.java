@@ -39,6 +39,9 @@ public class PerkListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
+
+        if (player.getGameMode() == GameMode.CREATIVE) return;
+
         if (event.getCurrentItem() == null) {
             return;
         }
