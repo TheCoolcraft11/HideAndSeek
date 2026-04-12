@@ -158,7 +158,11 @@ public class CurseSpellItem implements GameItem {
             var scale = hider.getAttribute(Attribute.SCALE);
             if (scale != null) {
                 scale.setBaseValue(1.0);
-                Bukkit.getScheduler().runTaskLater(plugin, () -> scale.setBaseValue(smallSize), shrinkDelay * 20L);
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (HideAndSeek.getDataController().getHiders().contains(hider.getUniqueId()) && HideAndSeek.getActiveInstance().getStateManager().isPhase("hiding")) {
+                        scale.setBaseValue(smallSize);
+                    }
+                }, shrinkDelay * 20L);
             }
         }
 
