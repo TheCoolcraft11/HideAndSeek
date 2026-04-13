@@ -18,6 +18,7 @@ import de.thecoolcraft11.hideAndSeek.listener.perk.PlaceholderItemProtectionList
 import de.thecoolcraft11.hideAndSeek.listener.player.*;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsLoader;
 import de.thecoolcraft11.hideAndSeek.perk.PerkRegistry;
@@ -30,6 +31,7 @@ import de.thecoolcraft11.hideAndSeek.phase.LobbyPhase;
 import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
 import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
 import de.thecoolcraft11.hideAndSeek.setting.SettingRegistrar;
+import de.thecoolcraft11.hideAndSeek.tab.CustomScoreboardProvider;
 import de.thecoolcraft11.hideAndSeek.tab.CustomTabProvider;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.SeekingBossBarService;
@@ -41,6 +43,8 @@ import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
 import de.thecoolcraft11.timer.Timer;
 import de.thecoolcraft11.timer.api.TimerAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -72,6 +76,7 @@ public final class HideAndSeek extends MinigameFramework {
     private PerkService perkService;
     private UnstuckManager unstuckManager;
     private CustomTabProvider tabProvider;
+    private CustomScoreboardProvider scoreboardProvider;
 
     @Override
     protected void onGameEnable() {
@@ -135,6 +140,7 @@ public final class HideAndSeek extends MinigameFramework {
         antiCheatVisibilityListener = new AntiCheatVisibilityListener(this);
         hiderCampingListener = new HiderCampingListener(this, playerHitListener);
         tabProvider = new CustomTabProvider(this, getConfig());
+        scoreboardProvider = new CustomScoreboardProvider(this);
 
         Bukkit.getPluginManager().registerEvents(playerHitListener, this);
         Bukkit.getPluginManager().registerEvents(new EnvironmentalDeathMessageListener(playerHitListener, playerHitListener.getDeathMessageService()), this);
@@ -146,6 +152,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new CrossbowTrackerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CameraViewListener(this), this);
         Bukkit.getPluginManager().registerEvents(new AssistantProjectileListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new ScoreboardStatusListener(this), this);
 
         Bukkit.getPluginManager().registerEvents(new SeekerKillModeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new HiderTotemListener(), this);
@@ -180,6 +187,22 @@ public final class HideAndSeek extends MinigameFramework {
 
         unstuckManager.startTrackingTask();
 
+        getWikiRegistry().addPlaceholderResolver((player, key) -> switch (key) {
+            case "small_size" -> {
+                double value = getSettingRegistry().get("game.small-mode.hider-size");
+                String text = String.valueOf(value).trim().substring(0, Math.min(3, String.valueOf(value).trim().length()));
+                yield Component.text(text, NamedTextColor.LIGHT_PURPLE);
+            }
+            case "gamemode" -> {
+                GameModeEnum value = getSettingRegistry().get("game.mode");
+                if (value == null) yield Component.text("N/A", NamedTextColor.LIGHT_PURPLE);
+                String raw = value.toString();
+                String text = raw.substring(0, 1).toUpperCase() + raw.substring(1).toLowerCase();
+                yield Component.text(text, NamedTextColor.LIGHT_PURPLE);
+            }
+            default -> null;
+        });
+
 
         updateWorldIconsForAllMaps();
 
@@ -190,6 +213,16 @@ public final class HideAndSeek extends MinigameFramework {
                 Bukkit.getOnlinePlayers().forEach(tabProvider::updateTab);
             }
         }.runTaskTimer(this, 0L, 1L);
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                Bukkit.getOnlinePlayers().forEach(scoreboardProvider::updateTitle);
+            }
+        }.runTaskTimer(this, 0L, 1L);
+
+
+        scoreboardProvider.startAutoUpdate(20);
 
         getLogger().info("Hide and Seek enabled with all features!");
     }
@@ -384,6 +417,10 @@ public final class HideAndSeek extends MinigameFramework {
 
     public UnstuckManager getUnstuckManager() {
         return unstuckManager;
+    }
+
+    public CustomScoreboardProvider getScoreboardProvider() {
+        return scoreboardProvider;
     }
 
     public void updateWorldIconsForAllMaps() {

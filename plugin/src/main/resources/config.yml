@@ -60,15 +60,152 @@ tab:
   enable-header: true
   enable-footer: true
   server-ip: "yourserver.com"
-  title-colors:
-    - "#FF0000" # Red
-    - "#FFFF00" # Yellow
-  title-speed: 0.5
-  ip-colors:
-    - "#00FF00" # Green
-    - "#00FFFF" # Aqua
-    - "#0088FF" # Light Blue
-  ip-speed: 0.3
+
+  # Header configuration
+  header:
+    # Color gradient settings for animated text
+    title-colors:
+      - "#FF0000" # Red
+      - "#FFFF00" # Yellow
+    title-speed: 0.5
+
+    ip-colors:
+      - "#00FF00" # Green
+      - "#00FFFF" # Aqua
+      - "#0088FF" # Light Blue
+    ip-speed: 0.3
+
+    # Header elements
+    elements:
+      - text: "Hello "
+        enabled: true
+        color: "#808080" # Gray
+        animated: false
+      - text: "{player}"
+        enabled: true
+        color: "#FFFF00" # Yellow
+        animated: false
+      - text: "!"
+        enabled: true
+        color: "#808080" # Gray
+        animated: false
+      - text: "\nYou are playing "
+        enabled: true
+        color: "#808080" # Gray
+        animated: false
+      - text: "HideAndSeek"
+        enabled: true
+        color-list: "title-colors" # Use color gradient
+        speed: "title-speed"
+        animated: true
+      - text: " on "
+        enabled: true
+        color: "#808080" # Gray
+        animated: false
+      - text: "{server-ip}"
+        enabled: true
+        color-list: "ip-colors" # Use color gradient
+        speed: "ip-speed"
+        animated: true
+      - text: "\n\n"
+        enabled: true
+        color: "#FFFFFF" # White
+        animated: false
+
+  # Footer configuration
+  footer:
+    # Footer elements
+    elements:
+      - text: "\nRole: "
+        enabled: true
+        color: "#A9A9A9" # Dark Gray
+      - text: "{role}"
+        enabled: true
+        color: "{role-color}"
+      - text: " | "
+        enabled: true
+        color: "#A9A9A9" # Dark Gray
+      - text: "{mode}"
+        enabled: true
+        color: "#008000" # Green
+      - text: "\nPlayers: "
+        enabled: true
+        color: "#A9A9A9" # Dark Gray
+      - text: "{players-total}"
+        enabled: true
+        color: "#FFFFFF" # White
+      - text: " ("
+        enabled: true
+        color: "#A9A9A9" # Dark Gray
+      - text: "{players-hiders}"
+        enabled: true
+        color: "#00AA00" # Green
+      - text: "|"
+        enabled: true
+        color: "#A9A9A9" # Dark Gray
+      - text: "{players-seekers}"
+        enabled: true
+        color: "#FF0000" # Red
+      - text: ")"
+        enabled: true
+        color: "#A9A9A9" # Dark Gray
+      - text: "\nPoints: "
+        enabled: true
+        color: "#FFD700" # Gold
+      - text: "{points}"
+        enabled: true
+        color: "#FFD700" # Gold
+      - text: "\nCoins: "
+        enabled: true
+        color: "#FFFF00" # Yellow
+      - text: "{coins}"
+        enabled: true
+        color: "#FFFF00" # Yellow
+      - text: "\n"
+        enabled: true
+        color: "#FFFFFF" # White
+
+scoreboard:
+  title:
+    text: "HideAndSeek"
+    small-caps: true
+    underline: true
+    colors:
+      gradient:
+        - "#FF0000" # Red
+        - "#FFFF00" # Yellow
+
+  animation:
+    enabled: true
+    speed: 0.15
+
+  formatting:
+    small-caps: true
+    padding: true
+    padding-amount: 3
+
+  lines:
+    - text: "Role:"
+      enabled: true
+      color: "#A9A9A9" # Dark Gray
+    - text: "{role}"
+      enabled: true
+      color: "#0000FF" # Blue
+    - text: "Mode:"
+      enabled: true
+      color: "#A9A9A9" # Dark Gray
+    - text: "{mode}"
+      enabled: true
+      color: "#008000" # Green
+    - text: "Players: {players-total} ({players-hiders}|{players-seekers})"
+      enabled: true
+      color: "#A9A9A9,#FFFFFF,#00FF00,#FF0000"
+    - text: "Points: {points}"
+      enabled: true
+      color: "#FFD700" # Gold
+    - text: "Coins: {coins}"
+      enabled: true
+      color: "#FFFF00" # Yellow
 
 settings:
 # Leave this section empty to use plugins defaults. To override a specific

@@ -12,48 +12,60 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CustomTabProvider {
-    private final String serverIp;
-    private final List<TextColor> titleColors = new ArrayList<>();
-    private final List<TextColor> ipColors = new ArrayList<>();
-    private final double speedTitle;
-    private final double speedIp;
+    private final FileConfiguration config;
+    private final Map<String, List<TextColor>> colorGradients = new HashMap<>();
+    private final Map<String, Double> colorSpeeds = new HashMap<>();
     private final boolean enableHeader;
     private final boolean enableFooter;
     private int animationTick = 0;
 
     public CustomTabProvider(HideAndSeek plugin, FileConfiguration config) {
-
-        this.serverIp = config.getString("tab.server-ip", "yoursever.com");
-        this.speedTitle = config.getDouble("tab.title-speed", 0.5);
-        this.speedIp = config.getDouble("tab.ip-speed", 0.3);
+        this.config = config;
         this.enableHeader = config.getBoolean("tab.enable-header", true);
         this.enableFooter = config.getBoolean("tab.enable-footer", true);
 
 
-        loadColors(config.getStringList("tab.title-colors"), titleColors, 0xFF0000, 0xFFFF00);
-        loadColors(config.getStringList("tab.ip-colors"), ipColors, 0x00FF00, 0x00FFFF);
+        loadColorGradients();
+        loadColorSpeeds();
 
         Bukkit.getScheduler().runTaskTimer(plugin, () -> animationTick++, 1L, 1L);
     }
 
-    private void loadColors(List<String> hexStrings, List<TextColor> targetList, int def1, int def2) {
+    private void loadColorGradients() {
+
+        loadColors(config.getStringList("tab.header.title-colors"), "title-colors", 0xFF0000, 0xFFFF00);
+
+        loadColors(config.getStringList("tab.header.ip-colors"), "ip-colors", 0x00FF00, 0x00FFFF);
+    }
+
+    private void loadColors(List<String> hexStrings, String key, int def1, int def2) {
+        List<TextColor> colors = new ArrayList<>();
         if (hexStrings.isEmpty()) {
-            targetList.add(TextColor.color(def1));
-            targetList.add(TextColor.color(def2));
+            colors.add(TextColor.color(def1));
+            colors.add(TextColor.color(def2));
         } else {
             for (String hex : hexStrings) {
-                targetList.add(TextColor.fromHexString(hex));
+                colors.add(TextColor.fromHexString(hex));
             }
         }
+        colorGradients.put(key, colors);
+    }
+
+    private void loadColorSpeeds() {
+        colorSpeeds.put("title-speed", config.getDouble("tab.header.title-speed", 0.5));
+        colorSpeeds.put("ip-speed", config.getDouble("tab.header.ip-speed", 0.3));
     }
 
     public void updateTab(Player player) {
 
         String role = HideAndSeek.getDataController().getHiders().contains(player.getUniqueId()) ? "Hider" : "Seeker";
         if (HideAndSeek.getActiveInstance().getStateManager().isPhase("lobby")) role = "N/A";
+
         int total = Bukkit.getOnlinePlayers().size();
         int h = HideAndSeek.getDataController().getHiders().size();
         int s = HideAndSeek.getDataController().getSeekers().size();
@@ -61,27 +73,139 @@ public class CustomTabProvider {
         int c = ItemSkinSelectionService.getCoins(player.getUniqueId());
         GameModeEnum mode = HideAndSeek.getActiveInstance().getSettingRegistry().get("game.mode");
 
-        Component header = buildHeader(player.getName());
-        Component footer = buildFooter(role, total, h, s, p, c, mode);
+        String modeText = switch (mode) {
+            case NORMAL -> "Normal";
+            case BLOCK -> "Block";
+            case SMALL -> "Small";
+        };
+
+
+        Map<String, Object> context = new HashMap<>();
+        context.put("player", player.getName());
+        context.put("role", role);
+        context.put("mode", modeText);
+        context.put("server-ip", config.getString("tab.server-ip", "yourserver.com"));
+        context.put("players-total", total);
+        context.put("players-hiders", h);
+        context.put("players-seekers", s);
+        context.put("points", p);
+        context.put("coins", c);
+        context.put("role-color", getRoleColor(role));
+
+        Component header = buildHeader(context);
+        Component footer = buildFooter(context);
 
         if (enableHeader) player.sendPlayerListHeader(header);
         if (enableFooter) player.sendPlayerListFooter(footer);
     }
 
-    private Component buildHeader(String playerName) {
+    private TextColor getRoleColor(String role) {
+        return switch (role) {
+            case "N/A" -> NamedTextColor.GRAY;
+            case "Hider" -> NamedTextColor.BLUE;
+            case "Seeker" -> NamedTextColor.RED;
+            default -> NamedTextColor.WHITE;
+        };
+    }
 
-        Component animatedTitle = buildWaveText("HideAndSeek", speedTitle, titleColors);
-        Component animatedIp = buildWaveText(serverIp, speedIp, ipColors);
+    private Component buildHeader(Map<String, Object> context) {
+        var elements = config.getList("tab.header.elements");
+        if (elements == null) {
+            return Component.text("Header not configured");
+        }
 
-        return Component.text()
-                .append(Component.text("Hello ", NamedTextColor.GRAY))
-                .append(Component.text(playerName + "!", NamedTextColor.YELLOW))
-                .append(Component.text("\nYou are playing ", NamedTextColor.GRAY))
-                .append(animatedTitle)
-                .append(Component.text(" on ", NamedTextColor.GRAY))
-                .append(animatedIp)
-                .append(Component.text("\n\n"))
-                .build();
+        TextComponent.Builder builder = Component.text();
+
+        for (Object element : elements) {
+            if (!(element instanceof Map<?, ?> elementMap)) continue;
+
+            Object enabledObj = elementMap.get("enabled");
+            boolean enabled = enabledObj == null ? true : (boolean) enabledObj;
+            if (!enabled) continue;
+
+            String text = (String) elementMap.get("text");
+            if (text == null) continue;
+
+
+            String processedText = replacePlaceholders(text, context);
+
+
+            Object animatedObj = elementMap.get("animated");
+            boolean animated = animatedObj == null ? false : (boolean) animatedObj;
+
+            if (animated) {
+                String colorListKey = (String) elementMap.get("color-list");
+                String speedKey = (String) elementMap.get("speed");
+                List<TextColor> colors = colorGradients.getOrDefault(colorListKey, colorGradients.get("title-colors"));
+                double speed = colorSpeeds.getOrDefault(speedKey, 0.5);
+
+                builder.append(buildWaveText(processedText, speed, colors));
+            } else {
+                String colorValue = (String) elementMap.get("color");
+                TextColor color = parseColor(colorValue, context, NamedTextColor.WHITE);
+                builder.append(Component.text(processedText, color));
+            }
+        }
+
+        return builder.build();
+    }
+
+    private Component buildFooter(Map<String, Object> context) {
+        var elements = config.getList("tab.footer.elements");
+        if (elements == null) {
+            return Component.text("Footer not configured");
+        }
+
+        TextComponent.Builder builder = Component.text();
+
+        for (Object element : elements) {
+            if (!(element instanceof Map<?, ?> elementMap)) continue;
+
+            Object enabledObj = elementMap.get("enabled");
+            boolean enabled = enabledObj == null ? true : (boolean) enabledObj;
+            if (!enabled) continue;
+
+            String text = (String) elementMap.get("text");
+            if (text == null) continue;
+
+
+            String processedText = replacePlaceholders(text, context);
+            String colorValue = (String) elementMap.get("color");
+            TextColor color = parseColor(colorValue, context, NamedTextColor.WHITE);
+
+            builder.append(Component.text(processedText, color));
+        }
+
+        return builder.build();
+    }
+
+    private String replacePlaceholders(String text, Map<String, Object> context) {
+        String result = text;
+        for (Map.Entry<String, Object> entry : context.entrySet()) {
+            result = result.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
+        }
+        return result;
+    }
+
+    private TextColor parseColor(String colorValue, Map<String, Object> context, TextColor defaultColor) {
+        if (colorValue == null) return defaultColor;
+
+
+        if (colorValue.startsWith("{") && colorValue.endsWith("}")) {
+            String key = colorValue.substring(1, colorValue.length() - 1);
+            Object colorObj = context.get(key);
+            if (colorObj instanceof TextColor) {
+                return (TextColor) colorObj;
+            }
+            return defaultColor;
+        }
+
+
+        if (colorValue.startsWith("#")) {
+            return TextColor.fromHexString(colorValue);
+        }
+
+        return defaultColor;
     }
 
     private Component buildWaveText(String text, double spread, List<TextColor> colorList) {
@@ -106,33 +230,5 @@ public class CustomTabProvider {
         if (index >= list.size() - 1) return list.getLast();
 
         return TextColor.lerp(localRatio, list.get(index), list.get(index + 1));
-    }
-
-    private Component buildFooter(String role, int total, int h, int s, int p, int c, GameModeEnum mode) {
-        TextColor roleColor = role.equals("N/A") ? NamedTextColor.GRAY : role.equals("Hider") ? NamedTextColor.BLUE : NamedTextColor.RED;
-        String modeText = switch (mode) {
-            case NORMAL -> "Normal";
-            case BLOCK -> "Block";
-            case SMALL -> "Small";
-        };
-
-        return Component.text()
-                .append(Component.text("\nRole: ", NamedTextColor.DARK_GRAY))
-                .append(Component.text(role, roleColor))
-                .append(Component.text("|", NamedTextColor.DARK_GRAY))
-                .append(Component.text(modeText, NamedTextColor.DARK_GREEN))
-                .append(Component.text("\nPlayers: ", NamedTextColor.DARK_GRAY))
-                .append(Component.text(total, NamedTextColor.WHITE))
-                .append(Component.text(" (", NamedTextColor.DARK_GRAY))
-                .append(Component.text(h, NamedTextColor.GREEN))
-                .append(Component.text("|", NamedTextColor.DARK_GRAY))
-                .append(Component.text(s, NamedTextColor.RED))
-                .append(Component.text(")", NamedTextColor.DARK_GRAY))
-                .append(Component.text("\nPoints: ", NamedTextColor.GOLD))
-                .append(Component.text(p, NamedTextColor.GOLD))
-                .append(Component.text("\nCoins: ", NamedTextColor.YELLOW))
-                .append(Component.text(c, NamedTextColor.YELLOW))
-                .append(Component.text("\n"))
-                .build();
     }
 }
