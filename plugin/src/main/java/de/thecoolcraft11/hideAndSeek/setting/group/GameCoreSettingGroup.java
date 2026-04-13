@@ -49,7 +49,7 @@ public final class GameCoreSettingGroup implements SettingGroup {
                 new IntegerSettingSpec("game.world-border.damage-delay-seconds", 10, 1, 60, "Seconds a hider must be outside the border before taking damage", Material.CLOCK),
                 new DoubleSettingSpec("game.world-border.damage-amount", 2.0, 0.5, 20.0, "Damage per tick dealt to hiders outside the border", Material.REDSTONE),
                 new IntegerSettingSpec("game.world-border.damage-cooldown-ticks", 20, 1, 100, "Ticks between damage hits (20 = 1 second)", Material.GOLDEN_APPLE),
-                new DoubleSettingSpec("game.small-mode.hider-size", 0.5, 0.0, Double.MAX_VALUE, "Size scale for SMALL mode hiders (0.1 = tiny, 1.0 = normal)", Material.SLIME_BALL),
+                new DoubleSettingSpec("game.small-mode.hider-size", 0.5, 0.0, 2.0, "Size scale for SMALL mode hiders (0.1 = tiny, 1.0 = normal)", Material.SLIME_BALL),
                 new BooleanSettingSpec("game.team-distribution.random", true, "Enable random distribution of players into hider/seeker teams", Material.PLAYER_HEAD, true),
                 new BooleanSettingSpec("game.voting.game-mode-enabled", true, "Allow players to vote for gamemodes in lobby", Material.COMMAND_BLOCK, true),
                 new BooleanSettingSpec("game.voting.map-enabled", true, "Allow players to vote for maps in lobby", Material.MAP, true),
