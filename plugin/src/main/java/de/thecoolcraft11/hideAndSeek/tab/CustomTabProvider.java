@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.tab;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -58,9 +59,10 @@ public class CustomTabProvider {
         int s = HideAndSeek.getDataController().getSeekers().size();
         int p = HideAndSeek.getDataController().getPoints(player.getUniqueId());
         int c = ItemSkinSelectionService.getCoins(player.getUniqueId());
+        GameModeEnum mode = HideAndSeek.getActiveInstance().getSettingRegistry().get("game.mode");
 
         Component header = buildHeader(player.getName());
-        Component footer = buildFooter(role, total, h, s, p, c);
+        Component footer = buildFooter(role, total, h, s, p, c, mode);
 
         if (enableHeader) player.sendPlayerListHeader(header);
         if (enableFooter) player.sendPlayerListFooter(footer);
@@ -106,12 +108,19 @@ public class CustomTabProvider {
         return TextColor.lerp(localRatio, list.get(index), list.get(index + 1));
     }
 
-    private Component buildFooter(String role, int total, int h, int s, int p, int c) {
+    private Component buildFooter(String role, int total, int h, int s, int p, int c, GameModeEnum mode) {
         TextColor roleColor = role.equals("N/A") ? NamedTextColor.GRAY : role.equals("Hider") ? NamedTextColor.BLUE : NamedTextColor.RED;
+        String modeText = switch (mode) {
+            case NORMAL -> "Normal";
+            case BLOCK -> "Block";
+            case SMALL -> "Small";
+        };
 
         return Component.text()
                 .append(Component.text("\nRole: ", NamedTextColor.DARK_GRAY))
                 .append(Component.text(role, roleColor))
+                .append(Component.text("|", NamedTextColor.DARK_GRAY))
+                .append(Component.text(modeText, NamedTextColor.DARK_GREEN))
                 .append(Component.text("\nPlayers: ", NamedTextColor.DARK_GRAY))
                 .append(Component.text(total, NamedTextColor.WHITE))
                 .append(Component.text(" (", NamedTextColor.DARK_GRAY))
