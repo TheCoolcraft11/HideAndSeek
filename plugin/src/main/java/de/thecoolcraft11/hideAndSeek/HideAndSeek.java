@@ -165,6 +165,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new TrapMovementListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlaceholderItemProtectionListener(perkService.getShopUI()), this);
         Bukkit.getPluginManager().registerEvents(new PerkListener(this, perkService), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerTeamListener(this), this);
 
 
         worldBorderCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this,

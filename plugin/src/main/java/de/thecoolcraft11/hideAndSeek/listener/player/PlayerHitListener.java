@@ -18,6 +18,7 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
@@ -488,6 +489,7 @@ public class PlayerHitListener implements Listener {
                 hider.sendMessage(Component.text("You'll respawn and can continue hiding!", NamedTextColor.GOLD));
                 break;
         }
+        Bukkit.getOnlinePlayers().forEach(player -> player.playSound(hider.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 0.5f, 1.0f));
     }
 
     private void handleSpectatorMode(Player hider) {
