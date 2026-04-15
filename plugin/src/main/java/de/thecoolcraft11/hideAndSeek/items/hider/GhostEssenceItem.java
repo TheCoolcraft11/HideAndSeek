@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -203,6 +204,14 @@ public class GhostEssenceItem implements GameItem {
             s.setSilent(true);
             s.setCollidable(false);
             s.setInvulnerable(true);
+            var sourceAttr = player.getAttribute(Attribute.SCALE);
+            var targetAttr = s.getAttribute(Attribute.SCALE);
+
+            if (sourceAttr == null || targetAttr == null) {
+                return;
+            }
+
+            targetAttr.setBaseValue(sourceAttr.getBaseValue());
         });
         Bukkit.getOnlinePlayers().forEach(p -> p.hideEntity(plugin, ghost));
 
