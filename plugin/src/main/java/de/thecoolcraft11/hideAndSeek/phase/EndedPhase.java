@@ -68,6 +68,7 @@ public class EndedPhase implements GamePhase {
         }
 
         boolean hidersWin = !activeHiders.isEmpty();
+        updateGlobalRoundStats(hideAndSeekPlugin, hidersWin, activeHiders);
 
         announceWinner(plugin, hidersWin, coinGains);
 
@@ -244,6 +245,38 @@ public class EndedPhase implements GamePhase {
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info((hidersWin ? "Hiders" : "Seekers") + " won the game!");
+        }
+    }
+
+    private void updateGlobalRoundStats(HideAndSeek plugin, boolean hidersWin, List<UUID> activeHiders) {
+        Set<UUID> winners = new HashSet<>();
+        if (hidersWin) {
+            winners.addAll(activeHiders);
+        } else {
+            winners.addAll(HideAndSeek.getDataController().getSeekers());
+        }
+
+        Set<UUID> participants = new HashSet<>();
+        participants.addAll(HideAndSeek.getDataController().getHiders());
+        participants.addAll(HideAndSeek.getDataController().getSeekers());
+
+        for (UUID playerId : participants) {
+            boolean winner = winners.contains(playerId);
+            if (winner) {
+                plugin.getPlayerDataStore().addWin(playerId)
+                        .thenCompose(ignored -> plugin.getPlayerDataStore().getXp(playerId))
+                        .thenCompose(currentXp -> plugin.getPlayerDataStore().setXp(playerId, Math.max(0L, currentXp + 10L)))
+                        .exceptionally(ex -> {
+                            plugin.getLogger().warning("Failed to update win/xp stats for " + playerId + ": " + ex.getMessage());
+                            return null;
+                        });
+            } else {
+                plugin.getPlayerDataStore().addLoss(playerId)
+                        .exceptionally(ex -> {
+                            plugin.getLogger().warning("Failed to update loss stats for " + playerId + ": " + ex.getMessage());
+                            return null;
+                        });
+            }
         }
     }
 

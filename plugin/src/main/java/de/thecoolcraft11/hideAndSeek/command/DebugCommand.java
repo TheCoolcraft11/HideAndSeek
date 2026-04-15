@@ -34,6 +34,7 @@ public class DebugCommand implements MinigameSubcommand {
         subcommands.put("perks", new DebugPerksCommand(plugin));
         subcommands.put("config", new DebugConfigCommand(plugin));
         subcommands.put("unstuck", new DebugUnstuckCommand(plugin));
+        subcommands.put("migrateyaml", new DebugMigrateYamlCommand(plugin));
     }
 
     @Override
@@ -113,6 +114,8 @@ public class DebugCommand implements MinigameSubcommand {
                 .append(Component.text(" - Test configuration and maps", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/has debug unstuck <player> [history|nearby|spawn]", NamedTextColor.YELLOW)
                 .append(Component.text(" - Forcefully unstuck a player", NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/migrateyaml or /has debug migrateyaml", NamedTextColor.YELLOW)
+                .append(Component.text(" - Migrate YAML player data into database", NamedTextColor.GRAY)));
     }
 }
 

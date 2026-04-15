@@ -29,6 +29,8 @@ import de.thecoolcraft11.hideAndSeek.phase.EndedPhase;
 import de.thecoolcraft11.hideAndSeek.phase.HidingPhase;
 import de.thecoolcraft11.hideAndSeek.phase.LobbyPhase;
 import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
+import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStore;
+import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStoreFactory;
 import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
 import de.thecoolcraft11.hideAndSeek.setting.SettingRegistrar;
 import de.thecoolcraft11.hideAndSeek.tab.CustomScoreboardProvider;
@@ -77,6 +79,7 @@ public final class HideAndSeek extends MinigameFramework {
     private UnstuckManager unstuckManager;
     private CustomTabProvider tabProvider;
     private CustomScoreboardProvider scoreboardProvider;
+    private PlayerDataStore playerDataStore;
 
     @Override
     protected void onGameEnable() {
@@ -86,6 +89,7 @@ public final class HideAndSeek extends MinigameFramework {
         }
 
         DataController.getInstance().setup();
+        playerDataStore = PlayerDataStoreFactory.create(this);
         ItemSkinSelectionService.initialize(this);
         LoadoutDataService.initialize(this);
         mapManager = new MapManager(this);
@@ -226,6 +230,8 @@ public final class HideAndSeek extends MinigameFramework {
         scoreboardProvider.startAutoUpdate(20);
 
         getLogger().info("Hide and Seek enabled with all features!");
+
+
     }
 
     @Override
@@ -422,6 +428,10 @@ public final class HideAndSeek extends MinigameFramework {
 
     public CustomScoreboardProvider getScoreboardProvider() {
         return scoreboardProvider;
+    }
+
+    public PlayerDataStore getPlayerDataStore() {
+        return playerDataStore;
     }
 
     public void updateWorldIconsForAllMaps() {

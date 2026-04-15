@@ -1,46 +1,32 @@
 package de.thecoolcraft11.hideAndSeek.items;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem;
 import de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem;
 import de.thecoolcraft11.hideAndSeek.model.ItemRarity;
+import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStore;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class ItemSkinSelectionService {
+
+    private static final Gson GSON = new Gson();
 
     private static final Map<UUID, Map<String, String>> PLAYER_VARIANTS = new ConcurrentHashMap<>();
     private static final Map<UUID, Set<String>> PLAYER_UNLOCKS = new ConcurrentHashMap<>();
     private static final Map<UUID, Integer> PLAYER_COINS = new ConcurrentHashMap<>();
     private static final Map<String, SkinMeta> SKIN_META = new ConcurrentHashMap<>();
 
-    private static File dataFile;
-    private static YamlConfiguration dataConfig;
+    private static PlayerDataStore dataStore;
 
     public static void initialize(HideAndSeek plugin) {
-        dataFile = new File(plugin.getDataFolder(), "skin-data.yml");
-        if (!dataFile.exists()) {
-            try {
-                File parent = dataFile.getParentFile();
-                if (parent != null && !parent.exists()) {
-                    parent.mkdirs();
-                }
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                plugin.getLogger().warning("Failed to create skin data file: " + e.getMessage());
-            }
-        }
-        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
-        loadAll();
+        dataStore = plugin.getPlayerDataStore();
     }
 
     private ItemSkinSelectionService() {
@@ -53,7 +39,7 @@ public final class ItemSkinSelectionService {
         }
         PLAYER_VARIANTS
                 .computeIfAbsent(playerId, ignored -> new ConcurrentHashMap<>())
-                .put(logicalItemId, variantId);
+                .put(normalizeLogicalItemId(logicalItemId), variantId);
     }
 
     public static void clearSelectedVariant(UUID playerId, String logicalItemId) {
@@ -61,7 +47,7 @@ public final class ItemSkinSelectionService {
         if (variants == null) {
             return;
         }
-        variants.remove(logicalItemId);
+        variants.remove(normalizeLogicalItemId(logicalItemId));
         if (variants.isEmpty()) {
             PLAYER_VARIANTS.remove(playerId);
         }
@@ -69,7 +55,7 @@ public final class ItemSkinSelectionService {
 
     public static String getSelectedVariant(UUID playerId, String logicalItemId) {
         Map<String, String> variants = PLAYER_VARIANTS.get(playerId);
-        return variants == null ? null : variants.get(logicalItemId);
+        return variants == null ? null : variants.get(normalizeLogicalItemId(logicalItemId));
     }
 
     public static String getSelectedVariant(Player player, String logicalItemId) {
@@ -105,7 +91,7 @@ public final class ItemSkinSelectionService {
     }
 
     public static int getCoins(UUID playerId) {
-        return PLAYER_COINS.getOrDefault(playerId, 0);
+        return Math.max(0, PLAYER_COINS.getOrDefault(playerId, 0));
     }
 
     public static void addCoins(HideAndSeek plugin, UUID playerId, int amount) {
@@ -119,7 +105,7 @@ public final class ItemSkinSelectionService {
     public static void addCoins(HideAndSeek plugin, UUID playerId, int amount, boolean force) {
         if (amount <= 0 && !force) return;
 
-        int updated = getCoins(playerId) + amount;
+        int updated = Math.max(0, getCoins(playerId) + amount);
         PLAYER_COINS.put(playerId, updated);
         savePlayer(plugin, playerId);
     }
@@ -173,45 +159,42 @@ public final class ItemSkinSelectionService {
     }
 
     public static void loadPlayer(HideAndSeek plugin, UUID playerId) {
-        if (dataConfig == null) {
-            initialize(plugin);
-        }
+        ensureStore(plugin);
+        Player player = Bukkit.getPlayer(playerId);
+        String playerName = player != null ? player.getName() : playerId.toString();
 
-        String basePath = "players." + playerId;
-        PLAYER_COINS.put(playerId, Math.max(0, dataConfig.getInt(basePath + ".coins", 0)));
+        dataStore.touchPlayer(playerId, playerName)
+                .exceptionally(ex -> {
+                    plugin.getLogger().warning("Failed to touch player in data store for " + playerId + ": " + ex.getMessage());
+                    return null;
+                });
 
-        Set<String> unlocks = ConcurrentHashMap.newKeySet();
-        unlocks.addAll(dataConfig.getStringList(basePath + ".unlocked"));
-        if (!unlocks.isEmpty()) {
-            PLAYER_UNLOCKS.put(playerId, unlocks);
-        } else {
-            PLAYER_UNLOCKS.remove(playerId);
-        }
+        CompletableFuture<Long> coinsFuture = dataStore.getCoins(playerId);
+        CompletableFuture<String> skinsFuture = dataStore.getSkins(playerId);
 
-        ConfigurationSection selectedSection = dataConfig.getConfigurationSection(basePath + ".selected");
-        if (selectedSection == null) {
-            PLAYER_VARIANTS.remove(playerId);
-            return;
-        }
+        coinsFuture.thenCombine(skinsFuture, LoadedSkinData::from)
+                .thenAccept(loaded -> {
+                    PLAYER_COINS.put(playerId, (int) Math.max(0L, loaded.coins));
 
-        Map<String, String> selected = new ConcurrentHashMap<>();
-        for (String key : selectedSection.getKeys(false)) {
-            String variantId = selectedSection.getString(key);
-            if (variantId == null || variantId.isBlank()) {
-                continue;
-            }
-            if (isUnlocked(playerId, key, variantId)) {
-                selected.put(normalizeLogicalItemId(key), variantId);
-            }
-        }
+                    if (loaded.unlocked.isEmpty()) {
+                        PLAYER_UNLOCKS.remove(playerId);
+                    } else {
+                        Set<String> unlocks = ConcurrentHashMap.newKeySet();
+                        unlocks.addAll(loaded.unlocked);
+                        PLAYER_UNLOCKS.put(playerId, unlocks);
+                    }
 
-        if (selected.isEmpty()) {
-            PLAYER_VARIANTS.remove(playerId);
-        } else {
-            PLAYER_VARIANTS.put(playerId, selected);
-        }
+                    if (loaded.selected.isEmpty()) {
+                        PLAYER_VARIANTS.remove(playerId);
+                    } else {
+                        PLAYER_VARIANTS.put(playerId, new ConcurrentHashMap<>(loaded.selected));
+                    }
+                })
+                .exceptionally(ex -> {
+                    plugin.getLogger().warning("Failed to load skins data for " + playerId + ": " + ex.getMessage());
+                    return null;
+                });
     }
-
 
     public static void savePlayer(HideAndSeek plugin, UUID playerId) {
         savePlayer(plugin, playerId, true);
@@ -222,90 +205,78 @@ public final class ItemSkinSelectionService {
             return;
         }
 
-        if (dataConfig == null) {
-            initialize(plugin);
-        }
+        ensureStore(plugin);
+        String skinsJson = toSkinsJson(playerId);
 
-        String basePath = "players." + playerId;
-        dataConfig.set(basePath + ".coins", Math.max(0, getCoins(playerId)));
+        CompletableFuture<Void> coinsSave = dataStore.setCoins(playerId, Math.max(0, getCoins(playerId)));
+        CompletableFuture<Void> skinsSave = dataStore.setSkins(playerId, skinsJson);
 
-        Set<String> unlocks = PLAYER_UNLOCKS.get(playerId);
-        dataConfig.set(basePath + ".unlocked", unlocks == null ? java.util.List.of() : unlocks.stream().sorted().toList());
-
-        dataConfig.set(basePath + ".selected", null);
-        Map<String, String> selected = PLAYER_VARIANTS.get(playerId);
-        if (selected != null && !selected.isEmpty()) {
-            for (Map.Entry<String, String> entry : selected.entrySet()) {
-                if (entry.getValue() == null || entry.getValue().isBlank()) {
-                    continue;
-                }
-                dataConfig.set(basePath + ".selected." + normalizeLogicalItemId(entry.getKey()), entry.getValue());
-            }
-        }
-
-        if (flush) {
-            saveData(plugin);
-        }
+        CompletableFuture.allOf(coinsSave, skinsSave)
+                .exceptionally(ex -> {
+                    plugin.getLogger().warning("Failed to save skins data for " + playerId + ": " + ex.getMessage());
+                    return null;
+                });
     }
 
     public static void saveAll(HideAndSeek plugin) {
-        if (dataConfig == null) {
-            initialize(plugin);
-        }
         for (UUID playerId : Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).toList()) {
             savePlayer(plugin, playerId, false);
         }
-        saveData(plugin);
     }
 
-    private static void loadAll() {
-        if (dataConfig == null) {
-            return;
+    private static void ensureStore(HideAndSeek plugin) {
+        if (dataStore == null) {
+            dataStore = plugin.getPlayerDataStore();
         }
-        ConfigurationSection players = dataConfig.getConfigurationSection("players");
-        if (players == null) {
-            return;
-        }
-        for (String key : players.getKeys(false)) {
-            try {
-                UUID playerId = UUID.fromString(key);
-                PLAYER_COINS.put(playerId, Math.max(0, dataConfig.getInt("players." + key + ".coins", 0)));
+    }
 
-                Set<String> unlocks = ConcurrentHashMap.newKeySet();
-                unlocks.addAll(dataConfig.getStringList("players." + key + ".unlocked"));
-                if (!unlocks.isEmpty()) {
-                    PLAYER_UNLOCKS.put(playerId, unlocks);
-                }
+    private static String toSkinsJson(UUID playerId) {
+        Map<String, String> selected = PLAYER_VARIANTS.getOrDefault(playerId, Map.of());
+        Set<String> unlocked = PLAYER_UNLOCKS.getOrDefault(playerId, Set.of());
 
-                ConfigurationSection selectedSection = dataConfig.getConfigurationSection("players." + key + ".selected");
-                if (selectedSection != null) {
-                    Map<String, String> selected = new ConcurrentHashMap<>();
-                    for (String logicalItemId : selectedSection.getKeys(false)) {
-                        String variantId = selectedSection.getString(logicalItemId);
-                        if (variantId == null || variantId.isBlank()) {
-                            continue;
-                        }
-                        if (unlocks.contains(metaKey(normalizeLogicalItemId(logicalItemId), variantId))) {
-                            selected.put(normalizeLogicalItemId(logicalItemId), variantId);
-                        }
-                    }
-                    if (!selected.isEmpty()) {
-                        PLAYER_VARIANTS.put(playerId, selected);
-                    }
-                }
-            } catch (IllegalArgumentException ignored) {
+        SkinDataJson skinData = new SkinDataJson();
+        skinData.selected = new HashMap<>();
+        for (Map.Entry<String, String> entry : selected.entrySet()) {
+            if (entry.getValue() != null && !entry.getValue().isBlank()) {
+                skinData.selected.put(normalizeLogicalItemId(entry.getKey()), entry.getValue());
             }
         }
+        skinData.unlocked = unlocked.stream().sorted().toList();
+        return GSON.toJson(skinData);
     }
 
-    private static void saveData(HideAndSeek plugin) {
-        if (dataConfig == null || dataFile == null) {
-            return;
+    private static LoadedSkinData parseSkinsJson(String json) {
+        if (json == null || json.isBlank()) {
+            return LoadedSkinData.empty();
         }
         try {
-            dataConfig.save(dataFile);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed to save skin data: " + e.getMessage());
+            SkinDataJson data = GSON.fromJson(json, SkinDataJson.class);
+            if (data == null) {
+                return LoadedSkinData.empty();
+            }
+
+            Set<String> unlocked = ConcurrentHashMap.newKeySet();
+            if (data.unlocked != null) {
+                unlocked.addAll(data.unlocked.stream().filter(v -> v != null && !v.isBlank()).toList());
+            }
+
+            Map<String, String> selected = new ConcurrentHashMap<>();
+            if (data.selected != null) {
+                for (Map.Entry<String, String> entry : data.selected.entrySet()) {
+                    String logicalItemId = normalizeLogicalItemId(entry.getKey());
+                    String variantId = entry.getValue();
+                    if (variantId == null || variantId.isBlank()) {
+                        continue;
+                    }
+                    if (unlocked.contains(metaKey(logicalItemId, variantId))) {
+                        selected.put(logicalItemId, variantId);
+                    }
+                }
+            }
+
+            return new LoadedSkinData(selected, unlocked, 0L);
+        } catch (JsonSyntaxException ex) {
+            return LoadedSkinData.empty();
         }
     }
 
@@ -314,6 +285,22 @@ public final class ItemSkinSelectionService {
     }
 
     private record SkinMeta(ItemRarity rarity) {
+    }
+
+    private static final class SkinDataJson {
+        Map<String, String> selected = new HashMap<>();
+        List<String> unlocked = new ArrayList<>();
+    }
+
+    private record LoadedSkinData(Map<String, String> selected, Set<String> unlocked, long coins) {
+        static LoadedSkinData empty() {
+            return new LoadedSkinData(new ConcurrentHashMap<>(), ConcurrentHashMap.newKeySet(), 0L);
+        }
+
+        static LoadedSkinData from(Long coins, String json) {
+            LoadedSkinData parsed = parseSkinsJson(json);
+            return new LoadedSkinData(parsed.selected, parsed.unlocked, coins == null ? 0L : coins);
+        }
     }
 
     public static String resolveRuntimeItemId(Player player, String logicalItemId) {

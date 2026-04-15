@@ -1,15 +1,22 @@
 package de.thecoolcraft11.hideAndSeek.loadout;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
+import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStore;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class LoadoutDataService {
+
+    private static final Gson GSON = new Gson();
 
     private static final Map<UUID, PlayerLoadout> PLAYER_LOADOUTS = new ConcurrentHashMap<>();
     private static final Map<LoadoutRole, LoadoutFilterMode> FILTER_MODES = new EnumMap<>(LoadoutRole.class);
@@ -21,13 +28,15 @@ public final class LoadoutDataService {
     private static boolean GLOBAL_LOADOUT_LOCK;
     private static File dataFile;
     private static YamlConfiguration dataConfig;
+    private static PlayerDataStore dataStore;
 
     private LoadoutDataService() {
     }
 
     public static void initialize(HideAndSeek plugin) {
+        dataStore = plugin.getPlayerDataStore();
         resetAdminDefaults();
-        dataFile = new File(plugin.getDataFolder(), "loadout-data.yml");
+        dataFile = resolveDataFile(plugin);
         if (!dataFile.exists()) {
             try {
                 File parent = dataFile.getParentFile();
@@ -44,8 +53,27 @@ public final class LoadoutDataService {
             }
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
-        loadAll(plugin);
         loadAdminPolicy();
+    }
+
+    private static File resolveDataFile(HideAndSeek plugin) {
+        File dataFolder = new File(plugin.getDataFolder(), "data");
+        if (!dataFolder.exists() && !dataFolder.mkdirs()) {
+            plugin.getLogger().warning("Failed to create data folder for " + "loadout-data.yml");
+        }
+
+        File preferred = new File(dataFolder, "loadout-data.yml");
+        File legacy = new File(plugin.getDataFolder(), "loadout-data.yml");
+        if (!preferred.exists() && legacy.exists()) {
+            try {
+                Files.copy(legacy.toPath(), preferred.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                plugin.getLogger().info("Migrated legacy YAML file to data/" + "loadout-data.yml");
+            } catch (IOException ex) {
+                plugin.getLogger().warning("Failed to migrate legacy YAML file " + "loadout-data.yml" + ": " + ex.getMessage());
+            }
+        }
+
+        return preferred;
     }
 
     public static PlayerLoadout getLoadout(UUID playerId) {
@@ -53,157 +81,40 @@ public final class LoadoutDataService {
     }
 
     public static void loadPlayer(HideAndSeek plugin, UUID playerId) {
-        if (dataConfig == null) {
-            initialize(plugin);
-        }
-
-        String basePath = "players." + playerId;
-        PlayerLoadout loadout = new PlayerLoadout();
-
-
-        List<String> hiderItemsStr = dataConfig.getStringList(basePath + ".hider-items");
-        for (String itemStr : hiderItemsStr) {
-            try {
-                LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
-                if (item.isForHiders()) {
-                    loadout.addHiderItemForced(item, item.getRarity().getDefaultCost());
-                }
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-
-
-        List<String> seekerItemsStr = dataConfig.getStringList(basePath + ".seeker-items");
-        for (String itemStr : seekerItemsStr) {
-            try {
-                LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
-                if (item.isForSeekers()) {
-                    loadout.addSeekerItemForced(item, item.getRarity().getDefaultCost());
-                }
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-
-        loadout.setHiderLocked(dataConfig.getBoolean(basePath + ".lock-hider", false));
-        loadout.setSeekerLocked(dataConfig.getBoolean(basePath + ".lock-seeker", false));
-        loadout.setSelectedAdminPresetSlot(LoadoutRole.HIDER, dataConfig.getInt(basePath + ".selected-admin-preset.hider", 0));
-        loadout.setSelectedAdminPresetSlot(LoadoutRole.SEEKER, dataConfig.getInt(basePath + ".selected-admin-preset.seeker", 0));
-
-        for (int presetSlot = 1; presetSlot <= PlayerLoadout.MAX_PRESETS; presetSlot++) {
-            List<String> hiderItemsRaw = dataConfig.getStringList(basePath + ".presets." + presetSlot + ".hider");
-            List<String> seekerItemsRaw = dataConfig.getStringList(basePath + ".presets." + presetSlot + ".seeker");
-
-            LinkedHashSet<LoadoutItemType> hiderItems = new LinkedHashSet<>();
-            for (String itemStr : hiderItemsRaw) {
-                try {
-                    LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
-                    if (item.isForHiders()) {
-                        hiderItems.add(item);
-                    }
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-
-            LinkedHashSet<LoadoutItemType> seekerItems = new LinkedHashSet<>();
-            for (String itemStr : seekerItemsRaw) {
-                try {
-                    LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
-                    if (item.isForSeekers()) {
-                        seekerItems.add(item);
-                    }
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-
-            if (!hiderItems.isEmpty() || !seekerItems.isEmpty()) {
-                loadout.setPreset(presetSlot, hiderItems, seekerItems);
-            }
-        }
-
-        PLAYER_LOADOUTS.put(playerId, loadout);
+        ensureStore(plugin);
+        dataStore.getLoadout(playerId)
+                .thenApply(LoadoutDataService::parseLoadoutJson)
+                .thenAccept(loadout -> PLAYER_LOADOUTS.put(playerId, loadout))
+                .exceptionally(ex -> {
+                    plugin.getLogger().warning("Failed to load loadout for " + playerId + ": " + ex.getMessage());
+                    PLAYER_LOADOUTS.putIfAbsent(playerId, new PlayerLoadout());
+                    return null;
+                });
     }
 
     public static void savePlayer(HideAndSeek plugin, UUID playerId) {
-        savePlayer(plugin, playerId, true);
-    }
-
-    public static void savePlayer(HideAndSeek plugin, UUID playerId, boolean flush) {
-        if (dataConfig == null) {
-            initialize(plugin);
-        }
-
+        ensureStore(plugin);
         PlayerLoadout loadout = PLAYER_LOADOUTS.get(playerId);
         if (loadout == null) {
             return;
         }
-
-        String basePath = "players." + playerId;
-
-
-        List<String> hiderItems = loadout.getHiderItems().stream()
-                .map(LoadoutItemType::name)
-                .sorted()
-                .toList();
-        dataConfig.set(basePath + ".hider-items", hiderItems);
-
-
-        List<String> seekerItems = loadout.getSeekerItems().stream()
-                .map(LoadoutItemType::name)
-                .sorted()
-                .toList();
-        dataConfig.set(basePath + ".seeker-items", seekerItems);
-        dataConfig.set(basePath + ".lock-hider", loadout.isHiderLocked());
-        dataConfig.set(basePath + ".lock-seeker", loadout.isSeekerLocked());
-        dataConfig.set(basePath + ".selected-admin-preset.hider", loadout.getSelectedAdminPresetSlot(LoadoutRole.HIDER));
-        dataConfig.set(basePath + ".selected-admin-preset.seeker", loadout.getSelectedAdminPresetSlot(LoadoutRole.SEEKER));
-
-        String presetsPath = basePath + ".presets";
-        dataConfig.set(presetsPath, null);
-        for (int presetSlot = 1; presetSlot <= PlayerLoadout.MAX_PRESETS; presetSlot++) {
-            if (!loadout.hasPreset(presetSlot)) {
-                continue;
-            }
-            PlayerLoadout.Preset preset = loadout.getPreset(presetSlot);
-            List<String> hiderItems2 = preset.hiderItems.stream().map(Enum::name).toList();
-            List<String> seekerItems2 = preset.seekerItems.stream().map(Enum::name).toList();
-            dataConfig.set(presetsPath + "." + presetSlot + ".hider", hiderItems2);
-            dataConfig.set(presetsPath + "." + presetSlot + ".seeker", seekerItems2);
-        }
-
-        if (flush) {
-            saveData(plugin);
-        }
+        dataStore.setLoadout(playerId, toLoadoutJson(loadout))
+                .exceptionally(ex -> {
+                    plugin.getLogger().warning("Failed to save loadout for " + playerId + ": " + ex.getMessage());
+                    return null;
+                });
     }
 
     public static void saveAll(HideAndSeek plugin) {
-        if (dataConfig == null) {
-            initialize(plugin);
-        }
         for (UUID playerId : new HashSet<>(PLAYER_LOADOUTS.keySet())) {
-            savePlayer(plugin, playerId, false);
+            savePlayer(plugin, playerId);
         }
         saveAdminPolicy(plugin, false);
         saveData(plugin);
     }
 
     public static Set<UUID> getAllKnownPlayerIds() {
-        Set<UUID> ids = new HashSet<>(PLAYER_LOADOUTS.keySet());
-        if (dataConfig == null) {
-            return ids;
-        }
-
-        org.bukkit.configuration.ConfigurationSection players = dataConfig.getConfigurationSection("players");
-        if (players == null) {
-            return ids;
-        }
-
-        for (String key : players.getKeys(false)) {
-            try {
-                ids.add(UUID.fromString(key));
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-        return ids;
+        return new HashSet<>(PLAYER_LOADOUTS.keySet());
     }
 
     public static LoadoutFilterMode getFilterMode(LoadoutRole role) {
@@ -314,21 +225,154 @@ public final class LoadoutDataService {
         saveAll(plugin);
     }
 
-    private static void loadAll(HideAndSeek plugin) {
-        if (dataConfig == null) {
+
+    private static void ensureStore(HideAndSeek plugin) {
+        if (dataStore == null) {
+            dataStore = plugin.getPlayerDataStore();
+        }
+    }
+
+    private static String toLoadoutJson(PlayerLoadout loadout) {
+        LoadoutJson json = new LoadoutJson();
+        json.hiderItems = loadout.getHiderItems().stream().map(Enum::name).sorted().toList();
+        json.seekerItems = loadout.getSeekerItems().stream().map(Enum::name).sorted().toList();
+        json.hiderLocked = loadout.isHiderLocked();
+        json.seekerLocked = loadout.isSeekerLocked();
+        json.selectedAdminPresetHider = loadout.getSelectedAdminPresetSlot(LoadoutRole.HIDER);
+        json.selectedAdminPresetSeeker = loadout.getSelectedAdminPresetSlot(LoadoutRole.SEEKER);
+
+        for (int presetSlot = 1; presetSlot <= PlayerLoadout.MAX_PRESETS; presetSlot++) {
+            if (!loadout.hasPreset(presetSlot)) {
+                continue;
+            }
+            PlayerLoadout.Preset preset = loadout.getPreset(presetSlot);
+            PresetJson presetJson = new PresetJson();
+            presetJson.hider = preset.hiderItems.stream().map(Enum::name).toList();
+            presetJson.seeker = preset.seekerItems.stream().map(Enum::name).toList();
+            json.presets.put(String.valueOf(presetSlot), presetJson);
+        }
+        return GSON.toJson(json);
+    }
+
+    private static PlayerLoadout parseLoadoutJson(String rawJson) {
+        if (rawJson == null || rawJson.isBlank()) {
+            return new PlayerLoadout();
+        }
+        try {
+            LoadoutJson json = GSON.fromJson(rawJson, LoadoutJson.class);
+            if (json == null) {
+                return new PlayerLoadout();
+            }
+
+            PlayerLoadout loadout = new PlayerLoadout();
+            for (String itemStr : json.hiderItems) {
+                try {
+                    LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
+                    if (item.isForHiders()) {
+                        loadout.addHiderItemForced(item, item.getRarity().getDefaultCost());
+                    }
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+
+            for (String itemStr : json.seekerItems) {
+                try {
+                    LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
+                    if (item.isForSeekers()) {
+                        loadout.addSeekerItemForced(item, item.getRarity().getDefaultCost());
+                    }
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+
+            loadout.setHiderLocked(json.hiderLocked);
+            loadout.setSeekerLocked(json.seekerLocked);
+            loadout.setSelectedAdminPresetSlot(LoadoutRole.HIDER, Math.max(0, json.selectedAdminPresetHider));
+            loadout.setSelectedAdminPresetSlot(LoadoutRole.SEEKER, Math.max(0, json.selectedAdminPresetSeeker));
+
+            for (Map.Entry<String, PresetJson> entry : json.presets.entrySet()) {
+                int slot;
+                try {
+                    slot = Integer.parseInt(entry.getKey());
+                } catch (NumberFormatException ex) {
+                    continue;
+                }
+                if (slot < 1 || slot > PlayerLoadout.MAX_PRESETS) {
+                    continue;
+                }
+
+                PresetJson presetJson = entry.getValue();
+                if (presetJson == null) {
+                    continue;
+                }
+
+                LinkedHashSet<LoadoutItemType> hiderItems = new LinkedHashSet<>();
+                for (String itemStr : presetJson.hider) {
+                    try {
+                        LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
+                        if (item.isForHiders()) {
+                            hiderItems.add(item);
+                        }
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+
+                LinkedHashSet<LoadoutItemType> seekerItems = new LinkedHashSet<>();
+                for (String itemStr : presetJson.seeker) {
+                    try {
+                        LoadoutItemType item = LoadoutItemType.valueOf(itemStr);
+                        if (item.isForSeekers()) {
+                            seekerItems.add(item);
+                        }
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+
+                if (!hiderItems.isEmpty() || !seekerItems.isEmpty()) {
+                    loadout.setPreset(slot, hiderItems, seekerItems);
+                }
+            }
+
+            return loadout;
+        } catch (JsonSyntaxException ex) {
+            return new PlayerLoadout();
+        }
+    }
+
+    private static void saveData(HideAndSeek plugin) {
+        if (dataConfig == null || dataFile == null) {
             return;
         }
-        org.bukkit.configuration.ConfigurationSection players = dataConfig.getConfigurationSection("players");
-        if (players == null) {
-            return;
-        }
-        for (String key : players.getKeys(false)) {
-            try {
-                UUID playerId = UUID.fromString(key);
-                loadPlayer(plugin, playerId);
-            } catch (IllegalArgumentException ignored) {
+
+
+        YamlConfiguration merged = YamlConfiguration.loadConfiguration(dataFile);
+        for (String key : new HashSet<>(merged.getKeys(true))) {
+            if (key.startsWith("admin.")) {
+                merged.set(key, null);
             }
         }
+        for (String key : dataConfig.getKeys(true)) {
+            if (key.startsWith("admin.")) {
+                merged.set(key, dataConfig.get(key));
+            }
+        }
+
+        try {
+            merged.save(dataFile);
+            dataConfig = merged;
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to save loadout data: " + e.getMessage());
+        }
+    }
+
+    private static final class LoadoutJson {
+        private final Map<String, PresetJson> presets = new HashMap<>();
+        private List<String> hiderItems = new ArrayList<>();
+        private List<String> seekerItems = new ArrayList<>();
+        private boolean hiderLocked;
+        private boolean seekerLocked;
+        private int selectedAdminPresetHider;
+        private int selectedAdminPresetSeeker;
     }
 
     private static void loadAdminPolicy() {
@@ -406,15 +450,9 @@ public final class LoadoutDataService {
         GLOBAL_LOADOUT_LOCK = false;
     }
 
-    private static void saveData(HideAndSeek plugin) {
-        if (dataConfig == null || dataFile == null) {
-            return;
-        }
-        try {
-            dataConfig.save(dataFile);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed to save loadout data: " + e.getMessage());
-        }
+    private static final class PresetJson {
+        private List<String> hider = new ArrayList<>();
+        private List<String> seeker = new ArrayList<>();
     }
 }
 

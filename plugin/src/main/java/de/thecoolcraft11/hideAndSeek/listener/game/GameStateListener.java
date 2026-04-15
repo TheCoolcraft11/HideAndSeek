@@ -4,6 +4,7 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.hider.RemoteGatewayItem;
 import de.thecoolcraft11.hideAndSeek.items.seeker.PhantomViewerItem;
+import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.util.PlayerStateResetUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -31,6 +32,7 @@ public class GameStateListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         ItemSkinSelectionService.loadPlayer(plugin, player.getUniqueId());
+        LoadoutDataService.loadPlayer(plugin, player.getUniqueId());
         String currentPhase = plugin.getStateManager().getCurrentPhaseId();
 
         plugin.getSeekingBossBarService().onPlayerJoin(player);
@@ -93,6 +95,7 @@ public class GameStateListener implements Listener {
         Player player = event.getPlayer();
         plugin.getUnstuckManager().clearPlayerData(player.getUniqueId());
         ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
+        LoadoutDataService.savePlayer(plugin, player.getUniqueId());
         cleanupSwordCharge(player.getUniqueId());
         cleanupMedkitCharge(player.getUniqueId());
         RemoteGatewayItem.clearGatewaysForOwner(player.getUniqueId());

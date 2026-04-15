@@ -21,7 +21,7 @@ public class PlayerTeamListener implements Listener {
             Object hiderTeamObj = hiderTeamResult.isSuccess() ? hiderTeamResult.getValue() : "Hiders";
             String hiderTeam = hiderTeamObj.toString();
 
-            Team team = event.getPlayer().getScoreboard().getTeam(hiderTeam);
+            Team team = plugin.getTeamManager().getTeam(hiderTeam);
             if (team != null) {
                 team.addEntry(event.getPlayer().getName());
             } else {

@@ -96,6 +96,28 @@ public final class GameCoreSettingGroup implements SettingGroup {
                             return new ItemStack(banner);
                         }
                 ),
+                new StringSettingSpec(
+                        "game.teams.fixed-hider-team",
+                        "Hiders",
+                        "Fixed hider team. Set to a team name to assign new player to this team automatically",
+                        Material.WHITE_BANNER,
+                        (plugin, value) -> {
+                            String teamName = value instanceof String stringValue ? stringValue.trim() : "";
+                            if (teamName.isEmpty()) {
+                                return new ItemStack(Material.WHITE_BANNER);
+                            }
+
+                            var team = plugin.getTeamManager().getTeam(teamName);
+                            if (team == null) {
+                                return new ItemStack(Material.WHITE_BANNER);
+                            }
+
+                            TextColor textColor = team.color();
+                            DyeColor dyeColor = new SettingIconHelper().mapToNearestDye(textColor);
+                            Material banner = Material.valueOf(dyeColor.name() + "_BANNER");
+                            return new ItemStack(banner);
+                        }
+                ),
                 new IntegerSettingSpec(
                         "game.teams.seeker-count",
                         1,
