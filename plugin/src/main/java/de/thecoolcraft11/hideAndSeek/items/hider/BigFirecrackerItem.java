@@ -58,7 +58,7 @@ public class BigFirecrackerItem implements GameItem {
 
     @Override
     public void register(HideAndSeek plugin) {
-        int bigFirecrackerCooldown = plugin.getSettingRegistry().get("hider-items.big-firecracker.cooldown", 12);
+        int bigFirecrackerCooldown = plugin.getSettingRegistry().get("hider-items.big-firecracker.cooldown", 18);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> spawnBigFirecracker(context, plugin))
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> spawnBigFirecracker(context, plugin))

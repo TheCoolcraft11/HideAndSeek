@@ -150,7 +150,7 @@ public final class HiderItemsSettingGroup implements SettingGroup {
                         "Cooldown for block swap in seconds", Material.CLOCK),
                 new DoubleSettingSpec("hider-items.block-swap.range", 50.0, 5.0, 200.0,
                         "Maximum swap range for block swap", Material.BLAZE_POWDER),
-                new IntegerSettingSpec("hider-items.big-firecracker.cooldown", 12, 0, 60,
+                new IntegerSettingSpec("hider-items.big-firecracker.cooldown", 18, 0, 60,
                         "Cooldown for big firecracker in seconds", Material.CLOCK),
                 new IntegerSettingSpec("hider-items.big-firecracker.fuse-time", 60, 10, 200,
                         "Fuse time in ticks before big explosion", Material.CLOCK),
