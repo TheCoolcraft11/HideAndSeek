@@ -10,10 +10,15 @@ import org.bukkit.Material;
 public final class DoubleSettingSpec implements SettingSpec {
 
     private final String key;
+
     private final double fallback;
+
     private final double min;
+
     private final double max;
+
     private final String description;
+
     private final Material icon;
 
     public DoubleSettingSpec(String key, double fallback, double min, double max, String description, Material icon) {
@@ -27,14 +32,9 @@ public final class DoubleSettingSpec implements SettingSpec {
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
+        plugin.getConfigRegistry().register("settings." + key, Double.class, fallback);
         plugin.getSettingRegistry().register(
-                SettingDefinition.builder(key, SettingType.DOUBLE, Double.class)
-                        .defaultValue(resolver.get(plugin, key, fallback))
-                        .rangeDouble(min, max)
-                        .description(description)
-                        .customIcon(icon)
-                        .build()
-        );
+                SettingDefinition.builder(key, SettingType.DOUBLE, Double.class).defaultValue(fallback).rangeDouble(min,
+                        max).description(description).customIcon(icon).build());
     }
 }
-

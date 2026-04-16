@@ -7,17 +7,22 @@ import de.thecoolcraft11.minigameframework.config.SettingDefinition;
 import de.thecoolcraft11.minigameframework.config.SettingType;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-
 import java.util.function.BiFunction;
 
 public final class IntegerSettingSpec implements SettingSpec {
 
     private final String key;
+
     private final int fallback;
+
     private final int min;
+
     private final int max;
+
     private final String description;
+
     private final Material icon;
+
     private final BiFunction<HideAndSeek, Object, ItemStack> itemProvider;
 
     public IntegerSettingSpec(String key, int fallback, int min, int max, String description, Material icon) {
@@ -36,18 +41,12 @@ public final class IntegerSettingSpec implements SettingSpec {
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
-        var builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class)
-                .defaultValue(resolver.get(plugin, key, fallback))
-                .range(min, max)
-                .description(description)
-                .customIcon(icon);
-
+        var builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(fallback).range(
+                min, max).description(description).customIcon(icon);
         if (itemProvider != null) {
             builder.itemProvider(value -> itemProvider.apply(plugin, value));
         }
-
+        plugin.getConfigRegistry().register("settings." + key, Integer.class, fallback);
         plugin.getSettingRegistry().register(builder.build());
     }
 }
-
-

@@ -9,46 +9,10 @@ maps:
 # NOTE: Map-specific configuration (spawn-points, allowed-blocks, world-borders, preferred-modes)
 # is saved in maps.yml. See that file for per-map settings.
 
-# Global disallowed blockstate properties
-# Properties listed here won't appear in the appearance GUI for ANY block
-disallowed-blockstates:
-  - "waterlogged"
-  - "conditional"
-
-seeker-break-blocks:
-  - "SHORT_GRASS"
-  - "TALL_GRASS"
-  - "SEAGRASS"
-  - "TALL_SEAGRASS"
-
-block-interaction-exceptions:
-  - "*_DOOR"
-  - "*_FENCE_GATE"
-  - "*_TRAPDOOR"
-  - "*_BUTTON"
-  - "*_LEVER"
-
-block-physics-exceptions:
-  - "*_DOOR"
-  - "*_FENCE_GATE"
-  - "*_TRAPDOOR"
-  - "*_BUTTON"
-  - "*_LEVER"
-
 nms:
   # Master switch: attempt to load NMS adapter. If true, plugin will try to enable NMS features
   # on startup. If adapter missing or fails, behavior depends on fallbacks.
   enabled: true
-
-  # Game settings
-game:
-  # Apply player facing direction to placed blockstate in BLOCK mode
-  # true = align facing/axis/rotation/half with player look
-  # false = keep the chosen blockstate exactly as selected in the appearance GUI
-  apply-player-direction: true
-
-  # Maximum air blocks above water/lava that still allow hiding placement
-  max-air-above-liquid: 2
 
 persistence:
   save-skin-data: true
@@ -208,12 +172,36 @@ scoreboard:
       color: "#FFFF00" # Yellow
 
 settings:
-# Leave this section empty to use plugins defaults. To override a specific
-# default value for a setting, add the key under this node and set the desired value. For example:
-#  hider-items:
-#    random-block:
-#      uses: 10
-#  game:
-#    use_map_specific_setting_overrides: true
-# This will set the default value for the random-block setting to 10. Though this still can be changed in the
-# ingame settings menu.
+  # Global disallowed blockstate properties for the appearance GUI
+  disallowed-blockstates:
+    - "waterlogged"
+    - "conditional"
+
+  seeker-break-blocks:
+    - "SHORT_GRASS"
+    - "TALL_GRASS"
+    - "SEAGRASS"
+    - "TALL_SEAGRASS"
+
+  block-interaction-exceptions:
+    - "*_DOOR"
+    - "*_FENCE_GATE"
+    - "*_TRAPDOOR"
+    - "*_BUTTON"
+    - "*_LEVER"
+
+  block-physics-exceptions:
+    - "*_DOOR"
+    - "*_FENCE_GATE"
+    - "*_TRAPDOOR"
+    - "*_BUTTON"
+    - "*_LEVER"
+
+  game:
+    # Apply player facing direction to placed blockstate in BLOCK mode
+    # true = align facing/axis/rotation/half with player look
+    # false = keep the chosen blockstate exactly as selected in the appearance GUI
+    apply-player-direction: true
+
+    # Maximum air blocks above water/lava that still allow hiding placement
+    max-air-above-liquid: 2

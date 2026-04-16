@@ -13,38 +13,13 @@ public final class PerkHiderCamouflageSettingGroup implements SettingGroup {
     @Override
     public List<SettingSpec> settings() {
         return List.of(
-                new BooleanSettingSpec(
-                        "perks.perk.hider_camouflage.enabled",
-                        true,
-                        "Enable Camouflage",
-                        Material.FERN,
-                        true
-                ),
-                new IntegerSettingSpec(
-                        "perks.perk.hider_camouflage.cost",
-                        80,
-                        0,
-                        10000,
-                        "Cost of Camouflage",
-                        Material.EMERALD
-                ),
-                new LongSettingSpec(
-                        "perks.perk.hider_camouflage.cooldown-ticks",
-                        0L,
-                        0L,
-                        20000L,
-                        "Purchase cooldown for Camouflage",
-                        Material.CLOCK
-                ),
-                new LongSettingSpec(
-                        "perks.perk.hider_camouflage.re-cleanse-interval-ticks",
-                        100L,
-                        1L,
-                        20000L,
-                        "Interval between Camouflage re-cleanses",
-                        Material.POTION
-                )
-        );
+                new BooleanSettingSpec("perks.perk.hider_camouflage.enabled", true, "Enable Camouflage", Material.FERN,
+                        true),
+                new IntegerSettingSpec("perks.perk.hider_camouflage.cost", 80, 0, 10000, "Cost of Camouflage",
+                        Material.EMERALD),
+                new LongSettingSpec("perks.perk.hider_camouflage.cooldown-ticks", 0L, 0L, 20000L,
+                        "Purchase cooldown for Camouflage", Material.CLOCK),
+                new LongSettingSpec("perks.perk.hider_camouflage.re-cleanse-interval-ticks", 100L, 1L, 20000L,
+                        "Interval between Camouflage re-cleanses", Material.POTION));
     }
 }
-

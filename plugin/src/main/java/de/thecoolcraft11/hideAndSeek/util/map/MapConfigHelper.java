@@ -185,7 +185,7 @@ public class MapConfigHelper {
         if (mapData != null && !mapData.getSeekerBreakBlocks().isEmpty()) {
             return new ArrayList<>(mapData.getSeekerBreakBlocks());
         }
-        return plugin.getConfig().getStringList("seeker-break-blocks");
+        return getStringListSetting(plugin, "seeker-break-blocks");
     }
 
     public static List<Material> getBlockInteractionExceptions(HideAndSeek plugin, String mapName) {
@@ -209,7 +209,23 @@ public class MapConfigHelper {
             }
         }
 
-        return parseMaterialRules(plugin.getConfig().getStringList(globalPath));
+        return parseMaterialRules(getStringListSetting(plugin, globalPath));
+    }
+
+    private static List<String> getStringListSetting(HideAndSeek plugin, String key) {
+        var settingResult = plugin.getSettingService().getSetting(key);
+        Object value = settingResult.isSuccess() ? settingResult.getValue() : List.of();
+        if (!(value instanceof List<?> listValue)) {
+            return List.of();
+        }
+
+        List<String> result = new ArrayList<>();
+        for (Object entry : listValue) {
+            if (entry instanceof String stringEntry) {
+                result.add(stringEntry);
+            }
+        }
+        return result;
     }
 
     private static List<Material> parseMaterialRules(List<String> rules) {

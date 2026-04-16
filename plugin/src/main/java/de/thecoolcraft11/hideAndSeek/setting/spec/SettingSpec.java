@@ -5,6 +5,6 @@ import de.thecoolcraft11.hideAndSeek.setting.SettingIconHelper;
 import de.thecoolcraft11.hideAndSeek.setting.SettingValueResolver;
 
 public interface SettingSpec {
+
     void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper);
 }
-

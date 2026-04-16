@@ -10,10 +10,15 @@ import org.bukkit.Material;
 public final class FloatSettingSpec implements SettingSpec {
 
     private final String key;
+
     private final float fallback;
+
     private final float min;
+
     private final float max;
+
     private final String description;
+
     private final Material icon;
 
     public FloatSettingSpec(String key, float fallback, float min, float max, String description, Material icon) {
@@ -27,14 +32,9 @@ public final class FloatSettingSpec implements SettingSpec {
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
+        plugin.getConfigRegistry().register("settings." + key, Float.class, fallback);
         plugin.getSettingRegistry().register(
-                SettingDefinition.builder(key, SettingType.FLOAT, Float.class)
-                        .defaultValue(resolver.get(plugin, key, fallback))
-                        .rangeFloat(min, max)
-                        .description(description)
-                        .customIcon(icon)
-                        .build()
-        );
+                SettingDefinition.builder(key, SettingType.FLOAT, Float.class).defaultValue(fallback).rangeFloat(min,
+                        max).description(description).customIcon(icon).build());
     }
 }
-

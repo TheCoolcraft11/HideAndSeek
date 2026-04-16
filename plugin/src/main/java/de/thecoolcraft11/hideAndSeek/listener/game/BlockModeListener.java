@@ -520,7 +520,9 @@ public class BlockModeListener implements Listener {
         Block blockAtFeet = loc.getBlock();
 
         boolean inLiquid = blockAtFeet.getType() == Material.WATER || blockAtFeet.getType() == Material.LAVA;
-        int maxAirAbove = Math.max(0, plugin.getConfig().getInt("game.max-air-above-liquid", 2));
+        var maxAirAboveResult = plugin.getSettingService().getSetting("game.max-air-above-liquid");
+        Object maxAirAboveObj = maxAirAboveResult.isSuccess() ? maxAirAboveResult.getValue() : 2;
+        int maxAirAbove = Math.max(0, maxAirAboveObj instanceof Number number ? number.intValue() : 2);
         Block targetBlock = blockAtFeet;
         if (inLiquid) {
             targetBlock = null;
@@ -559,7 +561,9 @@ public class BlockModeListener implements Listener {
 
 
         BlockData blockData = HideAndSeek.getDataController().getChosenBlockData(player.getUniqueId());
-        boolean applyPlayerDirection = plugin.getConfig().getBoolean("game.apply-player-direction", true);
+        var applyPlayerDirectionResult = plugin.getSettingService().getSetting("game.apply-player-direction");
+        Object applyPlayerDirectionObj = applyPlayerDirectionResult.isSuccess() ? applyPlayerDirectionResult.getValue() : true;
+        boolean applyPlayerDirection = applyPlayerDirectionObj instanceof Boolean bool ? bool : true;
         if (blockData != null) {
 
             blockData = blockData.clone();

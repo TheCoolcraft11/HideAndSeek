@@ -743,12 +743,19 @@ public class MapManager {
 
     public void loadDisallowedBlockStates() {
         BlockStateFilter.clear();
-        List<String> disallowedStates = plugin.getConfig().getStringList("disallowed-blockstates");
-        for (String state : disallowedStates) {
-            if (!state.isEmpty()) {
-                BlockStateFilter.addDisallowedProperty(state.trim());
-                plugin.getLogger().info("Disallowed blockstate property: " + state.trim());
+        var disallowedStatesResult = plugin.getSettingService().getSetting("disallowed-blockstates");
+        Object rawStates = disallowedStatesResult.isSuccess() ? disallowedStatesResult.getValue() : List.of();
+        if (!(rawStates instanceof List<?> disallowedStates)) {
+            return;
+        }
+
+        for (Object stateObj : disallowedStates) {
+            if (!(stateObj instanceof String state) || state.isBlank()) {
+                continue;
             }
+            String property = state.trim();
+            BlockStateFilter.addDisallowedProperty(property);
+            plugin.getLogger().info("Disallowed blockstate property: " + property);
         }
     }
 }

@@ -119,12 +119,33 @@ public class DebugConfigCommand implements DebugSubcommand {
             }
         }
 
-        validateMaterialRuleList(config, "seeker-break-blocks", "config.yml", errors);
-        validateMaterialRuleList(config, "block-interaction-exceptions", "config.yml", errors);
-        validateMaterialRuleList(config, "block-physics-exceptions", "config.yml", errors);
+        ConfigurationSection settings = config.getConfigurationSection("settings");
+        if (settings != null) {
+            validateMaterialRuleList(settings, "seeker-break-blocks", "config.yml settings", errors);
+            validateMaterialRuleList(settings, "block-interaction-exceptions", "config.yml settings", errors);
+            validateMaterialRuleList(settings, "block-physics-exceptions", "config.yml settings", errors);
 
-        if (config.contains("disallowed-blockstates") && !config.isList("disallowed-blockstates")) {
-            errors.add("config.yml key 'disallowed-blockstates' must be a list");
+            if (settings.contains("disallowed-blockstates") && !settings.isList("disallowed-blockstates")) {
+                errors.add("config.yml settings key 'disallowed-blockstates' must be a list");
+            }
+            if (settings.contains("game.apply-player-direction") && !settings.isBoolean(
+                    "game.apply-player-direction")) {
+                errors.add("config.yml settings key 'game.apply-player-direction' must be true/false");
+            }
+            if (settings.contains("game.max-air-above-liquid")) {
+                if (!settings.isInt("game.max-air-above-liquid")) {
+                    errors.add("config.yml settings key 'game.max-air-above-liquid' must be an integer");
+                } else if (settings.getInt("game.max-air-above-liquid") < 0) {
+                    errors.add("config.yml settings key 'game.max-air-above-liquid' must be >= 0");
+                }
+            }
+        }
+
+        if (config.contains("disallowed-blockstates") || config.contains("seeker-break-blocks") ||
+                config.contains("block-interaction-exceptions") || config.contains("block-physics-exceptions") ||
+                config.contains("game.apply-player-direction") || config.contains("game.max-air-above-liquid")) {
+            warnings.add(
+                    "Legacy root config keys detected for block rules. Move them under settings.* (for example settings.seeker-break-blocks)");
         }
 
         return new ValidationResult(errors, warnings);

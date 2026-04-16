@@ -10,10 +10,15 @@ import org.bukkit.Material;
 public final class LongSettingSpec implements SettingSpec {
 
     private final String key;
+
     private final long fallback;
+
     private final long min;
+
     private final long max;
+
     private final String description;
+
     private final Material icon;
 
     public LongSettingSpec(String key, long fallback, long min, long max, String description, Material icon) {
@@ -27,14 +32,9 @@ public final class LongSettingSpec implements SettingSpec {
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
+        plugin.getConfigRegistry().register("settings." + key, Long.class, fallback);
         plugin.getSettingRegistry().register(
-                SettingDefinition.builder(key, SettingType.LONG, Long.class)
-                        .defaultValue(resolver.get(plugin, key, fallback))
-                        .rangeLong(min, max)
-                        .description(description)
-                        .customIcon(icon)
-                        .build()
-        );
+                SettingDefinition.builder(key, SettingType.LONG, Long.class).defaultValue(fallback).rangeLong(min,
+                        max).description(description).customIcon(icon).build());
     }
 }
-
