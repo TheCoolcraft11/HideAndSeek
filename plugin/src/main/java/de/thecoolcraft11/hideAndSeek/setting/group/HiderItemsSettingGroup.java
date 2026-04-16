@@ -196,7 +196,7 @@ public final class HiderItemsSettingGroup implements SettingGroup {
                         1.0, "Boombox skin main particle multiplier"),
                 variantMultiplierSetting("hider-items.big-firecracker.variants.skin_boombox.mini-particle-multiplier",
                         1.0, "Boombox skin mini particle multiplier"),
-                new IntegerSettingSpec("hider-items.firework-rocket.cooldown", 10, 0, 60, "", Material.CLOCK),
+                new IntegerSettingSpec("hider-items.firework-rocket.cooldown", 30, 0, 60, "", Material.CLOCK),
                 new IntegerSettingSpec("hider-items.firework-rocket.target-y", 128, -64, 320,
                         "Target Y for firework explosion", Material.LADDER),
                 new DoubleSettingSpec("hider-items.firework-rocket.volume", 10.0, 0.1, 15.0,
