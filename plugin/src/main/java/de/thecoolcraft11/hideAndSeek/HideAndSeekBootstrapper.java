@@ -4,11 +4,13 @@ import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Objects;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.Map;
 
 @SuppressWarnings({"UnstableApiUsage", "unused"})
 public class HideAndSeekBootstrapper implements PluginBootstrap {
@@ -18,9 +20,9 @@ public class HideAndSeekBootstrapper implements PluginBootstrap {
 
         File configFile = new File(context.getDataDirectory().toFile(), "config.yml");
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+        boolean injectDatapack = loadInjectFlag(configFile);
 
-        if (!config.getBoolean("inject-datapack", false)) {
+        if (!injectDatapack) {
             return;
         }
 
@@ -31,9 +33,13 @@ public class HideAndSeekBootstrapper implements PluginBootstrap {
             var registrar = event.registrar();
 
             try {
-                URI uri = Objects.requireNonNull(
-                        getClass().getResource("/datapack")
-                ).toURI();
+                URL resource = getClass().getClassLoader().getResource("datapack");
+
+                if (resource == null) {
+                    throw new IllegalStateException("Datapack folder not found inside plugin jar");
+                }
+
+                URI uri = resource.toURI();
 
                 registrar.discoverPack(
                         context.getPluginMeta(),
@@ -49,5 +55,30 @@ public class HideAndSeekBootstrapper implements PluginBootstrap {
                 throw new RuntimeException("Failed to load embedded datapack", e);
             }
         });
+    }
+
+    private boolean loadInjectFlag(File configFile) {
+
+        if (!configFile.exists()) {
+            return false;
+        }
+
+        Yaml yaml = new Yaml();
+
+        try (var reader = Files.newBufferedReader(configFile.toPath())) {
+
+            Map<String, Object> config = yaml.load(reader);
+
+            if (config == null) {
+                return false;
+            }
+
+            Object value = config.get("inject-datapack");
+
+            return Boolean.TRUE.equals(value);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read config.yml in bootstrap", e);
+        }
     }
 }
