@@ -33,6 +33,28 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
 
     @Override
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
+
+        boolean force = Arrays.stream(args)
+                .anyMatch(arg -> arg.equalsIgnoreCase("--force"));
+
+        boolean playersOnline = !Bukkit.getOnlinePlayers().isEmpty();
+
+        if (playersOnline && !force) {
+            sender.sendMessage(Component.text(
+                    "Migration blocked: players are currently online.",
+                    NamedTextColor.RED));
+
+            sender.sendMessage(Component.text(
+                    "All players must be offline before running this command to avoid data corruption. Run it from the console.",
+                    NamedTextColor.YELLOW));
+
+            sender.sendMessage(Component.text(
+                    "Use --force to override (risk of data corruption).",
+                    NamedTextColor.RED));
+
+            return false;
+        }
+
         if (!GlobalStatsAPI.isAvailable() || !MinigameStatsAPI.isAvailable()) {
             sender.sendMessage(Component.text("Migration aborted: GlobalStatsAPI/MinigameStatsAPI are not available.", NamedTextColor.RED));
             return false;
