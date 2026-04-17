@@ -15,6 +15,9 @@ subprojects {
             name = "papermc-repo"
             url = "https://repo.papermc.io/repository/maven-public/"
         }
+        maven {
+            url = 'https://repo.extendedclip.com/releases/'
+        }
     }
 
     java {

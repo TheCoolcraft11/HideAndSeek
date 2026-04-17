@@ -29,6 +29,7 @@ import de.thecoolcraft11.hideAndSeek.phase.EndedPhase;
 import de.thecoolcraft11.hideAndSeek.phase.HidingPhase;
 import de.thecoolcraft11.hideAndSeek.phase.LobbyPhase;
 import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
+import de.thecoolcraft11.hideAndSeek.placeholder.HASExpansion;
 import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStore;
 import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStoreFactory;
 import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
@@ -229,9 +230,11 @@ public final class HideAndSeek extends MinigameFramework {
 
         scoreboardProvider.startAutoUpdate(20);
 
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new HASExpansion().register();
+        }
+
         getLogger().info("Hide and Seek enabled with all features!");
-
-
     }
 
     @Override

@@ -15,6 +15,9 @@ dependencies:
     Timer:
       required: false
       load: BEFORE
+    PlaceholderAPI:
+      required: false
+      load: BEFORE
 
 permissions:
   hideandseek.command.loadout:
