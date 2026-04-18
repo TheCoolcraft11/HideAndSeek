@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.playerdata;
 
 import de.thecoolcraft11.minigameframework.MinigameFramework;
+import de.thecoolcraft11.minigameframework.storage.sql.framework.GlobalStatType;
 import de.thecoolcraft11.minigameframework.storage.sql.stats.GlobalStatsAPI;
 import de.thecoolcraft11.minigameframework.storage.sql.stats.MinigameStatsAPI;
 
@@ -11,8 +12,6 @@ public final class DatabasePlayerDataStore implements PlayerDataStore {
 
     public static final String MINIGAME_ID = "hideandseek";
 
-    private static final String COINS_KEY = "coins";
-    private static final String XP_KEY = "xp";
     private static final String WINS_KEY = "wins";
     private static final String LOSSES_KEY = "losses";
 
@@ -27,42 +26,48 @@ public final class DatabasePlayerDataStore implements PlayerDataStore {
 
     @Override
     public CompletableFuture<Long> getCoins(UUID uuid) {
-        return GlobalStatsAPI.getStat(uuid, COINS_KEY).thenApply(v -> v == null ? 0L : Math.max(0L, v));
+        return GlobalStatsAPI.getStat(uuid, GlobalStatType.COINS).thenApply(v -> v == null ? 0L : Math.max(0L, v));
     }
 
     @Override
     public CompletableFuture<Void> setCoins(UUID uuid, long value) {
-        return GlobalStatsAPI.setStat(uuid, COINS_KEY, Math.max(0L, value));
+        return GlobalStatsAPI.setStat(uuid, GlobalStatType.COINS, Math.max(0L, value));
     }
 
     @Override
     public CompletableFuture<Long> getXp(UUID uuid) {
-        return GlobalStatsAPI.getStat(uuid, XP_KEY).thenApply(v -> v == null ? 0L : Math.max(0L, v));
+        return GlobalStatsAPI.getStat(uuid, GlobalStatType.XP).thenApply(v -> v == null ? 0L : Math.max(0L, v));
     }
 
     @Override
     public CompletableFuture<Void> setXp(UUID uuid, long value) {
-        return GlobalStatsAPI.setStat(uuid, XP_KEY, Math.max(0L, value));
+        return GlobalStatsAPI.setStat(uuid, GlobalStatType.XP, Math.max(0L, value));
     }
 
     @Override
     public CompletableFuture<Long> getWins(UUID uuid) {
-        return GlobalStatsAPI.getStat(uuid, WINS_KEY).thenApply(v -> v == null ? 0L : Math.max(0L, v));
+        return GlobalStatsAPI.getStat(uuid, GlobalStatType.WINS).thenApply(v -> v == null ? 0L : Math.max(0L, v));
     }
 
     @Override
     public CompletableFuture<Long> getLosses(UUID uuid) {
-        return GlobalStatsAPI.getStat(uuid, LOSSES_KEY).thenApply(v -> v == null ? 0L : Math.max(0L, v));
+        return GlobalStatsAPI.getStat(uuid, GlobalStatType.LOSSES).thenApply(v -> v == null ? 0L : Math.max(0L, v));
     }
 
     @Override
     public CompletableFuture<Void> addWin(UUID uuid) {
-        return GlobalStatsAPI.addStat(uuid, WINS_KEY, 1L).thenApply(ignored -> null);
+        return GlobalStatsAPI.addStat(uuid, GlobalStatType.WINS, 1L)
+                .thenCompose(ignored ->
+                        MinigameStatsAPI.addStat(uuid, MINIGAME_ID, WINS_KEY, 1L))
+                .thenApply(ignored -> null);
     }
 
     @Override
     public CompletableFuture<Void> addLoss(UUID uuid) {
-        return GlobalStatsAPI.addStat(uuid, LOSSES_KEY, 1L).thenApply(ignored -> null);
+        return GlobalStatsAPI.addStat(uuid, GlobalStatType.LOSSES, 1L)
+                .thenCompose(ignored ->
+                        MinigameStatsAPI.addStat(uuid, MINIGAME_ID, LOSSES_KEY, 1L))
+                .thenApply(ignored -> null);
     }
 
     @Override

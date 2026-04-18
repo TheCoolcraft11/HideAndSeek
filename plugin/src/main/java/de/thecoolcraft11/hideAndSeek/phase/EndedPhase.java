@@ -16,9 +16,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jspecify.annotations.NonNull;
 
@@ -105,9 +109,9 @@ public class EndedPhase implements GamePhase {
                 public void run() {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String lobbyWorldName = hideAndSeekPlugin.getMapManager().getLobbyWorld();
-                        org.bukkit.World lobbyWorld = Bukkit.getWorld(lobbyWorldName);
+                        World lobbyWorld = Bukkit.getWorld(lobbyWorldName);
                         if (lobbyWorld != null) {
-                            org.bukkit.Location lobbySpawn = lobbyWorld.getSpawnLocation();
+                            Location lobbySpawn = lobbyWorld.getSpawnLocation();
                             player.teleport(lobbySpawn);
                         }
                     }
@@ -147,13 +151,13 @@ public class EndedPhase implements GamePhase {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
 
-            org.bukkit.entity.BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
+            BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(player.getUniqueId());
             if (display != null && display.isValid()) {
                 display.remove();
             }
 
 
-            org.bukkit.entity.Entity sittingEntity = HideAndSeek.getDataController().getSittingEntity(player.getUniqueId());
+            Entity sittingEntity = HideAndSeek.getDataController().getSittingEntity(player.getUniqueId());
             if (sittingEntity != null && sittingEntity.isValid()) {
 
                 if (player.isInsideVehicle() && Objects.equals(player.getVehicle(), sittingEntity)) {
@@ -163,12 +167,12 @@ public class EndedPhase implements GamePhase {
             }
 
 
-            org.bukkit.Location lastLoc = HideAndSeek.getDataController().getLastLocation(player.getUniqueId());
+            Location lastLoc = HideAndSeek.getDataController().getLastLocation(player.getUniqueId());
             if (lastLoc != null) {
-                org.bukkit.block.Block block = lastLoc.getBlock();
-                org.bukkit.Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
+                Block block = lastLoc.getBlock();
+                Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
                 if (chosenBlock != null && block.getType() == chosenBlock) {
-                    block.setType(org.bukkit.Material.AIR);
+                    block.setType(Material.AIR);
                 }
             }
         }
@@ -181,14 +185,14 @@ public class EndedPhase implements GamePhase {
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerStateResetUtil.resetPlayerCompletely(player, true);
 
-            var maxHealth = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+            var maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
             if (maxHealth != null) {
                 maxHealth.setBaseValue(20.0);
             }
 
-            player.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
+            player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
-            player.removePotionEffect(org.bukkit.potion.PotionEffectType.SLOWNESS);
+            player.removePotionEffect(PotionEffectType.SLOWNESS);
         }
     }
 
@@ -282,6 +286,7 @@ public class EndedPhase implements GamePhase {
             winners.addAll(activeHiders);
         } else {
             winners.addAll(HideAndSeek.getDataController().getSeekers());
+            winners.removeAll(HideAndSeek.getDataController().getAllHiders());
         }
 
         Set<UUID> participants = new HashSet<>();
