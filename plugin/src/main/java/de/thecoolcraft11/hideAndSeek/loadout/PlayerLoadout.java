@@ -1,5 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.loadout;
 
+import de.thecoolcraft11.hideAndSeek.model.ItemType;
 import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 
 import java.util.*;
@@ -11,6 +12,8 @@ public class PlayerLoadout {
     private final Set<LoadoutItemType> seekerItems = new LinkedHashSet<>();
     private final Map<LoadoutItemType, Integer> itemCosts = new HashMap<>();
     private final Map<Integer, Preset> presets = new HashMap<>();
+    private final Map<Integer, ItemType> hiderSlotPreferences = new HashMap<>();
+    private final Map<Integer, ItemType> seekerSlotPreferences = new HashMap<>();
     private int selectedHiderAdminPresetSlot;
     private int selectedSeekerAdminPresetSlot;
     private boolean hiderLocked;
@@ -147,6 +150,48 @@ public class PlayerLoadout {
             return;
         }
         selectedSeekerAdminPresetSlot = normalized;
+    }
+
+    public void setHiderSlotPreference(int slot, ItemType itemType) {
+        if (slot < 0 || slot > 8) return;
+        if (itemType == null) {
+            hiderSlotPreferences.remove(slot);
+        } else {
+            hiderSlotPreferences.put(slot, itemType);
+        }
+    }
+
+    public void setSeekerSlotPreference(int slot, ItemType itemType) {
+        if (slot < 0 || slot > 8) return;
+        if (itemType == null) {
+            seekerSlotPreferences.remove(slot);
+        } else {
+            seekerSlotPreferences.put(slot, itemType);
+        }
+    }
+
+    public ItemType getHiderSlotPreference(int slot) {
+        return hiderSlotPreferences.getOrDefault(slot, null);
+    }
+
+    public ItemType getSeekerSlotPreference(int slot) {
+        return seekerSlotPreferences.getOrDefault(slot, null);
+    }
+
+    public Map<Integer, ItemType> getHiderSlotPreferences() {
+        return Collections.unmodifiableMap(hiderSlotPreferences);
+    }
+
+    public Map<Integer, ItemType> getSeekerSlotPreferences() {
+        return Collections.unmodifiableMap(seekerSlotPreferences);
+    }
+
+    public void clearHiderSlotPreferences() {
+        hiderSlotPreferences.clear();
+    }
+
+    public void clearSeekerSlotPreferences() {
+        seekerSlotPreferences.clear();
     }
 
     public static class Preset {

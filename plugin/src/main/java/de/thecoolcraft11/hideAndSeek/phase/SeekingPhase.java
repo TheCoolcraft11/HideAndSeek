@@ -178,6 +178,9 @@ public class SeekingPhase implements GamePhase {
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
         hideAndSeekPlugin.getPointService().stopSeekingTracking();
         hideAndSeekPlugin.getSeekingBossBarService().stopSeekingSession();
+
+        HideAndSeek.getDataController().setRoundEndTime(System.currentTimeMillis());
+
         if (checkTask != null) {
             checkTask.cancel();
         }

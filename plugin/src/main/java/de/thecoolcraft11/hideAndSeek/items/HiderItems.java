@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -118,7 +119,6 @@ public final class HiderItems {
         plugin.getLoadoutManager().sanitizePlayerLoadout(player.getUniqueId());
         var loadout = plugin.getLoadoutManager().getLoadout(player.getUniqueId());
 
-        int slot = 0;
         Set<LoadoutItemType> itemsToGive = loadout.getHiderItems();
 
         if (itemsToGive.isEmpty()) {
@@ -160,7 +160,52 @@ public final class HiderItems {
             );
         }
 
+
+        int slot = 0;
+        java.util.Map<Integer, de.thecoolcraft11.hideAndSeek.model.ItemType> slotPreferences = loadout.getHiderSlotPreferences();
+        java.util.Set<LoadoutItemType> placedItems = new java.util.HashSet<>();
+
+        if (!slotPreferences.isEmpty()) {
+            for (int currentSlot = 0; currentSlot < 9; currentSlot++) {
+                de.thecoolcraft11.hideAndSeek.model.ItemType preference = slotPreferences.get(currentSlot);
+                if (preference == null) continue;
+
+
+                for (LoadoutItemType itemType : itemsToGive) {
+                    if (placedItems.contains(itemType)) continue;
+                    if (itemType.getItemType() != preference) continue;
+
+                    String itemId = itemType.getItemId();
+                    if (itemType == LoadoutItemType.SPEED_BOOST) {
+                        itemId = SpeedBoostItem.ID + "_" + SpeedBoostItem.getSpeedLevel(player.getUniqueId());
+                    } else if (itemType == LoadoutItemType.KNOCKBACK_STICK) {
+                        itemId = KnockbackStickItem.ID + "_" + KnockbackStickItem.getKnockbackLevel(
+                                player.getUniqueId());
+                    }
+
+                    ItemStack item = plugin.getCustomItemManager().getIdentifiedItemStack(itemId, player);
+                    if (item != null) {
+                        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                            plugin.getLogger().info(
+                                    "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (preference match)");
+                        }
+                        String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player,
+                                ItemSkinSelectionService.normalizeLogicalItemId(itemId));
+                        CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
+                        player.getInventory().setItem(currentSlot, item);
+                        placedItems.add(itemType);
+                        plugin.getCustomItemManager().resetPlayerUses(RandomBlockItem.ID, player.getUniqueId());
+                        plugin.getCustomItemManager().resetPlayerUses(TotemItem.ID, player.getUniqueId());
+                        break;
+                    }
+                }
+            }
+        }
+
+
         for (LoadoutItemType itemType : itemsToGive) {
+            if (placedItems.contains(itemType)) continue;
+
             String itemId = itemType.getItemId();
 
             if (itemType == LoadoutItemType.SPEED_BOOST) {
@@ -168,6 +213,15 @@ public final class HiderItems {
             } else if (itemType == LoadoutItemType.KNOCKBACK_STICK) {
                 itemId = KnockbackStickItem.ID + "_" + KnockbackStickItem.getKnockbackLevel(player.getUniqueId());
             }
+
+
+            while (slot < 9 && player.getInventory().getItem(slot) != null && !Objects.requireNonNull(
+                    player.getInventory().getItem(
+                            slot)).getType().isAir()) {
+                slot++;
+            }
+
+            if (slot >= 9) break;
 
             if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                 plugin.getLogger().info("Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + slot);

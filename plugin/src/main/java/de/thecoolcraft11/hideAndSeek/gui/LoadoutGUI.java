@@ -170,6 +170,24 @@ public class LoadoutGUI {
             displayedCount++;
         }
 
+
+        InventoryItem slotPrefsButton = new InventoryItem(createUtilityItem(Material.HOPPER,
+                "Slot Preferences", NamedTextColor.LIGHT_PURPLE,
+                List.of(
+                        Component.text("Configure item placement", NamedTextColor.YELLOW).decoration(
+                                TextDecoration.ITALIC, false),
+                        Component.text("Choose which ItemTypes go in which slots", NamedTextColor.YELLOW).decoration(
+                                TextDecoration.ITALIC, false)
+                )));
+        slotPrefsButton.setClickHandler((p, item, event, s) -> {
+            SlotPreferencesGUI gui = new SlotPreferencesGUI(loadoutManager, plugin);
+            gui.open(p, hiderView);
+            event.setCancelled(true);
+        });
+        slotPrefsButton.setAllowTakeout(false);
+        slotPrefsButton.setAllowInsert(false);
+        inv.setItem(48, slotPrefsButton);
+
         renderBottomTabs(inv, hiderView ? GuiTab.HIDER : GuiTab.SEEKER);
 
         plugin.getInventoryFramework().openInventory(player, inv);

@@ -99,9 +99,6 @@ public final class SeekerItems {
         plugin.getLoadoutManager().sanitizePlayerLoadout(player.getUniqueId());
         var loadout = plugin.getLoadoutManager().getLoadout(player.getUniqueId());
 
-        int slot = 1;
-
-
         var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         var blockSmallResult = plugin.getSettingService().getSetting("game.block-form.scale-to-block");
@@ -171,9 +168,63 @@ public final class SeekerItems {
         }
 
 
+        java.util.Map<Integer, de.thecoolcraft11.hideAndSeek.model.ItemType> slotPreferences = loadout.getSeekerSlotPreferences();
+        java.util.Set<LoadoutItemType> placedItems = new java.util.HashSet<>();
+
+        if (!slotPreferences.isEmpty()) {
+            for (int currentSlot = 1; currentSlot < 9; currentSlot++) {
+
+                if ((isBlockMode && blockStatsEnabled && currentSlot == 8) ||
+                        ((isSmallMode || (isBlockMode && isBlockSmall)) && crowBarEnabled && currentSlot == 7)) {
+                    continue;
+                }
+
+                de.thecoolcraft11.hideAndSeek.model.ItemType preference = slotPreferences.get(currentSlot);
+                if (preference == null) continue;
+
+
+                for (LoadoutItemType itemType : itemsToGive) {
+                    if (placedItems.contains(itemType)) continue;
+                    if (itemType.getItemType() != preference) continue;
+
+                    String itemId = itemType.getItemId();
+                    ItemStack item = plugin.getCustomItemManager().getIdentifiedItemStack(itemId, player);
+                    if (item != null) {
+                        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                            plugin.getLogger().info(
+                                    "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (preference match)");
+                        }
+                        String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player,
+                                ItemSkinSelectionService.normalizeLogicalItemId(itemId));
+                        CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
+                        player.getInventory().setItem(currentSlot, item);
+                        placedItems.add(itemType);
+                        break;
+                    }
+                }
+            }
+
+        }
+
+
+        int slot = 1;
         for (LoadoutItemType itemType : itemsToGive) {
 
+            if (placedItems.contains(itemType)) continue;
+
             String itemId = itemType.getItemId();
+
+
+            while (slot < 7) {
+                ItemStack slotItem = player.getInventory().getItem(slot);
+                if (slotItem == null || slotItem.getType().isAir()) {
+                    break;
+                }
+                slot++;
+            }
+
+
+            if (slot >= 7) break;
 
             if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                 plugin.getLogger().info("Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + slot);
