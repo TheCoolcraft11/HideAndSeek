@@ -295,7 +295,7 @@ public class EndedPhase implements GamePhase {
 
         int totalPlayers = participants.size();
         long roundMillis = DataController.getInstance().getRoundEndTime() - DataController.getInstance().getRoundStartTime();
-        int durationSeconds = (int) (roundMillis / 100);
+        int durationSeconds = (int) (roundMillis / 1000);
 
         List<Map.Entry<UUID, Integer>> sortedPoints = new ArrayList<>(
                 HideAndSeek.getDataController().getAllPoints().entrySet());
