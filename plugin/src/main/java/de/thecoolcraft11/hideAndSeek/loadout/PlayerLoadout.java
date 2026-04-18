@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.loadout;
 
 import de.thecoolcraft11.hideAndSeek.model.ItemType;
 import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
+import de.thecoolcraft11.hideAndSeek.model.SlotPreference;
 
 import java.util.*;
 
@@ -12,8 +13,8 @@ public class PlayerLoadout {
     private final Set<LoadoutItemType> seekerItems = new LinkedHashSet<>();
     private final Map<LoadoutItemType, Integer> itemCosts = new HashMap<>();
     private final Map<Integer, Preset> presets = new HashMap<>();
-    private final Map<Integer, ItemType> hiderSlotPreferences = new HashMap<>();
-    private final Map<Integer, ItemType> seekerSlotPreferences = new HashMap<>();
+    private final Map<Integer, SlotPreference> hiderSlotPreferences = new HashMap<>();
+    private final Map<Integer, SlotPreference> seekerSlotPreferences = new HashMap<>();
     private int selectedHiderAdminPresetSlot;
     private int selectedSeekerAdminPresetSlot;
     private boolean hiderLocked;
@@ -152,37 +153,37 @@ public class PlayerLoadout {
         selectedSeekerAdminPresetSlot = normalized;
     }
 
-    public void setHiderSlotPreference(int slot, ItemType itemType) {
+    public void setHiderSlotPreference(int slot, ItemType primary, ItemType fallback) {
         if (slot < 0 || slot > 8) return;
-        if (itemType == null) {
+        if (primary == null) {
             hiderSlotPreferences.remove(slot);
         } else {
-            hiderSlotPreferences.put(slot, itemType);
+            hiderSlotPreferences.put(slot, new SlotPreference(primary, fallback));
         }
     }
 
-    public void setSeekerSlotPreference(int slot, ItemType itemType) {
+    public void setSeekerSlotPreference(int slot, ItemType primary, ItemType fallback) {
         if (slot < 0 || slot > 8) return;
-        if (itemType == null) {
+        if (primary == null) {
             seekerSlotPreferences.remove(slot);
         } else {
-            seekerSlotPreferences.put(slot, itemType);
+            seekerSlotPreferences.put(slot, new SlotPreference(primary, fallback));
         }
     }
 
-    public ItemType getHiderSlotPreference(int slot) {
+    public SlotPreference getHiderSlotPreference(int slot) {
         return hiderSlotPreferences.getOrDefault(slot, null);
     }
 
-    public ItemType getSeekerSlotPreference(int slot) {
+    public SlotPreference getSeekerSlotPreference(int slot) {
         return seekerSlotPreferences.getOrDefault(slot, null);
     }
 
-    public Map<Integer, ItemType> getHiderSlotPreferences() {
+    public Map<Integer, SlotPreference> getHiderSlotPreferences() {
         return Collections.unmodifiableMap(hiderSlotPreferences);
     }
 
-    public Map<Integer, ItemType> getSeekerSlotPreferences() {
+    public Map<Integer, SlotPreference> getSeekerSlotPreferences() {
         return Collections.unmodifiableMap(seekerSlotPreferences);
     }
 

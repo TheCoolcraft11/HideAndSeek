@@ -4,6 +4,7 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.seeker.*;
 import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
+import de.thecoolcraft11.hideAndSeek.model.SlotPreference;
 import de.thecoolcraft11.hideAndSeek.util.CustomModelDataUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -81,15 +82,8 @@ public final class SeekerItems {
 
     public static void giveItems(Player player, HideAndSeek plugin) {
         removeItems(player);
-
-        ItemStack sword = plugin.getCustomItemManager().getIdentifiedItemStack(SeekersSwordItem.ID, player);
-        String swordSkin = ItemSkinSelectionService.getSelectedVariant(player, ItemSkinSelectionService.normalizeLogicalItemId(SeekersSwordItem.ID));
-        CustomModelDataUtil.setCustomModelData(sword, SeekersSwordItem.ID, swordSkin);
-        player.getInventory().setItem(0, sword);
-
         giveLoadoutItems(player, plugin);
         ItemSkinSelectionService.applySelectedVariants(player, plugin);
-
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 4, false, false, false));
     }
 
@@ -114,85 +108,66 @@ public final class SeekerItems {
         boolean crowBarEnabled = crowbarEnabledObj != null && crowbarEnabledObj.toString().equals("true");
 
 
-        Set<LoadoutItemType> itemsToGive = loadout.getSeekerItems();
+        ItemStack sword = plugin.getCustomItemManager().getIdentifiedItemStack(SeekersSwordItem.ID, player);
+        if (sword != null) {
+            String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player,
+                    ItemSkinSelectionService.normalizeLogicalItemId(SeekersSwordItem.ID));
+            CustomModelDataUtil.setCustomModelData(sword, SeekersSwordItem.ID, selectedVariant);
+            player.getInventory().setItem(0, sword);
+        }
+
+
+        Set<LoadoutItemType> itemsToGive = loadout.getSeekerItems().stream()
+                .filter(item -> !SeekersSwordItem.ID.equals(item.getItemId()))
+                .collect(java.util.stream.Collectors.toSet());
 
 
         if (itemsToGive.isEmpty()) {
-
             if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                 plugin.getLogger().info("No loadout selected for " + player.getName() + ", using defaults");
             }
 
-            itemsToGive = Set.of(
-                    LoadoutItemType.GRAPPLING_HOOK
-            );
-
+            itemsToGive = Set.of(LoadoutItemType.GRAPPLING_HOOK);
         } else {
-
             if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                 plugin.getLogger().info(player.getName() + " has custom loadout with " + itemsToGive.size() + " items");
             }
-
         }
 
 
         boolean hasValidItems = false;
-
         for (LoadoutItemType itemType : itemsToGive) {
-
             String itemId = itemType.getItemId();
-
             if (plugin.getCustomItemManager().getIdentifiedItemStack(itemId, player) != null) {
-
                 hasValidItems = true;
-
                 break;
-
             }
-
         }
-
-
         if (!hasValidItems && !itemsToGive.isEmpty()) {
-
             plugin.getLogger().warning("All selected items for " + player.getName() + " are not implemented yet! Using default loadout instead.");
-
             player.sendMessage(Component.text("Some items you selected are not implemented yet. Using default items instead.", NamedTextColor.YELLOW));
-
-            itemsToGive = Set.of(
-
-                    LoadoutItemType.GRAPPLING_HOOK
-
-            );
-
+            itemsToGive = Set.of(LoadoutItemType.GRAPPLING_HOOK);
         }
 
 
-        java.util.Map<Integer, de.thecoolcraft11.hideAndSeek.model.ItemType> slotPreferences = loadout.getSeekerSlotPreferences();
+        java.util.Map<Integer, SlotPreference> slotPreferences = loadout.getSeekerSlotPreferences();
         java.util.Set<LoadoutItemType> placedItems = new java.util.HashSet<>();
 
+
         if (!slotPreferences.isEmpty()) {
-            for (int currentSlot = 1; currentSlot < 9; currentSlot++) {
-
-                if ((isBlockMode && blockStatsEnabled && currentSlot == 8) ||
-                        ((isSmallMode || (isBlockMode && isBlockSmall)) && crowBarEnabled && currentSlot == 7)) {
-                    continue;
-                }
-
-                de.thecoolcraft11.hideAndSeek.model.ItemType preference = slotPreferences.get(currentSlot);
+            for (int currentSlot = 1; currentSlot < 7; currentSlot++) {
+                SlotPreference preference = slotPreferences.get(currentSlot);
                 if (preference == null) continue;
-
 
                 for (LoadoutItemType itemType : itemsToGive) {
                     if (placedItems.contains(itemType)) continue;
-                    if (itemType.getItemType() != preference) continue;
-
+                    if (itemType.getItemType() != preference.primary()) continue;
                     String itemId = itemType.getItemId();
                     ItemStack item = plugin.getCustomItemManager().getIdentifiedItemStack(itemId, player);
                     if (item != null) {
                         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                             plugin.getLogger().info(
-                                    "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (preference match)");
+                                    "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (primary preference match)");
                         }
                         String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player,
                                 ItemSkinSelectionService.normalizeLogicalItemId(itemId));
@@ -202,19 +177,36 @@ public final class SeekerItems {
                         break;
                     }
                 }
-            }
 
+                if (preference.hasFallback() && (player.getInventory().getItem(
+                        currentSlot) == null || player.getInventory().getItem(currentSlot).getType().isAir())) {
+                    for (LoadoutItemType itemType : itemsToGive) {
+                        if (placedItems.contains(itemType)) continue;
+                        if (itemType.getItemType() != preference.fallback()) continue;
+                        String itemId = itemType.getItemId();
+                        ItemStack item = plugin.getCustomItemManager().getIdentifiedItemStack(itemId, player);
+                        if (item != null) {
+                            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                                plugin.getLogger().info(
+                                        "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (fallback preference match)");
+                            }
+                            String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player,
+                                    ItemSkinSelectionService.normalizeLogicalItemId(itemId));
+                            CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
+                            player.getInventory().setItem(currentSlot, item);
+                            placedItems.add(itemType);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
 
         int slot = 1;
         for (LoadoutItemType itemType : itemsToGive) {
-
             if (placedItems.contains(itemType)) continue;
-
             String itemId = itemType.getItemId();
-
-
             while (slot < 7) {
                 ItemStack slotItem = player.getInventory().getItem(slot);
                 if (slotItem == null || slotItem.getType().isAir()) {
@@ -222,32 +214,21 @@ public final class SeekerItems {
                 }
                 slot++;
             }
-
-
             if (slot >= 7) break;
-
             if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                 plugin.getLogger().info("Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + slot);
             }
-
             ItemStack item = plugin.getCustomItemManager().getIdentifiedItemStack(itemId, player);
-
             if (item != null) {
                 String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ItemSkinSelectionService.normalizeLogicalItemId(itemId));
                 CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
-
                 player.getInventory().setItem(slot++, item);
-
                 if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                     plugin.getLogger().info(" Item placed successfully");
                 }
-
             } else {
-
                 plugin.getLogger().warning(" Item is NULL! Item not registered: " + itemId + " (skipping)");
-
             }
-
         }
 
 
@@ -322,11 +303,6 @@ public final class SeekerItems {
     public static void giveItemsWithLoadout(Player player, HideAndSeek plugin) {
         removeItems(player);
 
-
-        ItemStack sword = plugin.getCustomItemManager().getIdentifiedItemStack(SeekersSwordItem.ID, player);
-        String swordSkin = ItemSkinSelectionService.getSelectedVariant(player, ItemSkinSelectionService.normalizeLogicalItemId(SeekersSwordItem.ID));
-        CustomModelDataUtil.setCustomModelData(sword, SeekersSwordItem.ID, swordSkin);
-        player.getInventory().setItem(0, sword);
 
 
         giveLoadoutItems(player, plugin);

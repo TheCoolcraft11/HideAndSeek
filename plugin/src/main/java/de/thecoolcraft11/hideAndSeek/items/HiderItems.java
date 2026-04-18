@@ -5,6 +5,7 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.hider.*;
 import de.thecoolcraft11.hideAndSeek.listener.player.HiderEquipmentChangeListener;
 import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
+import de.thecoolcraft11.hideAndSeek.model.SlotPreference;
 import de.thecoolcraft11.hideAndSeek.util.CustomModelDataUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -161,19 +162,19 @@ public final class HiderItems {
         }
 
 
-        int slot = 0;
-        java.util.Map<Integer, de.thecoolcraft11.hideAndSeek.model.ItemType> slotPreferences = loadout.getHiderSlotPreferences();
+        int slot;
+        java.util.Map<Integer, SlotPreference> slotPreferences = loadout.getHiderSlotPreferences();
         java.util.Set<LoadoutItemType> placedItems = new java.util.HashSet<>();
 
         if (!slotPreferences.isEmpty()) {
             for (int currentSlot = 0; currentSlot < 9; currentSlot++) {
-                de.thecoolcraft11.hideAndSeek.model.ItemType preference = slotPreferences.get(currentSlot);
+                SlotPreference preference = slotPreferences.get(currentSlot);
                 if (preference == null) continue;
 
 
                 for (LoadoutItemType itemType : itemsToGive) {
                     if (placedItems.contains(itemType)) continue;
-                    if (itemType.getItemType() != preference) continue;
+                    if (itemType.getItemType() != preference.primary()) continue;
 
                     String itemId = itemType.getItemId();
                     if (itemType == LoadoutItemType.SPEED_BOOST) {
@@ -187,7 +188,7 @@ public final class HiderItems {
                     if (item != null) {
                         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                             plugin.getLogger().info(
-                                    "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (preference match)");
+                                    "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (primary preference match)");
                         }
                         String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player,
                                 ItemSkinSelectionService.normalizeLogicalItemId(itemId));
@@ -199,10 +200,45 @@ public final class HiderItems {
                         break;
                     }
                 }
+
+
+                if (preference.hasFallback() && (player.getInventory().getItem(
+                        currentSlot) == null || Objects.requireNonNull(
+                        player.getInventory().getItem(currentSlot)).getType().isAir())) {
+                    for (LoadoutItemType itemType : itemsToGive) {
+                        if (placedItems.contains(itemType)) continue;
+                        if (itemType.getItemType() != preference.fallback()) continue;
+
+                        String itemId = itemType.getItemId();
+                        if (itemType == LoadoutItemType.SPEED_BOOST) {
+                            itemId = SpeedBoostItem.ID + "_" + SpeedBoostItem.getSpeedLevel(player.getUniqueId());
+                        } else if (itemType == LoadoutItemType.KNOCKBACK_STICK) {
+                            itemId = KnockbackStickItem.ID + "_" + KnockbackStickItem.getKnockbackLevel(
+                                    player.getUniqueId());
+                        }
+
+                        ItemStack item = plugin.getCustomItemManager().getIdentifiedItemStack(itemId, player);
+                        if (item != null) {
+                            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                                plugin.getLogger().info(
+                                        "Giving " + player.getName() + " item: " + itemType.name() + " (ID: " + itemId + ") in slot " + currentSlot + " (fallback preference match)");
+                            }
+                            String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player,
+                                    ItemSkinSelectionService.normalizeLogicalItemId(itemId));
+                            CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
+                            player.getInventory().setItem(currentSlot, item);
+                            placedItems.add(itemType);
+                            plugin.getCustomItemManager().resetPlayerUses(RandomBlockItem.ID, player.getUniqueId());
+                            plugin.getCustomItemManager().resetPlayerUses(TotemItem.ID, player.getUniqueId());
+                            break;
+                        }
+                    }
+                }
             }
         }
 
 
+        slot = 0;
         for (LoadoutItemType itemType : itemsToGive) {
             if (placedItems.contains(itemType)) continue;
 
@@ -216,8 +252,7 @@ public final class HiderItems {
 
 
             while (slot < 9 && player.getInventory().getItem(slot) != null && !Objects.requireNonNull(
-                    player.getInventory().getItem(
-                            slot)).getType().isAir()) {
+                    player.getInventory().getItem(slot)).getType().isAir()) {
                 slot++;
             }
 

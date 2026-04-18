@@ -3,8 +3,8 @@ package de.thecoolcraft11.hideAndSeek.loadout;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import de.thecoolcraft11.hideAndSeek.model.ItemType;
 import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
+import de.thecoolcraft11.hideAndSeek.model.SlotPreference;
 import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStore;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -242,12 +242,12 @@ public final class LoadoutDataService {
         json.selectedAdminPresetHider = loadout.getSelectedAdminPresetSlot(LoadoutRole.HIDER);
         json.selectedAdminPresetSeeker = loadout.getSelectedAdminPresetSlot(LoadoutRole.SEEKER);
 
-        for (Map.Entry<Integer, ItemType> entry : loadout.getHiderSlotPreferences().entrySet()) {
-            json.hiderSlotPreferences.put(String.valueOf(entry.getKey()), entry.getValue().name());
+        for (Map.Entry<Integer, SlotPreference> entry : loadout.getHiderSlotPreferences().entrySet()) {
+            json.hiderSlotPreferences.put(String.valueOf(entry.getKey()), entry.getValue().toString());
         }
 
-        for (Map.Entry<Integer, ItemType> entry : loadout.getSeekerSlotPreferences().entrySet()) {
-            json.seekerSlotPreferences.put(String.valueOf(entry.getKey()), entry.getValue().name());
+        for (Map.Entry<Integer, SlotPreference> entry : loadout.getSeekerSlotPreferences().entrySet()) {
+            json.seekerSlotPreferences.put(String.valueOf(entry.getKey()), entry.getValue().toString());
         }
 
         for (int presetSlot = 1; presetSlot <= PlayerLoadout.MAX_PRESETS; presetSlot++) {
@@ -302,8 +302,10 @@ public final class LoadoutDataService {
             for (Map.Entry<String, String> entry : json.hiderSlotPreferences.entrySet()) {
                 try {
                     int slot = Integer.parseInt(entry.getKey());
-                    ItemType itemType = ItemType.valueOf(entry.getValue());
-                    loadout.setHiderSlotPreference(slot, itemType);
+                    SlotPreference pref = SlotPreference.fromString(entry.getValue());
+                    if (pref != null) {
+                        loadout.setHiderSlotPreference(slot, pref.primary(), pref.fallback());
+                    }
                 } catch (Exception ignored) {
                 }
             }
@@ -311,8 +313,10 @@ public final class LoadoutDataService {
             for (Map.Entry<String, String> entry : json.seekerSlotPreferences.entrySet()) {
                 try {
                     int slot = Integer.parseInt(entry.getKey());
-                    ItemType itemType = ItemType.valueOf(entry.getValue());
-                    loadout.setSeekerSlotPreference(slot, itemType);
+                    SlotPreference pref = SlotPreference.fromString(entry.getValue());
+                    if (pref != null) {
+                        loadout.setSeekerSlotPreference(slot, pref.primary(), pref.fallback());
+                    }
                 } catch (Exception ignored) {
                 }
             }

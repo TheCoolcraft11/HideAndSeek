@@ -186,7 +186,7 @@ public class LoadoutGUI {
         });
         slotPrefsButton.setAllowTakeout(false);
         slotPrefsButton.setAllowInsert(false);
-        inv.setItem(48, slotPrefsButton);
+        inv.setItem(53, slotPrefsButton);
 
         renderBottomTabs(inv, hiderView ? GuiTab.HIDER : GuiTab.SEEKER);
 
@@ -674,6 +674,8 @@ public class LoadoutGUI {
         }
 
         lore.add(Component.text("Cost: " + cost + " tokens", NamedTextColor.GOLD)
+                .decoration(TextDecoration.ITALIC, false));
+        lore.add(Component.text("Type: " + type.getItemType().name(), NamedTextColor.DARK_GRAY)
                 .decoration(TextDecoration.ITALIC, false));
         lore.add(Component.text("Rarity: " + type.getRarity().name(), rarityColor)
                 .decoration(TextDecoration.ITALIC, false));
