@@ -5,6 +5,7 @@ import de.thecoolcraft11.hideAndSeek.items.seeker.*;
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
 
+import java.util.Arrays;
 import java.util.Set;
 
 
@@ -81,6 +82,10 @@ public enum LoadoutItemType {
 
     public String getItemId() {
         return itemId;
+    }
+
+    public static LoadoutItemType fromID(String ID) {
+        return Arrays.stream(values()).filter(type -> type.getItemId().equals(ID)).findFirst().orElse(null);
     }
 
     public boolean isSupported(NmsAdapter nms) {

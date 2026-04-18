@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek;
 import de.thecoolcraft11.hideAndSeek.command.*;
 import de.thecoolcraft11.hideAndSeek.gui.*;
 import de.thecoolcraft11.hideAndSeek.items.*;
+import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
@@ -18,7 +19,7 @@ import de.thecoolcraft11.hideAndSeek.listener.perk.PlaceholderItemProtectionList
 import de.thecoolcraft11.hideAndSeek.listener.player.*;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
-import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsLoader;
 import de.thecoolcraft11.hideAndSeek.perk.PerkRegistry;
@@ -193,20 +194,40 @@ public final class HideAndSeek extends MinigameFramework {
 
         unstuckManager.startTrackingTask();
 
-        getWikiRegistry().addPlaceholderResolver((player, key) -> switch (key) {
-            case "small_size" -> {
-                double value = getSettingRegistry().get("game.small-mode.hider-size");
-                String text = String.valueOf(value).trim().substring(0, Math.min(3, String.valueOf(value).trim().length()));
-                yield Component.text(text, NamedTextColor.LIGHT_PURPLE);
+        getWikiRegistry().addPlaceholderResolver((player, key) -> {
+            if (key.startsWith("setting-")) {
+                return Component.text(getSettingRegistry().get(key.substring("setting-".length())).toString());
             }
-            case "gamemode" -> {
-                GameModeEnum value = getSettingRegistry().get("game.mode");
-                if (value == null) yield Component.text("N/A", NamedTextColor.LIGHT_PURPLE);
-                String raw = value.toString();
-                String text = raw.substring(0, 1).toUpperCase() + raw.substring(1).toLowerCase();
-                yield Component.text(text, NamedTextColor.LIGHT_PURPLE);
+            if (key.startsWith("rarity-")) {
+                if (key.startsWith("item-")) {
+                    LoadoutItemType itemType = LoadoutItemType.fromID("has_hider_" + key.substring("rarity-".length()));
+                    if (itemType == null) {
+                        itemType = LoadoutItemType.fromID("has_seeker_" + key.substring("rarity-".length()));
+                    }
+                    if (itemType != null) {
+                        return Component.text(itemType.getRarity().name(), switch (itemType.getRarity()) {
+                            case COMMON -> NamedTextColor.WHITE;
+                            case UNCOMMON -> NamedTextColor.GREEN;
+                            case RARE -> NamedTextColor.BLUE;
+                            case EPIC -> NamedTextColor.LIGHT_PURPLE;
+                            case LEGENDARY -> NamedTextColor.GOLD;
+                        });
+                    }
+                }
             }
-            default -> null;
+            return Component.empty();
+        });
+
+        getWikiRegistry().addItemPlaceholderResolver((player, key) -> {
+            if (key.startsWith("item-")) {
+                GameItem gameItem = SeekerItems.getItem("has_seeker_" + key.substring("item-".length()));
+                if (gameItem == null) {
+                    gameItem = HiderItems.getItem("has_hider_" + key.substring("item-".length()));
+                }
+                if (gameItem == null) return new ItemStack(Material.BARRIER);
+                return gameItem.createItem(this);
+            }
+            return new ItemStack(Material.AIR);
         });
 
 
