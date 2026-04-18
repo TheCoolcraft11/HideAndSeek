@@ -56,7 +56,7 @@ public class HidingPhase implements GamePhase {
         hideAndSeekPlugin.getPointService().resetRoundState();
 
         TimerManager.cleanupTimers(hideAndSeekPlugin);
-
+        HideAndSeek.getDataController().setRoundStartTime(System.currentTimeMillis());
 
         String selectedMapName = HideAndSeek.getDataController().getCurrentMapName();
         World gameWorld;

@@ -30,6 +30,8 @@ public class DataController {
     private org.bukkit.Location roundSpawnPoint;
     private final Set<UUID> allowedSpectators;
     private boolean mapSelectionLocked;
+    private long roundStartTime;
+    private long roundEndTime;
 
 
     public DataController() {
@@ -53,6 +55,8 @@ public class DataController {
         this.glowingState = new HashMap<>();
         this.allowedSpectators = new HashSet<>();
         this.mapSelectionLocked = false;
+        this.roundStartTime = 0L;
+        this.roundEndTime = 0L;
     }
 
     public void setup() {
@@ -352,5 +356,21 @@ public class DataController {
 
     public Set<UUID> getAllowedSpectators() {
         return Collections.unmodifiableSet(this.allowedSpectators);
+    }
+
+    public long getRoundStartTime() {
+        return roundStartTime;
+    }
+
+    public void setRoundStartTime(long roundStartTime) {
+        this.roundStartTime = roundStartTime;
+    }
+
+    public long getRoundEndTime() {
+        return roundEndTime;
+    }
+
+    public void setRoundEndTime(long roundEndTime) {
+        this.roundEndTime = roundEndTime;
     }
 }

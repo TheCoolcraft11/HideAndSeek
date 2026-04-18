@@ -8,8 +8,10 @@ import de.thecoolcraft11.hideAndSeek.items.seeker.CameraItem;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.PlayerStateResetUtil;
 import de.thecoolcraft11.hideAndSeek.util.TimerManager;
+import de.thecoolcraft11.minigameframework.FrameworkPlugin;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.game.GamePhase;
+import de.thecoolcraft11.minigameframework.progression.GameResult;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -18,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.util.*;
@@ -248,6 +251,31 @@ public class EndedPhase implements GamePhase {
         }
     }
 
+    private static int getMaxPoints() {
+        Map<UUID, Integer> allPoints = DataController.getInstance().getAllPoints();
+        int max = 1;
+        for (int points : allPoints.values()) {
+            if (points > max) max = points;
+        }
+        return max;
+    }
+
+    private static @NonNull Map<UUID, Integer> getUuidIntegerMap(List<Map.Entry<UUID, Integer>> sortedPoints) {
+        Map<UUID, Integer> placements = new HashMap<>();
+        int currentPlacement = 1;
+        int lastPoints = Integer.MIN_VALUE;
+        for (int i = 0; i < sortedPoints.size(); i++) {
+            int points = sortedPoints.get(i).getValue();
+            UUID uuid = sortedPoints.get(i).getKey();
+            if (points != lastPoints) {
+                currentPlacement = i + 1;
+                lastPoints = points;
+            }
+            placements.put(uuid, currentPlacement);
+        }
+        return placements;
+    }
+
     private void updateGlobalRoundStats(HideAndSeek plugin, boolean hidersWin, List<UUID> activeHiders) {
         Set<UUID> winners = new HashSet<>();
         if (hidersWin) {
@@ -260,12 +288,26 @@ public class EndedPhase implements GamePhase {
         participants.addAll(HideAndSeek.getDataController().getHiders());
         participants.addAll(HideAndSeek.getDataController().getSeekers());
 
+        int totalPlayers = participants.size();
+        long roundMillis = DataController.getInstance().getRoundEndTime() - DataController.getInstance().getRoundStartTime();
+        int durationSeconds = (int) (roundMillis / 100);
+
+        List<Map.Entry<UUID, Integer>> sortedPoints = new ArrayList<>(
+                HideAndSeek.getDataController().getAllPoints().entrySet());
+        sortedPoints.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+
+        Map<UUID, Integer> placements = getUuidIntegerMap(sortedPoints);
+
         for (UUID playerId : participants) {
             boolean winner = winners.contains(playerId);
+            int placement = placements.getOrDefault(playerId, totalPlayers);
+            int points = HideAndSeek.getDataController().getAllPoints().getOrDefault(playerId, 0);
+            double performance = (double) points / Math.max(1, getMaxPoints());
+            GameResult result = new GameResult(placement, totalPlayers, performance,
+                    durationSeconds > 0 ? durationSeconds : 1);
+            Player player = Bukkit.getPlayer(playerId);
             if (winner) {
                 plugin.getPlayerDataStore().addWin(playerId)
-                        .thenCompose(ignored -> plugin.getPlayerDataStore().getXp(playerId))
-                        .thenCompose(currentXp -> plugin.getPlayerDataStore().setXp(playerId, Math.max(0L, currentXp + 10L)))
                         .exceptionally(ex -> {
                             plugin.getLogger().warning("Failed to update win/xp stats for " + playerId + ": " + ex.getMessage());
                             return null;
@@ -276,6 +318,9 @@ public class EndedPhase implements GamePhase {
                             plugin.getLogger().warning("Failed to update loss stats for " + playerId + ": " + ex.getMessage());
                             return null;
                         });
+            }
+            if (player != null) {
+                FrameworkPlugin.getLevelManager().processResult(player.getUniqueId(), result);
             }
         }
     }
