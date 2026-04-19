@@ -156,13 +156,13 @@
         ]
       },
       "tooltip": {
-        "text": "Open the Plugins Page in your browser",
+        "text": "Open the Server Links Dialog",
         "type": "text",
         "color": "gray"
       },
       "action": {
-        "type": "minecraft:open_url",
-        "url": "https://github.com/TheCoolcraft11/HideAndSeek"
+        "type": "minecraft:show_dialog",
+        "dialog": "minecraft:server_links"
       }
     }
   ]
