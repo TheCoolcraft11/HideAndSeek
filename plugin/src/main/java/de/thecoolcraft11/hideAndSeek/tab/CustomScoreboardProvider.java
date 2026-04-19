@@ -28,6 +28,37 @@ public class CustomScoreboardProvider {
     private final ScoreboardManager scoreboardManager;
     private int animationTick = 0;
 
+    private static final char[] SMALL_CAPS_MAP = new char[26];
+
+    static {
+        SMALL_CAPS_MAP[0] = 'ᴀ';
+        SMALL_CAPS_MAP[1] = 'ʙ';
+        SMALL_CAPS_MAP[2] = 'ᴄ';
+        SMALL_CAPS_MAP[3] = 'ᴅ';
+        SMALL_CAPS_MAP[4] = 'ᴇ';
+        SMALL_CAPS_MAP[5] = 'ꜰ';
+        SMALL_CAPS_MAP[6] = 'ɢ';
+        SMALL_CAPS_MAP[7] = 'ʜ';
+        SMALL_CAPS_MAP[8] = 'ɪ';
+        SMALL_CAPS_MAP[9] = 'ᴊ';
+        SMALL_CAPS_MAP[10] = 'ᴋ';
+        SMALL_CAPS_MAP[11] = 'ʟ';
+        SMALL_CAPS_MAP[12] = 'ᴍ';
+        SMALL_CAPS_MAP[13] = 'ɴ';
+        SMALL_CAPS_MAP[14] = 'ᴏ';
+        SMALL_CAPS_MAP[15] = 'ᴘ';
+        SMALL_CAPS_MAP[16] = 'ǫ';
+        SMALL_CAPS_MAP[17] = 'ʀ';
+        SMALL_CAPS_MAP[18] = 's';
+        SMALL_CAPS_MAP[19] = 'ᴛ';
+        SMALL_CAPS_MAP[20] = 'ᴜ';
+        SMALL_CAPS_MAP[21] = 'ᴠ';
+        SMALL_CAPS_MAP[22] = 'ᴡ';
+        SMALL_CAPS_MAP[23] = 'x';
+        SMALL_CAPS_MAP[24] = 'ʏ';
+        SMALL_CAPS_MAP[25] = 'ᴢ';
+    }
+
 
     public CustomScoreboardProvider(HideAndSeek plugin) {
         this.scoreboardManager = plugin.getScoreboardManager();
@@ -52,15 +83,12 @@ public class CustomScoreboardProvider {
     }
 
     private static String toSmallCaps(String input) {
-        String normal = "abcdefghijklmnopqrstuvwxyz";
-        String small = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ";
+        char[] chars = input.toLowerCase().toCharArray();
+        StringBuilder out = new StringBuilder(chars.length);
 
-        StringBuilder out = new StringBuilder();
-
-        for (char c : input.toLowerCase().toCharArray()) {
-            int index = normal.indexOf(c);
-            if (index != -1) {
-                out.append(small.charAt(index));
+        for (char c : chars) {
+            if (c >= 'a' && c <= 'z') {
+                out.append(SMALL_CAPS_MAP[c - 'a']);
             } else {
                 out.append(c);
             }
@@ -106,7 +134,7 @@ public class CustomScoreboardProvider {
                 if (!(element instanceof java.util.Map<?, ?> elementMap)) continue;
 
                 Object enabledObj = elementMap.get("enabled");
-                boolean enabled = enabledObj == null ? true : (boolean) enabledObj;
+                boolean enabled = enabledObj == null || (boolean) enabledObj;
                 if (!enabled) continue;
 
                 String text = (String) elementMap.get("text");
@@ -283,36 +311,7 @@ public class CustomScoreboardProvider {
     }
 
 
-    private Component buildMultiColorPlayerCountLine(String template, java.util.Map<String, Object> context) {
 
-        String total = String.valueOf(context.getOrDefault("players-total", "0"));
-        String hiders = String.valueOf(context.getOrDefault("players-hiders", "0"));
-        String seekers = String.valueOf(context.getOrDefault("players-seekers", "0"));
-
-
-        int totalIdx = template.indexOf("{players-total}");
-        String prefix = totalIdx > 0 ? template.substring(0, totalIdx) : "";
-        String suffix = template.substring(totalIdx + "{players-total}".length());
-
-
-        int hidersIdx = suffix.indexOf("{players-hiders}");
-        String beforeHiders = hidersIdx > 0 ? suffix.substring(0, hidersIdx) : "";
-        String afterHiders = suffix.substring(hidersIdx + "{players-hiders}".length());
-        int seekersIdx = afterHiders.indexOf("{players-seekers}");
-        String betweenHidersSeekers = seekersIdx > 0 ? afterHiders.substring(0, seekersIdx) : "";
-        String afterSeekers = afterHiders.substring(seekersIdx + "{players-seekers}".length());
-
-
-        TextComponent.Builder builder = Component.text();
-        builder.append(Component.text(pad(toSmallCaps(prefix)), TextColor.fromHexString("#A9A9A9")));
-        builder.append(Component.text(total, TextColor.fromHexString("#FFFFFF")));
-        builder.append(Component.text(beforeHiders, TextColor.fromHexString("#A9A9A9")));
-        builder.append(Component.text(hiders, TextColor.fromHexString("#00FF00")));
-        builder.append(Component.text(betweenHidersSeekers, TextColor.fromHexString("#A9A9A9")));
-        builder.append(Component.text(seekers, TextColor.fromHexString("#FF0000")));
-        builder.append(Component.text(afterSeekers, TextColor.fromHexString("#A9A9A9")));
-        return builder.build();
-    }
 
 
     private Component buildMultiColorPlayerCountLineWithColors(String template, java.util.Map<String, Object> context, String colorList) {
