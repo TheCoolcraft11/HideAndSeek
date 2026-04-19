@@ -35,6 +35,8 @@ public class DebugCommand implements MinigameSubcommand {
         subcommands.put("config", new DebugConfigCommand(plugin));
         subcommands.put("unstuck", new DebugUnstuckCommand(plugin));
         subcommands.put("migrateyaml", new DebugMigrateYamlCommand(plugin));
+        subcommands.put("xp", new DebugXPCommand(plugin));
+        subcommands.put("booster", new DebugBoosterCommand());
     }
 
     @Override
