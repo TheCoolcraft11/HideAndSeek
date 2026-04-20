@@ -107,6 +107,10 @@ public class LobbyPhase implements GamePhase {
         }
 
         if (result.winningMap() != null && !result.winningMap().isBlank()) {
+            if (plugin.getMapManager().isMapVoteDisabled(result.winningMap())) {
+                plugin.getLogger().warning("Skipped voted map because it is vote-disabled: " + result.winningMap());
+                return;
+            }
             HideAndSeek.getDataController().setCurrentMapName(result.winningMap());
             if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                 plugin.getLogger().info("Applied voted map: " + result.winningMap());

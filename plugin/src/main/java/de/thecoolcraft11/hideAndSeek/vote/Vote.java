@@ -33,6 +33,21 @@ public class Vote<T> {
         votes.clear();
     }
 
+    public Set<UUID> clearVotesByValue(T value) {
+        Set<UUID> affectedPlayers = new HashSet<>();
+        if (value == null) {
+            return affectedPlayers;
+        }
+
+        for (Map.Entry<UUID, T> entry : votes.entrySet()) {
+            if (Objects.equals(entry.getValue(), value) && votes.remove(entry.getKey(), entry.getValue())) {
+                affectedPlayers.add(entry.getKey());
+            }
+        }
+
+        return affectedPlayers;
+    }
+
     public Map<T, Long> countVotes(Set<UUID> eligibleVoters) {
         Map<T, Long> counts = new HashMap<>();
         for (Map.Entry<UUID, T> entry : votes.entrySet()) {

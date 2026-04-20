@@ -13,13 +13,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class MapGUI {
+    private static final String ADMIN_MAP_PERMISSION = "hideandseek.command.map";
     private final HideAndSeek plugin;
 
     public MapGUI(HideAndSeek plugin) {
@@ -29,6 +34,7 @@ public class MapGUI {
     public void open(Player player) {
         List<String> availableMaps = plugin.getMapManager().getAvailableMaps();
         int rows = Math.max(3, (availableMaps.size() + 9) / 9);
+        boolean canManageMapVoting = player.hasPermission(ADMIN_MAP_PERMISSION);
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("map_selector_" + player.getUniqueId())
@@ -55,21 +61,72 @@ public class MapGUI {
         int slot = 1;
         for (String mapName : availableMaps) {
             boolean isCurrentMap = mapName.equals(currentMapName);
+            boolean voteDisabled = plugin.getMapManager().isMapVoteDisabled(mapName);
             MapData mapData = plugin.getMapManager().getMapData(mapName);
 
-            ItemStack mapItem = createMapItemWithData(mapName, mapData, isCurrentMap);
-            final String selectedMapName = mapName;
-            InventoryItem mapGuiItem = new InventoryItem(mapItem);
-            mapGuiItem.setClickHandler((p, item, event, s) -> {
-                selectSpecificMap(p, selectedMapName);
-                event.setCancelled(true);
-            });
-            mapGuiItem.setAllowTakeout(false);
-            mapGuiItem.setAllowInsert(false);
+            ItemStack mapItem = createMapItemWithData(mapName, mapData, isCurrentMap, voteDisabled, canManageMapVoting);
+            InventoryItem mapGuiItem = getInventoryItem(mapName, mapItem,
+                    canManageMapVoting);
             inventory.setItem(slot++, mapGuiItem);
         }
 
         plugin.getInventoryFramework().openInventory(player, inventory);
+    }
+
+    private @NonNull InventoryItem getInventoryItem(String mapName, ItemStack mapItem, boolean canManageMapVoting) {
+        final String selectedMapName = mapName;
+        InventoryItem mapGuiItem = new InventoryItem(mapItem);
+        mapGuiItem.setClickHandler((p, item, event, s) -> {
+            if (canManageMapVoting && event.getClick() == ClickType.RIGHT) {
+                toggleMapVoteDisabled(p, selectedMapName);
+                event.setCancelled(true);
+                return;
+            }
+            selectSpecificMap(p, selectedMapName);
+            event.setCancelled(true);
+        });
+        mapGuiItem.setAllowTakeout(false);
+        mapGuiItem.setAllowInsert(false);
+        return mapGuiItem;
+    }
+
+    private void toggleMapVoteDisabled(Player admin, String mapName) {
+        if (!admin.hasPermission(ADMIN_MAP_PERMISSION)) {
+            admin.sendMessage(Component.text("You do not have permission to manage map voting.", NamedTextColor.RED));
+            admin.playSound(admin.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+            return;
+        }
+
+        boolean nowDisabled = plugin.getMapManager().toggleMapVoteDisabled(mapName);
+        MapData mapData = plugin.getMapManager().getMapData(mapName);
+        String displayName = mapData != null ? mapData.getDisplayName() : mapName;
+
+        admin.sendMessage(Component.text("Map vote visibility for ", NamedTextColor.YELLOW)
+                .append(Component.text(displayName, NamedTextColor.GOLD))
+                .append(Component.text(": " + (nowDisabled ? "DISABLED" : "ENABLED"),
+                        nowDisabled ? NamedTextColor.RED : NamedTextColor.GREEN)));
+        admin.playSound(admin.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, nowDisabled ? 0.8f : 1.2f);
+
+        if (nowDisabled) {
+            Set<UUID> affectedVoterIds = plugin.getVoteManager().clearMapVotesForMap(mapName);
+            for (UUID playerId : affectedVoterIds) {
+                Player affectedPlayer = Bukkit.getPlayer(playerId);
+                if (affectedPlayer == null) {
+                    continue;
+                }
+                affectedPlayer.sendMessage(Component.text("Your vote for ", NamedTextColor.YELLOW)
+                        .append(Component.text(displayName, NamedTextColor.GOLD))
+                        .append(Component.text(" was reset because this map is now vote-disabled.",
+                                NamedTextColor.YELLOW)));
+                affectedPlayer.sendMessage(Component.text("Your readiness status was reset.", NamedTextColor.RED));
+            }
+            if (!affectedVoterIds.isEmpty()) {
+                admin.sendMessage(Component.text("Reset votes/readiness for " + affectedVoterIds.size() + " player(s).",
+                        NamedTextColor.YELLOW));
+            }
+        }
+
+        open(admin);
     }
 
 
@@ -133,12 +190,13 @@ public class MapGUI {
             }
 
             meta.lore(lore);
+            meta.setEnchantmentGlintOverride(highlight);
             item.setItemMeta(meta);
         }
         return item;
     }
 
-    private ItemStack createMapItemWithData(String mapName, MapData mapData, boolean isCurrentMap) {
+    private ItemStack createMapItemWithData(String mapName, MapData mapData, boolean isCurrentMap, boolean voteDisabled, boolean canManageMapVoting) {
         ItemStack item = new ItemStack(plugin.getMapManager().getMapIconMaterial(mapName, Material.GRASS_BLOCK));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -242,11 +300,20 @@ public class MapGUI {
                         .decoration(TextDecoration.ITALIC, false));
             }
 
+            lore.add(Component.text("Vote visibility: " + (voteDisabled ? "DISABLED" : "ENABLED"),
+                            voteDisabled ? NamedTextColor.RED : NamedTextColor.GREEN)
+                    .decoration(TextDecoration.ITALIC, false));
+            if (canManageMapVoting) {
+                lore.add(Component.text("Right click: toggle vote visibility", NamedTextColor.YELLOW)
+                        .decoration(TextDecoration.ITALIC, false));
+            }
+
             lore.add(Component.empty());
             lore.add(Component.text("ID: " + mapName, NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, false));
 
             meta.lore(lore);
+            meta.setEnchantmentGlintOverride(isCurrentMap);
             item.setItemMeta(meta);
         }
         return item;

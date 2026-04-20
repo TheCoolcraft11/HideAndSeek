@@ -147,6 +147,18 @@ public class VoteManager {
         readyStates.clear();
     }
 
+    public Set<UUID> clearMapVotesForMap(String mapName) {
+        if (mapName == null || mapName.isBlank()) {
+            return Set.of();
+        }
+
+        Set<UUID> affectedPlayers = mapVote.clearVotesByValue(mapName);
+        for (UUID playerId : affectedPlayers) {
+            readyStates.remove(playerId);
+        }
+        return affectedPlayers;
+    }
+
     public Set<UUID> getOnlineVoterIds() {
         Set<UUID> onlineIds = new HashSet<>();
         for (Player player : Bukkit.getOnlinePlayers()) {

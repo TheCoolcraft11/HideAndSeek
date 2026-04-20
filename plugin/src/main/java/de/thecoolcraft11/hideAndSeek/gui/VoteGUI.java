@@ -198,6 +198,19 @@ public class VoteGUI {
                     event.setCancelled(true);
                     return;
                 }
+
+                GameModeEnum currentModeVote = voteManager.getGamemodeVote(p.getUniqueId()).orElse(null);
+                boolean mapStillVisible = plugin.getMapManager().getMapsForVoting().contains(clickedMap);
+                boolean mapAllowedForMode = currentModeVote == null || plugin.getMapManager().getAvailableMapsForMode(
+                        currentModeVote).contains(clickedMap);
+                if (!mapStillVisible || !mapAllowedForMode) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    p.sendMessage(Component.text("This map is no longer available for voting.", NamedTextColor.RED));
+                    open(p);
+                    event.setCancelled(true);
+                    return;
+                }
+
                 voteManager.castMapVote(p.getUniqueId(), clickedMap);
                 boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
                 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.1f);

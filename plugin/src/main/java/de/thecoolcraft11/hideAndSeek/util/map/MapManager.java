@@ -18,14 +18,23 @@ import java.util.stream.Stream;
 
 public class MapManager {
     private static final String WORKING_WORLD_PREFIX = "has_";
+    private static final String MAP_DATA_FILE_NAME = "map-data.yml";
+    private static final String VOTE_DISABLED_MAPS_PATH = "map-vote-disabled";
     private final HideAndSeek plugin;
     private final Map<String, MapData> mapDataCache;
     private final Map<String, Object> previousSettingValues;
+    private final Set<String> voteDisabledMaps;
+    private final File mapDataFile;
+    private final YamlConfiguration mapDataConfig;
 
     public MapManager(HideAndSeek plugin) {
         this.plugin = plugin;
         this.mapDataCache = new HashMap<>();
         this.previousSettingValues = new LinkedHashMap<>();
+        this.voteDisabledMaps = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        this.mapDataFile = resolveMapDataFile();
+        this.mapDataConfig = YamlConfiguration.loadConfiguration(mapDataFile);
+        loadVoteDisabledMaps();
         loadMapConfigurations();
     }
 
@@ -38,9 +47,39 @@ public class MapManager {
         if (maps.isEmpty()) {
             maps = new ArrayList<>(getAvailableMaps());
         }
-        maps.removeIf(name -> name == null || name.isBlank());
+        maps.removeIf(name -> name == null || name.isBlank() || isMapVoteDisabled(name));
         maps.sort(String.CASE_INSENSITIVE_ORDER);
         return maps;
+    }
+
+    public boolean isMapVoteDisabled(String mapName) {
+        if (mapName == null || mapName.isBlank()) {
+            return false;
+        }
+        synchronized (voteDisabledMaps) {
+            return voteDisabledMaps.contains(mapName.trim());
+        }
+    }
+
+    public void setMapVoteDisabled(String mapName, boolean disabled) {
+        if (mapName == null || mapName.isBlank()) {
+            return;
+        }
+
+        boolean changed;
+        String normalizedName = mapName.trim();
+        synchronized (voteDisabledMaps) {
+            changed = disabled ? voteDisabledMaps.add(normalizedName) : voteDisabledMaps.remove(normalizedName);
+        }
+        if (changed) {
+            persistVoteDisabledMaps();
+        }
+    }
+
+    public boolean toggleMapVoteDisabled(String mapName) {
+        boolean disabled = !isMapVoteDisabled(mapName);
+        setMapVoteDisabled(mapName, disabled);
+        return disabled;
     }
 
     public List<String> getAvailableMapsForMode(GameModeEnum mode) {
@@ -60,7 +99,9 @@ public class MapManager {
     }
 
     public List<String> getAvailableMapsByPreferredMode() {
-        List<String> allMaps = getAvailableMaps();
+        List<String> allMaps = getAvailableMaps().stream()
+                .filter(mapName -> mapName != null && !mapName.isBlank() && !isMapVoteDisabled(mapName))
+                .toList();
 
 
         var usePreferredModesResult = plugin.getSettingService().getSetting("game.maps.use-preferred-modes");
@@ -157,6 +198,67 @@ public class MapManager {
 
 
         return Material.matchMaterial(normalizedName);
+    }
+
+    private void loadVoteDisabledMaps() {
+        synchronized (voteDisabledMaps) {
+            voteDisabledMaps.clear();
+
+            // Prefer dedicated map-data.yml storage.
+            for (String mapName : mapDataConfig.getStringList(VOTE_DISABLED_MAPS_PATH)) {
+                if (mapName != null && !mapName.isBlank()) {
+                    voteDisabledMaps.add(mapName.trim());
+                }
+            }
+
+            // One-time migration from legacy config.yml key.
+            if (voteDisabledMaps.isEmpty()) {
+                for (String mapName : plugin.getConfig().getStringList(VOTE_DISABLED_MAPS_PATH)) {
+                    if (mapName != null && !mapName.isBlank()) {
+                        voteDisabledMaps.add(mapName.trim());
+                    }
+                }
+                if (!voteDisabledMaps.isEmpty()) {
+                    plugin.getLogger().info(
+                            "Migrated map vote-disabled entries from config.yml to data/" + MAP_DATA_FILE_NAME);
+                    persistVoteDisabledMaps();
+                }
+            }
+
+        }
+    }
+
+    private void persistVoteDisabledMaps() {
+        List<String> stored;
+        synchronized (voteDisabledMaps) {
+            stored = new ArrayList<>(voteDisabledMaps);
+        }
+        stored.sort(String.CASE_INSENSITIVE_ORDER);
+        mapDataConfig.set(VOTE_DISABLED_MAPS_PATH, stored);
+        try {
+            mapDataConfig.save(mapDataFile);
+        } catch (IOException ex) {
+            plugin.getLogger().warning("Failed to save " + MAP_DATA_FILE_NAME + ": " + ex.getMessage());
+        }
+    }
+
+    private File resolveMapDataFile() {
+        File dataFolder = new File(plugin.getDataFolder(), "data");
+        if (!dataFolder.exists() && !dataFolder.mkdirs()) {
+            plugin.getLogger().warning("Failed to create data folder for " + MAP_DATA_FILE_NAME);
+        }
+
+        File file = new File(dataFolder, MAP_DATA_FILE_NAME);
+        if (!file.exists()) {
+            try {
+                if (!file.createNewFile()) {
+                    plugin.getLogger().warning("Failed to create " + MAP_DATA_FILE_NAME);
+                }
+            } catch (IOException ex) {
+                plugin.getLogger().warning("Failed to create " + MAP_DATA_FILE_NAME + ": " + ex.getMessage());
+            }
+        }
+        return file;
     }
 
     public void applySettingOverridesForMap(String mapName) {
@@ -477,12 +579,20 @@ public class MapManager {
     public String selectRandomMapName(int playerCount) {
         List<String> maps = getAvailableMapsByPreferredMode();
         if (maps.isEmpty()) {
-            plugin.getLogger().warning("No maps configured in config.yml!");
+            plugin.getLogger().warning("No eligible maps configured for random selection.");
             return null;
         }
 
         if (playerCount > 0) {
             maps = MapConfigHelper.filterMapsByPlayerCount(plugin, maps, playerCount);
+        }
+
+        maps = maps.stream()
+                .filter(mapName -> mapName != null && !mapName.isBlank() && !isMapVoteDisabled(mapName))
+                .toList();
+        if (maps.isEmpty()) {
+            plugin.getLogger().warning("No eligible maps available for random selection after filters.");
+            return null;
         }
 
         String selectedMap = maps.get((int) (Math.random() * maps.size()));
