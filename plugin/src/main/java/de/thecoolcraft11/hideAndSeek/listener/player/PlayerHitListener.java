@@ -87,8 +87,8 @@ public class PlayerHitListener implements Listener {
         return environmentalDeathAttributors.get(playerId);
     }
 
-    public void consumeEnvironmentalDeathAttributor(UUID playerId) {
-        environmentalDeathAttributors.remove(playerId);
+    public UUID consumeEnvironmentalDeathAttributor(UUID playerId) {
+        return environmentalDeathAttributors.remove(playerId);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -107,8 +107,16 @@ public class PlayerHitListener implements Listener {
         }
 
         EnvironmentalDeathCause environmentalCause = consumeEnvironmentalDeathCause(deceased.getUniqueId());
-        consumeEnvironmentalDeathAttributor(deceased.getUniqueId());
+        UUID attributorId = consumeEnvironmentalDeathAttributor(deceased.getUniqueId());
         if (environmentalCause != null && HideAndSeek.getDataController().getHiders().contains(deceased.getUniqueId())) {
+
+            Player attributor = attributorId == null ? null : Bukkit.getPlayer(attributorId);
+            Component customEnvironmentalMessage = (attributor != null)
+                    ? deathMessageService.getSeekerPerkDeathMessage(attributor, deceased, environmentalCause)
+                    : deathMessageService.getEnvironmentalDeathMessage(deceased, environmentalCause, deceased);
+            event.deathMessage(customEnvironmentalMessage != null
+                    ? customEnvironmentalMessage
+                    : buildFallbackEnvironmentalDeathMessage(deceased, environmentalCause));
 
             for (java.util.UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
                 plugin.getPointService().award(seekerId, PointAction.SEEKER_ENVIRONMENTAL_ELIMINATION);
@@ -497,35 +505,7 @@ public class PlayerHitListener implements Listener {
         plugin.getUnstuckManager().clearPlayerData(hider.getUniqueId());
         HideAndSeek.getDataController().addSeeker(hider.getUniqueId());
 
-
-        Team seekerTeam = null;
-        for (Team team : plugin.getTeamManager().getAllTeams()) {
-            if (!plugin.getTeamManager().isSpectatorTeam(team.getName())) {
-
-                for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
-                    if (seekerId.equals(hider.getUniqueId())) continue;
-
-                    Player seeker = Bukkit.getPlayer(seekerId);
-                    if (seeker != null) {
-                        String seekerTeamName = plugin.getTeamManager().getPlayerTeam(seeker);
-                        if (seekerTeamName != null && seekerTeamName.equals(team.getName())) {
-                            seekerTeam = team;
-                            break;
-                        }
-                    }
-                }
-                if (seekerTeam != null) break;
-            }
-        }
-
-        if (seekerTeam != null) {
-            plugin.getTeamManager().addPlayerToTeam(hider, seekerTeam.getName());
-            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
-                plugin.getLogger().info("Moved " + hider.getName() + " to seeker team: " + seekerTeam.getName());
-            }
-        } else {
-            plugin.getLogger().warning("Could not find seeker team for eliminated hider!");
-        }
+        assignToSeekerTeamOrFallback(hider, "eliminated hider");
 
         plugin.getTeamManager().removeRole(hider, "hider");
         plugin.getTeamManager().addRole(hider, "seeker");
@@ -556,35 +536,7 @@ public class PlayerHitListener implements Listener {
 
         clearConvertedPlayerAreaWarnings(hider);
 
-
-        Team seekerTeam = null;
-        for (Team team : plugin.getTeamManager().getAllTeams()) {
-            if (!plugin.getTeamManager().isSpectatorTeam(team.getName())) {
-
-                for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
-                    if (seekerId.equals(hider.getUniqueId())) continue;
-
-                    Player seeker = Bukkit.getPlayer(seekerId);
-                    if (seeker != null) {
-                        String seekerTeamName = plugin.getTeamManager().getPlayerTeam(seeker);
-                        if (seekerTeamName != null && seekerTeamName.equals(team.getName())) {
-                            seekerTeam = team;
-                            break;
-                        }
-                    }
-                }
-                if (seekerTeam != null) break;
-            }
-        }
-
-        if (seekerTeam != null) {
-            plugin.getTeamManager().addPlayerToTeam(hider, seekerTeam.getName());
-            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
-                plugin.getLogger().info("Added " + hider.getName() + " to seeker team: " + seekerTeam.getName());
-            }
-        } else {
-            plugin.getLogger().warning("Could not find seeker team for INVASION mode conversion!");
-        }
+        assignToSeekerTeamOrFallback(hider, "INVASION conversion");
 
         plugin.getTeamManager().removeRole(hider, "hider");
         plugin.getTeamManager().addRole(hider, "seeker");
@@ -663,6 +615,98 @@ public class PlayerHitListener implements Listener {
         RelocatePerk.clearWarningsFor(playerId);
     }
 
+    private void assignToSeekerTeamOrFallback(Player player, String context) {
+        Team seekerTeam = findExistingSeekerTeam();
+        if (seekerTeam == null) {
+            seekerTeam = findConfiguredSeekerTeam();
+        }
+        if (seekerTeam == null) {
+            seekerTeam = findFirstPlayableTeam();
+        }
+
+        if (seekerTeam == null) {
+            plugin.getLogger().warning("Could not find any non-spectator team for " + context + "!");
+            return;
+        }
+
+        plugin.getTeamManager().addPlayerToTeam(player, seekerTeam.getName());
+        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+            plugin.getLogger().info("Assigned " + player.getName() + " to seeker team: " + seekerTeam.getName());
+        }
+    }
+
+    private Team findExistingSeekerTeam() {
+        for (UUID seekerId : HideAndSeek.getDataController().getSeekers()) {
+            Player seeker = Bukkit.getPlayer(seekerId);
+            if (seeker == null || !seeker.isOnline()) {
+                continue;
+            }
+
+            String seekerTeamName = plugin.getTeamManager().getPlayerTeam(seeker);
+            if (seekerTeamName == null || plugin.getTeamManager().isSpectatorTeam(seekerTeamName)) {
+                continue;
+            }
+
+            Team team = plugin.getTeamManager().getTeam(seekerTeamName);
+            if (team != null) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    private Team findConfiguredSeekerTeam() {
+        String configuredTeam = plugin.getSettingRegistry().get("game.teams.fixed-seeker-team", "");
+        if (configuredTeam.isBlank()) {
+            return null;
+        }
+
+        Team configured = plugin.getTeamManager().getTeam(configuredTeam.trim());
+        if (configured == null || plugin.getTeamManager().isSpectatorTeam(configured.getName())) {
+            return null;
+        }
+
+        return configured;
+    }
+
+    private Team findFirstPlayableTeam() {
+        for (Team team : plugin.getTeamManager().getAllTeams()) {
+            if (!plugin.getTeamManager().isSpectatorTeam(team.getName())) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    private Component buildFallbackEnvironmentalDeathMessage(Player victim, EnvironmentalDeathCause cause) {
+        return switch (cause) {
+            case CAMPING -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" was struck down for camping too long.", NamedTextColor.YELLOW));
+            case WORLD_BORDER -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" was consumed by the world border.", NamedTextColor.YELLOW));
+            case DROWNING -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" drowned after staying underwater too long.", NamedTextColor.YELLOW));
+            case FIRE -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" burned for too long.", NamedTextColor.YELLOW));
+            case LAVA -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" sank into lava and could not recover.", NamedTextColor.YELLOW));
+            case SUFFOCATION -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" suffocated in a tight space.", NamedTextColor.YELLOW));
+            case FREEZING -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" froze solid.", NamedTextColor.YELLOW));
+            case HOT_FLOOR -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" stood on scorching ground for too long.", NamedTextColor.YELLOW));
+            case CONTACT -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" was shredded by hazardous terrain.", NamedTextColor.YELLOW));
+            case PERK_DEATH_ZONE -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" failed to escape the Death Zone.", NamedTextColor.YELLOW));
+            case PERK_RELOCATE -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" did not relocate in time.", NamedTextColor.YELLOW));
+            default -> Component.text(victim.getName(), NamedTextColor.GREEN)
+                    .append(Component.text(" was eliminated by the environment.", NamedTextColor.YELLOW));
+        };
+    }
+
     public DeathMessageService getDeathMessageService() {
         return deathMessageService;
     }
@@ -670,6 +714,13 @@ public class PlayerHitListener implements Listener {
     public enum EnvironmentalDeathCause {
         WORLD_BORDER,
         CAMPING,
+        DROWNING,
+        FIRE,
+        LAVA,
+        SUFFOCATION,
+        FREEZING,
+        HOT_FLOOR,
+        CONTACT,
         PERK_DEATH_ZONE,
         PERK_RELOCATE,
         PERK_GENERIC

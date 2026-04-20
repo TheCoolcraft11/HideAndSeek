@@ -140,9 +140,6 @@ public class DebugBoosterCommand implements DebugSubcommand {
         return List.of();
     }
 
-    /**
-     * Format milliseconds into human-readable duration.
-     */
     private String formatDuration(long milliseconds) {
         if (milliseconds <= 0) return "0m";
 

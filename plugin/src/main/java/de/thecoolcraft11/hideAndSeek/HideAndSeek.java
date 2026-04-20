@@ -76,6 +76,7 @@ public final class HideAndSeek extends MinigameFramework {
     private ReadyGUI readyGUI;
     private AntiCheatVisibilityListener antiCheatVisibilityListener;
     private HiderCampingListener hiderCampingListener;
+    private EnvironmentalDamageListener environmentalDamageListener;
     private SeekingBossBarService seekingBossBarService;
     private PerkService perkService;
     private UnstuckManager unstuckManager;
@@ -145,6 +146,7 @@ public final class HideAndSeek extends MinigameFramework {
         playerHitListener = new PlayerHitListener(this);
         antiCheatVisibilityListener = new AntiCheatVisibilityListener(this);
         hiderCampingListener = new HiderCampingListener(this, playerHitListener);
+        environmentalDamageListener = new EnvironmentalDamageListener(this, playerHitListener);
         tabProvider = new CustomTabProvider(this, getConfig());
         scoreboardProvider = new CustomScoreboardProvider(this);
 
@@ -154,6 +156,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(blockModeListener, this);
         Bukkit.getPluginManager().registerEvents(antiCheatVisibilityListener, this);
         Bukkit.getPluginManager().registerEvents(hiderCampingListener, this);
+        Bukkit.getPluginManager().registerEvents(environmentalDamageListener, this);
         Bukkit.getPluginManager().registerEvents(new HiderEquipmentChangeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CrossbowTrackerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CameraViewListener(this), this);
@@ -272,6 +275,9 @@ public final class HideAndSeek extends MinigameFramework {
         }
         if (hiderCampingListener != null) {
             hiderCampingListener.shutdown();
+        }
+        if (environmentalDamageListener != null) {
+            environmentalDamageListener.shutdown();
         }
         if (seekingBossBarService != null) {
             seekingBossBarService.stopSeekingSession();

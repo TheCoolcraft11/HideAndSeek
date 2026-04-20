@@ -57,6 +57,30 @@ public class SettingRegistrar {
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.world-border").icon(Material.BARRIER).build());
 
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.environmental-damage").icon(Material.LAVA_BUCKET).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.environmental-damage.drowning").icon(Material.WATER_BUCKET).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.environmental-damage.fire").icon(Material.FLINT_AND_STEEL).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.environmental-damage.lava").icon(Material.LAVA_BUCKET).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.environmental-damage.suffocation").icon(Material.SAND).build());
+
+        plugin.getSectionRegistry().register(SectionDefinition.builder("game.environmental-damage.freezing").icon(
+                Material.POWDER_SNOW_BUCKET).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.environmental-damage.hot-floor").icon(Material.MAGMA_BLOCK).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.environmental-damage.contact").icon(Material.SWEET_BERRIES).build());
+
         plugin.getSectionRegistry().register(SectionDefinition.builder("perks").icon(Material.NETHER_STAR).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("perks.perk").icon(Material.BREWING_STAND).build());

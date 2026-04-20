@@ -6,6 +6,7 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
+import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
@@ -248,10 +249,10 @@ public class FireworkRocketItem implements GameItem {
                 new CustomItemBuilder(createItem(plugin), getId())
                         .withAction(ItemActionType.RIGHT_CLICK_AIR,
                                 context -> launchFirework(context.getPlayer(),
-                                        context.getBlock().getLocation().clone().add(0, 1, 0), plugin))
+                                        resolveLaunchLocation(context), plugin))
                         .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
                                 context -> launchFirework(context.getPlayer(),
-                                        context.getBlock().getLocation().clone().add(0, 1, 0), plugin))
+                                        resolveLaunchLocation(context), plugin))
                         .withDescription(getDescription(plugin))
                         .withDropPrevention(true)
                         .withCraftPrevention(true)
@@ -263,5 +264,12 @@ public class FireworkRocketItem implements GameItem {
                         .cancelDefaultAction(true)
                         .build()
         );
+    }
+
+    private Location resolveLaunchLocation(ItemInteractionContext context) {
+        if (context.getBlock() != null) {
+            return context.getBlock().getLocation().clone().add(0, 1, 0);
+        }
+        return context.getPlayer().getLocation().clone().add(0, 1, 0);
     }
 }
