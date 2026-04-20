@@ -181,6 +181,7 @@ public class CustomScoreboardProvider {
 
         context.put("role", role);
         context.put("mode", modeText);
+        context.put("mode-color", getModeColor(modeText));
         context.put("server-ip", config.getString("tab.server-ip", "yourserver.com"));
         context.put("players-total", total);
         context.put("players-hiders", h);
@@ -223,6 +224,15 @@ public class CustomScoreboardProvider {
             case "N/A" -> net.kyori.adventure.text.format.NamedTextColor.GRAY;
             case "Hider" -> net.kyori.adventure.text.format.NamedTextColor.BLUE;
             case "Seeker" -> net.kyori.adventure.text.format.NamedTextColor.RED;
+            default -> net.kyori.adventure.text.format.NamedTextColor.WHITE;
+        };
+    }
+
+    private TextColor getModeColor(String mode) {
+        return switch (mode) {
+            case "Normal" -> net.kyori.adventure.text.format.NamedTextColor.GREEN;
+            case "Block" -> net.kyori.adventure.text.format.NamedTextColor.BLUE;
+            case "Small" -> net.kyori.adventure.text.format.NamedTextColor.YELLOW;
             default -> net.kyori.adventure.text.format.NamedTextColor.WHITE;
         };
     }

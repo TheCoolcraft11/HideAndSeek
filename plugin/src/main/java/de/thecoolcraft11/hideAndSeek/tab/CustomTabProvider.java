@@ -61,6 +61,15 @@ public class CustomTabProvider {
         colorSpeeds.put("ip-speed", config.getDouble("tab.header.ip-speed", 0.3));
     }
 
+    private TextColor getModeColor(String mode) {
+        return switch (mode) {
+            case "Normal" -> NamedTextColor.GREEN;
+            case "Block" -> NamedTextColor.BLUE;
+            case "Small" -> NamedTextColor.YELLOW;
+            default -> NamedTextColor.WHITE;
+        };
+    }
+
     public void updateTab(Player player) {
 
         String role = HideAndSeek.getDataController().getHiders().contains(player.getUniqueId()) ? "Hider" : "Seeker";
@@ -79,11 +88,11 @@ public class CustomTabProvider {
             case SMALL -> "Small";
         };
 
-
         Map<String, Object> context = new HashMap<>();
         context.put("player", player.getName());
         context.put("role", role);
         context.put("mode", modeText);
+        context.put("mode-color", getModeColor(modeText));
         context.put("server-ip", config.getString("tab.server-ip", "yourserver.com"));
         context.put("players-total", total);
         context.put("players-hiders", h);
@@ -120,7 +129,7 @@ public class CustomTabProvider {
             if (!(element instanceof Map<?, ?> elementMap)) continue;
 
             Object enabledObj = elementMap.get("enabled");
-            boolean enabled = enabledObj == null ? true : (boolean) enabledObj;
+            boolean enabled = enabledObj == null || (boolean) enabledObj;
             if (!enabled) continue;
 
             String text = (String) elementMap.get("text");
@@ -131,7 +140,7 @@ public class CustomTabProvider {
 
 
             Object animatedObj = elementMap.get("animated");
-            boolean animated = animatedObj == null ? false : (boolean) animatedObj;
+            boolean animated = animatedObj != null && (boolean) animatedObj;
 
             if (animated) {
                 String colorListKey = (String) elementMap.get("color-list");
@@ -142,7 +151,7 @@ public class CustomTabProvider {
                 builder.append(buildWaveText(processedText, speed, colors));
             } else {
                 String colorValue = (String) elementMap.get("color");
-                TextColor color = parseColor(colorValue, context, NamedTextColor.WHITE);
+                TextColor color = parseColor(colorValue, context);
                 builder.append(Component.text(processedText, color));
             }
         }
@@ -162,7 +171,7 @@ public class CustomTabProvider {
             if (!(element instanceof Map<?, ?> elementMap)) continue;
 
             Object enabledObj = elementMap.get("enabled");
-            boolean enabled = enabledObj == null ? true : (boolean) enabledObj;
+            boolean enabled = enabledObj == null || (boolean) enabledObj;
             if (!enabled) continue;
 
             String text = (String) elementMap.get("text");
@@ -171,7 +180,7 @@ public class CustomTabProvider {
 
             String processedText = replacePlaceholders(text, context);
             String colorValue = (String) elementMap.get("color");
-            TextColor color = parseColor(colorValue, context, NamedTextColor.WHITE);
+            TextColor color = parseColor(colorValue, context);
 
             builder.append(Component.text(processedText, color));
         }
@@ -187,8 +196,8 @@ public class CustomTabProvider {
         return result;
     }
 
-    private TextColor parseColor(String colorValue, Map<String, Object> context, TextColor defaultColor) {
-        if (colorValue == null) return defaultColor;
+    private TextColor parseColor(String colorValue, Map<String, Object> context) {
+        if (colorValue == null) return NamedTextColor.WHITE;
 
 
         if (colorValue.startsWith("{") && colorValue.endsWith("}")) {
@@ -197,7 +206,7 @@ public class CustomTabProvider {
             if (colorObj instanceof TextColor) {
                 return (TextColor) colorObj;
             }
-            return defaultColor;
+            return NamedTextColor.WHITE;
         }
 
 
@@ -205,7 +214,7 @@ public class CustomTabProvider {
             return TextColor.fromHexString(colorValue);
         }
 
-        return defaultColor;
+        return NamedTextColor.WHITE;
     }
 
     private Component buildWaveText(String text, double spread, List<TextColor> colorList) {
