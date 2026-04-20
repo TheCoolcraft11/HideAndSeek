@@ -489,7 +489,9 @@ public class BlockModeListener implements Listener {
     private void placeBlockAndHide(Player player) {
         Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
         if (chosenBlock == null) {
-            player.sendMessage(Component.text("You haven't chosen a block yet! Use /mg chooseblock", NamedTextColor.RED));
+            player.sendMessage(
+                    Component.text("You haven't chosen a block yet! Use the block selector to change your block",
+                            NamedTextColor.RED));
             player.setLevel(0);
             player.setExp(0.0f);
             return;
@@ -507,7 +509,9 @@ public class BlockModeListener implements Listener {
                 var selector = plugin.getBlockSelectorGUI();
                 var resolvedConfig = selector.resolveConfigForMaterial(allowedBlocks, chosenData.getMaterial());
                 if (resolvedConfig == null || !resolvedConfig.isBlockStateAllowed(chosenData)) {
-                    player.sendMessage(Component.text("That block is not allowed on this map! Use /mg chooseblock to select an allowed block.", NamedTextColor.RED));
+                    player.sendMessage(Component.text(
+                            "That block is not allowed on this map! Use the block selector to change your block.",
+                            NamedTextColor.RED));
                     HideAndSeek.getDataController().clearSneakStart(player.getUniqueId());
                     player.setLevel(0);
                     player.setExp(0.0f);

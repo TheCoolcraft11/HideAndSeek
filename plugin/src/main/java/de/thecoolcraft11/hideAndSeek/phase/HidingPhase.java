@@ -151,7 +151,9 @@ public class HidingPhase implements GamePhase {
                     Player hider = Bukkit.getPlayer(hiderId);
                     if (hider != null) {
                         HiderItems.updateAppearanceItem(hider, hideAndSeekPlugin);
-                        hider.sendMessage(Component.text("Default block set to " + defaultBlock.name() + ". Use /mg chooseblock to change.", NamedTextColor.YELLOW));
+                        hider.sendMessage(Component.text(
+                                "Default block set to " + defaultBlock.name() + ". Use the Block Selector to change your block.",
+                                NamedTextColor.YELLOW));
                     }
                 }
             }
@@ -262,7 +264,8 @@ public class HidingPhase implements GamePhase {
                                 false
                         ));
                         if (gameMode == GameModeEnum.BLOCK) {
-                            hider.sendMessage(Component.text("You are invisible! Choose your block with /mg chooseblock", NamedTextColor.GREEN));
+                            hider.sendMessage(
+                                    Component.text("Choose your block with the block selector", NamedTextColor.GREEN));
                         } else {
                             hider.sendMessage(Component.text("You are invisible! Use this time to hide!", NamedTextColor.GREEN));
                         }
