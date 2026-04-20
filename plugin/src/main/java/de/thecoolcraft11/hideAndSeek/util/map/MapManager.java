@@ -39,16 +39,15 @@ public class MapManager {
     }
 
     public List<String> getAvailableMaps() {
-        return plugin.getConfig().getStringList("maps");
+        return new ArrayList<>(mapDataCache.keySet());
     }
 
     public List<String> getMapsForVoting() {
         List<String> maps = new ArrayList<>(mapDataCache.keySet());
-        if (maps.isEmpty()) {
-            maps = new ArrayList<>(getAvailableMaps());
-        }
+
         maps.removeIf(name -> name == null || name.isBlank() || isMapVoteDisabled(name));
         maps.sort(String.CASE_INSENSITIVE_ORDER);
+
         return maps;
     }
 
@@ -204,27 +203,11 @@ public class MapManager {
         synchronized (voteDisabledMaps) {
             voteDisabledMaps.clear();
 
-            // Prefer dedicated map-data.yml storage.
             for (String mapName : mapDataConfig.getStringList(VOTE_DISABLED_MAPS_PATH)) {
                 if (mapName != null && !mapName.isBlank()) {
                     voteDisabledMaps.add(mapName.trim());
                 }
             }
-
-            // One-time migration from legacy config.yml key.
-            if (voteDisabledMaps.isEmpty()) {
-                for (String mapName : plugin.getConfig().getStringList(VOTE_DISABLED_MAPS_PATH)) {
-                    if (mapName != null && !mapName.isBlank()) {
-                        voteDisabledMaps.add(mapName.trim());
-                    }
-                }
-                if (!voteDisabledMaps.isEmpty()) {
-                    plugin.getLogger().info(
-                            "Migrated map vote-disabled entries from config.yml to data/" + MAP_DATA_FILE_NAME);
-                    persistVoteDisabledMaps();
-                }
-            }
-
         }
     }
 
@@ -317,34 +300,24 @@ public class MapManager {
     private void loadMapConfigurations() {
         mapDataCache.clear();
 
-
-        ConfigurationSection mapConfig = plugin.getConfig().getConfigurationSection("map-config");
-        if (mapConfig != null) {
-            for (String mapName : mapConfig.getKeys(false)) {
-                MapData mapData = loadMapFromConfig(mapName, mapConfig.getConfigurationSection(mapName));
-                if (mapData != null) {
-                    mapDataCache.put(mapName, mapData);
-                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
-                        plugin.getLogger().info("Loaded map config for: " + mapName);
-                    }
-                }
-            }
+        File mapsFile = new File(plugin.getDataFolder(), "maps.yml");
+        if (!mapsFile.exists()) {
+            plugin.getLogger().warning("maps.yml not found, no maps loaded.");
+            return;
         }
 
+        FileConfiguration mapsConfig = YamlConfiguration.loadConfiguration(mapsFile);
 
-        File worldsFile = new File(plugin.getDataFolder(), "maps.yml");
-        if (worldsFile.exists()) {
-            FileConfiguration worldsConfig = YamlConfiguration.loadConfiguration(worldsFile);
-            for (String mapName : worldsConfig.getKeys(false)) {
-                ConfigurationSection section = worldsConfig.getConfigurationSection(mapName);
-                if (section != null) {
-                    MapData mapData = loadMapFromConfig(mapName, section);
-                    if (mapData != null) {
-                        mapDataCache.put(mapName, mapData);
-                        if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
-                            plugin.getLogger().info("Loaded map from maps.yml: " + mapName);
-                        }
-                    }
+        for (String mapName : mapsConfig.getKeys(false)) {
+            ConfigurationSection section = mapsConfig.getConfigurationSection(mapName);
+            if (section == null) continue;
+
+            MapData mapData = loadMapFromConfig(mapName, section);
+            if (mapData != null) {
+                mapDataCache.put(mapName, mapData);
+
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Loaded map from maps.yml: " + mapName);
                 }
             }
         }
