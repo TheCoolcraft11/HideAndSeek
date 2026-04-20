@@ -46,7 +46,7 @@ public class FireworkRocketItem implements GameItem {
         );
         display.setBlock(Bukkit.createBlockData(Material.STRIPPED_BAMBOO_BLOCK));
         display.setTransformation(new Transformation(
-                        new Vector3f(0, 0, 0),
+                new Vector3f(0.25f, 0, 0.25f),
                         new Quaternionf(),
                         new Vector3f(0.5f, 0.75f, 0.5f),
                         new Quaternionf()
