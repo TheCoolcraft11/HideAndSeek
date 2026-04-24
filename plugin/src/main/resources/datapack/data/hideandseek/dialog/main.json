@@ -146,6 +146,50 @@
     {
       "label": {
         "atlas": "minecraft:items",
+        "sprite": "minecraft:item/experience_bottle",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Level",
+            "color": "dark_green"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Click to open the Level menu",
+        "type": "text",
+        "color": "gold"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg level"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:gui",
+        "sprite": "minecraft:statistics/item_crafted",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Statistics",
+            "color": "dark_gray"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Click to open the Statistics menu",
+        "type": "text",
+        "color": "yellow"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg stats"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:items",
         "sprite": "minecraft:item/book",
         "object": "atlas",
         "extra": [

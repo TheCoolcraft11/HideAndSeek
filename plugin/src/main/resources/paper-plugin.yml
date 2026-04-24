@@ -44,3 +44,6 @@ permissions:
   hideandseek.command.unstuck:
     description: Allows using /mg unstuck command
     default: true
+  hideandseek.command.stats:
+    description: Allows using /mg stats command
+    default: true
