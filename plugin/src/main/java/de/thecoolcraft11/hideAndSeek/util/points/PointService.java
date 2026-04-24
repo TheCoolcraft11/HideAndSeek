@@ -52,6 +52,15 @@ public class PointService {
         if (points != 0) {
             HideAndSeek.getDataController().addPoints(playerId, points);
         }
+        if (action == PointAction.HIDER_TAUNT_SMALL || action == PointAction.HIDER_TAUNT_LARGE) {
+            var active = HideAndSeek.getActiveInstance();
+            if (active instanceof HideAndSeek) {
+                var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+                if (statsService != null) {
+                    statsService.recordTauntUsed(playerId);
+                }
+            }
+        }
         return points;
     }
 
@@ -74,6 +83,13 @@ public class PointService {
         }
 
         UUID killerId = killer.getUniqueId();
+        var active = HideAndSeek.getActiveInstance();
+        if (active instanceof HideAndSeek) {
+            var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+            if (statsService != null) {
+                statsService.recordSeekerKill(killerId);
+            }
+        }
         int killPoints = award(killerId, PointAction.SEEKER_KILL);
         seekerCaptures.merge(killerId, 1, Integer::sum);
 

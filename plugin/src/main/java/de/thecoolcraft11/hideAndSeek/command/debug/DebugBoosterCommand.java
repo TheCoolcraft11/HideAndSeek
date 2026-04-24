@@ -141,7 +141,7 @@ public class DebugBoosterCommand implements DebugSubcommand {
     }
 
     private String formatDuration(long milliseconds) {
-        if (milliseconds <= 0) return "0m";
+        if (milliseconds <= 0) return "Infinite";
 
         long hours = TimeUnit.MILLISECONDS.toHours(milliseconds);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds) % 60;

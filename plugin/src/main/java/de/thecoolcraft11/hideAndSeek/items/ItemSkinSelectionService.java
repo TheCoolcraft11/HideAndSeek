@@ -99,6 +99,10 @@ public final class ItemSkinSelectionService {
 
         int updated = getCoins(playerId) + amount;
         PLAYER_COINS.put(playerId, updated);
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordCoinsEarned(playerId, amount);
+        }
         savePlayer(plugin, playerId);
     }
 
@@ -107,6 +111,12 @@ public final class ItemSkinSelectionService {
 
         int updated = Math.max(0, getCoins(playerId) + amount);
         PLAYER_COINS.put(playerId, updated);
+        if (amount > 0) {
+            var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+            if (statsService != null) {
+                statsService.recordCoinsEarned(playerId, amount);
+            }
+        }
         savePlayer(plugin, playerId);
     }
 
@@ -197,14 +207,9 @@ public final class ItemSkinSelectionService {
     }
 
     public static void savePlayer(HideAndSeek plugin, UUID playerId) {
-        savePlayer(plugin, playerId, true);
-    }
-
-    public static void savePlayer(HideAndSeek plugin, UUID playerId, boolean flush) {
         if (!plugin.getConfig().getBoolean("persistence.save-skin-data", true)) {
             return;
         }
-
         ensureStore(plugin);
         String skinsJson = toSkinsJson(playerId);
 
@@ -220,7 +225,7 @@ public final class ItemSkinSelectionService {
 
     public static void saveAll(HideAndSeek plugin) {
         for (UUID playerId : Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).toList()) {
-            savePlayer(plugin, playerId, false);
+            savePlayer(plugin, playerId);
         }
     }
 

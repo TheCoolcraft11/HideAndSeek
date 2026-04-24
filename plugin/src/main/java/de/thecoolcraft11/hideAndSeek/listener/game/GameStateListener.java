@@ -33,6 +33,10 @@ public class GameStateListener implements Listener {
         Player player = event.getPlayer();
         ItemSkinSelectionService.loadPlayer(plugin, player.getUniqueId());
         LoadoutDataService.loadPlayer(plugin, player.getUniqueId());
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.loadPlayer(player.getUniqueId(), player.getName());
+        }
         String currentPhase = plugin.getStateManager().getCurrentPhaseId();
 
         plugin.getSeekingBossBarService().onPlayerJoin(player);
@@ -96,6 +100,10 @@ public class GameStateListener implements Listener {
         plugin.getUnstuckManager().clearPlayerData(player.getUniqueId());
         ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
         LoadoutDataService.savePlayer(plugin, player.getUniqueId());
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.savePlayer(player.getUniqueId());
+        }
         cleanupSwordCharge(player.getUniqueId());
         cleanupMedkitCharge(player.getUniqueId());
         RemoteGatewayItem.clearGatewaysForOwner(player.getUniqueId());

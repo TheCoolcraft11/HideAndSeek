@@ -23,6 +23,7 @@ public final class YamlPlayerDataStore implements PlayerDataStore {
     private static final String XP_KEY = "xp";
     private static final String WINS_KEY = "wins";
     private static final String LOSSES_KEY = "losses";
+    private static final String STATS_KEY = "stats";
 
     private final MinigameFramework framework;
     private final File skinDataFile;
@@ -227,6 +228,18 @@ public final class YamlPlayerDataStore implements PlayerDataStore {
     }
 
     @Override
+    public synchronized CompletableFuture<String> getStats(UUID uuid) {
+        return CompletableFuture.completedFuture(skinConfig.getString(globalPath(uuid, STATS_KEY), "{}"));
+    }
+
+    @Override
+    public synchronized CompletableFuture<Void> setStats(UUID uuid, String json) {
+        skinConfig.set(globalPath(uuid, STATS_KEY), (json == null || json.isBlank()) ? "{}" : json);
+        saveSkin();
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
     public synchronized CompletableFuture<Void> touchPlayer(UUID uuid, String name) {
         String basePath = "players." + uuid;
 
@@ -244,6 +257,9 @@ public final class YamlPlayerDataStore implements PlayerDataStore {
         }
         if (!skinConfig.contains(basePath + ".unlocked")) {
             skinConfig.set(basePath + ".unlocked", List.of());
+        }
+        if (!skinConfig.contains(basePath + "." + STATS_KEY)) {
+            skinConfig.set(basePath + "." + STATS_KEY, "{}");
         }
 
         if (!loadoutConfig.contains(basePath + ".hider-items")) {

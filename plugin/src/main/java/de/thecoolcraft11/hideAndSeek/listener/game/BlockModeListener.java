@@ -174,6 +174,10 @@ public class BlockModeListener implements Listener {
         if (hider != null && hider.isOnline()) {
 
             double damage = gazeKill ? 1000 : getDamage(breaker);
+            var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+            if (statsService != null) {
+                statsService.recordDamageDealt(breaker.getUniqueId(), damage);
+            }
 
             HideAndSeek.getDataController().setBlockDamageOverride(hider.getUniqueId(), System.currentTimeMillis() + 500);
             hider.setNoDamageTicks(0);

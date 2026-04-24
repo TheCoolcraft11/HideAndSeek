@@ -126,6 +126,16 @@ public class HidingPhase implements GamePhase {
                 (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
         plugin.getLogger().info("Game mode: " + gameMode);
 
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.onRoundStarted(
+                    currentMapName,
+                    gameMode.name(),
+                    HideAndSeek.getDataController().getHiders(),
+                    HideAndSeek.getDataController().getSeekers()
+            );
+        }
+
 
         if (gameMode == GameModeEnum.SMALL) {
             var seekerSizeResult = plugin.getSettingService().getSetting("game.small-mode.seeker-size");

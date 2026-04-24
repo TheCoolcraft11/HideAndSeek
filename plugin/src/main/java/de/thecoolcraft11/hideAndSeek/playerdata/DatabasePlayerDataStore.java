@@ -17,6 +17,7 @@ public final class DatabasePlayerDataStore implements PlayerDataStore {
 
     private static final String SKINS_KEY = "skins";
     private static final String LOADOUT_KEY = "loadout";
+    private static final String STATS_KEY = "stats";
 
     private final MinigameFramework framework;
 
@@ -114,6 +115,29 @@ public final class DatabasePlayerDataStore implements PlayerDataStore {
     @Override
     public CompletableFuture<Void> setLoadout(UUID uuid, String json) {
         return MinigameStatsAPI.setTypedStatString(uuid, MINIGAME_ID, LOADOUT_KEY, sanitizeJson(json));
+    }
+
+    @Override
+    public CompletableFuture<String> getStats(UUID uuid) {
+        return MinigameStatsAPI
+                .getTypedStat(uuid, MINIGAME_ID, STATS_KEY)
+                .thenApply(stat -> {
+                    if (stat == null || stat.value() == null || stat.value().isBlank()) {
+                        return "{}";
+                    }
+                    return stat.value();
+                })
+                .exceptionally(ex -> {
+                    framework.getLogger().warning(
+                            "Failed to read tracked stats from database for " + uuid + ": " + ex.getMessage()
+                    );
+                    return "{}";
+                });
+    }
+
+    @Override
+    public CompletableFuture<Void> setStats(UUID uuid, String json) {
+        return MinigameStatsAPI.setTypedStatString(uuid, MINIGAME_ID, STATS_KEY, sanitizeJson(json));
     }
 
     @Override

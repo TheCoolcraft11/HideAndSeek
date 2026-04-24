@@ -257,6 +257,10 @@ public class PlayerHitListener implements Listener {
                 return;
             }
 
+            var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+            if (statsService != null) {
+                statsService.recordDamageDealt(attacker.getUniqueId(), event.getFinalDamage());
+            }
             plugin.getPointService().onHiderDamagedBySeeker(attacker, victim, event.getFinalDamage());
             event.setCancelled(false);
             return;
@@ -467,6 +471,10 @@ public class PlayerHitListener implements Listener {
     }
 
     private void handleHiderElimination(Player hider, Player seeker, GameStyleEnum gameStyle) {
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordHiderDeath(hider.getUniqueId());
+        }
 
         int seekerPoints = plugin.getPointService().onHiderEliminated(hider, seeker);
 
@@ -504,6 +512,10 @@ public class PlayerHitListener implements Listener {
         HideAndSeek.getDataController().removeHider(hider.getUniqueId());
         plugin.getUnstuckManager().clearPlayerData(hider.getUniqueId());
         HideAndSeek.getDataController().addSeeker(hider.getUniqueId());
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordBlockConversion(hider.getUniqueId());
+        }
 
         assignToSeekerTeamOrFallback(hider, "eliminated hider");
 
@@ -533,6 +545,10 @@ public class PlayerHitListener implements Listener {
     private void handleInvasionMode(Player hider) {
         HideAndSeek.getDataController().removeHider(hider.getUniqueId());
         HideAndSeek.getDataController().addSeeker(hider.getUniqueId());
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordBlockConversion(hider.getUniqueId());
+        }
 
         clearConvertedPlayerAreaWarnings(hider);
 

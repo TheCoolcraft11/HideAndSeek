@@ -49,6 +49,20 @@ public final class SeekerItems {
         ITEM_REGISTRY.put(item.getId(), item);
     }
 
+    public static Set<String> getAllItemIds() {
+        return Set.copyOf(ITEM_REGISTRY.keySet());
+    }
+
+    private static void recordItemEquipped(HideAndSeek plugin, Player player, String itemId) {
+        if (plugin == null || player == null || itemId == null || itemId.isBlank()) {
+            return;
+        }
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordItemEquipped(player.getUniqueId(), itemId);
+        }
+    }
+
     public static void registerItems(HideAndSeek plugin) {
         AtomicInteger registered = new AtomicInteger(0);
         AtomicInteger failed = new AtomicInteger(0);
@@ -114,6 +128,7 @@ public final class SeekerItems {
                     ItemSkinSelectionService.normalizeLogicalItemId(SeekersSwordItem.ID));
             CustomModelDataUtil.setCustomModelData(sword, SeekersSwordItem.ID, selectedVariant);
             player.getInventory().setItem(0, sword);
+            recordItemEquipped(plugin, player, SeekersSwordItem.ID);
         }
 
 
@@ -143,7 +158,7 @@ public final class SeekerItems {
                 break;
             }
         }
-        if (!hasValidItems && !itemsToGive.isEmpty()) {
+        if (!hasValidItems) {
             plugin.getLogger().warning("All selected items for " + player.getName() + " are not implemented yet! Using default loadout instead.");
             player.sendMessage(Component.text("Some items you selected are not implemented yet. Using default items instead.", NamedTextColor.YELLOW));
             itemsToGive = Set.of(LoadoutItemType.GRAPPLING_HOOK);
@@ -173,13 +188,14 @@ public final class SeekerItems {
                                 ItemSkinSelectionService.normalizeLogicalItemId(itemId));
                         CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
                         player.getInventory().setItem(currentSlot, item);
+                        recordItemEquipped(plugin, player, itemId);
                         placedItems.add(itemType);
                         break;
                     }
                 }
 
-                if (preference.hasFallback() && (player.getInventory().getItem(
-                        currentSlot) == null || player.getInventory().getItem(currentSlot).getType().isAir())) {
+                ItemStack currentItem = player.getInventory().getItem(currentSlot);
+                if (preference.hasFallback() && (currentItem == null || currentItem.getType().isAir())) {
                     for (LoadoutItemType itemType : itemsToGive) {
                         if (placedItems.contains(itemType)) continue;
                         if (itemType.getItemType() != preference.fallback()) continue;
@@ -194,6 +210,7 @@ public final class SeekerItems {
                                     ItemSkinSelectionService.normalizeLogicalItemId(itemId));
                             CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
                             player.getInventory().setItem(currentSlot, item);
+                            recordItemEquipped(plugin, player, itemId);
                             placedItems.add(itemType);
                             break;
                         }
@@ -223,6 +240,7 @@ public final class SeekerItems {
                 String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ItemSkinSelectionService.normalizeLogicalItemId(itemId));
                 CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
                 player.getInventory().setItem(slot++, item);
+                recordItemEquipped(plugin, player, itemId);
                 if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                     plugin.getLogger().info(" Item placed successfully");
                 }
@@ -257,6 +275,7 @@ public final class SeekerItems {
                 if (blockStats != null) {
                     CustomModelDataUtil.setCustomModelData(blockStats, CrowbarItem.ID);
                     player.getInventory().setItem(7, blockStats);
+                    recordItemEquipped(plugin, player, CrowbarItem.ID);
                     if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                         plugin.getLogger().info("Gave Crowbar to " + player.getName() + " in slot 7");
                     }
@@ -276,6 +295,7 @@ public final class SeekerItems {
 
         player.getInventory().setHelmet(plugin.getCustomItemManager().getIdentifiedItemStack(SeekersMaskItem.ID, player));
         CustomModelDataUtil.setForInventorySlot(player.getInventory(), 39, SeekersMaskItem.ID, null);
+        recordItemEquipped(plugin, player, SeekersMaskItem.ID);
 
     }
 
@@ -335,6 +355,7 @@ public final class SeekerItems {
                     if (blockStats != null) {
                         CustomModelDataUtil.setCustomModelData(blockStats, BlockStatsItem.ID);
                         player.getInventory().setItem(8, blockStats);
+                        recordItemEquipped(plugin, player, BlockStatsItem.ID);
                         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                             plugin.getLogger().info("Gave BlockStats to " + player.getName() + " in slot 8");
                         }
@@ -351,6 +372,7 @@ public final class SeekerItems {
                 if (blockStats != null) {
                     CustomModelDataUtil.setCustomModelData(blockStats, CrowbarItem.ID);
                     player.getInventory().setItem(7, blockStats);
+                    recordItemEquipped(plugin, player, CrowbarItem.ID);
                     if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                         plugin.getLogger().info("Gave Crowbar to " + player.getName() + " in slot 7");
                     }

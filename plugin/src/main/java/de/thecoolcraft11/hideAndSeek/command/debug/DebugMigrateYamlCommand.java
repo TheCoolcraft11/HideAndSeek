@@ -115,6 +115,15 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
                         "loadout",
                         report));
             }
+
+            String statsJson = source.statsJson.get(playerId);
+            if (statsJson != null) {
+                tasks.add(track(playerId,
+                        MinigameStatsAPI.setTypedStatString(playerId, DatabasePlayerDataStore.MINIGAME_ID, "stats",
+                                sanitizeJson(statsJson)),
+                        "stats",
+                        report));
+            }
         }
 
         return CompletableFuture.allOf(tasks.toArray(CompletableFuture[]::new)).thenApply(ignored -> report);
@@ -142,7 +151,8 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
         }
         for (File minigameFile : resolveCandidates("minigame.yml")) {
             if (minigameFile.exists()) {
-                readMinigameYaml(YamlConfiguration.loadConfiguration(minigameFile), source.skinsJson, source.loadoutJson);
+                readMinigameYaml(YamlConfiguration.loadConfiguration(minigameFile), source.skinsJson,
+                        source.loadoutJson, source.statsJson);
             }
         }
 
@@ -150,7 +160,8 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
         for (int i = 0; i < legacySkinFiles.size(); i++) {
             File legacySkinFile = legacySkinFiles.get(i);
             if (legacySkinFile.exists()) {
-                readLegacySkinsYaml(YamlConfiguration.loadConfiguration(legacySkinFile), source.globalData, source.skinsJson, i > 0);
+                readLegacySkinsYaml(YamlConfiguration.loadConfiguration(legacySkinFile), source.globalData,
+                        source.skinsJson, source.statsJson, i > 0);
             }
         }
 
@@ -193,7 +204,7 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
         }
     }
 
-    private void readMinigameYaml(YamlConfiguration yaml, Map<UUID, String> skins, Map<UUID, String> loadout) {
+    private void readMinigameYaml(YamlConfiguration yaml, Map<UUID, String> skins, Map<UUID, String> loadout, Map<UUID, String> stats) {
         ConfigurationSection players = yaml.getConfigurationSection("players");
         if (players == null) {
             return;
@@ -212,10 +223,15 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
             if (loadoutJson != null && !loadoutJson.isBlank()) {
                 loadout.put(uuid, loadoutJson);
             }
+
+            String statsJson = yaml.getString(base + ".stats");
+            if (statsJson != null && !statsJson.isBlank()) {
+                stats.put(uuid, statsJson);
+            }
         }
     }
 
-    private void readLegacySkinsYaml(YamlConfiguration yaml, Map<UUID, GlobalData> global, Map<UUID, String> skins, boolean overrideExisting) {
+    private void readLegacySkinsYaml(YamlConfiguration yaml, Map<UUID, GlobalData> global, Map<UUID, String> skins, Map<UUID, String> stats, boolean overrideExisting) {
         ConfigurationSection players = yaml.getConfigurationSection("players");
         if (players == null) {
             return;
@@ -257,6 +273,15 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
                 skins.put(uuid, GSON.toJson(payload));
             } else {
                 skins.putIfAbsent(uuid, GSON.toJson(payload));
+            }
+
+            String statsJson = yaml.getString(base + ".stats");
+            if (statsJson != null && !statsJson.isBlank()) {
+                if (overrideExisting) {
+                    stats.put(uuid, statsJson);
+                } else {
+                    stats.putIfAbsent(uuid, statsJson);
+                }
             }
         }
     }
@@ -351,12 +376,14 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
         private final Map<UUID, GlobalData> globalData = new HashMap<>();
         private final Map<UUID, String> skinsJson = new HashMap<>();
         private final Map<UUID, String> loadoutJson = new HashMap<>();
+        private final Map<UUID, String> statsJson = new HashMap<>();
 
         private Set<UUID> allPlayerIds() {
             Set<UUID> all = new LinkedHashSet<>();
             all.addAll(globalData.keySet());
             all.addAll(skinsJson.keySet());
             all.addAll(loadoutJson.keySet());
+            all.addAll(statsJson.keySet());
             return all;
         }
     }

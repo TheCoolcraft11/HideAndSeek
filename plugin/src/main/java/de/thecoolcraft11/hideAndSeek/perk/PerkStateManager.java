@@ -108,6 +108,10 @@ public class PerkStateManager {
         } else {
             plugin.getPerkShopUI().refreshForPlayer(player);
         }
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordPerkUsed(id, perk.getId());
+        }
     }
 
     public boolean grantDebug(Player player, PerkDefinition perk, boolean bypassCooldown) {
@@ -168,6 +172,10 @@ public class PerkStateManager {
             plugin.getPerkShopUI().refreshAllPlayersWithShopItems();
         } else {
             plugin.getPerkShopUI().refreshForPlayer(player);
+        }
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordPerkUsed(id, perk.getId());
         }
         return true;
     }

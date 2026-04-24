@@ -1,5 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.util;
 
+import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -271,6 +272,15 @@ public class DataController {
 
     public void addPoints(UUID uuid, int points) {
         playerPoints.put(uuid, playerPoints.getOrDefault(uuid, 0) + points);
+        if (points > 0) {
+            var active = HideAndSeek.getActiveInstance();
+            if (active instanceof HideAndSeek) {
+                var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+                if (statsService != null) {
+                    statsService.recordPointsEarned(uuid, points);
+                }
+            }
+        }
     }
 
     public Map<UUID, Integer> getAllPoints() {

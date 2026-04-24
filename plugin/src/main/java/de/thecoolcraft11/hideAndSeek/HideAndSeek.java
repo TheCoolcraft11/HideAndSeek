@@ -33,6 +33,7 @@ import de.thecoolcraft11.hideAndSeek.phase.SeekingPhase;
 import de.thecoolcraft11.hideAndSeek.placeholder.HASExpansion;
 import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStore;
 import de.thecoolcraft11.hideAndSeek.playerdata.PlayerDataStoreFactory;
+import de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService;
 import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
 import de.thecoolcraft11.hideAndSeek.setting.SettingRegistrar;
 import de.thecoolcraft11.hideAndSeek.tab.CustomScoreboardProvider;
@@ -83,6 +84,8 @@ public final class HideAndSeek extends MinigameFramework {
     private CustomTabProvider tabProvider;
     private CustomScoreboardProvider scoreboardProvider;
     private PlayerDataStore playerDataStore;
+    private PlayerStatsService playerStatsService;
+    private PlayerStatsGUI playerStatsGUI;
 
     @Override
     protected void onGameEnable() {
@@ -93,6 +96,7 @@ public final class HideAndSeek extends MinigameFramework {
 
         DataController.getInstance().setup();
         playerDataStore = PlayerDataStoreFactory.create(this);
+        playerStatsService = new PlayerStatsService(this);
         ItemSkinSelectionService.initialize(this);
         LoadoutDataService.initialize(this);
         mapManager = new MapManager(this);
@@ -109,6 +113,7 @@ public final class HideAndSeek extends MinigameFramework {
         readyGUI = new ReadyGUI(this);
         seekingBossBarService = new SeekingBossBarService(this);
         unstuckManager = new UnstuckManager(this);
+        playerStatsGUI = new PlayerStatsGUI(this);
 
         nmsAdapter = NmsLoader.load(getLogger(), getConfig().getBoolean("nms.enabled", true));
 
@@ -158,6 +163,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(hiderCampingListener, this);
         Bukkit.getPluginManager().registerEvents(environmentalDamageListener, this);
         Bukkit.getPluginManager().registerEvents(new HiderEquipmentChangeListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerItemUsageListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CrossbowTrackerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CameraViewListener(this), this);
         Bukkit.getPluginManager().registerEvents(new AssistantProjectileListener(this), this);
@@ -194,6 +200,7 @@ public final class HideAndSeek extends MinigameFramework {
         MinigameSubcommandRegistry.register(new ReadyCommand(this));
         MinigameSubcommandRegistry.register(new DebugCommand(this));
         MinigameSubcommandRegistry.register(new UnstuckCommand(this, unstuckManager));
+        MinigameSubcommandRegistry.register(new StatsCommand(this));
 
         unstuckManager.startTrackingTask();
 
@@ -287,6 +294,9 @@ public final class HideAndSeek extends MinigameFramework {
         }
         if (unstuckManager != null) {
             unstuckManager.shutdown();
+        }
+        if (playerStatsService != null) {
+            playerStatsService.saveAllOnlinePlayers();
         }
         KillEffectManager.clear();
         WinSkinManager.clear();
@@ -462,6 +472,14 @@ public final class HideAndSeek extends MinigameFramework {
 
     public PlayerDataStore getPlayerDataStore() {
         return playerDataStore;
+    }
+
+    public PlayerStatsService getPlayerStatsService() {
+        return playerStatsService;
+    }
+
+    public PlayerStatsGUI getPlayerStatsGUI() {
+        return playerStatsGUI;
     }
 
     public void updateWorldIconsForAllMaps() {

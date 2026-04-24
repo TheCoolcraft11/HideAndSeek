@@ -54,6 +54,20 @@ public final class HiderItems {
         ITEM_REGISTRY.put(item.getId(), item);
     }
 
+    public static Set<String> getAllItemIds() {
+        return Set.copyOf(ITEM_REGISTRY.keySet());
+    }
+
+    private static void recordItemEquipped(HideAndSeek plugin, Player player, String itemId) {
+        if (plugin == null || player == null || itemId == null || itemId.isBlank()) {
+            return;
+        }
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.recordItemEquipped(player.getUniqueId(), itemId);
+        }
+    }
+
     public static void registerItems(HideAndSeek plugin) {
         AtomicInteger registered = new AtomicInteger(0);
         AtomicInteger failed = new AtomicInteger(0);
@@ -101,6 +115,7 @@ public final class HiderItems {
                 ItemStack appearance = plugin.getCustomItemManager().getIdentifiedItemStack(AppearanceItem.ID, player);
                 CustomModelDataUtil.setCustomModelData(appearance, AppearanceItem.ID);
                 player.getInventory().setItem(appearanceSlot, appearance);
+                recordItemEquipped(plugin, player, AppearanceItem.ID);
             } else {
                 player.getInventory().setItem(appearanceSlot, new ItemStack(Material.AIR));
             }
@@ -110,6 +125,7 @@ public final class HiderItems {
             ItemStack selector = plugin.getCustomItemManager().getIdentifiedItemStack(BlockSelectorItem.ID, player);
             CustomModelDataUtil.setCustomModelData(selector, BlockSelectorItem.ID);
             player.getInventory().setItem(8, selector);
+            recordItemEquipped(plugin, player, BlockSelectorItem.ID);
         }
 
         HiderEquipmentChangeListener.hideHandItem(player, EquipmentSlot.HAND);
@@ -194,6 +210,7 @@ public final class HiderItems {
                                 ItemSkinSelectionService.normalizeLogicalItemId(itemId));
                         CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
                         player.getInventory().setItem(currentSlot, item);
+                        recordItemEquipped(plugin, player, itemId);
                         placedItems.add(itemType);
                         plugin.getCustomItemManager().resetPlayerUses(RandomBlockItem.ID, player.getUniqueId());
                         plugin.getCustomItemManager().resetPlayerUses(TotemItem.ID, player.getUniqueId());
@@ -227,6 +244,7 @@ public final class HiderItems {
                                     ItemSkinSelectionService.normalizeLogicalItemId(itemId));
                             CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
                             player.getInventory().setItem(currentSlot, item);
+                            recordItemEquipped(plugin, player, itemId);
                             placedItems.add(itemType);
                             plugin.getCustomItemManager().resetPlayerUses(RandomBlockItem.ID, player.getUniqueId());
                             plugin.getCustomItemManager().resetPlayerUses(TotemItem.ID, player.getUniqueId());
@@ -266,6 +284,7 @@ public final class HiderItems {
                 String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ItemSkinSelectionService.normalizeLogicalItemId(itemId));
                 CustomModelDataUtil.setCustomModelData(item, itemId, selectedVariant);
                 player.getInventory().setItem(slot++, item);
+                recordItemEquipped(plugin, player, itemId);
                 if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                     plugin.getLogger().info("  Item placed successfully");
                 }

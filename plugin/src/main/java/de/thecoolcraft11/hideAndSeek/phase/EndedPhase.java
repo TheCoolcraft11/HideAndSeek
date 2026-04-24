@@ -77,6 +77,15 @@ public class EndedPhase implements GamePhase {
         boolean hidersWin = !activeHiders.isEmpty();
         updateGlobalRoundStats(hideAndSeekPlugin, hidersWin, activeHiders);
 
+        Set<UUID> participants = new HashSet<>();
+        participants.addAll(HideAndSeek.getDataController().getHiders());
+        participants.addAll(HideAndSeek.getDataController().getSeekers());
+        var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
+        if (statsService != null) {
+            statsService.onRoundEnded(hidersWin, activeHiders);
+            statsService.savePlayers(participants);
+        }
+
         announceWinner(plugin, hidersWin, coinGains);
 
         WinSkinService winSkinService = new WinSkinService(hideAndSeekPlugin);
