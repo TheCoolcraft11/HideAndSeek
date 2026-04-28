@@ -207,19 +207,6 @@ public class PhantomViewerItem implements GameItem {
         return snapshot.getBlockData(localX, worldY, localZ);
     }
 
-    private static boolean isVisualHitMaterial(Material material) {
-        String name = material.name();
-        return name.contains("WATER")
-                || name.contains("LAVA")
-                || name.contains("LEAVES")
-                || name.contains("VINE")
-                || name.contains("KELP")
-                || name.contains("SEAGRASS")
-                || name.contains("MOSS")
-                || name.contains("GRASS")
-                || name.contains("FERN")
-                || name.contains("FLOWER");
-    }
 
     private static Color toLoFiColor(BlockData blockData) {
         if (blockData == null || blockData.getMaterial().isAir()) {

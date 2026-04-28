@@ -251,7 +251,7 @@ settings:
 ```
 
 A full list of available setting keys can be found in [
-`SettingRegisterer.java`](plugin/src/main/java/de/thecoolcraft11/hideAndSeek/util/setting/SettingRegisterer.java).
+`SettingRegistrar.java`](plugin/src/main/java/de/thecoolcraft11/hideAndSeek/setting/SettingRegistrar.java).
 
 ---
 
@@ -411,23 +411,24 @@ configurable via the in-game settings GUI or under `settings.loadout.*` in `conf
 
 ### Hider Items
 
-| Item               | Rarity    | Without NMS | Description                                                              |
-|--------------------|-----------|-------------|--------------------------------------------------------------------------|
-| Firecracker        | Common    | Full        | Place a small exploding candle taunt for points                          |
-| Cat Sound          | Common    | Full        | Play a loud cat sound to all online players                              |
-| Random Block       | Common    | Full        | Reroll your disguise block (limited uses)                                |
-| Speed Boost        | Common    | Full        | Gain a speed effect or velocity burst                                    |
-| Tracker Crossbow   | Common    | Full        | Shoot seekers to earn points and upgrade items                           |
-| Knockback Stick    | Common    | Full        | Knock seekers away; upgrades when crossbow hits threshold                |
-| Firework Rocket    | Uncommon  | Full        | Launch a high-altitude firework taunt                                    |
-| Slowness Ball      | Uncommon  | Full        | Throw a projectile that slows seekers                                    |
-| Smoke Bomb         | Uncommon  | Full        | Throw a smoke cloud for visual cover                                     |
-| Block Swap         | Rare      | Full        | Swap block disguise with the nearest other hider                         |
-| Big Firecracker    | Rare      | Full        | Large explosion with bouncing mini firecrackers                          |
-| Medkit             | Rare      | Full        | Hold block to channel-heal; release early to cancel                      |
-| Ghost Essence      | Rare      | Disabled    | Phase through walls briefly; falls back to limited behaviour without NMS |
-| Invisibility Cloak | Epic      | Full        | Turn invisible for a configurable duration                               |
-| Totem of Undying   | Legendary | Full        | Activate a one-time revive window on death                               |
+| Item               | Rarity    | Without NMS | Description                                                               |
+|--------------------|-----------|-------------|---------------------------------------------------------------------------|
+| Firecracker        | Common    | Full        | Place a small exploding candle taunt for points                           |
+| Cat Sound          | Common    | Full        | Play a loud cat sound to all online players                               |
+| Random Block       | Common    | Full        | Reroll your disguise block (limited uses)                                 |
+| Speed Boost        | Common    | Full        | Gain a speed effect or velocity burst                                     |
+| Tracker Crossbow   | Common    | Full        | Shoot seekers to earn points and upgrade items                            |
+| Knockback Stick    | Common    | Full        | Knock seekers away; upgrades when crossbow hits threshold                 |
+| Firework Rocket    | Uncommon  | Full        | Launch a high-altitude firework taunt                                     |
+| Slowness Ball      | Uncommon  | Full        | Throw a projectile that slows seekers                                     |
+| Smoke Bomb         | Uncommon  | Full        | Throw a smoke cloud for visual cover                                      |
+| Block Swap         | Rare      | Full        | Swap block disguise with the nearest other hider                          |
+| Big Firecracker    | Rare      | Full        | Large explosion with bouncing mini firecrackers                           |
+| Medkit             | Rare      | Full        | Hold block to channel-heal; release early to cancel                       |
+| Ghost Essence      | Rare      | Disabled    | Phase through walls briefly; falls back to limited behaviour without NMS  |
+| Invisibility Cloak | Epic      | Full        | Turn invisible for a configurable duration                                |
+| Totem of Undying   | Legendary | Full        | Activate a one-time revive window on death                                |
+| Remote Gateway     | Epic      | Full        | Place paired gateways that teleport between anchors until the round ends. |  
 
 ### Seeker Items
 
@@ -444,6 +445,7 @@ configurable via the in-game settings GUI or under `settings.loadout.*` in `conf
 | Camera             | Epic      | Disabled    | Place up to 5 cameras and spectate through them           |
 | Lightning Freeze   | Legendary | Fallback    | Freeze all hiders in place for a short duration           |
 | Seeker's Assistant | Legendary | Disabled    | Summon an AI hunting mob that tracks and shoots hiders    |
+| Phantom Viewer     | Rare      | Full        | Capture a rough map snapshot from a hider perspective.    |
 
 ---
 
