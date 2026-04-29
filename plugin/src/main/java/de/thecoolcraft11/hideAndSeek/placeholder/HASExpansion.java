@@ -7,6 +7,7 @@ import de.thecoolcraft11.minigameframework.storage.sql.stats.MinigameStatsAPI;
 import de.thecoolcraft11.minigameframework.storage.sql.stats.StatValue;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
@@ -96,6 +97,9 @@ public class HASExpansion extends PlaceholderExpansion {
                 return HideAndSeek.getDataController().getPoints(player.getUniqueId()) + "";
 
             case "players": {
+                if (HideAndSeek.getActiveInstance().getStateManager().isPhase("lobby")) {
+                    return Bukkit.getOnlinePlayers().size() + "";
+                }
                 Set<UUID> players = new HashSet<>();
                 players.addAll(HideAndSeek.getDataController().getHiders());
                 players.addAll(HideAndSeek.getDataController().getHiders());
