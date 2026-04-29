@@ -407,4 +407,9 @@ public class SeekingPhase implements GamePhase {
     public boolean allowEntityPortals() {
         return false;
     }
+
+    @Override
+    public boolean usesBooster() {
+        return true;
+    }
 }

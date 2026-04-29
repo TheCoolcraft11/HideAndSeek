@@ -718,4 +718,9 @@ public class HidingPhase implements GamePhase {
     public boolean allowEntityPortals() {
         return false;
     }
+
+    @Override
+    public boolean usesBooster() {
+        return true;
+    }
 }

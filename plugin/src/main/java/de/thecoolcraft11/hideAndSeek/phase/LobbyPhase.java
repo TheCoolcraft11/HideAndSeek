@@ -455,4 +455,5 @@ public class LobbyPhase implements GamePhase {
     public boolean allowEntityPortals() {
         return false;
     }
+
 }

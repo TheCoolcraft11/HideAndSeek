@@ -423,4 +423,5 @@ public class EndedPhase implements GamePhase {
     public boolean allowEntityPortals() {
         return false;
     }
+
 }
