@@ -39,6 +39,8 @@ public class PerkRegistry {
         allPerks.add(new ElytraRushPerk());
         allPerks.add(new ProximityMeterPerk());
         allPerks.add(new ScentTrailPerk());
+        allPerks.add(new AutoAimPerk());
+        allPerks.add(new HitDisplayPerk());
     }
 
     public void selectRoundPerks() {

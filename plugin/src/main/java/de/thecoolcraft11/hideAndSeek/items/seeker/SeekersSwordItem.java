@@ -4,6 +4,8 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
+import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.AutoAimPerk;
+import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.HitDisplayPerk;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -89,46 +91,10 @@ public class SeekersSwordItem implements GameItem {
                 .build());
     }
 
-    private void startSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
-        context.skipCooldown();
-        Player seeker = context.getPlayer();
-        int maxChargeSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
-        long maxChargeMs = maxChargeSeconds * 1000L;
-
-        clearSwordCharge(seeker);
-
-        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
-        swordChargeXp.put(seeker.getUniqueId(), savedXp);
-
-        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, maxChargeSeconds * 20L, XpProgressHelper.Mode.COUNTUP, 10);
-        swordChargeXpTasks.put(seeker.getUniqueId(), xpTask);
-
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
-            final long startTime = System.currentTimeMillis();
-            long nextSoundAtMs = startTime;
-
-            @Override
-            public void run() {
-                if (!seeker.isOnline() || !plugin.getCustomItemManager().hasItemInMainHand(seeker, getId())) {
-                    clearSwordCharge(seeker);
-                    return;
-                }
-
-                long now = System.currentTimeMillis();
-                long elapsed = now - startTime;
-                double progress = Math.min(1.0, (double) elapsed / maxChargeMs);
-
-                if (now >= nextSoundAtMs && progress < 1.0) {
-                    float pitch = 0.5f + ((float) progress * 1.5f);
-                    seeker.playSound(seeker.getLocation(), Sound.BLOCK_COMPARATOR_CLICK, 0.8f, pitch);
-
-                    long delay = (long) (1000 - (progress * 900));
-                    nextSoundAtMs = now + Math.max(100, delay);
-                }
-            }
-        }, 1L, 1L);
-
-        swordChargeTasks.put(seeker.getUniqueId(), task);
+    private static boolean isSwordTarget(Player seeker, Entity entity) {
+        return entity instanceof Player target
+                && !target.getUniqueId().equals(seeker.getUniqueId())
+                && HideAndSeek.getDataController().getHiders().contains(target.getUniqueId());
     }
 
     private void releaseSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
@@ -171,6 +137,163 @@ public class SeekersSwordItem implements GameItem {
         swordChargeXp.remove(playerId);
     }
 
+    private static Entity raycastHiderHit(Player seeker, HideAndSeek plugin, Location previous, Vector direction, double distance, double hitbox) {
+        World world = previous.getWorld();
+        if (world == null) {
+            return null;
+        }
+
+        if (plugin.getNmsAdapter().hasCapability(NmsCapabilities.PROJECTILE_ENTITY_RAYCAST)) {
+            Entity hitEntity = plugin.getNmsAdapter().raycastEntityHit(
+                    seeker,
+                    previous,
+                    direction,
+                    distance,
+                    hitbox,
+                    entity -> isSwordTarget(seeker, entity)
+            );
+            if (hitEntity != null) {
+                return hitEntity;
+            }
+        }
+
+        RayTraceResult entityTrace = world.rayTraceEntities(
+                previous,
+                direction,
+                distance,
+                hitbox,
+                entity -> isSwordTarget(seeker, entity)
+        );
+        return entityTrace == null ? null : entityTrace.getHitEntity();
+    }
+
+    private static Vector steerVelocityTowardHider(Location from, Vector velocity, HideAndSeek plugin, double hitbox) {
+        if (velocity.lengthSquared() <= 1.0E-6) {
+            return velocity;
+        }
+
+        Player target = findAutoAimTarget(from, velocity, 32.0 + (hitbox * 8.0));
+        if (target == null) {
+            return velocity;
+        }
+
+        Vector toTarget = target.getLocation().add(0.0, 1.0, 0.0).toVector().subtract(from.toVector());
+        if (toTarget.lengthSquared() <= 1.0E-6) {
+            return velocity;
+        }
+
+        double steeringStrength = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.auto-aim-strength",
+                0.22);
+        steeringStrength = Math.clamp(steeringStrength, 0.01, 0.6);
+
+        double speed = velocity.length();
+        Vector blended = velocity.clone().normalize().multiply(1.0 - steeringStrength)
+                .add(toTarget.normalize().multiply(steeringStrength));
+        if (blended.lengthSquared() <= 1.0E-6) {
+            return velocity;
+        }
+        return blended.normalize().multiply(speed);
+    }
+
+    private static Player findAutoAimTarget(Location from, Vector velocity, double maxRange) {
+        if (velocity.lengthSquared() <= 1.0E-6) {
+            return null;
+        }
+
+        Vector forward = velocity.clone().normalize();
+        Player best = null;
+        double bestScore = Double.MAX_VALUE;
+
+        for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+            Player hider = Bukkit.getPlayer(hiderId);
+            if (hider == null || !hider.isOnline() || hider.isDead() || hider.getGameMode() == GameMode.SPECTATOR) {
+                continue;
+            }
+            hider.getWorld();
+            if (!hider.getWorld().equals(from.getWorld())) {
+                continue;
+            }
+
+            Vector toTarget = hider.getLocation().add(0.0, 1.0, 0.0).toVector().subtract(from.toVector());
+            double distance = toTarget.length();
+            if (distance <= 0.001 || distance > maxRange) {
+                continue;
+            }
+
+            double angle = Math.toDegrees(forward.angle(toTarget));
+            if (Double.isNaN(angle) || angle > 75.0) {
+                continue;
+            }
+
+            double score = distance + (angle * 0.75);
+            if (score < bestScore) {
+                bestScore = score;
+                best = hider;
+            }
+        }
+
+        return best;
+    }
+
+    private void startSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
+        context.skipCooldown();
+        Player seeker = context.getPlayer();
+        plugin.getLogger().info("Test");
+        int maxChargeSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
+        long maxChargeMs = maxChargeSeconds * 1000L;
+        double minSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.min-speed", 0.8);
+        double maxSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-speed", 2.4);
+        double gravity = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.gravity", 0.035);
+        double hitbox = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.hitbox", 0.4);
+        int maxFlightSeconds = Math.max(1,
+                plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-flight-seconds", 6));
+
+        clearSwordCharge(seeker);
+
+        XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
+        swordChargeXp.put(seeker.getUniqueId(), savedXp);
+
+        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, maxChargeSeconds * 20L, XpProgressHelper.Mode.COUNTUP, 10);
+        swordChargeXpTasks.put(seeker.getUniqueId(), xpTask);
+
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
+            final long startTime = System.currentTimeMillis();
+            long nextSoundAtMs = startTime;
+            long lastPreviewBucket = -1L;
+
+            @Override
+            public void run() {
+                if (!seeker.isOnline() || !plugin.getCustomItemManager().hasItemInMainHand(seeker, getId())) {
+                    clearSwordCharge(seeker);
+                    return;
+                }
+
+                long now = System.currentTimeMillis();
+                long elapsed = now - startTime;
+                double progress = Math.min(1.0, (double) elapsed / maxChargeMs);
+
+                if (now >= nextSoundAtMs && progress < 1.0) {
+                    float pitch = 0.5f + ((float) progress * 1.5f);
+                    seeker.playSound(seeker.getLocation(), Sound.BLOCK_COMPARATOR_CLICK, 0.8f, pitch);
+
+                    long delay = (long) (1000 - (progress * 900));
+                    nextSoundAtMs = now + Math.max(100, delay);
+                }
+
+                if (plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), HitDisplayPerk.ID)) {
+                    long previewBucket = elapsed / 100L;
+                    if (previewBucket != lastPreviewBucket) {
+                        lastPreviewBucket = previewBucket;
+                        renderSwordPreview(seeker, plugin, progress, minSpeed, maxSpeed, gravity, hitbox,
+                                maxFlightSeconds);
+                    }
+                }
+            }
+        }, 1L, 1L);
+
+        swordChargeTasks.put(seeker.getUniqueId(), task);
+    }
+
     private void throwChargedSword(Player seeker, HideAndSeek plugin, double chargeRatio) {
         if (!seeker.isOnline()) {
             return;
@@ -182,13 +305,16 @@ public class SeekersSwordItem implements GameItem {
         int maxFlightSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-flight-seconds", 6));
         int stuckSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.stuck-seconds", 12));
         double hitbox = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.hitbox", 0.4);
+        boolean autoAim = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), AutoAimPerk.ID);
 
         double speed = minSpeed + (maxSpeed - minSpeed) * chargeRatio;
         boolean energyBlade = ItemSkinSelectionService.isSelected(seeker, ID, "skin_energy_blade");
         boolean banHammer = ItemSkinSelectionService.isSelected(seeker, ID, "skin_the_ban_hammer");
         boolean giantSpatula = ItemSkinSelectionService.isSelected(seeker, ID, "skin_giant_spatula");
-        Location start = seeker.getEyeLocation().add(seeker.getEyeLocation().getDirection().normalize().multiply(0.6)).add(0, -0.2, 0);
-        Vector velocity = seeker.getEyeLocation().getDirection().normalize().multiply(speed);
+        Location eyeLocation = seeker.getEyeLocation();
+        Vector lookDirection = eyeLocation.getDirection().normalize();
+        Location start = eyeLocation.clone().add(lookDirection.clone().multiply(0.6)).add(0, -0.2, 0);
+        final Vector[] velocity = {lookDirection.multiply(speed)};
 
         ItemStack swordDisplayItem = getSwordDisplayItem(seeker, plugin);
         ItemDisplay swordDisplay = start.getWorld().spawn(start, ItemDisplay.class, display -> {
@@ -232,8 +358,11 @@ public class SeekersSwordItem implements GameItem {
                 }
 
                 Location previous = current.clone();
-                velocity.setY(velocity.getY() - gravity);
-                current = current.add(velocity);
+                if (autoAim) {
+                    velocity[0] = steerVelocityTowardHider(previous, velocity[0], plugin, hitbox);
+                }
+                velocity[0].setY(velocity[0].getY() - gravity);
+                current = current.add(velocity[0]);
 
                 World world = current.getWorld();
                 Vector travel = current.toVector().subtract(previous.toVector());
@@ -243,34 +372,7 @@ public class SeekersSwordItem implements GameItem {
                 }
                 Vector direction = travel.clone().normalize();
 
-                Entity hitEntity = null;
-                if (plugin.getNmsAdapter().hasCapability(NmsCapabilities.PROJECTILE_ENTITY_RAYCAST)) {
-                    hitEntity = plugin.getNmsAdapter().raycastEntityHit(
-                            seeker,
-                            previous,
-                            direction,
-                            distance,
-                            hitbox,
-                            entity -> entity instanceof Player target
-                                    && !target.getUniqueId().equals(seeker.getUniqueId())
-                                    && HideAndSeek.getDataController().getHiders().contains(target.getUniqueId())
-                    );
-                }
-
-                if (hitEntity == null) {
-                    RayTraceResult entityTrace = world.rayTraceEntities(
-                            previous,
-                            direction,
-                            distance,
-                            hitbox,
-                            entity -> entity instanceof Player target
-                                    && !target.getUniqueId().equals(seeker.getUniqueId())
-                                    && HideAndSeek.getDataController().getHiders().contains(target.getUniqueId())
-                    );
-                    if (entityTrace != null) {
-                        hitEntity = entityTrace.getHitEntity();
-                    }
-                }
+                Entity hitEntity = raycastHiderHit(seeker, plugin, previous, direction, distance, hitbox);
 
                 if (hitEntity instanceof Player target) {
                     double damage = getThrownSwordDamage(seeker);
@@ -401,6 +503,59 @@ public class SeekersSwordItem implements GameItem {
                 }
             }
         }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    private void renderSwordPreview(Player seeker, HideAndSeek plugin, double chargeRatio, double minSpeed, double maxSpeed,
+                                    double gravity, double hitbox, int maxFlightSeconds) {
+        World world = seeker.getWorld();
+
+        double speed = minSpeed + (maxSpeed - minSpeed) * chargeRatio;
+        Location eyeLocation = seeker.getEyeLocation();
+        Vector lookDirection = eyeLocation.getDirection().normalize();
+        Location current = eyeLocation.clone().add(lookDirection.clone().multiply(0.6)).add(0, -0.2, 0);
+        Vector velocity = lookDirection.multiply(speed);
+        boolean autoAim = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), AutoAimPerk.ID);
+
+        for (int ticks = 0; ticks < maxFlightSeconds * 20; ticks++) {
+            Location previous = current.clone();
+            if (autoAim) {
+                velocity = steerVelocityTowardHider(previous, velocity, plugin, hitbox);
+            }
+            velocity.setY(velocity.getY() - gravity);
+            current = current.add(velocity);
+
+            Vector travel = current.toVector().subtract(previous.toVector());
+            double distance = travel.length();
+            if (distance <= 0.0001) {
+                continue;
+            }
+
+            Vector direction = travel.clone().normalize();
+            Entity hitEntity = raycastHiderHit(seeker, plugin, previous, direction, distance, hitbox);
+            if (hitEntity != null) {
+                Location impact = hitEntity.getLocation().add(0, 1, 0);
+                world.spawnParticle(Particle.ENCHANTED_HIT, impact, 8, 0.12, 0.12, 0.12, 0.01);
+                world.spawnParticle(Particle.SWEEP_ATTACK, impact, 2, 0.08, 0.08, 0.08, 0.0);
+                return;
+            }
+
+            RayTraceResult blockTrace = world.rayTraceBlocks(previous, direction, distance, FluidCollisionMode.NEVER,
+                    true);
+            if (blockTrace != null) {
+                Location impact = blockTrace.getHitPosition().toLocation(world);
+                world.spawnParticle(Particle.ENCHANTED_HIT, impact, 8, 0.12, 0.12, 0.12, 0.01);
+                world.spawnParticle(Particle.CRIT, impact, 6, 0.15, 0.15, 0.15, 0.02);
+                return;
+            }
+
+            for (double sample = 0.0; sample <= distance; sample += Math.max(0.18, distance / 4.0)) {
+                Location point = previous.clone().add(direction.clone().multiply(sample));
+                world.spawnParticle(Particle.ENCHANTED_HIT, point, 1, 0.01, 0.01, 0.01, 0.0);
+                if (autoAim) {
+                    world.spawnParticle(Particle.ELECTRIC_SPARK, point, 1, 0.02, 0.02, 0.02, 0.0);
+                }
+            }
+        }
     }
 
     private ItemStack getSwordDisplayItem(Player seeker, HideAndSeek plugin) {

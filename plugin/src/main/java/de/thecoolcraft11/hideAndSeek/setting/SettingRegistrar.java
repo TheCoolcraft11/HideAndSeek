@@ -115,6 +115,12 @@ public class SettingRegistrar {
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("perks.perk.seeker_scent_trail").icon(Material.DIRT_PATH).build());
 
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("perks.perk.seeker_auto_aim").icon(Material.TARGET).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("perks.perk.seeker_hit_display").icon(Material.FILLED_MAP).build());
+
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items").icon(Material.PLAYER_HEAD).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.unstuck").icon(Material.ENDER_PEARL).build());
@@ -296,6 +302,8 @@ public class SettingRegistrar {
                 new PerkSeekerElytraRushSettingGroup(),
                 new PerkSeekerProximityMeterSettingGroup(),
                 new PerkSeekerScentTrailSettingGroup(),
+                new PerkSeekerAutoAimSettingGroup(),
+                new PerkSeekerHitDisplaySettingGroup(),
                 new PerkSeekerMapTeleportSettingGroup(),
                 new PerkSeekerRandomSwapSettingGroup(),
                 new TimerSettingGroup(),

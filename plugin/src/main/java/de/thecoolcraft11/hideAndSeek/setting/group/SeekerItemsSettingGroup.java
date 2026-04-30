@@ -175,6 +175,8 @@ public final class SeekerItemsSettingGroup implements SettingGroup {
                         "Per-tick gravity applied to the thrown sword", Material.FEATHER),
                 new DoubleSettingSpec("seeker-items.seeker-sword-throw.hitbox", 0.4, 0.1, 1.5,
                         "Collision radius used for hider hit detection", Material.TARGET),
+                new DoubleSettingSpec("seeker-items.seeker-sword-throw.auto-aim-strength", 0.22, 0.01, 0.6,
+                        "How strongly Auto Aim bends the thrown sword toward hiders", Material.TARGET),
                 new IntegerSettingSpec("seeker-items.seeker-sword-throw.max-flight-seconds", 6, 1, 30,
                         "Maximum travel time before the thrown sword despawns", Material.CLOCK),
                 new IntegerSettingSpec("seeker-items.seeker-sword-throw.stuck-seconds", 12, 1, 60,
