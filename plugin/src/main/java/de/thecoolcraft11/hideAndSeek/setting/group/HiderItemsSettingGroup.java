@@ -212,7 +212,7 @@ public final class HiderItemsSettingGroup implements SettingGroup {
                         "Time to stand still before healing", Material.CLOCK),
                 new DoubleSettingSpec("hider-items.medkit.heal-amount", 20.0, 1.0, 40.0, "Heal amount in half-hearts",
                         Material.GLISTERING_MELON_SLICE),
-                new IntegerSettingSpec("hider-items.totem.effect-duration", 30, 5, 120,
+                new IntegerSettingSpec("hider-items.totem.effect-duration", 5, 1, 120,
                         "Duration of revive effect in seconds", Material.CLOCK),
                 new IntegerSettingSpec("hider-items.totem.max-uses", 1, 1, 5, "Max uses per totem",
                         Material.TOTEM_OF_UNDYING),

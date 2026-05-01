@@ -53,7 +53,7 @@ public class TotemItem implements GameItem {
             return;
         }
 
-        int duration = plugin.getSettingRegistry().get("hider-items.totem.effect-duration", 30);
+        int duration = plugin.getSettingRegistry().get("hider-items.totem.effect-duration", 5);
         boolean phoenix = ItemSkinSelectionService.isSelected(player, ID, "skin_phoenix_feather");
         boolean lifeCoin = ItemSkinSelectionService.isSelected(player, ID, "skin_extra_life_coin");
         long expiresAt = System.currentTimeMillis() + (duration * 1000L);
@@ -114,7 +114,7 @@ public class TotemItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin) {
-        Number duration = plugin.getSettingRegistry().get("hider-items.totem.effect-duration", 30);
+        Number duration = plugin.getSettingRegistry().get("hider-items.totem.effect-duration", 5);
         return String.format("Activate a one-time revive window for %ds.", duration.intValue());
     }
 
