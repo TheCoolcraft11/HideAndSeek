@@ -122,11 +122,11 @@ Assistant *(NMS only, disabled without it)*
 
 ## Requirements
 
-| Requirement       | Version |
-|-------------------|---------|
-| Java              | 21+     |
-| Paper (or Purpur) | 1.21.x  |
-| MinigameFramework | 1.0.0   |
+| Requirement       | Version  |
+|-------------------|----------|
+| Java              | 21+      |
+| Paper (or Purpur) | 1.21.10+ |
+| MinigameFramework | 1.0.0    |
 
 ### MinigameFramework
 
@@ -141,7 +141,7 @@ available, neither the JAR nor the source code.**.
 
 ## Installation
 
-1. Ensure your server runs Paper 1.21.x with Java 21 or newer.
+1. Ensure your server runs Paper 1.21.10/11 with Java 21 or newer.
 2. Wait until `MinigameFramework.jar` is released and place it in your `plugins/` folder.
 3. Place `HideAndSeek-1.0-SNAPSHOT.jar` in your `plugins/` folder.
 4. Start the server once to generate config files.
@@ -152,7 +152,7 @@ available, neither the JAR nor the source code.**.
 ### Quick Checklist
 
 - [ ] Java 21+ on the server
-- [ ] Paper 1.21.x server jar
+- [ ] Paper 1.21.10/11 server jar
 - [ ] `MinigameFramework.jar` in `plugins/`
 - [ ] `HideAndSeek-1.0-SNAPSHOT.jar` in `plugins/`
 - [ ] Two teams configured in MinigameFramework
