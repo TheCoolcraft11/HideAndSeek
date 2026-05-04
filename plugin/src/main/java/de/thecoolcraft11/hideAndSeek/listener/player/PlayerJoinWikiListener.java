@@ -2,15 +2,11 @@ package de.thecoolcraft11.hideAndSeek.listener.player;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
-
-import java.util.UUID;
 
 public class PlayerJoinWikiListener implements Listener {
 
@@ -23,30 +19,25 @@ public class PlayerJoinWikiListener implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.MONITOR)
     public void onLogin(PlayerLoginEvent event) {
+        final org.bukkit.entity.Player player = event.getPlayer();
+
         Bukkit.getScheduler().runTask(plugin,
-                () -> plugin.getNmsAdapter().injectDialogFilter(event.getPlayer().getUniqueId(), plugin,
+                () -> plugin.getNmsAdapter().injectDialogFilter(player.getUniqueId(), plugin,
                         (command, p) -> {
-                            UUID uuid = p.getUniqueId();
-
-                            LuckPerms luckPerms = Bukkit.getServicesManager()
-                                    .load(LuckPerms.class);
-                            if (luckPerms == null) return false;
-                            User user = luckPerms.getUserManager().getUser(uuid);
-                            if (user == null) return false;
                             String cmd = command.startsWith("/") ? command.substring(1) : command;
-
-
                             String[] parts = cmd.split(" ", 2);
+
                             if (parts.length > 1) {
-                                var subcommand = MinigameSubcommandRegistry.get(parts[1].split(" ")[0]);
+                                String subName = parts[1].split(" ")[0];
+                                var subcommand = MinigameSubcommandRegistry.get(subName);
+
                                 if (subcommand != null && subcommand.getPermission() != null) {
-                                    return user.getCachedData().getPermissionData().checkPermission(
-                                            subcommand.getPermission()).asBoolean();
+                                    return player.hasPermission(subcommand.getPermission());
                                 }
                             }
 
-                            return user.getCachedData().getPermissionData().checkPermission(
-                                    getFrameworkPerm(parts[1].split(" ")[0])).asBoolean();
+                            String frameworkPerm = getFrameworkPerm(parts[1].split(" ")[0]);
+                            return player.hasPermission(frameworkPerm);
                         }));
     }
 
