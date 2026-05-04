@@ -1311,8 +1311,6 @@ public class NmsAdapterImpl implements NmsAdapter {
             if (action.getString("command").isEmpty()) return false;
             String command = action.getString("command").get();
 
-            System.out.println(
-                    "Checking permission for dialog action command: " + command + " for player UUID: " + playerUuid);
             return !permissionChecker.apply(command, org.bukkit.Bukkit.getOfflinePlayer(playerUuid));
         } catch (Throwable ignored) {
             return false;

@@ -51,6 +51,6 @@ public class PlayerJoinWikiListener implements Listener {
     }
 
     private String getFrameworkPerm(String subcommand) {
-        return "miniigameframework." + subcommand;
+        return "minigameframework." + subcommand;
     }
 }
