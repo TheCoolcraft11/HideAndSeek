@@ -90,6 +90,8 @@ public final class HideAndSeek extends MinigameFramework {
     @Override
     protected void onGameEnable() {
 
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinWikiListener(this), this);
+
         if (getResource("maps.yml") != null && !(new File(getDataFolder(), "maps.yml").exists())) {
             saveResource("maps.yml", false);
         }
@@ -405,11 +407,13 @@ public final class HideAndSeek extends MinigameFramework {
             net.kyori.adventure.text.format.NamedTextColor nameColor =
                     net.kyori.adventure.text.format.NamedTextColor.AQUA;
 
-            meta.displayName(net.kyori.adventure.text.Component.text(name, nameColor, net.kyori.adventure.text.format.TextDecoration.BOLD)
+            meta.displayName(net.kyori.adventure.text.Component.text(name, nameColor,
+                            net.kyori.adventure.text.format.TextDecoration.BOLD)
                     .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
 
             java.util.List<net.kyori.adventure.text.Component> lore = new java.util.ArrayList<>();
-            lore.add(net.kyori.adventure.text.Component.text(description, net.kyori.adventure.text.format.NamedTextColor.GRAY)
+            lore.add(net.kyori.adventure.text.Component.text(description,
+                            net.kyori.adventure.text.format.NamedTextColor.GRAY)
                     .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
 
             meta.lore(lore);

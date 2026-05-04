@@ -18,6 +18,9 @@ dependencies:
     PlaceholderAPI:
       required: false
       load: BEFORE
+    LuckPerms:
+      required: false
+      load: BEFORE
 
 permissions:
   hideandseek.command.loadout:

@@ -15,9 +15,13 @@ import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,10 +36,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
@@ -50,6 +51,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -57,6 +59,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 public class NmsAdapterImpl implements NmsAdapter {
@@ -82,7 +85,8 @@ public class NmsAdapterImpl implements NmsAdapter {
                     NmsCapabilities.CLIENT_FAKE_BORDER_WARNING,
                     NmsCapabilities.CLIENT_CAMERA_SPOOFING,
                     NmsCapabilities.CLIENT_TEST_BLOCK_BEAM,
-                    NmsCapabilities.CUSTOM_ENTITY_GOALS
+                    NmsCapabilities.CUSTOM_ENTITY_GOALS,
+                    NmsCapabilities.PER_PLAYER_DIALOG_REGISTRY
             );
     private final Map<UUID, Set<Integer>> blockedEntityIdsByViewer = new ConcurrentHashMap<>();
     private final Map<UUID, Map<Integer, net.minecraft.world.entity.Entity>> clientCameraEntities = new ConcurrentHashMap<>();
@@ -1030,6 +1034,270 @@ public class NmsAdapterImpl implements NmsAdapter {
     public void setCameraSessionChecker(Predicate<UUID> checker) {
         this.cameraSessionChecker = checker != null ? checker : uuid -> false;
     }
+
+    @Override
+    public void injectDialogFilter(UUID playerUuid, Plugin plugin, BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
+
+
+        try {
+            MinecraftServer server = MinecraftServer.getServer();
+            List<Connection> connections = server.getConnection().getConnections();
+
+
+            for (Connection connection : connections) {
+                Channel channel = getChannelFromConnection(connection);
+                if (channel == null || !channel.isActive()) continue;
+
+
+                Object packetListener = connection.getPacketListener();
+                if (packetListener == null) continue;
+
+                UUID listenerUuid = extractUuidFromListener(packetListener);
+                if (listenerUuid == null || !listenerUuid.equals(playerUuid)) continue;
+
+
+                injectDialogRegistryFilter(channel, playerUuid, plugin, permissionChecker);
+                return;
+            }
+        } catch (Throwable t) {
+            plugin.getLogger().warning("Failed to inject dialog filter for " + playerUuid + ": " + t.getMessage());
+        }
+    }
+
+    private UUID extractUuidFromListener(Object listener) {
+
+
+        try {
+            for (Method m : listener.getClass().getMethods()) {
+                if (m.getReturnType() == com.mojang.authlib.GameProfile.class
+                        && m.getParameterCount() == 0) {
+                    com.mojang.authlib.GameProfile profile =
+                            (com.mojang.authlib.GameProfile) m.invoke(listener);
+                    if (profile != null) return profile.id();
+                }
+            }
+
+            for (Field f : listener.getClass().getDeclaredFields()) {
+                if (f.getType() == com.mojang.authlib.GameProfile.class) {
+                    f.setAccessible(true);
+                    com.mojang.authlib.GameProfile profile =
+                            (com.mojang.authlib.GameProfile) f.get(listener);
+                    if (profile != null) return profile.id();
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private Channel getChannelFromConnection(Connection connection) {
+        try {
+            Field channelField = Connection.class.getDeclaredField("channel");
+            channelField.setAccessible(true);
+            return (Channel) channelField.get(connection);
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    private void injectDialogRegistryFilter(Channel channel, UUID playerUuid, Plugin plugin, BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
+        String handlerName = "has_dialog_filter_" + playerUuid;
+        if (channel.pipeline().get(handlerName) != null) return;
+
+
+        channel.pipeline().addBefore("packet_handler", handlerName, new ChannelDuplexHandler() {
+            @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
+                    throws Exception {
+                if (msg instanceof ClientboundRegistryDataPacket registryPacket) {
+                    try {
+                        Object registryKey = getRegistryKey(registryPacket);
+                        if (registryKey != null && isDialogRegistry(registryKey)) {
+                            Object modified = rebuildDialogRegistry(registryPacket, permissionChecker, playerUuid);
+                            if (modified != null) {
+
+                                channel.pipeline().remove(handlerName);
+                                super.write(ctx, modified, promise);
+                                return;
+                            }
+                        }
+                    } catch (Throwable t) {
+                        plugin.getLogger().warning(
+                                "Dialog registry intercept failed for " + playerUuid + ": " + t.getMessage());
+                    }
+                }
+                super.write(ctx, msg, promise);
+            }
+        });
+    }
+
+    private Object getRegistryKey(ClientboundRegistryDataPacket packet) {
+        try {
+
+
+            for (Method m : packet.getClass().getDeclaredMethods()) {
+                if (m.getParameterCount() == 0
+                        && ResourceKey.class.isAssignableFrom(m.getReturnType())) {
+                    m.setAccessible(true);
+                    return m.invoke(packet);
+                }
+            }
+            for (Field f : packet.getClass().getDeclaredFields()) {
+                if (ResourceKey.class.isAssignableFrom(f.getType())) {
+                    f.setAccessible(true);
+                    return f.get(packet);
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private boolean isDialogRegistry(Object registryKey) {
+
+        return registryKey.toString().contains("minecraft:dialog");
+    }
+
+    private Object rebuildDialogRegistry(ClientboundRegistryDataPacket original, BiFunction<String, OfflinePlayer, Boolean> permissionChecker, UUID playerUUID) {
+        try {
+            List<?> entries = null;
+            for (Field f : original.getClass().getDeclaredFields()) {
+                if (List.class.isAssignableFrom(f.getType())) {
+                    f.setAccessible(true);
+                    entries = (List<?>) f.get(original);
+                    break;
+                }
+            }
+            if (entries == null) return null;
+
+
+            List<Object> newEntries = new ArrayList<>();
+            Identifier targetKey = Identifier.fromNamespaceAndPath("hideandseek", "main");
+
+            for (Object entry : entries) {
+                Identifier entryId = getEntryId(entry);
+                if (entryId != null && entryId.equals(targetKey)) {
+
+                    Object rebuilt = rebuildMainDialogEntry(entry, permissionChecker, playerUUID);
+                    newEntries.add(rebuilt != null ? rebuilt : entry);
+                } else {
+                    newEntries.add(entry);
+                }
+            }
+
+
+            Object registryKey = null;
+            for (Field f : original.getClass().getDeclaredFields()) {
+                if (ResourceKey.class.isAssignableFrom(f.getType())) {
+                    f.setAccessible(true);
+                    registryKey = f.get(original);
+                    break;
+                }
+            }
+            if (registryKey == null) return null;
+
+
+            for (Constructor<?> c : ClientboundRegistryDataPacket.class.getConstructors()) {
+                if (c.getParameterCount() == 2) {
+                    c.setAccessible(true);
+                    return c.newInstance(registryKey, newEntries);
+                }
+            }
+        } catch (Throwable t) {
+            return null;
+        }
+        return null;
+    }
+
+    private Identifier getEntryId(Object entry) {
+        try {
+            for (Method m : entry.getClass().getDeclaredMethods()) {
+                if (m.getParameterCount() == 0
+                        && Identifier.class.isAssignableFrom(m.getReturnType())) {
+                    m.setAccessible(true);
+                    return (Identifier) m.invoke(entry);
+                }
+            }
+            for (Field f : entry.getClass().getDeclaredFields()) {
+                if (Identifier.class.isAssignableFrom(f.getType())) {
+                    f.setAccessible(true);
+                    return (Identifier) f.get(entry);
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private Object rebuildMainDialogEntry(Object originalEntry, BiFunction<String, OfflinePlayer, Boolean> permissionChecker, UUID playerUUID) {
+        try {
+
+            Optional<?> dataOpt = Optional.empty();
+            for (Field f : originalEntry.getClass().getDeclaredFields()) {
+                if (Optional.class.isAssignableFrom(f.getType())) {
+                    f.setAccessible(true);
+                    dataOpt = (Optional<?>) f.get(originalEntry);
+                    break;
+                }
+            }
+            if (dataOpt.isEmpty()) return null;
+
+
+            CompoundTag dialogNbt = (CompoundTag) dataOpt.get();
+            CompoundTag modified = dialogNbt.copy();
+
+            ListTag actions = modified.getListOrEmpty("actions");
+            ListTag filteredActions = new ListTag();
+
+            for (int i = 0; i < actions.size(); i++) {
+                if (actions.getCompound(i).isEmpty()) continue;
+                CompoundTag action = actions.getCompound(i).get();
+
+                if (hasNoPermission(action, permissionChecker, playerUUID)) {
+                    continue;
+                }
+                filteredActions.add(action);
+            }
+
+            modified.put("actions", filteredActions);
+
+
+            Identifier entryId = getEntryId(originalEntry);
+            if (entryId == null) return null;
+
+            for (Constructor<?> c : originalEntry.getClass().getDeclaredConstructors()) {
+                if (c.getParameterCount() == 2) {
+                    c.setAccessible(true);
+                    return c.newInstance(entryId, Optional.of(modified));
+                }
+            }
+        } catch (Throwable t) {
+            return null;
+        }
+        return null;
+    }
+
+    private boolean hasNoPermission(CompoundTag actionTag, BiFunction<String, @NotNull OfflinePlayer, Boolean> permissionChecker, UUID playerUuid) {
+        try {
+            if (actionTag.getCompound("action").isEmpty()) return false;
+            CompoundTag action = actionTag.getCompound("action").get();
+            if (action.isEmpty()) return false;
+
+            if (action.getString("type").isEmpty()) return false;
+            String type = action.getString("type").get();
+            if (!"minecraft:run_command".equals(type)) return false;
+
+            if (action.getString("command").isEmpty()) return false;
+            String command = action.getString("command").get();
+
+            System.out.println(
+                    "Checking permission for dialog action command: " + command + " for player UUID: " + playerUuid);
+            return !permissionChecker.apply(command, org.bukkit.Bukkit.getOfflinePlayer(playerUuid));
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
 
     private void removePacketFilter(ServerPlayer viewerHandle, UUID viewerId) {
         Channel channel = getChannel(viewerHandle);

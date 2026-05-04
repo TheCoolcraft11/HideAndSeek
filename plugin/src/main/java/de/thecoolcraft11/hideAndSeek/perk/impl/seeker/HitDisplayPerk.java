@@ -53,4 +53,3 @@ public class HitDisplayPerk extends BasePerk {
 
     }
 }
-

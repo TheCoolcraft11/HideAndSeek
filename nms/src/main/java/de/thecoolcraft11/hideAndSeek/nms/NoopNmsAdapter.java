@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek.nms;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 public class NoopNmsAdapter implements NmsAdapter {
@@ -134,5 +136,10 @@ public class NoopNmsAdapter implements NmsAdapter {
 
     @Override
     public void setCameraSessionChecker(Predicate<UUID> checker) {
+    }
+
+    @Override
+    public void injectDialogFilter(UUID playerUuid, Plugin plugin, BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
+
     }
 }
