@@ -1,6 +1,9 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.HiderItems;
+import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
+import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
@@ -502,36 +505,10 @@ public class PlayerStatsGUI {
 
     private Material resolveItemIcon(String itemId) {
 
-        if (itemId.contains("explosion") || itemId.contains("firecracker")) return Material.RED_CANDLE;
-        if (itemId.contains("sound") || itemId.contains("cat")) return Material.CAT_SPAWN_EGG;
-        if (itemId.contains("speed")) return Material.GOLDEN_HOE;
-        if (itemId.contains("random_block")) return Material.BLAZE_POWDER;
-        if (itemId.contains("crossbow")) return Material.CROSSBOW;
-        if (itemId.contains("knockback")) return Material.STICK;
-        if (itemId.contains("block_swap")) return Material.ENDER_PEARL;
-        if (itemId.contains("big_firecracker")) return Material.TNT;
-        if (itemId.contains("firework_rocket") || itemId.contains("firework")) return Material.FIREWORK_ROCKET;
-        if (itemId.contains("medkit")) return Material.FLOWER_BANNER_PATTERN;
-        if (itemId.contains("totem")) return Material.TOTEM_OF_UNDYING;
-        if (itemId.contains("invisibility_cloak") || itemId.contains("invisible")) return Material.PHANTOM_MEMBRANE;
-        if (itemId.contains("slowness_ball")) return Material.SNOWBALL;
-        if (itemId.contains("smoke_bomb")) return Material.GRAY_DYE;
-        if (itemId.contains("ghost_essence")) return Material.GHAST_TEAR;
-        if (itemId.contains("remote_gateway")) return Material.ENDER_EYE;
-        if (itemId.contains("grappling")) return Material.FISHING_ROD;
-        if (itemId.contains("ink_splash")) return Material.INK_SAC;
-        if (itemId.contains("lightning_freeze")) return Material.LIGHTNING_ROD;
-        if (itemId.contains("glowing_compass")) return Material.COMPASS;
-        if (itemId.contains("curse_spell")) return Material.ENCHANTED_BOOK;
-        if (itemId.contains("block_randomizer")) return Material.BLAZE_POWDER;
-        if (itemId.contains("chain_pull")) return Material.LEAD;
-        if (itemId.contains("proximity_sensor")) return Material.REDSTONE_TORCH;
-        if (itemId.contains("cage_trap")) return Material.IRON_BARS;
-        if (itemId.contains("camera")) return Material.FILLED_MAP;
-        if (itemId.contains("phantom_viewer")) return Material.FILLED_MAP;
-        if (itemId.contains("sword")) return Material.IRON_SWORD;
-        if (itemId.contains("assistant")) return Material.ZOMBIE_HEAD;
-        return Material.PAPER; 
+        GameItem item = HiderItems.getItem(itemId);
+        if (item == null) item = SeekerItems.getItem(itemId);
+        if (item == null) return Material.PAPER;
+        return item.createItem(plugin).getType();
     }
 
 
