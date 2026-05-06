@@ -19,8 +19,16 @@
   "after_action": "none",
   "pause": false,
   "exit_action": {
-    "label": "Exit",
-    "tooltip": "Click to close this dialog"
+    "label": {
+      "text": "Exit",
+      "type": "text",
+      "color": "#454545"
+    },
+    "tooltip": {
+      "text": "Click to close this dialog",
+      "type": "text",
+      "color": "#454545"
+    }
   },
   "actions": [
     {
@@ -31,6 +39,7 @@
         "extra": [
           {
             "text": " Unstuck",
+            "type": "text",
             "color": "dark_red",
             "bold": true
           }
@@ -63,6 +72,7 @@
         "extra": [
           {
             "text": " Wiki",
+            "type": "text",
             "color": "aqua"
           }
         ]
@@ -85,6 +95,7 @@
         "extra": [
           {
             "text": " Vote",
+            "type": "text",
             "color": "green"
           }
         ]
@@ -107,6 +118,7 @@
         "extra": [
           {
             "text": " Loadout",
+            "type": "text",
             "color": "gold"
           }
         ]
@@ -129,6 +141,7 @@
         "extra": [
           {
             "text": " Skins",
+            "type": "text",
             "color": "yellow"
           }
         ]
@@ -151,6 +164,7 @@
         "extra": [
           {
             "text": " Level",
+            "type": "text",
             "color": "dark_green"
           }
         ]
@@ -173,6 +187,7 @@
         "extra": [
           {
             "text": " Statistics",
+            "type": "text",
             "color": "dark_gray"
           }
         ]
@@ -180,11 +195,105 @@
       "tooltip": {
         "text": "Click to open the Statistics menu",
         "type": "text",
-        "color": "yellow"
+        "color": "dark_gray"
       },
       "action": {
         "type": "minecraft:run_command",
         "command": "mg stats"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:gui",
+        "sprite": "statistics/item_used",
+        "extra": [
+          {
+            "text": " Preferences",
+            "type": "text",
+            "color": "dark_aqua"
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Click to open the Preferences Menu",
+        "type": "text",
+        "color": "dark_aqua"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg preferences"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:items",
+        "sprite": "minecraft:item/comparator",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Settings",
+            "type": "text",
+            "color": "red",
+            "bold": true
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Open the Game Settings (Admins Only)",
+        "type": "text",
+        "color": "red"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg setting"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:blocks",
+        "sprite": "block/command_block_side",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Phase Controls",
+            "type": "text",
+            "color": "light_purple",
+            "bold": true
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Open the Phase Controls Dialog (Admins Only)",
+        "type": "text",
+        "color": "light_purple"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg gamecontrols dialog"
+      }
+    },
+    {
+      "label": {
+        "atlas": "minecraft:blocks",
+        "sprite": "block/repeating_command_block_conditional",
+        "object": "atlas",
+        "extra": [
+          {
+            "text": " Game Menu",
+            "type": "text",
+            "color": "dark_purple",
+            "bold": true
+          }
+        ]
+      },
+      "tooltip": {
+        "text": "Open the main Game Menu (Admins Only)",
+        "type": "text",
+        "color": "dark_purple"
+      },
+      "action": {
+        "type": "minecraft:run_command",
+        "command": "mg gui"
       }
     },
     {
@@ -195,6 +304,7 @@
         "extra": [
           {
             "text": " Information",
+            "type": "text",
             "color": "gray"
           }
         ]
