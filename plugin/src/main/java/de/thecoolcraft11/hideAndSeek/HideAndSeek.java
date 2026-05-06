@@ -228,9 +228,9 @@ public final class HideAndSeek extends MinigameFramework {
                 }
             }
             if (key.startsWith("desc-")) {
-                GameItem gameItem = HiderItems.getItem(key.substring("desc-".length()));
+                GameItem gameItem = HiderItems.getItem("has_hider_" + key.substring("desc-".length()));
                 if (gameItem == null) {
-                    gameItem = SeekerItems.getItem(key.substring("desc-".length()));
+                    gameItem = SeekerItems.getItem("has_seeker_" + key.substring("desc-".length()));
                 }
                 if (gameItem != null) {
                     return Component.text(gameItem.getDescription(this));
