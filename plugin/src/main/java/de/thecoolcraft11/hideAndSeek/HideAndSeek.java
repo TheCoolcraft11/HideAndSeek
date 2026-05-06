@@ -49,7 +49,6 @@ import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
 import de.thecoolcraft11.timer.Timer;
 import de.thecoolcraft11.timer.api.TimerAPI;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -208,26 +207,36 @@ public final class HideAndSeek extends MinigameFramework {
 
         getWikiRegistry().addPlaceholderResolver((player, key) -> {
             if (key.startsWith("setting-")) {
-                return Component.text(getSettingRegistry().get(key.substring("setting-".length())).toString());
+                Object o = getSettingRegistry().get(key.substring("setting-".length()));
+                if (o == null) return Component.text("N/A");
+                return Component.text(o.toString());
             }
             if (key.startsWith("rarity-")) {
-                if (key.startsWith("item-")) {
                     LoadoutItemType itemType = LoadoutItemType.fromID("has_hider_" + key.substring("rarity-".length()));
                     if (itemType == null) {
                         itemType = LoadoutItemType.fromID("has_seeker_" + key.substring("rarity-".length()));
                     }
                     if (itemType != null) {
-                        return Component.text(itemType.getRarity().name(), switch (itemType.getRarity()) {
-                            case COMMON -> NamedTextColor.WHITE;
-                            case UNCOMMON -> NamedTextColor.GREEN;
-                            case RARE -> NamedTextColor.BLUE;
-                            case EPIC -> NamedTextColor.LIGHT_PURPLE;
-                            case LEGENDARY -> NamedTextColor.GOLD;
-                        });
-                    }
+                        String color = switch (itemType.getRarity()) {
+                            case COMMON -> "white";
+                            case UNCOMMON -> "green";
+                            case RARE -> "blue";
+                            case EPIC -> "purple";
+                            case LEGENDARY -> "gold";
+                        };
+                        return Component.text("<" + color + ">" + itemType.getRarity().name() + "</" + color + ">");
                 }
             }
-            return Component.empty();
+            if (key.startsWith("desc-")) {
+                GameItem gameItem = HiderItems.getItem(key.substring("desc-".length()));
+                if (gameItem == null) {
+                    gameItem = SeekerItems.getItem(key.substring("desc-".length()));
+                }
+                if (gameItem != null) {
+                    return Component.text(gameItem.getDescription(this));
+                }
+            }
+            return Component.text("N/A");
         });
 
         getWikiRegistry().addItemPlaceholderResolver((player, key) -> {
