@@ -38,7 +38,7 @@ persistent loadout and cosmetic skin system, and an extensive in-game settings G
 
 ## Screenshots
 
-![Gameplay - Block Mode](assets/clips/BlockMode.GIF)
+https://github.com/user-attachments/assets/5b4c1312-afd0-4cdd-96a1-fd94ada127a8
 
 *Block mode: hiders disguise as blocks and blend into the environment.*
 
@@ -46,13 +46,20 @@ persistent loadout and cosmetic skin system, and an extensive in-game settings G
 
 *The loadout screen. Hiders and seekers have separate item pools and token budgets.*
 
-![Block Selector GUI](assets/clips/BlockMode.GIF)
+https://github.com/user-attachments/assets/d648ddb3-64c7-426b-a90d-e6340d015343
 
 *Block Selector GUI for choosing and customizing your block disguise.*
 
-![Seeker Item - Proximity Sensor](assets/clips/Proximity.GIF)
-![Seeker Item - Camera](assets/clips/Camera.GIF)
-![Seeker Item - Cage Trap](assets/clips/Trap.GIF)
+
+
+https://github.com/user-attachments/assets/4ef363c3-2379-4074-812d-bf023cd184ff
+
+https://github.com/user-attachments/assets/5cc24e07-a249-480d-83b5-f1e79d4e51a4
+
+https://github.com/user-attachments/assets/ebb8a135-0015-4d5d-8daa-06d11a6f2318
+
+
+
 *The Proximity Sensor, Camera System, and Cage Trap in action.*
 
 ---
