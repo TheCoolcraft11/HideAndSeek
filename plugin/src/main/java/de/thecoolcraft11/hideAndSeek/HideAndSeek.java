@@ -38,6 +38,7 @@ import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
 import de.thecoolcraft11.hideAndSeek.setting.SettingRegistrar;
 import de.thecoolcraft11.hideAndSeek.tab.CustomScoreboardProvider;
 import de.thecoolcraft11.hideAndSeek.tab.CustomTabProvider;
+import de.thecoolcraft11.hideAndSeek.util.AdrenalineRushService;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.SeekingBossBarService;
 import de.thecoolcraft11.hideAndSeek.util.UnstuckManager;
@@ -78,6 +79,8 @@ public final class HideAndSeek extends MinigameFramework {
     private HiderCampingListener hiderCampingListener;
     private EnvironmentalDamageListener environmentalDamageListener;
     private SeekingBossBarService seekingBossBarService;
+    private AdrenalineRushService adrenalineRushService;
+    private AdrenalineRushListener adrenalineRushListener;
     private PerkService perkService;
     private UnstuckManager unstuckManager;
     private CustomTabProvider tabProvider;
@@ -113,6 +116,8 @@ public final class HideAndSeek extends MinigameFramework {
         voteGUI = new VoteGUI(this);
         readyGUI = new ReadyGUI(this);
         seekingBossBarService = new SeekingBossBarService(this);
+        adrenalineRushService = new AdrenalineRushService(this);
+        adrenalineRushListener = new AdrenalineRushListener(this, adrenalineRushService);
         unstuckManager = new UnstuckManager(this);
         playerStatsGUI = new PlayerStatsGUI(this);
 
@@ -182,6 +187,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new PlaceholderItemProtectionListener(perkService.getShopUI()), this);
         Bukkit.getPluginManager().registerEvents(new PerkListener(this, perkService), this);
         Bukkit.getPluginManager().registerEvents(new PlayerTeamListener(this), this);
+        Bukkit.getPluginManager().registerEvents(adrenalineRushListener, this);
 
 
         worldBorderCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this,
@@ -299,6 +305,12 @@ public final class HideAndSeek extends MinigameFramework {
         }
         if (seekingBossBarService != null) {
             seekingBossBarService.stopSeekingSession();
+        }
+        if (adrenalineRushListener != null) {
+            adrenalineRushListener.shutdown();
+        }
+        if (adrenalineRushService != null) {
+            adrenalineRushService.shutdown();
         }
         if (perkService != null) {
             perkService.shutdown();
@@ -494,6 +506,11 @@ public final class HideAndSeek extends MinigameFramework {
     public PlayerStatsGUI getPlayerStatsGUI() {
         return playerStatsGUI;
     }
+
+    public AdrenalineRushService getAdrenalineRushService() {
+        return adrenalineRushService;
+    }
+
 
     public void updateWorldIconsForAllMaps() {
         if (mapManager == null) {

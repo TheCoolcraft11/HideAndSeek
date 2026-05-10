@@ -284,6 +284,16 @@ public class SettingRegistrar {
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.seeking-bossbar.color").icon(Material.REDSTONE).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.seeking-bossbar.animation").icon(Material.CLOCK).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("adrenaline-rush").icon(Material.BEACON).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("adrenaline-rush.hider").icon(Material.PLAYER_HEAD).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("adrenaline-rush.seeker").icon(Material.ENDER_EYE).build());
+
     }
 
     public static void registerSettings(HideAndSeek plugin) {
@@ -313,7 +323,8 @@ public class SettingRegistrar {
                 new PointsSettingGroup(),
                 new GameAdvancedSettingGroup(),
                 new HiderItemsSettingGroup(),
-                new SeekerItemsSettingGroup()
+                new SeekerItemsSettingGroup(),
+                new AdrenalineRushSettingGroup()
         ));
     }
 }
