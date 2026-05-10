@@ -534,8 +534,8 @@ public class SeekersSwordItem implements GameItem {
             Entity hitEntity = raycastHiderHit(seeker, plugin, previous, direction, distance, hitbox);
             if (hitEntity != null) {
                 Location impact = hitEntity.getLocation().add(0, 1, 0);
-                world.spawnParticle(Particle.ENCHANTED_HIT, impact, 8, 0.12, 0.12, 0.12, 0.01);
-                world.spawnParticle(Particle.SWEEP_ATTACK, impact, 2, 0.08, 0.08, 0.08, 0.0);
+                seeker.spawnParticle(Particle.ENCHANTED_HIT, impact, 8, 0.12, 0.12, 0.12, 0.01);
+                seeker.spawnParticle(Particle.SWEEP_ATTACK, impact, 2, 0.08, 0.08, 0.08, 0.0);
                 return;
             }
 
@@ -543,16 +543,16 @@ public class SeekersSwordItem implements GameItem {
                     true);
             if (blockTrace != null) {
                 Location impact = blockTrace.getHitPosition().toLocation(world);
-                world.spawnParticle(Particle.ENCHANTED_HIT, impact, 8, 0.12, 0.12, 0.12, 0.01);
-                world.spawnParticle(Particle.CRIT, impact, 6, 0.15, 0.15, 0.15, 0.02);
+                seeker.spawnParticle(Particle.ENCHANTED_HIT, impact, 8, 0.12, 0.12, 0.12, 0.01);
+                seeker.spawnParticle(Particle.CRIT, impact, 6, 0.15, 0.15, 0.15, 0.02);
                 return;
             }
 
             for (double sample = 0.0; sample <= distance; sample += Math.max(0.18, distance / 4.0)) {
                 Location point = previous.clone().add(direction.clone().multiply(sample));
-                world.spawnParticle(Particle.ENCHANTED_HIT, point, 1, 0.01, 0.01, 0.01, 0.0);
+                seeker.spawnParticle(Particle.ENCHANTED_HIT, point, 1, 0.01, 0.01, 0.01, 0.0);
                 if (autoAim) {
-                    world.spawnParticle(Particle.ELECTRIC_SPARK, point, 1, 0.02, 0.02, 0.02, 0.0);
+                    seeker.spawnParticle(Particle.ELECTRIC_SPARK, point, 1, 0.02, 0.02, 0.02, 0.0);
                 }
             }
         }
