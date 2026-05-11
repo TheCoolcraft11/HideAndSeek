@@ -23,6 +23,7 @@ public class MapData {
     private final List<WorldBorderData> worldBorders;
     private final List<GameModeEnum> preferredModes;
     private final List<String> allowedBlocks;
+    private final List<String> allowedSkins;
     private final List<String> seekerBreakBlocks;
     private final List<String> blockInteractionExceptions;
     private final List<String> blockPhysicsExceptions;
@@ -54,6 +55,7 @@ public class MapData {
         this.worldBorders = new ArrayList<>();
         this.preferredModes = new ArrayList<>();
         this.allowedBlocks = new ArrayList<>();
+        this.allowedSkins = new ArrayList<>();
         this.seekerBreakBlocks = new ArrayList<>();
         this.blockInteractionExceptions = new ArrayList<>();
         this.blockPhysicsExceptions = new ArrayList<>();
@@ -151,6 +153,17 @@ public class MapData {
         this.allowedBlocks.clear();
         if (blocks != null) {
             this.allowedBlocks.addAll(blocks);
+        }
+    }
+
+    public List<String> getAllowedSkins() {
+        return allowedSkins;
+    }
+
+    public void setAllowedSkins(List<String> skins) {
+        this.allowedSkins.clear();
+        if (skins != null) {
+            this.allowedSkins.addAll(skins);
         }
     }
 

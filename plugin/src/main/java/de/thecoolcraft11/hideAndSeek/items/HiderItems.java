@@ -35,6 +35,7 @@ public final class HiderItems {
         add(new SpeedBoostItem());
         add(new TrackerCrossbowItem());
         add(new BlockSelectorItem());
+        add(new SkinSelectorItem());
         add(new AppearanceItem());
         add(new KnockbackStickItem());
         add(new BlockSwapItem());
@@ -126,6 +127,13 @@ public final class HiderItems {
             CustomModelDataUtil.setCustomModelData(selector, BlockSelectorItem.ID);
             player.getInventory().setItem(8, selector);
             recordItemEquipped(plugin, player, BlockSelectorItem.ID);
+        }
+
+        if (isHiding && gameModeObj != null && gameModeObj.toString().equals("SKIN")) {
+            ItemStack skinSelector = plugin.getCustomItemManager().getIdentifiedItemStack(SkinSelectorItem.ID, player);
+            CustomModelDataUtil.setCustomModelData(skinSelector, SkinSelectorItem.ID);
+            player.getInventory().setItem(8, skinSelector);
+            recordItemEquipped(plugin, player, SkinSelectorItem.ID);
         }
 
         HiderEquipmentChangeListener.hideHandItem(player, EquipmentSlot.HAND);

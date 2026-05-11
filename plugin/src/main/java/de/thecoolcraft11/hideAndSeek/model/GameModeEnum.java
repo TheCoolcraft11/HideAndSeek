@@ -4,5 +4,6 @@ public enum GameModeEnum {
     NORMAL,
     SMALL,
     BLOCK,
+    SKIN,
 }
 

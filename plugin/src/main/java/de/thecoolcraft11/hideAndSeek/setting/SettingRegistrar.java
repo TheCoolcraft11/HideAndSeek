@@ -35,6 +35,9 @@ public class SettingRegistrar {
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.blockstats").icon(Material.BOOKSHELF).build());
 
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.skinstats").icon(Material.CHISELED_BOOKSHELF).build());
+
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.hiders").icon(Material.PLAYER_HEAD).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.lobby").icon(Material.LIME_STAINED_GLASS_PANE).build());

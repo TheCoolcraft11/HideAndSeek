@@ -42,6 +42,7 @@ public final class SeekerItems {
         add(new SeekersSwordItem());
         add(new SeekersMaskItem());
         add(new BlockStatsItem());
+        add(new SkinStatsItem());
         add(new CrowbarItem());
     }
 
@@ -113,12 +114,16 @@ public final class SeekerItems {
         Object blockSmallObj = blockSmallResult.isSuccess() ? blockSmallResult.getValue() : null;
         var blockStatsEnabledResult = plugin.getSettingService().getSetting("game.blockstats.enabled");
         Object blockStatsEnabledObj = blockStatsEnabledResult.isSuccess() ? blockStatsEnabledResult.getValue() : null;
+        var skinStatsEnabledResult = plugin.getSettingService().getSetting("game.skinstats.enabled");
+        Object skinStatsEnabledObj = skinStatsEnabledResult.isSuccess() ? skinStatsEnabledResult.getValue() : null;
         var crowBarEnabledResult = plugin.getSettingService().getSetting("seeker-items.crowbar.enabled");
         Object crowbarEnabledObj = crowBarEnabledResult.isSuccess() ? crowBarEnabledResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
         boolean isSmallMode = gameModeObj != null && gameModeObj.toString().equals("SMALL");
+        boolean isSkinMode = gameModeObj != null && gameModeObj.toString().equals("SKIN");
         boolean isBlockSmall = blockSmallObj != null && blockSmallObj.toString().equals("true");
         boolean blockStatsEnabled = blockStatsEnabledObj != null && blockStatsEnabledObj.toString().equals("true");
+        boolean skinStatsEnabled = skinStatsEnabledObj != null && skinStatsEnabledObj.toString().equals("true");
         boolean crowBarEnabled = crowbarEnabledObj != null && crowbarEnabledObj.toString().equals("true");
 
 
@@ -267,6 +272,23 @@ public final class SeekerItems {
 
         }
 
+        if (isSkinMode && skinStatsEnabled) {
+
+            ItemStack blockStats = plugin.getCustomItemManager().getIdentifiedItemStack(SkinStatsItem.ID, player);
+
+            if (blockStats != null) {
+                CustomModelDataUtil.setCustomModelData(blockStats, SkinStatsItem.ID);
+
+                player.getInventory().setItem(8, blockStats);
+
+                if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                    plugin.getLogger().info("Gave permanent SkinStats item to " + player.getName() + " in slot 8");
+                }
+
+            }
+
+        }
+
         if (isSmallMode || (isBlockMode && isBlockSmall)) {
             if (!crowBarEnabled) return;
             ItemStack slot7Item = player.getInventory().getItem(7);
@@ -295,15 +317,12 @@ public final class SeekerItems {
 
         player.getInventory().setHelmet(plugin.getCustomItemManager().getIdentifiedItemStack(SeekersMaskItem.ID, player));
         CustomModelDataUtil.setForInventorySlot(player.getInventory(), 39, SeekersMaskItem.ID, null);
-        recordItemEquipped(plugin, player, SeekersMaskItem.ID);
-
     }
 
 
     public static void removeItems(Player player) {
 
         player.getInventory().clear();
-
 
         player.removePotionEffect(PotionEffectType.REGENERATION);
 
@@ -336,18 +355,20 @@ public final class SeekerItems {
         Object blockSmallObj = blockSmallResult.isSuccess() ? blockSmallResult.getValue() : null;
         var blockStatsEnabledResult = plugin.getSettingService().getSetting("game.blockstats.enabled");
         Object blockStatsEnabledObj = blockStatsEnabledResult.isSuccess() ? blockStatsEnabledResult.getValue() : null;
+        var skinStatsEnabledResult = plugin.getSettingService().getSetting("game.skinstats.enabled");
+        Object skinStatsEnabledObj = skinStatsEnabledResult.isSuccess() ? skinStatsEnabledResult.getValue() : null;
         var crowBarEnabledResult = plugin.getSettingService().getSetting("seeker-items.crowbar.enabled");
         Object crowbarEnabledObj = crowBarEnabledResult.isSuccess() ? crowBarEnabledResult.getValue() : null;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
         boolean isSmallMode = gameModeObj != null && gameModeObj.toString().equals("SMALL");
+        boolean isSkinMode = gameModeObj != null && gameModeObj.toString().equals("SKIN");
         boolean isBlockSmall = blockSmallObj != null && blockSmallObj.toString().equals("true");
         boolean blockStatsEnabled = blockStatsEnabledObj != null && blockStatsEnabledObj.toString().equals("true");
+        boolean skinStatsEnabled = skinStatsEnabledObj != null && skinStatsEnabledObj.toString().equals("true");
         boolean crowBarEnabled = crowbarEnabledObj != null && crowbarEnabledObj.toString().equals("true");
 
 
-
-        if (isBlockMode) {
-            if (blockStatsEnabled) {
+        if (isBlockMode && blockStatsEnabled) {
 
                 ItemStack slot8Item = player.getInventory().getItem(8);
                 if (slot8Item == null || slot8Item.getType().isAir()) {
@@ -355,10 +376,23 @@ public final class SeekerItems {
                     if (blockStats != null) {
                         CustomModelDataUtil.setCustomModelData(blockStats, BlockStatsItem.ID);
                         player.getInventory().setItem(8, blockStats);
-                        recordItemEquipped(plugin, player, BlockStatsItem.ID);
                         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                             plugin.getLogger().info("Gave BlockStats to " + player.getName() + " in slot 8");
                         }
+                    }
+                }
+        }
+
+        if (isSkinMode && skinStatsEnabled) {
+
+            ItemStack slot8Item = player.getInventory().getItem(8);
+            if (slot8Item == null || slot8Item.getType().isAir()) {
+                ItemStack blockStats = plugin.getCustomItemManager().getIdentifiedItemStack(SkinStatsItem.ID, player);
+                if (blockStats != null) {
+                    CustomModelDataUtil.setCustomModelData(blockStats, SkinStatsItem.ID);
+                    player.getInventory().setItem(8, blockStats);
+                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                        plugin.getLogger().info("Gave SkinStats to " + player.getName() + " in slot 8");
                     }
                 }
             }
@@ -372,7 +406,6 @@ public final class SeekerItems {
                 if (blockStats != null) {
                     CustomModelDataUtil.setCustomModelData(blockStats, CrowbarItem.ID);
                     player.getInventory().setItem(7, blockStats);
-                    recordItemEquipped(plugin, player, CrowbarItem.ID);
                     if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                         plugin.getLogger().info("Gave Crowbar to " + player.getName() + " in slot 7");
                     }

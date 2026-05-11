@@ -4,6 +4,7 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.block.BlockAppearanceConfig;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
@@ -106,7 +107,10 @@ public class RandomBlockItem implements GameItem {
             return;
         }
 
-        randomizeBlock(player, plugin);
+        if (plugin.getSettingRegistry().get("game.mode") == GameModeEnum.BLOCK) {
+            randomizeBlock(player, plugin);
+        }
+
     }
 
     public static void randomizeBlock(Player player, HideAndSeek plugin) {

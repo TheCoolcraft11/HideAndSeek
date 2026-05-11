@@ -86,6 +86,7 @@ public class CustomTabProvider {
             case NORMAL -> "Normal";
             case BLOCK -> "Block";
             case SMALL -> "Small";
+            case SKIN -> "Skin";
         };
 
         Map<String, Object> context = new HashMap<>();

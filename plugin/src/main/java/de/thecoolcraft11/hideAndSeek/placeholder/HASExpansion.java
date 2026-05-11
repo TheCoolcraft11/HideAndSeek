@@ -90,6 +90,7 @@ public class HASExpansion extends PlaceholderExpansion {
                     case NORMAL -> "Normal";
                     case BLOCK -> "Block";
                     case SMALL -> "Small";
+                    case SKIN -> "Skin";
                 };
             }
 
@@ -139,6 +140,7 @@ public class HASExpansion extends PlaceholderExpansion {
                     case NORMAL -> "<green>Normal</green>";
                     case BLOCK -> "<blue>Block</blue>";
                     case SMALL -> "<yellow>Small</yellow>";
+                    case SKIN -> "<red>Skin</red>";
                 };
             }
 

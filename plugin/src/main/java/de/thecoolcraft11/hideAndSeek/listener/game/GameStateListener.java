@@ -53,6 +53,8 @@ public class GameStateListener implements Listener {
             teleportNextTick(player, resolveLobbySpawn());
             scheduleLobbyStartRecheck();
         }
+
+        plugin.getSkinManager().setOriginalProfile(player.getUniqueId(), player.getPlayerProfile());
     }
 
     private void teleportNextTick(Player player, Location target) {
@@ -108,6 +110,7 @@ public class GameStateListener implements Listener {
         cleanupMedkitCharge(player.getUniqueId());
         RemoteGatewayItem.clearGatewaysForOwner(player.getUniqueId());
         PhantomViewerItem.clearPlayerState(player.getUniqueId());
+        plugin.getSkinManager().resetSkin(player);
         HideAndSeek.getDataController().removeAllowedSpectator(player.getUniqueId());
         plugin.getVoteManager().clearVotes(player.getUniqueId());
 

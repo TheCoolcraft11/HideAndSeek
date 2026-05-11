@@ -44,6 +44,7 @@ import de.thecoolcraft11.hideAndSeek.util.SeekingBossBarService;
 import de.thecoolcraft11.hideAndSeek.util.UnstuckManager;
 import de.thecoolcraft11.hideAndSeek.util.map.MapManager;
 import de.thecoolcraft11.hideAndSeek.util.points.PointService;
+import de.thecoolcraft11.hideAndSeek.util.skin.SkinManager;
 import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
@@ -88,6 +89,9 @@ public final class HideAndSeek extends MinigameFramework {
     private PlayerDataStore playerDataStore;
     private PlayerStatsService playerStatsService;
     private PlayerStatsGUI playerStatsGUI;
+    private SkinManager skinManager;
+    private SkinSelectorGUI skinSelectorGUI;
+    private SkinStatsGUI skinStatsGUI;
 
     @Override
     protected void onGameEnable() {
@@ -120,6 +124,8 @@ public final class HideAndSeek extends MinigameFramework {
         adrenalineRushListener = new AdrenalineRushListener(this, adrenalineRushService);
         unstuckManager = new UnstuckManager(this);
         playerStatsGUI = new PlayerStatsGUI(this);
+        skinManager = new SkinManager(this);
+        skinSelectorGUI = new SkinSelectorGUI(this, skinManager);
 
         nmsAdapter = NmsLoader.load(getLogger(), getConfig().getBoolean("nms.enabled", true));
 
@@ -199,6 +205,8 @@ public final class HideAndSeek extends MinigameFramework {
         registerMapSelectionMenu();
         registerLoadoutMenu();
         registerSkinMenu();
+
+        skinManager.loadSkins();
 
         MinigameSubcommandRegistry.register(new MapCommand(this));
         MinigameSubcommandRegistry.register(new LoadoutCommand(this));
@@ -511,6 +519,13 @@ public final class HideAndSeek extends MinigameFramework {
         return adrenalineRushService;
     }
 
+    public SkinManager getSkinManager() {
+        return skinManager;
+    }
+
+    public SkinSelectorGUI getSkinSelectorGUI() {
+        return skinSelectorGUI;
+    }
 
     public void updateWorldIconsForAllMaps() {
         if (mapManager == null) {

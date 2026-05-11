@@ -512,6 +512,7 @@ public class PlayerHitListener implements Listener {
         HideAndSeek.getDataController().removeHider(hider.getUniqueId());
         plugin.getUnstuckManager().clearPlayerData(hider.getUniqueId());
         HideAndSeek.getDataController().addSeeker(hider.getUniqueId());
+        plugin.getSkinManager().resetSkin(hider);
         var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
         if (statsService != null) {
             statsService.recordBlockConversion(hider.getUniqueId());
@@ -545,6 +546,7 @@ public class PlayerHitListener implements Listener {
     private void handleInvasionMode(Player hider) {
         HideAndSeek.getDataController().removeHider(hider.getUniqueId());
         HideAndSeek.getDataController().addSeeker(hider.getUniqueId());
+        plugin.getSkinManager().resetSkin(hider);
         var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
         if (statsService != null) {
             statsService.recordBlockConversion(hider.getUniqueId());

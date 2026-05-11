@@ -5,6 +5,7 @@ import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.effects.win.WinSkinService;
 import de.thecoolcraft11.hideAndSeek.items.hider.RemoteGatewayItem;
 import de.thecoolcraft11.hideAndSeek.items.seeker.CameraItem;
+import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.PlayerStateResetUtil;
 import de.thecoolcraft11.hideAndSeek.util.TimerManager;
@@ -72,6 +73,19 @@ public class EndedPhase implements GamePhase {
                 ItemSkinSelectionService.addCoins(hideAndSeekPlugin, entry.getKey(), gainedCoins);
             }
             coinGains.put(entry.getKey(), gainedCoins);
+        }
+
+        var gameModeResult = plugin.getSettingService().getSetting("game.mode");
+        Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : GameModeEnum.NORMAL;
+        GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
+                (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
+
+        if (gameMode == GameModeEnum.SKIN) {
+            for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+                Player player = Bukkit.getPlayer(hiderId);
+                if (player == null) return;
+                ((HideAndSeek) plugin).getSkinManager().resetSkin(player);
+            }
         }
 
         boolean hidersWin = !activeHiders.isEmpty();

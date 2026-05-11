@@ -405,6 +405,13 @@ public class MapManager {
             }
         }
 
+        List<String> allowedSkinStrings = section.getStringList("allowed-skins");
+        mapData.setAllowedSkins(allowedSkinStrings);
+        if (!allowedSkinStrings.isEmpty()) {
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Loaded " + allowedBlockStrings.size() + " allowed skins for map " + mapName);
+            }
+        }
 
         mapData.setSeekerBreakBlocks(section.getStringList("seeker-break-blocks"));
         mapData.setBlockInteractionExceptions(section.getStringList("block-interaction-exceptions"));
@@ -484,6 +491,17 @@ public class MapManager {
         }
 
         plugin.getLogger().warning("No map data found for " + mapName + ", returning empty allowed blocks list");
+        return new ArrayList<>();
+    }
+
+
+    public List<String> getAllowedSkinsForMap(String mapName) {
+        MapData mapData = getMapData(mapName);
+        if (mapData != null) {
+            return mapData.getAllowedSkins();
+        }
+
+        plugin.getLogger().warning("No skin data found for " + mapName + ", returning empty allowed skin list");
         return new ArrayList<>();
     }
 

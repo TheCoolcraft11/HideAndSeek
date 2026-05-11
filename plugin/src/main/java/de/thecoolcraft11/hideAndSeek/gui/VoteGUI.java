@@ -353,6 +353,7 @@ public class VoteGUI {
             case NORMAL -> Material.IRON_SWORD;
             case SMALL -> Material.IRON_NUGGET;
             case BLOCK -> Material.COBBLESTONE;
+            case SKIN -> Material.PLAYER_HEAD;
         };
         ItemStack item = new ItemStack(icon);
         ItemMeta meta = item.getItemMeta();

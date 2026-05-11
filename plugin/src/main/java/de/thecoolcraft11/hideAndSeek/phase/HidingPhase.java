@@ -124,7 +124,6 @@ public class HidingPhase implements GamePhase {
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : GameModeEnum.NORMAL;
         GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
                 (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
-        plugin.getLogger().info("Game mode: " + gameMode);
 
         var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
         if (statsService != null) {
@@ -168,6 +167,28 @@ public class HidingPhase implements GamePhase {
                 }
             }
         }
+
+        if (gameMode == GameModeEnum.SKIN) {
+            String currentMapForSkins = HideAndSeek.getDataController().getCurrentMapName();
+            List<String> allowedSkinIds = (currentMapForSkins != null && !currentMapForSkins.isEmpty())
+                    ? hideAndSeekPlugin.getMapManager().getAllowedSkinsForMap(currentMapForSkins)
+                    : List.of();
+            List<de.thecoolcraft11.hideAndSeek.model.SkinData> allowedSkins =
+                    hideAndSeekPlugin.getSkinManager().resolveSkins(allowedSkinIds);
+
+            if (allowedSkins.isEmpty()) {
+                plugin.getLogger().warning("SKIN mode is active but no skins are configured! " +
+                        "Add skins to skins.yml and/or set allowed-skins on the map.");
+            } else {
+                for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+                    org.bukkit.entity.Player hider = org.bukkit.Bukkit.getPlayer(hiderId);
+                    if (hider != null && hider.isOnline()) {
+                        hideAndSeekPlugin.getSkinManager().assignSkin(hider, allowedSkins.getFirst());
+                    }
+                }
+            }
+        }
+
 
 
         var sizeResult = plugin.getSettingService().getSetting("game.small-mode.hider-size");
@@ -324,7 +345,7 @@ public class HidingPhase implements GamePhase {
             spectator.setGlowing(false);
         }
 
-        if (gameMode == GameModeEnum.BLOCK) {
+        if (gameMode == GameModeEnum.BLOCK || gameMode == GameModeEnum.SKIN) {
             for (java.util.UUID hiderId : HideAndSeek.getDataController().getHiders()) {
                 org.bukkit.entity.Player hider = org.bukkit.Bukkit.getPlayer(hiderId);
                 if (hider != null) {

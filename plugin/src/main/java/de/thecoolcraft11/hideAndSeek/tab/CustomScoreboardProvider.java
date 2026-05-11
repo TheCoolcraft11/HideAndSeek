@@ -177,6 +177,7 @@ public class CustomScoreboardProvider {
             case NORMAL -> "Normal";
             case BLOCK -> "Block";
             case SMALL -> "Small";
+            case SKIN -> "Skin";
         };
 
         context.put("role", role);
