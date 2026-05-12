@@ -4,14 +4,13 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.loadout.PlayerLoadout;
 import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class DebugLoadoutCommand implements DebugSubcommand {
@@ -40,13 +39,13 @@ public class DebugLoadoutCommand implements DebugSubcommand {
     @Override
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /has debug loadout <player> [reset|items|give] [itemName]", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.usage"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.player_not_found", Map.of("player", args[0])));
             return true;
         }
 
@@ -57,8 +56,8 @@ public class DebugLoadoutCommand implements DebugSubcommand {
             case "items" -> handleItems(sender, target);
             case "give" -> handleGive(sender, target, args);
             default -> {
-                sender.sendMessage(Component.text("Unknown action: " + action, NamedTextColor.RED));
-                sender.sendMessage(Component.text("Usage: /has debug loadout <player> [reset|items|give] [itemName]", NamedTextColor.YELLOW));
+                sender.sendMessage(plugin.tr(sender, "command.debug.loadout.unknown_action", Map.of("action", action)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.loadout.usage"));
             }
         }
 
@@ -70,7 +69,7 @@ public class DebugLoadoutCommand implements DebugSubcommand {
         PlayerLoadout loadout = LoadoutDataService.getLoadout(targetId);
 
         if (loadout == null) {
-            sender.sendMessage(Component.text("Player has no loadout", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.no_loadout"));
             return;
         }
 
@@ -84,8 +83,7 @@ public class DebugLoadoutCommand implements DebugSubcommand {
 
         LoadoutDataService.savePlayer(plugin, targetId);
 
-        sender.sendMessage(Component.text("Loadout reset for ", NamedTextColor.GREEN)
-                .append(Component.text(target.getName(), NamedTextColor.AQUA)));
+        sender.sendMessage(plugin.tr(sender, "command.debug.loadout.reset", Map.of("player", target.getName())));
     }
 
     private void handleItems(CommandSender sender, Player target) {
@@ -93,39 +91,42 @@ public class DebugLoadoutCommand implements DebugSubcommand {
         PlayerLoadout loadout = LoadoutDataService.getLoadout(targetId);
 
         if (loadout == null) {
-            sender.sendMessage(Component.text("Player has no loadout", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.no_loadout"));
             return;
         }
 
-        sender.sendMessage(Component.text("\n=== Loadout for " + target.getName() + " ===", NamedTextColor.GOLD));
+        sender.sendMessage(plugin.tr(sender, "command.debug.loadout.header", Map.of("player", target.getName())));
 
         if (loadout.getHiderItems().isEmpty()) {
-            sender.sendMessage(Component.text("Hider Items: None", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.no_hider_items"));
         } else {
-            sender.sendMessage(Component.text("Hider Items:", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.hider_items"));
             for (LoadoutItemType item : loadout.getHiderItems()) {
-                sender.sendMessage(Component.text("  - " + item.name(), NamedTextColor.GRAY));
+                sender.sendMessage(plugin.tr(sender, "command.debug.loadout.item_entry", Map.of("item", item.name())));
             }
         }
 
         if (loadout.getSeekerItems().isEmpty()) {
-            sender.sendMessage(Component.text("Seeker Items: None", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.no_seeker_items"));
         } else {
-            sender.sendMessage(Component.text("Seeker Items:", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.seeker_items"));
             for (LoadoutItemType item : loadout.getSeekerItems()) {
-                sender.sendMessage(Component.text("  - " + item.name(), NamedTextColor.GRAY));
+                sender.sendMessage(plugin.tr(sender, "command.debug.loadout.item_entry", Map.of("item", item.name())));
             }
         }
     }
 
     private void handleGive(CommandSender sender, Player target, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(Component.text("Usage: /has debug loadout <player> give <itemName>", NamedTextColor.YELLOW));
-            sender.sendMessage(Component.text("Available items:", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.usage_give"));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.available_items"));
             for (LoadoutItemType item : LoadoutItemType.values()) {
                 String type = item.isForHiders() && item.isForSeekers() ? "BOTH" :
                         item.isForHiders() ? "HIDER" : "SEEKER";
-                sender.sendMessage(Component.text("  - " + item.name() + " (" + type + ")", NamedTextColor.GRAY));
+                sender.sendMessage(plugin.tr(sender, "command.debug.loadout.available_item", Map.of(
+                        "item", item.name(),
+                        "type", type
+                )));
             }
             return;
         }
@@ -136,7 +137,7 @@ public class DebugLoadoutCommand implements DebugSubcommand {
         try {
             itemType = LoadoutItemType.valueOf(itemName);
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(Component.text("Unknown item: " + itemName, NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.unknown_item", Map.of("item", itemName)));
             return;
         }
 
@@ -144,7 +145,7 @@ public class DebugLoadoutCommand implements DebugSubcommand {
         PlayerLoadout loadout = LoadoutDataService.getLoadout(targetId);
 
         if (loadout == null) {
-            sender.sendMessage(Component.text("Player has no loadout", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.no_loadout"));
             return;
         }
 
@@ -157,13 +158,12 @@ public class DebugLoadoutCommand implements DebugSubcommand {
 
         if (added) {
             LoadoutDataService.savePlayer(plugin, targetId);
-            sender.sendMessage(Component.text("Added ", NamedTextColor.GREEN)
-                    .append(Component.text(itemName, NamedTextColor.AQUA))
-                    .append(Component.text(" to ", NamedTextColor.GREEN))
-                    .append(Component.text(target.getName(), NamedTextColor.AQUA))
-                    .append(Component.text("'s loadout", NamedTextColor.GREEN)));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.added", Map.of(
+                    "item", itemName,
+                    "player", target.getName()
+            )));
         } else {
-            sender.sendMessage(Component.text("Failed to add item (loadout full or invalid item)", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.loadout.add_failed"));
         }
     }
 }

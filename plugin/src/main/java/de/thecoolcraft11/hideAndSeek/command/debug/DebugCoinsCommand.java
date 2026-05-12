@@ -2,8 +2,6 @@ package de.thecoolcraft11.hideAndSeek.command.debug;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -37,13 +35,14 @@ public class DebugCoinsCommand implements DebugSubcommand {
     @Override
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /has debug coins <player> [set|give|remove] <amount>", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.coins.usage"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.coins.player_not_found", java.util.Map.of("player", args[0])));
             return true;
         }
 
@@ -54,7 +53,8 @@ public class DebugCoinsCommand implements DebugSubcommand {
         try {
             amount = Integer.parseInt(args[args.length - 1]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(Component.text("Invalid amount: " + args[args.length - 1], NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.coins.invalid_amount",
+                    java.util.Map.of("value", args[args.length - 1])));
             return true;
         }
 
@@ -67,32 +67,25 @@ public class DebugCoinsCommand implements DebugSubcommand {
                 if (diff != 0) {
                     ItemSkinSelectionService.addCoins(plugin, targetId, diff, true);
                 }
-                sender.sendMessage(Component.text("Set coins for ", NamedTextColor.GREEN)
-                        .append(Component.text(target.getName(), NamedTextColor.AQUA))
-                        .append(Component.text(" to ", NamedTextColor.GREEN))
-                        .append(Component.text(String.valueOf(amount), NamedTextColor.GOLD)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_set",
+                        java.util.Map.of("player", target.getName(), "amount", amount)));
             }
             case "give" -> {
                 ItemSkinSelectionService.addCoins(plugin, targetId, amount, true);
                 int newCoins = ItemSkinSelectionService.getCoins(targetId);
-                sender.sendMessage(Component.text("Gave ", NamedTextColor.GREEN)
-                        .append(Component.text(String.valueOf(amount), NamedTextColor.GOLD))
-                        .append(Component.text(" coins to ", NamedTextColor.GREEN))
-                        .append(Component.text(target.getName(), NamedTextColor.AQUA))
-                        .append(Component.text(" (now: " + newCoins + ")", NamedTextColor.GRAY)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_give",
+                        java.util.Map.of("amount", amount, "player", target.getName(), "new_total", newCoins)));
             }
             case "remove" -> {
                 ItemSkinSelectionService.addCoins(plugin, targetId, -amount, true);
                 int newCoins = ItemSkinSelectionService.getCoins(targetId);
-                sender.sendMessage(Component.text("Removed ", NamedTextColor.GREEN)
-                        .append(Component.text(String.valueOf(amount), NamedTextColor.GOLD))
-                        .append(Component.text(" coins from ", NamedTextColor.GREEN))
-                        .append(Component.text(target.getName(), NamedTextColor.AQUA))
-                        .append(Component.text(" (now: " + newCoins + ")", NamedTextColor.GRAY)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_remove",
+                        java.util.Map.of("amount", amount, "player", target.getName(), "new_total", newCoins)));
             }
             default -> {
-                sender.sendMessage(Component.text("Unknown action: " + action, NamedTextColor.RED));
-                sender.sendMessage(Component.text("Usage: /has debug coins <player> [set|give|remove] <amount>", NamedTextColor.YELLOW));
+                sender.sendMessage(
+                        plugin.tr(sender, "command.debug.coins.unknown_action", java.util.Map.of("action", action)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.coins.usage"));
             }
         }
 

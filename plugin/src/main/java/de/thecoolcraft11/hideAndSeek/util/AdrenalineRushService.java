@@ -3,7 +3,6 @@ package de.thecoolcraft11.hideAndSeek.util;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
@@ -165,7 +164,7 @@ public final class AdrenalineRushService {
     }
 
     private void applyBorderWarning(Player player) {
-        if (!isBorderWarningEnabled()) {
+        if (isBorderWarningDisabled()) {
             return;
         }
         if (!plugin.getNmsAdapter().hasCapability(NmsCapabilities.CLIENT_FAKE_BORDER_WARNING)) {
@@ -176,7 +175,7 @@ public final class AdrenalineRushService {
     }
 
     private void clearBorderWarning(Player player) {
-        if (!isBorderWarningEnabled()) {
+        if (isBorderWarningDisabled()) {
             return;
         }
         if (!plugin.getNmsAdapter().hasCapability(NmsCapabilities.CLIENT_FAKE_BORDER_WARNING)) {
@@ -203,7 +202,7 @@ public final class AdrenalineRushService {
     }
 
     private void pulseActiveRushPlayers() {
-        if (!isBorderWarningEnabled()) {
+        if (isBorderWarningDisabled()) {
             return;
         }
         if (!plugin.getNmsAdapter().hasCapability(NmsCapabilities.CLIENT_FAKE_BORDER_WARNING)) {
@@ -228,18 +227,24 @@ public final class AdrenalineRushService {
     }
 
     private void announceHiderRush(List<Player> hiders) {
-
-        Title title = Title.title(
-                Component.text("ADRENALINE RUSH!", NamedTextColor.RED, TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false),
-                Component.text("Survive until the end. Stay hidden!", NamedTextColor.GOLD)
-                        .decoration(TextDecoration.ITALIC, false),
-                Title.Times.times(
-                        Duration.ofMillis(300),
-                        Duration.ofMillis(3000),
-                        Duration.ofMillis(500))
-        );
         for (Player hider : hiders) {
+            String titleStr = plugin.trText(hider, "util.adrenaline_rush.hider.title");
+            String subtitleStr = plugin.trText(hider, "util.adrenaline_rush.hider.subtitle");
+            Component titleComponent = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
+                            titleStr)
+                    .decoration(TextDecoration.ITALIC, false);
+            Component subtitleComponent = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
+                            subtitleStr)
+                    .decoration(TextDecoration.ITALIC, false);
+
+            Title title = Title.title(
+                    titleComponent,
+                    subtitleComponent,
+                    Title.Times.times(
+                            Duration.ofMillis(300),
+                            Duration.ofMillis(3000),
+                            Duration.ofMillis(500))
+            );
             hider.showTitle(title);
             hider.playSound(hider.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.6f, 1.6f);
             hider.spawnParticle(Particle.SOUL_FIRE_FLAME, hider.getLocation().add(0, 1, 0),
@@ -248,17 +253,24 @@ public final class AdrenalineRushService {
     }
 
     private void announceSeekerRush(List<Player> seekers) {
-        Title title = Title.title(
-                Component.text("ADRENALINE RUSH!", NamedTextColor.YELLOW, TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false),
-                Component.text("Time is almost up - Find them!", NamedTextColor.RED)
-                        .decoration(TextDecoration.ITALIC, false),
-                Title.Times.times(
-                        Duration.ofMillis(300),
-                        Duration.ofMillis(3000),
-                        Duration.ofMillis(500))
-        );
         for (Player seeker : seekers) {
+            String titleStr = plugin.trText(seeker, "util.adrenaline_rush.seeker.title");
+            String subtitleStr = plugin.trText(seeker, "util.adrenaline_rush.seeker.subtitle");
+            Component titleComponent = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
+                            titleStr)
+                    .decoration(TextDecoration.ITALIC, false);
+            Component subtitleComponent = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
+                            subtitleStr)
+                    .decoration(TextDecoration.ITALIC, false);
+
+            Title title = Title.title(
+                    titleComponent,
+                    subtitleComponent,
+                    Title.Times.times(
+                            Duration.ofMillis(300),
+                            Duration.ofMillis(3000),
+                            Duration.ofMillis(500))
+            );
             seeker.showTitle(title);
             seeker.playSound(seeker.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 0.5f, 1.4f);
             seeker.spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1, 0),
@@ -368,8 +380,8 @@ public final class AdrenalineRushService {
         return getSettingBool("adrenaline-rush.seeker.enabled", true);
     }
 
-    private boolean isBorderWarningEnabled() {
-        return getSettingBool("adrenaline-rush.border-warning-enabled", true);
+    private boolean isBorderWarningDisabled() {
+        return !getSettingBool("adrenaline-rush.border-warning-enabled", true);
     }
 
     private int getHiderTriggerCount() {

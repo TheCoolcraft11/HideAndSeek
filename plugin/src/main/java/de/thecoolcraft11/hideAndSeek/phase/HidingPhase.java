@@ -15,6 +15,7 @@ import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.game.GamePhase;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -36,6 +37,7 @@ public class HidingPhase implements GamePhase {
     private final Set<Material> allowedMaterials = new HashSet<>();
     private final Set<Material> blockInteractionExceptions = new LinkedHashSet<>();
     private final Set<Material> blockPhysicsExceptions = new LinkedHashSet<>();
+    private HideAndSeek plugin;
 
 
     @Override
@@ -52,6 +54,7 @@ public class HidingPhase implements GamePhase {
     public void onStart(MinigameFramework plugin) {
 
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
+        this.plugin = hideAndSeekPlugin;
         hideAndSeekPlugin.getAntiCheatVisibilityListener().resetNow();
         hideAndSeekPlugin.getPointService().resetRoundState();
 
@@ -160,9 +163,10 @@ public class HidingPhase implements GamePhase {
                     Player hider = Bukkit.getPlayer(hiderId);
                     if (hider != null) {
                         HiderItems.updateAppearanceItem(hider, hideAndSeekPlugin);
-                        hider.sendMessage(Component.text(
-                                "Default block set to " + defaultBlock.name() + ". Use the Block Selector to change your block.",
-                                NamedTextColor.YELLOW));
+                        net.kyori.adventure.text.minimessage.MiniMessage mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage();
+                        Component msg = mm.deserialize(plugin.trText(hider, "phase.hiding.default_block_set",
+                                java.util.Map.of("material", defaultBlock.name())));
+                        hider.sendMessage(msg);
                     }
                 }
             }
@@ -216,7 +220,8 @@ public class HidingPhase implements GamePhase {
                 seeker.setWalkSpeed(0f);
                 seeker.setAllowFlight(false);
                 seeker.setFlying(false);
-                seeker.sendMessage(Component.text("Wait for the hiders to hide...", NamedTextColor.RED));
+                String msg = plugin.trText(seeker, "phase.ended.wait_for_hiders");
+                seeker.sendMessage(MiniMessage.miniMessage().deserialize(msg));
                 seeker.setGlowing(false);
                 Objects.requireNonNull(seeker.getAttribute(Attribute.SCALE)).setBaseValue(1.0);
 
@@ -294,20 +299,24 @@ public class HidingPhase implements GamePhase {
                                 false,
                                 false
                         ));
+                        String msg;
                         if (gameMode == GameModeEnum.BLOCK) {
-                            hider.sendMessage(
-                                    Component.text("Choose your block with the block selector", NamedTextColor.GREEN));
+                            msg = plugin.trText(hider, "phase.hiding.choose_block");
                         } else {
-                            hider.sendMessage(Component.text("You are invisible! Use this time to hide!", NamedTextColor.GREEN));
+                            msg = plugin.trText(hider, "phase.hiding.invisible_message");
                         }
+                        hider.sendMessage(MiniMessage.miniMessage().deserialize(msg));
                         if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
                             plugin.getLogger().info(hider.getName() + " granted invisibility");
                         }
                     } catch (Exception e) {
-                        plugin.getLogger().warning("Failed to grant invisibility to " + hider.getName() + ": " + e.getMessage());
+                        plugin.getLogger().warning(
+                                "Failed to grant invisibility to " + hider.getName() + ": " + e.getMessage());
                     }
                 } else {
-                    hider.sendMessage(Component.text("Hide now! You have " + timeRemaining + " seconds!", NamedTextColor.GREEN));
+                    String msg = plugin.trText(hider, "phase.hiding.hide_countdown",
+                            java.util.Map.of("time", String.valueOf(timeRemaining)));
+                    hider.sendMessage(MiniMessage.miniMessage().deserialize(msg));
                 }
 
 
@@ -433,9 +442,11 @@ public class HidingPhase implements GamePhase {
                 seeker.setGameMode(GameMode.SURVIVAL);
                 seeker.setWalkSpeed(0.2f);
 
+                String goTitle = plugin.trText(seeker, "phase.ended.go_title");
+                String goSubtitle = plugin.trText(seeker, "phase.ended.go_subtitle");
                 Title title = Title.title(
-                        Component.text("GO!", NamedTextColor.RED),
-                        Component.text("Find the hiders!", NamedTextColor.YELLOW),
+                        MiniMessage.miniMessage().deserialize(goTitle),
+                        MiniMessage.miniMessage().deserialize(goSubtitle),
                         Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(2), Duration.ofMillis(500))
                 );
                 seeker.showTitle(title);
@@ -602,28 +613,31 @@ public class HidingPhase implements GamePhase {
 
         MapInfoDisplayMode displayMode = resolveMapInfoDisplayMode(plugin);
 
-        String resolvedMapName = mapData != null && hasText(mapData.getDisplayName()) ? mapData.getDisplayName() : mapName;
-        if (!hasText(resolvedMapName)) {
-            resolvedMapName = "Unknown Map";
-        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+
+            String resolvedMapName = mapData != null && hasText(
+                    mapData.getDisplayName()) ? "<aqua>" + mapData.getDisplayName() : mapName;
+            if (!hasText(resolvedMapName)) {
+                resolvedMapName = plugin.trText(player, "phase.hiding.unknown_map");
+            }
 
         List<String> subtitleParts = new ArrayList<>();
         if (displayMode == MapInfoDisplayMode.NAME_AND_AUTHOR || displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
-            subtitleParts.add("By " + resolveAuthor(mapData));
+            subtitleParts.add(plugin.trText(player, "phase.hiding.by") + resolveAuthor(mapData, player));
         }
 
         if (displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
-            subtitleParts.add(trimForTitle(resolveDescription(mapData)));
+            subtitleParts.add(trimForTitle(resolveDescription(mapData, player)));
         }
 
-        String subtitle = String.join(" | ", subtitleParts);
+            String subtitle = "<gray>" + String.join(" | ", subtitleParts);
         Title title = Title.title(
-                Component.text(resolvedMapName, NamedTextColor.AQUA),
-                Component.text(subtitle, NamedTextColor.GRAY),
+                MiniMessage.miniMessage().deserialize(resolvedMapName),
+                MiniMessage.miniMessage().deserialize(subtitle),
                 Title.Times.times(Duration.ofMillis(400), Duration.ofSeconds(4), Duration.ofMillis(500))
         );
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+
             player.showTitle(title);
         }
     }
@@ -638,49 +652,58 @@ public class HidingPhase implements GamePhase {
             spectatorIds.add(spectator.getUniqueId());
         }
 
-        String displayMapName = mapData != null && hasText(mapData.getDisplayName()) ? mapData.getDisplayName() : mapName;
-        if (!hasText(displayMapName)) {
-            displayMapName = "Unknown Map";
-        }
-
-        String author = resolveAuthor(mapData);
-        String description = resolveDescription(mapData);
-
         for (Player player : Bukkit.getOnlinePlayers()) {
+
+            String displayMapName = mapData != null && hasText(
+                    mapData.getDisplayName()) ? mapData.getDisplayName() : mapName;
+            if (!hasText(displayMapName)) {
+                displayMapName = plugin.trText(player, "phase.hiding.unknown_map");
+            }
+
+            String author = resolveAuthor(mapData, player);
+            String description = resolveDescription(mapData, player);
 
             Component roleText;
             if (seekerIds.contains(player.getUniqueId())) {
-                roleText = Component.text("SEEKER", NamedTextColor.RED);
+                String role = plugin.trText(player, "phase.hiding.role.seeker");
+                roleText = MiniMessage.miniMessage().deserialize(role);
             } else if (hiderIds.contains(player.getUniqueId())) {
-                roleText = Component.text("HIDER", NamedTextColor.GREEN);
+                String role = plugin.trText(player, "phase.hiding.role.hider");
+                roleText = MiniMessage.miniMessage().deserialize(role);
             } else if (spectatorIds.contains(player.getUniqueId())) {
-                roleText = Component.text("SPECTATOR", NamedTextColor.GRAY);
+                String role = plugin.trText(player, "phase.hiding.role.spectator");
+                roleText = MiniMessage.miniMessage().deserialize(role);
             } else {
-                roleText = Component.text("UNASSIGNED", NamedTextColor.DARK_GRAY);
+                String role = plugin.trText(player, "phase.hiding.role.unassigned");
+                roleText = MiniMessage.miniMessage().deserialize(role);
             }
 
 
-            Component roleMessage = Component.text("You're a ", NamedTextColor.AQUA)
+            String youAreStr = plugin.trText(player, "phase.hiding.you_are");
+            Component roleMessage = MiniMessage.miniMessage().deserialize(youAreStr)
                     .append(roleText);
             player.sendMessage(roleMessage);
 
 
-            Component mapMessage = Component.text("You're playing on ", NamedTextColor.AQUA)
+            String playingOnStr = plugin.trText(player, "phase.hiding.playing_on");
+            Component mapMessage = MiniMessage.miniMessage().deserialize(playingOnStr)
                     .append(Component.text(displayMapName, NamedTextColor.YELLOW));
 
             if (displayMode == MapInfoDisplayMode.NAME_AND_AUTHOR || displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
-                mapMessage = mapMessage.append(Component.text(" by ", NamedTextColor.AQUA))
+                String byStr = plugin.trText(player, "phase.hiding.by");
+                mapMessage = mapMessage.append(MiniMessage.miniMessage().deserialize(byStr))
                         .append(Component.text(author, NamedTextColor.GOLD));
             }
 
-            Component mapBoxLine = Component.text("═══════════════════════════════", NamedTextColor.AQUA);
-            player.sendMessage(mapBoxLine);
+            String boxLine = plugin.trText(player, "phase.hiding.box_line");
+            Component boxLineComponent = MiniMessage.miniMessage().deserialize(boxLine);
+            player.sendMessage(boxLineComponent);
             player.sendMessage(mapMessage);
 
             if (displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
                 player.sendMessage(Component.text(description, NamedTextColor.GRAY));
             }
-            player.sendMessage(mapBoxLine);
+            player.sendMessage(boxLineComponent);
         }
     }
 
@@ -704,18 +727,18 @@ public class HidingPhase implements GamePhase {
         return MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION;
     }
 
-    private String resolveAuthor(MapData mapData) {
+    private String resolveAuthor(MapData mapData, Player player) {
         if (mapData != null && hasText(mapData.getAuthor())) {
             return mapData.getAuthor().trim();
         }
-        return "Unknown author";
+        return plugin.trText(player, "phase.hiding.unknown_author");
     }
 
-    private String resolveDescription(MapData mapData) {
+    private String resolveDescription(MapData mapData, Player player) {
         if (mapData != null && hasText(mapData.getDescription())) {
             return mapData.getDescription().trim();
         }
-        return "No description.";
+        return plugin.trText(player, "phase.hiding.no_description");
     }
 
     private boolean hasText(String value) {

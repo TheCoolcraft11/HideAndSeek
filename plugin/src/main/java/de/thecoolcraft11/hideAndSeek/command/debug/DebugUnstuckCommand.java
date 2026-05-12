@@ -2,8 +2,6 @@ package de.thecoolcraft11.hideAndSeek.command.debug;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.util.UnstuckManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -13,11 +11,14 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 
 public class DebugUnstuckCommand implements DebugSubcommand {
+    private final HideAndSeek plugin;
     private final UnstuckManager unstuckManager;
 
     public DebugUnstuckCommand(HideAndSeek plugin) {
+        this.plugin = plugin;
         this.unstuckManager = plugin.getUnstuckManager();
     }
 
@@ -36,13 +37,13 @@ public class DebugUnstuckCommand implements DebugSubcommand {
     @Override
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /has debug unstuck <player> [history|nearby|spawn]", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.unstuck.usage"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.unstuck.player_not_found", Map.of("player", args[0])));
             return true;
         }
 
@@ -73,21 +74,22 @@ public class DebugUnstuckCommand implements DebugSubcommand {
                 }
             }
             default -> {
-                sender.sendMessage(Component.text("Unknown unstuck method: " + method, NamedTextColor.RED));
-                sender.sendMessage(Component.text("Valid methods: history, nearby, spawn", NamedTextColor.YELLOW));
+                sender.sendMessage(plugin.tr(sender, "command.debug.unstuck.unknown_method", Map.of("method", method)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.unstuck.valid_methods"));
                 return true;
             }
         }
 
         if (targetLocation == null) {
-            sender.sendMessage(Component.text("Could not find a safe position for unstuck method: " + method, NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.unstuck.no_safe_position", Map.of("method", method)));
             return true;
         }
 
 
         boolean teleported = target.teleport(targetLocation);
         if (!teleported) {
-            sender.sendMessage(Component.text("Teleport failed for " + target.getName(), NamedTextColor.RED));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.unstuck.teleport_failed", Map.of("player", target.getName())));
             return true;
         }
 
@@ -101,15 +103,15 @@ public class DebugUnstuckCommand implements DebugSubcommand {
         target.playSound(targetLocation, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
 
 
-        sender.sendMessage(Component.text("Forcefully unstuck ", NamedTextColor.GREEN)
-                .append(Component.text(target.getName(), NamedTextColor.AQUA))
-                .append(Component.text(" using method: ", NamedTextColor.GREEN))
-                .append(Component.text(method, NamedTextColor.GOLD)));
+        sender.sendMessage(plugin.tr(sender, "command.debug.unstuck.force_sender", Map.of(
+                "player", target.getName(),
+                "method", method
+        )));
 
-        target.sendMessage(Component.text("You were forcefully unstuck by ", NamedTextColor.YELLOW)
-                .append(Component.text(sender.getName(), NamedTextColor.AQUA))
-                .append(Component.text(" using method: ", NamedTextColor.YELLOW))
-                .append(Component.text(method, NamedTextColor.GOLD)));
+        target.sendMessage(plugin.tr(target, "command.debug.unstuck.force_target", Map.of(
+                "sender", sender.getName(),
+                "method", method
+        )));
 
         return true;
     }

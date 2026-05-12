@@ -16,7 +16,6 @@ import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -48,7 +47,7 @@ public class AdminLoadoutManagementGUI {
 
     public void open(Player admin) {
         if (!admin.hasPermission(ADMIN_PERMISSION)) {
-            admin.sendMessage(Component.text("You do not have permission to use this GUI.", NamedTextColor.RED));
+            admin.sendMessage(plugin.tr(admin, "gui.admin.permission_denied"));
             return;
         }
         Tab tab = tabByAdmin.getOrDefault(admin.getUniqueId(), Tab.HIDER);
@@ -60,7 +59,7 @@ public class AdminLoadoutManagementGUI {
 
         FrameworkInventory inv = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("admin_loadout_" + admin.getUniqueId() + "_" + tab.name().toLowerCase())
-                .title("Admin Loadout Manager")
+                .title(plugin.trText(admin, "gui.admin.title"))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -68,9 +67,9 @@ public class AdminLoadoutManagementGUI {
                 .build();
 
         switch (tab) {
-            case HIDER -> fillRoleTab(inv, LoadoutRole.HIDER);
-            case SEEKER -> fillRoleTab(inv, LoadoutRole.SEEKER);
-            case PERKS -> fillPerkTab(inv);
+            case HIDER -> fillRoleTab(admin, inv, LoadoutRole.HIDER);
+            case SEEKER -> fillRoleTab(admin, inv, LoadoutRole.SEEKER);
+            case PERKS -> fillPerkTab(admin, inv);
             case PLAYERS -> fillPlayersTab(admin, inv);
             case PRESETS -> fillPresetTab(admin, inv);
         }
@@ -79,37 +78,45 @@ public class AdminLoadoutManagementGUI {
         plugin.getInventoryFramework().openInventory(admin, inv);
     }
 
-    private void fillRoleTab(FrameworkInventory inv, LoadoutRole role) {
+    private void fillRoleTab(Player admin, FrameworkInventory inv, LoadoutRole role) {
         LoadoutFilterMode mode = loadoutManager.getFilterMode(role);
         Set<LoadoutItemType> filterItems = loadoutManager.getFilterItems(role);
 
-        inv.setItem(0, clickable(createInfoItem(role, mode, filterItems.size()), (p, i, e, s) -> e.setCancelled(true)));
+        inv.setItem(0,
+                clickable(createInfoItem(admin, role, mode, filterItems.size()), (p, i, e, s) -> e.setCancelled(true)));
 
-        inv.setItem(1, clickable(createUtility(Material.LECTERN, "Mode: " + mode.name(), NamedTextColor.YELLOW,
-                List.of(Component.text("Click to toggle blacklist/whitelist", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(1, clickable(
+                createUtility(Material.LECTERN, plugin.tr(admin, "gui.admin.loadout.mode", Map.of("mode", mode.name())),
+                        List.of(plugin.tr(admin, "gui.admin.loadout.mode.hint"))), (p, i, e, s) -> {
             LoadoutFilterMode next = mode == LoadoutFilterMode.BLACKLIST ? LoadoutFilterMode.WHITELIST : LoadoutFilterMode.BLACKLIST;
             loadoutManager.setFilterMode(role, next);
             int affected = loadoutManager.enforcePoliciesAndNotify();
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
-            p.sendMessage(Component.text("Set " + role.name().toLowerCase() + " filter mode to " + next.name() + ". Updated " + affected + " online player(s).", NamedTextColor.GREEN));
+                    p.sendMessage(plugin.tr(p, "gui.admin.loadout.filter.mode.changed",
+                            Map.of("role", role.name().toLowerCase(), "mode", next.name(), "count",
+                                    String.valueOf(affected))));
             openTab(p, tabByRole(role));
             e.setCancelled(true);
         }));
 
-        inv.setItem(2, clickable(createUtility(Material.BARRIER, "Clear Filter Entries", NamedTextColor.RED,
-                List.of(Component.text("Keeps mode, clears item list", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(2,
+                clickable(createUtility(Material.BARRIER, plugin.tr(admin, "gui.admin.loadout.clear_entries.title"),
+                        List.of(plugin.tr(admin, "gui.admin.loadout.clear_entries.hint"))), (p, i, e, s) -> {
             loadoutManager.clearRoleFilter(role);
             int affected = loadoutManager.enforcePoliciesAndNotify();
-            p.sendMessage(Component.text("Cleared " + role.name().toLowerCase() + " filter entries. Updated " + affected + " online player(s).", NamedTextColor.YELLOW));
+                    p.sendMessage(plugin.tr(p, "gui.admin.loadout.clear_entries.done",
+                            Map.of("role", role.name().toLowerCase(), "count", String.valueOf(affected))));
             openTab(p, tabByRole(role));
             e.setCancelled(true);
         }));
 
-        inv.setItem(3, clickable(createUtility(Material.TNT, "Reset All " + role.name() + " Loadouts", NamedTextColor.RED,
-                List.of(Component.text("Bulk reset for all known players", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(3, clickable(createUtility(Material.TNT,
+                plugin.tr(admin, "gui.admin.loadout.reset_all.title", Map.of("role", role.name())),
+                List.of(plugin.tr(admin, "gui.admin.loadout.reset_all.hint"))), (p, i, e, s) -> {
             int changed = loadoutManager.resetAllLoadouts(role);
             loadoutManager.enforcePoliciesAndNotify();
-            p.sendMessage(Component.text("Reset " + role.name().toLowerCase() + " loadouts for " + changed + " player(s).", NamedTextColor.YELLOW));
+            p.sendMessage(plugin.tr(p, "gui.admin.loadout.reset_all.done",
+                    Map.of("role", role.name().toLowerCase(), "count", String.valueOf(changed))));
             openTab(p, tabByRole(role));
             e.setCancelled(true);
         }));
@@ -128,32 +135,35 @@ public class AdminLoadoutManagementGUI {
 
             boolean inFilter = filterItems.contains(item);
             boolean allowed = loadoutManager.isItemAvailableForRole(role, item);
-            ItemStack stack = createLoadoutPolicyItem(item, role, inFilter, allowed,
+            ItemStack stack = createLoadoutPolicyItem(admin, item, role, inFilter,
                     List.of(
-                            Component.text("Filter entry: " + (inFilter ? "YES" : "NO"), NamedTextColor.GRAY),
-                            Component.text("Mode: " + mode.name(), NamedTextColor.GRAY),
-                            Component.text("Status: " + (allowed ? "ALLOWED" : "BLOCKED"), allowed ? NamedTextColor.GREEN : NamedTextColor.RED),
-                            Component.text("Click to toggle filter entry", NamedTextColor.YELLOW)
+                            plugin.tr(admin, "gui.admin.loadout.item.filter_entry",
+                                    Map.of("value", inFilter ? "YES" : "NO")),
+                            plugin.tr(admin, "gui.admin.loadout.item.mode", Map.of("mode", mode.name())),
+                            plugin.tr(admin, "gui.admin.loadout.item.status",
+                                    Map.of("status", allowed ? "ALLOWED" : "BLOCKED")),
+                            plugin.tr(admin, "gui.admin.loadout.item.click_toggle")
                     ));
 
             inv.setItem(slot++, clickable(stack, (p, i, e, s) -> {
                 loadoutManager.toggleRoleFilterItem(role, item);
                 int affected = loadoutManager.enforcePoliciesAndNotify();
-                p.sendMessage(Component.text("Updated " + humanize(item.name()) + ". Online updates: " + affected + ".", NamedTextColor.YELLOW));
+                p.sendMessage(plugin.tr(p, "gui.admin.loadout.item.updated",
+                        Map.of("item", humanize(item.name()), "count", String.valueOf(affected))));
                 openTab(p, tabByRole(role));
                 e.setCancelled(true);
             }));
         }
     }
 
-    private void fillPerkTab(FrameworkInventory inv) {
-        inv.setItem(0, clickable(createUtility(Material.BEACON, "Perk Availability", NamedTextColor.AQUA,
-                List.of(Component.text("Click a perk to enable/disable by role", NamedTextColor.GRAY))), (p, i, e, s) -> e.setCancelled(true)));
+    private void fillPerkTab(Player admin, FrameworkInventory inv) {
+        inv.setItem(0, clickable(createUtility(Material.BEACON, plugin.tr(admin, "gui.admin.perks.title"),
+                List.of(plugin.tr(admin, "gui.admin.perks.hint"))), (p, i, e, s) -> e.setCancelled(true)));
 
-        inv.setItem(1, clickable(createUtility(Material.CLOCK, "Refresh Round Perks", NamedTextColor.YELLOW,
-                List.of(Component.text("Re-selects perks and refreshes shop items", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(1, clickable(createUtility(Material.CLOCK, plugin.tr(admin, "gui.admin.perks.refresh.title"),
+                List.of(plugin.tr(admin, "gui.admin.perks.refresh.hint"))), (p, i, e, s) -> {
             loadoutManager.enforcePoliciesAndNotify();
-            p.sendMessage(Component.text("Refreshed current perk pool.", NamedTextColor.GREEN));
+            p.sendMessage(plugin.tr(p, "gui.admin.perks.refresh.done"));
             openTab(p, Tab.PERKS);
             e.setCancelled(true);
         }));
@@ -169,18 +179,20 @@ public class AdminLoadoutManagementGUI {
 
             LoadoutRole role = perk.getTarget() == PerkTarget.HIDER ? LoadoutRole.HIDER : LoadoutRole.SEEKER;
             boolean disabled = loadoutManager.getDisabledPerks(role).contains(perk.getId());
-            ItemStack stack = createPerkPolicyItem(perk, role, disabled,
+            ItemStack stack = createPerkPolicyItem(admin, perk, role, disabled,
                     List.of(
-                            Component.text("Role: " + role.name(), NamedTextColor.GRAY),
-                            Component.text("Status: " + (disabled ? "DISABLED" : "ENABLED"), disabled ? NamedTextColor.RED : NamedTextColor.GREEN),
-                            perk.getDescription().color(NamedTextColor.GRAY),
-                            Component.text("Click to toggle", NamedTextColor.YELLOW)
+                            plugin.tr(admin, "gui.admin.perks.role", Map.of("role", role.name())),
+                            plugin.tr(admin, "gui.admin.perks.status",
+                                    Map.of("status", disabled ? "DISABLED" : "ENABLED")),
+                            perk.getDescription(),
+                            plugin.tr(admin, "gui.admin.perks.click_toggle")
                     ));
 
             inv.setItem(slot++, clickable(stack, (p, i, e, s) -> {
                 loadoutManager.toggleDisabledPerk(role, perk.getId());
                 loadoutManager.enforcePoliciesAndNotify();
-                p.sendMessage(Component.text("Updated perk " + perk.getId() + " for " + role.name().toLowerCase() + ".", NamedTextColor.YELLOW));
+                p.sendMessage(plugin.tr(p, "gui.admin.perks.updated",
+                        Map.of("perk", perk.getId(), "role", role.name().toLowerCase())));
                 openTab(p, Tab.PERKS);
                 e.setCancelled(true);
             }));
@@ -191,92 +203,115 @@ public class AdminLoadoutManagementGUI {
         UUID selectedTargetId = selectedTargetByAdmin.get(admin.getUniqueId());
         Player selectedTarget = selectedTargetId == null ? null : Bukkit.getPlayer(selectedTargetId);
 
-        inv.setItem(0, clickable(createUtility(Material.PLAYER_HEAD, "Player Loadouts", NamedTextColor.AQUA,
-                List.of(Component.text("Left click to select player", NamedTextColor.GRAY),
-                        Component.text("Right click to open editor", NamedTextColor.GRAY))), (p, i, e, s) -> e.setCancelled(true)));
+        inv.setItem(0, clickable(createUtility(Material.PLAYER_HEAD, plugin.tr(admin, "gui.admin.players.title"),
+                List.of(plugin.tr(admin, "gui.admin.players.left_click"),
+                        plugin.tr(admin, "gui.admin.players.right_click"))), (p, i, e, s) -> e.setCancelled(true)));
 
-        inv.setItem(36, clickable(createActionButton("Toggle Hider Lock", selectedTarget, Material.IRON_DOOR), (p, i, e, s) -> {
+        inv.setItem(36, clickable(
+                createActionButton(admin, plugin.tr(admin, "gui.admin.players.toggle_hider"), selectedTarget,
+                        Material.IRON_DOOR, LoadoutRole.HIDER), (p, i, e, s) -> {
             if (selectedTarget == null) {
                 e.setCancelled(true);
                 return;
             }
             boolean locked = !loadoutManager.isRoleLocked(selectedTarget.getUniqueId(), LoadoutRole.HIDER);
             loadoutManager.setRoleLocked(selectedTarget.getUniqueId(), LoadoutRole.HIDER, locked);
-            p.sendMessage(Component.text("Hider lock for " + selectedTarget.getName() + ": " + locked, NamedTextColor.YELLOW));
+                    p.sendMessage(plugin.tr(p, "gui.admin.players.lock_changed",
+                            Map.of("player", selectedTarget.getName(), "role", "hider", "locked",
+                                    String.valueOf(locked))));
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(37, clickable(createActionButton("Toggle Seeker Lock", selectedTarget, Material.IRON_DOOR), (p, i, e, s) -> {
+        inv.setItem(37, clickable(
+                createActionButton(admin, plugin.tr(admin, "gui.admin.players.toggle_seeker"), selectedTarget,
+                        Material.IRON_DOOR, LoadoutRole.SEEKER), (p, i, e, s) -> {
             if (selectedTarget == null) {
                 e.setCancelled(true);
                 return;
             }
             boolean locked = !loadoutManager.isRoleLocked(selectedTarget.getUniqueId(), LoadoutRole.SEEKER);
             loadoutManager.setRoleLocked(selectedTarget.getUniqueId(), LoadoutRole.SEEKER, locked);
-            p.sendMessage(Component.text("Seeker lock for " + selectedTarget.getName() + ": " + locked, NamedTextColor.YELLOW));
+                    p.sendMessage(plugin.tr(p, "gui.admin.players.lock_changed",
+                            Map.of("player", selectedTarget.getName(), "role", "seeker", "locked",
+                                    String.valueOf(locked))));
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(38, clickable(createActionButton("Reset Selected (Hider)", selectedTarget, Material.REDSTONE), (p, i, e, s) -> {
+        inv.setItem(38, clickable(
+                createActionButton(admin, plugin.tr(admin, "gui.admin.players.reset_selected_hider"), selectedTarget,
+                        Material.REDSTONE, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 loadoutManager.resetPlayerLoadout(selectedTarget.getUniqueId(), LoadoutRole.HIDER);
                 loadoutManager.refreshRoleInventory(selectedTarget);
-                p.sendMessage(Component.text("Reset hider loadout for " + selectedTarget.getName() + ".", NamedTextColor.YELLOW));
+                p.sendMessage(
+                        plugin.tr(p, "gui.admin.players.reset_hider", Map.of("player", selectedTarget.getName())));
             }
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(39, clickable(createActionButton("Reset Selected (Seeker)", selectedTarget, Material.REDSTONE), (p, i, e, s) -> {
+        inv.setItem(39, clickable(
+                createActionButton(admin, plugin.tr(admin, "gui.admin.players.reset_selected_seeker"), selectedTarget,
+                        Material.REDSTONE, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 loadoutManager.resetPlayerLoadout(selectedTarget.getUniqueId(), LoadoutRole.SEEKER);
                 loadoutManager.refreshRoleInventory(selectedTarget);
-                p.sendMessage(Component.text("Reset seeker loadout for " + selectedTarget.getName() + ".", NamedTextColor.YELLOW));
+                p.sendMessage(
+                        plugin.tr(p, "gui.admin.players.reset_seeker", Map.of("player", selectedTarget.getName())));
             }
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(40, clickable(createActionButton("Reset Selected (All)", selectedTarget, Material.TNT), (p, i, e, s) -> {
+        inv.setItem(40, clickable(
+                createActionButton(admin, plugin.tr(admin, "gui.admin.players.reset_selected_all"), selectedTarget,
+                        Material.TNT, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 loadoutManager.resetPlayerLoadout(selectedTarget.getUniqueId());
                 loadoutManager.refreshRoleInventory(selectedTarget);
-                p.sendMessage(Component.text("Reset full loadout for " + selectedTarget.getName() + ".", NamedTextColor.YELLOW));
+                p.sendMessage(plugin.tr(p, "gui.admin.players.reset_all", Map.of("player", selectedTarget.getName())));
             }
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(41, clickable(createActionButton("Edit Selected (Hider)", selectedTarget, Material.CHEST), (p, i, e, s) -> {
+        inv.setItem(41, clickable(
+                createActionButton(admin, plugin.tr(admin, "gui.admin.players.edit_selected_hider"), selectedTarget,
+                        Material.CHEST, null), (p, i, e, s) -> {
             plugin.getLogger().info("Test1");
             if (selectedTarget != null) {
                 plugin.getLogger().info("Test2");
                 openPlayerEditor(p, selectedTarget, LoadoutRole.HIDER);
             } else {
                 p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                p.sendMessage(Component.text("Select a player first", NamedTextColor.RED));
+                p.sendMessage(plugin.tr(p, "gui.admin.players.select_first"));
             }
             e.setCancelled(true);
         }));
 
-        inv.setItem(42, clickable(createActionButton("Edit Selected (Seeker)", selectedTarget, Material.CHEST), (p, i, e, s) -> {
+        inv.setItem(42, clickable(
+                createActionButton(admin, plugin.tr(admin, "gui.admin.players.edit_selected_seeker"), selectedTarget,
+                        Material.CHEST, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 openPlayerEditor(p, selectedTarget, LoadoutRole.SEEKER);
             } else {
                 p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                p.sendMessage(Component.text("Select a player first", NamedTextColor.RED));
+                p.sendMessage(plugin.tr(p, "gui.admin.players.select_first"));
             }
             e.setCancelled(true);
         }));
 
-        inv.setItem(43, clickable(createUtility(Material.LAVA_BUCKET, "Reset Everyone (All)", NamedTextColor.RED,
-                List.of(Component.text("Bulk reset all known players", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(43,
+                clickable(createUtility(Material.LAVA_BUCKET, plugin.tr(admin, "gui.admin.players.reset_everyone_all"),
+                        List.of(plugin.tr(admin, "gui.admin.players.bulk_reset_hint"))), (p, i, e, s) -> {
             int h = loadoutManager.resetAllLoadouts(LoadoutRole.HIDER);
             int sk = loadoutManager.resetAllLoadouts(LoadoutRole.SEEKER);
             int affected = loadoutManager.enforcePoliciesAndNotify();
-            p.sendMessage(Component.text("Bulk reset complete. Hider: " + h + ", Seeker: " + sk + ", online updated: " + affected + ".", NamedTextColor.RED));
+                    p.sendMessage(plugin.tr(p, "gui.admin.players.bulk_reset_complete",
+                            Map.of("hider", String.valueOf(h), "seeker", String.valueOf(sk), "affected",
+                                    String.valueOf(affected))));
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
@@ -291,8 +326,8 @@ public class AdminLoadoutManagementGUI {
             }
 
             PlayerLoadout loadout = loadoutManager.getLoadout(target.getUniqueId());
-            boolean selected = target.getUniqueId().equals(selectedTargetId);
-            ItemStack head = createPlayerHead(target, loadout, selected);
+            target.getUniqueId();
+            ItemStack head = createPlayerHead(admin, target, loadout);
             inv.setItem(slot++, clickable(head, (p, i, e, s) -> {
                 selectedTargetByAdmin.put(p.getUniqueId(), target.getUniqueId());
                 if (e.getClick() == ClickType.RIGHT) {
@@ -309,7 +344,8 @@ public class AdminLoadoutManagementGUI {
     private void openPlayerEditor(Player admin, Player target, LoadoutRole role) {
         FrameworkInventory inv = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("admin_loadout_editor_" + admin.getUniqueId() + "_" + target.getUniqueId() + "_" + role.name().toLowerCase())
-                .title("Edit " + target.getName() + " - " + role.name())
+                .title(plugin.trText(admin, "gui.admin.editor.title",
+                        Map.of("player", target.getName(), "role", role.name())))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -319,24 +355,29 @@ public class AdminLoadoutManagementGUI {
         PlayerLoadout loadout = loadoutManager.getLoadout(target.getUniqueId());
         Set<LoadoutItemType> selectedItems = role == LoadoutRole.HIDER ? loadout.getHiderItems() : loadout.getSeekerItems();
 
-        inv.setItem(0, clickable(createUtility(Material.ARROW, "Back", NamedTextColor.YELLOW,
-                List.of(Component.text("Return to player tab", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(0, clickable(createUtility(Material.ARROW, plugin.tr(admin, "gui.admin.editor.back"),
+                List.of(plugin.tr(admin, "gui.admin.editor.back_hint"))), (p, i, e, s) -> {
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(1, clickable(createUtility(Material.COMPASS, "Switch Role", NamedTextColor.YELLOW,
-                List.of(Component.text("Current: " + role.name(), NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(1, clickable(createUtility(Material.COMPASS, plugin.tr(admin, "gui.admin.editor.switch_role"),
+                List.of(plugin.tr(admin, "gui.admin.editor.current", Map.of("role", role.name())))), (p, i, e, s) -> {
             openPlayerEditor(p, target, role == LoadoutRole.HIDER ? LoadoutRole.SEEKER : LoadoutRole.HIDER);
             e.setCancelled(true);
         }));
 
-        inv.setItem(4, clickable(createUtility(Material.BOOK, target.getName() + " Loadout", NamedTextColor.AQUA,
-                List.of(
-                        Component.text("Role: " + role.name(), NamedTextColor.GRAY),
-                        Component.text("Items: " + selectedItems.size(), NamedTextColor.GRAY),
-                        Component.text("Click any item to add/remove", NamedTextColor.YELLOW)
-                )), (p, i, e, s) -> e.setCancelled(true)));
+        inv.setItem(4, clickable(
+                createUtility(Material.BOOK,
+                        plugin.tr(admin, "gui.admin.editor.summary", Map.of("player", target.getName())),
+                        List.of(
+                                plugin.tr(admin, "gui.admin.editor.role", Map.of("role", role.name())),
+                                plugin.tr(admin, "gui.admin.editor.items",
+                                        Map.of("count", String.valueOf(selectedItems.size()))),
+                                plugin.tr(admin, "gui.admin.editor.click_hint")
+                        )
+                ), (p, i, e, s) -> e.setCancelled(true)
+        ));
 
         int slot = 9;
         for (LoadoutItemType item : LoadoutItemType.values()) {
@@ -352,16 +393,21 @@ public class AdminLoadoutManagementGUI {
             boolean allowed = loadoutManager.isItemAvailableForRole(role, item);
             boolean selected = selectedItems.contains(item);
 
-            ItemStack stack = createLoadoutPolicyItem(item, role, selected, allowed,
+            ItemStack stack = createLoadoutPolicyItem(admin, item, role, selected,
                     List.of(
-                            Component.text("Status: " + (selected ? "SELECTED" : "NOT SELECTED"), selected ? NamedTextColor.GREEN : NamedTextColor.GRAY),
-                            Component.text("Allowed by policy: " + (allowed ? "YES" : "NO"), allowed ? NamedTextColor.GREEN : NamedTextColor.RED),
-                            Component.text(allowed ? "Click to toggle" : "Blocked by current policy", allowed ? NamedTextColor.YELLOW : NamedTextColor.RED)
+                            plugin.tr(admin, "gui.admin.loadout.item.status", Map.of("status",
+                                    selected ? plugin.trText(admin, "common.state.selected") : plugin.trText(admin,
+                                            "common.state.not_selected"), "color", selected ? "green" : "gray")),
+                            plugin.tr(admin, "gui.admin.loadout.item.allowed", Map.of("state",
+                                    allowed ? plugin.trText(admin, "common.state.yes") : plugin.trText(admin,
+                                            "common.state.no"))),
+                            plugin.tr(admin,
+                                    allowed ? "gui.admin.loadout.item.click_toggle" : "gui.admin.loadout.item.blocked_notice")
                     ));
 
             inv.setItem(slot++, clickable(stack, (p, i, e, s) -> {
                 if (!loadoutManager.isItemAvailableForRole(role, item)) {
-                    p.sendMessage(Component.text("This item is blocked by current role policy.", NamedTextColor.RED));
+                    p.sendMessage(plugin.tr(p, "gui.admin.editor.item.blocked_by_policy"));
                     openPlayerEditor(p, target, role);
                     e.setCancelled(true);
                     return;
@@ -397,11 +443,12 @@ public class AdminLoadoutManagementGUI {
         boolean restricted = loadoutManager.isRoleRestrictedToAdminPresets(role);
         int forcedSlot = loadoutManager.getForcedRolePresetSlot(role);
 
-        inv.setItem(0, clickable(createUtility(Material.BOOKSHELF, "Role Presets", NamedTextColor.AQUA,
-                List.of(Component.text("Define preset loadouts for players", NamedTextColor.GRAY))), (p, i, e, s) -> e.setCancelled(true)));
+        inv.setItem(0, clickable(createUtility(Material.BOOKSHELF, plugin.tr(admin, "gui.admin.presets.title"),
+                List.of(plugin.tr(admin, "gui.admin.presets.hint"))), (p, i, e, s) -> e.setCancelled(true)));
 
-        inv.setItem(1, clickable(createUtility(Material.COMPASS, "Role: " + role.name(), NamedTextColor.YELLOW,
-                List.of(Component.text("Click to switch role", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(1, clickable(
+                createUtility(Material.COMPASS, plugin.tr(admin, "gui.admin.presets.role", Map.of("role", role.name())),
+                        List.of(plugin.tr(admin, "gui.admin.presets.click_to_switch"))), (p, i, e, s) -> {
             LoadoutRole next = role == LoadoutRole.HIDER ? LoadoutRole.SEEKER : LoadoutRole.HIDER;
             presetRoleByAdmin.put(p.getUniqueId(), next);
             openTab(p, Tab.PRESETS);
@@ -409,25 +456,27 @@ public class AdminLoadoutManagementGUI {
         }));
 
         inv.setItem(2, clickable(createUtility(restricted ? Material.REDSTONE_BLOCK : Material.LIME_CONCRETE,
-                "Restrict Players: " + (restricted ? "ON" : "OFF"),
-                restricted ? NamedTextColor.RED : NamedTextColor.GREEN,
-                List.of(Component.text("When ON, players can only use admin presets", NamedTextColor.GRAY))), (p, i, e, s) -> {
+                plugin.tr(admin, "gui.admin.presets.restrict_players", Map.of("state", restricted ? "ON" : "OFF")),
+                List.of(plugin.tr(admin, "gui.admin.presets.restrict_players.hint"))), (p, i, e, s) -> {
             loadoutManager.setRoleRestrictedToAdminPresets(role, !restricted);
             int affected = loadoutManager.enforcePoliciesAndNotify();
-            p.sendMessage(Component.text("Preset restriction for " + role.name().toLowerCase() + " is now " + (!restricted) + ". Updated " + affected + " online player(s).", NamedTextColor.YELLOW));
+            p.sendMessage(plugin.tr(p, "gui.admin.presets.restrict_toggled",
+                    Map.of("role", role.name().toLowerCase(), "state", !restricted ? "OFF" : "ON", "count",
+                            String.valueOf(affected))));
             openTab(p, Tab.PRESETS);
             e.setCancelled(true);
         }));
 
         inv.setItem(3, clickable(createUtility(forcedSlot > 0 ? Material.RED_BED : Material.GRAY_BED,
-                forcedSlot > 0 ? "Forced Preset: #" + forcedSlot : "Forced Preset: NONE",
-                forcedSlot > 0 ? NamedTextColor.RED : NamedTextColor.GRAY,
-                List.of(Component.text("Shift+Left on preset = assign forced", NamedTextColor.GRAY),
-                        Component.text("Click here to clear forced preset", NamedTextColor.GRAY))), (p, i, e, s) -> {
+                plugin.tr(admin, "gui.admin.presets.forced_display",
+                        Map.of("slot", forcedSlot > 0 ? String.valueOf(forcedSlot) : "NONE")),
+                List.of(plugin.tr(admin, "gui.admin.presets.forced.hint1"),
+                        plugin.tr(admin, "gui.admin.presets.forced.hint2"))), (p, i, e, s) -> {
             if (forcedSlot > 0) {
                 loadoutManager.setForcedRolePresetSlot(role, 0);
                 int affected = loadoutManager.enforcePoliciesAndNotify();
-                p.sendMessage(Component.text("Cleared forced preset for " + role.name().toLowerCase() + ". Updated " + affected + " online player(s).", NamedTextColor.YELLOW));
+                p.sendMessage(plugin.tr(p, "gui.admin.presets.cleared_forced",
+                        Map.of("role", role.name().toLowerCase(), "count", String.valueOf(affected))));
             }
             openTab(p, Tab.PRESETS);
             e.setCancelled(true);
@@ -441,39 +490,39 @@ public class AdminLoadoutManagementGUI {
             boolean forced = forcedSlot == slot;
 
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("Items: " + preset.getItems().size(), NamedTextColor.GRAY));
-            lore.add(Component.text("Status: " + (enabled ? "ENABLED" : "DISABLED"), enabled ? NamedTextColor.GREEN : NamedTextColor.RED));
+            lore.add(plugin.tr(admin, "gui.admin.presets.items",
+                    Map.of("count", String.valueOf(preset.getItems().size()))));
+            lore.add(plugin.tr(admin, "gui.admin.presets.status", Map.of("state", enabled ? "ENABLED" : "DISABLED")));
             if (!preset.getItems().isEmpty()) {
-                lore.add(Component.text("Preview:", NamedTextColor.AQUA));
+                lore.add(plugin.tr(admin, "gui.admin.presets.preview_label"));
                 int shown = 0;
                 for (LoadoutItemType previewItem : preset.getItems()) {
-                    lore.add(Component.text("- " + humanize(previewItem.name()), NamedTextColor.GRAY));
+                    lore.add(plugin.tr(admin, "gui.admin.presets.preview_item",
+                            Map.of("item", humanize(previewItem.name()))));
                     shown++;
-                    if (shown >= 3) {
-                        break;
-                    }
+                    if (shown >= 3) break;
                 }
-                if (preset.getItems().size() > 3) {
-                    lore.add(Component.text("+ " + (preset.getItems().size() - 3) + " more", NamedTextColor.DARK_GRAY));
-                }
+                if (preset.getItems().size() > 3) lore.add(plugin.tr(admin, "gui.admin.presets.more",
+                        Map.of("count", String.valueOf(preset.getItems().size() - 3))));
             }
-            if (forced) {
-                lore.add(Component.text("Currently forced for this role", NamedTextColor.RED));
-            }
+            if (forced) lore.add(plugin.tr(admin, "gui.admin.presets.forced_note"));
             lore.add(Component.empty());
-            lore.add(Component.text("Left: edit items", NamedTextColor.YELLOW));
-            lore.add(Component.text("Shift+Left: set forced", NamedTextColor.GOLD));
-            lore.add(Component.text("Shift+Right: enable/disable", NamedTextColor.YELLOW));
-            lore.add(Component.text("Drop key: delete preset", NamedTextColor.RED));
+            lore.add(plugin.tr(admin, "gui.admin.presets.left_edit"));
+            lore.add(plugin.tr(admin, "gui.admin.presets.shift_left_set_forced"));
+            lore.add(plugin.tr(admin, "gui.admin.presets.shift_right_toggle"));
+            lore.add(plugin.tr(admin, "gui.admin.presets.drop_delete"));
 
             LoadoutItemType preview = preset.getItems().stream().findFirst().orElse(null);
             ItemStack stack = preview == null
-                    ? createUtility(Material.CHEST, "Preset #" + slot, enabled ? NamedTextColor.GREEN : NamedTextColor.GRAY, lore)
+                    ? createUtility(Material.CHEST,
+                    plugin.tr(admin, "gui.admin.presets.slot_title", Map.of("slot", String.valueOf(slot))), lore)
                     : getPreviewItemStack(preview);
             ItemMeta meta = stack.getItemMeta();
             if (meta != null) {
-                meta.displayName(Component.text("Preset #" + slot + (forced ? " (Forced)" : ""), forced ? NamedTextColor.RED : (enabled ? NamedTextColor.GREEN : NamedTextColor.GRAY), TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false));
+                Component titleComp = plugin.tr(admin,
+                        forced ? "gui.admin.presets.slot_forced" : (enabled ? "gui.admin.presets.slot_enabled" : "gui.admin.presets.slot_title"),
+                        Map.of("slot", String.valueOf(slot)));
+                meta.displayName(titleComp.decoration(TextDecoration.ITALIC, false));
                 meta.lore(lore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
 
                 meta.setEnchantmentGlintOverride(enabled || forced);
@@ -489,7 +538,8 @@ public class AdminLoadoutManagementGUI {
                 if (e.getClick() == ClickType.DROP || e.getClick() == ClickType.CONTROL_DROP) {
                     loadoutManager.deleteAdminPreset(role, targetSlot);
                     int affected = loadoutManager.enforcePoliciesAndNotify();
-                    p.sendMessage(Component.text("Deleted preset #" + targetSlot + ". Updated " + affected + " online player(s).", NamedTextColor.RED));
+                    p.sendMessage(plugin.tr(p, "gui.admin.presets.deleted",
+                            Map.of("slot", String.valueOf(targetSlot), "count", String.valueOf(affected))));
                     openTab(p, Tab.PRESETS);
                     e.setCancelled(true);
                     return;
@@ -497,18 +547,22 @@ public class AdminLoadoutManagementGUI {
                 if (e.getClick() == ClickType.SHIFT_RIGHT) {
                     loadoutManager.setAdminPresetEnabled(role, targetSlot, !enabled);
                     int affected = loadoutManager.enforcePoliciesAndNotify();
-                    p.sendMessage(Component.text("Preset #" + targetSlot + " is now " + (!enabled ? "enabled" : "disabled") + ". Updated " + affected + " online player(s).", NamedTextColor.YELLOW));
+                    p.sendMessage(plugin.tr(p, "gui.admin.presets.toggled",
+                            Map.of("slot", String.valueOf(targetSlot), "state", !enabled ? "enabled" : "disabled",
+                                    "count", String.valueOf(affected))));
                     openTab(p, Tab.PRESETS);
                     e.setCancelled(true);
                     return;
                 }
                 if (e.getClick() == ClickType.SHIFT_LEFT) {
                     if (!loadoutManager.isAdminPresetEnabled(role, targetSlot)) {
-                        p.sendMessage(Component.text("Enable a preset before forcing it.", NamedTextColor.RED));
+                        p.sendMessage(plugin.tr(p, "gui.admin.presets.enable_before_forcing"));
                     } else {
                         loadoutManager.setForcedRolePresetSlot(role, targetSlot);
                         int affected = loadoutManager.enforcePoliciesAndNotify();
-                        p.sendMessage(Component.text("Forced preset #" + targetSlot + " for " + role.name().toLowerCase() + ". Updated " + affected + " online player(s).", NamedTextColor.RED));
+                        p.sendMessage(plugin.tr(p, "gui.admin.presets.forced_assigned",
+                                Map.of("slot", String.valueOf(targetSlot), "role", role.name().toLowerCase(), "count",
+                                        String.valueOf(affected))));
                     }
                     openTab(p, Tab.PRESETS);
                     e.setCancelled(true);
@@ -523,7 +577,8 @@ public class AdminLoadoutManagementGUI {
     private void openPresetEditor(Player admin, LoadoutRole role, int presetSlot) {
         FrameworkInventory inv = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("admin_role_preset_editor_" + admin.getUniqueId() + "_" + role.name().toLowerCase() + "_" + presetSlot + "_items")
-                .title("Preset #" + presetSlot + " - " + role.name() + " Items")
+                .title(plugin.trText(admin, "gui.admin.presets.editor_title",
+                        Map.of("slot", String.valueOf(presetSlot), "role", role.name())))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -532,21 +587,29 @@ public class AdminLoadoutManagementGUI {
 
         AdminRolePreset preset = loadoutManager.getAdminPreset(role, presetSlot);
 
-        inv.setItem(0, clickable(createUtility(Material.ARROW, "Back", NamedTextColor.YELLOW,
-                List.of(Component.text("Return to presets tab", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(0, clickable(createUtility(Material.ARROW, plugin.tr(admin, "gui.admin.editor.back"),
+                List.of(plugin.tr(admin, "gui.admin.editor.back_hint"))), (p, i, e, s) -> {
             openTab(p, Tab.PRESETS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(1, clickable(createUtility(Material.COMPASS, "Switch Role", NamedTextColor.YELLOW,
-                List.of(Component.text("Current: " + role.name(), NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(1, clickable(createUtility(Material.COMPASS, plugin.tr(admin, "gui.admin.editor.switch_role"),
+                List.of(plugin.tr(admin, "gui.admin.editor.current", Map.of("role", role.name())))), (p, i, e, s) -> {
             openPresetEditor(p, role == LoadoutRole.HIDER ? LoadoutRole.SEEKER : LoadoutRole.HIDER, presetSlot);
             e.setCancelled(true);
         }));
 
-        inv.setItem(4, clickable(createUtility(Material.BOOK, "Preset #" + presetSlot + " Summary", NamedTextColor.AQUA,
-                List.of(Component.text("Items: " + preset.getItems().size(), NamedTextColor.GRAY),
-                        Component.text("Enabled for players: " + loadoutManager.isAdminPresetEnabled(role, presetSlot), NamedTextColor.GRAY))), (p, i, e, s) -> e.setCancelled(true)));
+        inv.setItem(4, clickable(
+                createUtility(Material.BOOK,
+                        plugin.tr(admin, "gui.admin.editor.summary", Map.of("slot", String.valueOf(presetSlot))),
+                        List.of(
+                                plugin.tr(admin, "gui.admin.editor.items",
+                                        Map.of("count", String.valueOf(preset.getItems().size()))),
+                                plugin.tr(admin, "gui.admin.presets.enabled_for_players", Map.of("enabled",
+                                        String.valueOf(loadoutManager.isAdminPresetEnabled(role, presetSlot))))
+                        )
+                ), (p, i, e, s) -> e.setCancelled(true)
+        ));
 
         int slot = 9;
         for (LoadoutItemType item : LoadoutItemType.values()) {
@@ -557,9 +620,10 @@ public class AdminLoadoutManagementGUI {
                 break;
             }
             boolean selected = preset.getItems().contains(item);
-            ItemStack stack = createLoadoutPolicyItem(item, role, selected, true,
-                    List.of(Component.text(selected ? "In preset" : "Not in preset", selected ? NamedTextColor.GREEN : NamedTextColor.GRAY),
-                            Component.text("Click to toggle", NamedTextColor.YELLOW)));
+            ItemStack stack = createLoadoutPolicyItem(admin, item, role, selected,
+                    List.of(plugin.tr(admin,
+                                    selected ? "gui.admin.editor.in_preset" : "gui.admin.editor.not_in_preset"),
+                            plugin.tr(admin, "gui.admin.editor.click_to_toggle")));
             inv.setItem(slot++, clickable(stack, (p, i, e, s) -> {
                 loadoutManager.toggleAdminPresetItem(role, presetSlot, item);
                 loadoutManager.enforcePoliciesAndNotify();
@@ -568,12 +632,12 @@ public class AdminLoadoutManagementGUI {
             }));
         }
 
-        renderPresetItemPreviewRow(inv, preset);
+        renderPresetItemPreviewRow(admin, inv, preset);
 
         plugin.getInventoryFramework().openInventory(admin, inv);
     }
 
-    private void renderPresetItemPreviewRow(FrameworkInventory inv, AdminRolePreset preset) {
+    private void renderPresetItemPreviewRow(Player admin, FrameworkInventory inv, AdminRolePreset preset) {
         int slot = 45;
         int shown = 0;
         for (LoadoutItemType itemType : new ArrayList<>(preset.getItems())) {
@@ -583,11 +647,10 @@ public class AdminLoadoutManagementGUI {
             ItemStack stack = getPreviewItemStack(itemType);
             ItemMeta meta = stack.getItemMeta();
             if (meta != null) {
-                meta.displayName(Component.text(humanize(itemType.name()), NamedTextColor.GREEN, TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false));
-                meta.lore(List.of(
-                        Component.text("Included in preset", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false)
-                ));
+                Component title = plugin.tr(admin, "gui.admin.item.name", Map.of("name", humanize(itemType.name())));
+                meta.displayName(title.decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false));
+                meta.lore(List.of(plugin.tr(admin, "gui.admin.presets.forced_note").decoration(TextDecoration.ITALIC,
+                        false)));
                 stack.setItemMeta(meta);
             }
             CustomModelDataUtil.setCustomModelData(stack, resolveRuntimeItemId(itemType), null);
@@ -596,51 +659,57 @@ public class AdminLoadoutManagementGUI {
         }
 
         while (shown < 5) {
-            ItemStack filler = createUtility(Material.GRAY_STAINED_GLASS_PANE, "Empty Preview", NamedTextColor.DARK_GRAY,
-                    List.of(Component.text("No item", NamedTextColor.GRAY)));
+            ItemStack filler = createUtility(Material.GRAY_STAINED_GLASS_PANE,
+                    plugin.tr(admin, "gui.admin.presets.empty_preview"),
+                    List.of(plugin.tr(admin, "gui.admin.presets.no_item")));
             inv.setItem(slot++, clickable(filler, (p, i, e, s) -> e.setCancelled(true)));
             shown++;
         }
     }
 
     private void setTabButtons(Player admin, FrameworkInventory inv, Tab activeTab) {
-        inv.setItem(45, tabButton(admin, activeTab, Tab.HIDER, Material.BLUE_CONCRETE, "Hider Loadouts"));
-        inv.setItem(46, tabButton(admin, activeTab, Tab.SEEKER, Material.RED_CONCRETE, "Seeker Loadouts"));
-        inv.setItem(47, tabButton(admin, activeTab, Tab.PERKS, Material.AMETHYST_SHARD, "Perks"));
-        inv.setItem(48, tabButton(admin, activeTab, Tab.PLAYERS, Material.PLAYER_HEAD, "Player Loadouts"));
-        inv.setItem(49, tabButton(admin, activeTab, Tab.PRESETS, Material.BOOKSHELF, "Presets"));
+        inv.setItem(45, tabButton(admin, activeTab, Tab.HIDER, Material.BLUE_CONCRETE,
+                plugin.tr(admin, "gui.admin.tabs.hider")));
+        inv.setItem(46, tabButton(admin, activeTab, Tab.SEEKER, Material.RED_CONCRETE,
+                plugin.tr(admin, "gui.admin.tabs.seeker")));
+        inv.setItem(47, tabButton(admin, activeTab, Tab.PERKS, Material.AMETHYST_SHARD,
+                plugin.tr(admin, "gui.admin.tabs.perks")));
+        inv.setItem(48, tabButton(admin, activeTab, Tab.PLAYERS, Material.PLAYER_HEAD,
+                plugin.tr(admin, "gui.admin.tabs.players")));
+        inv.setItem(49, tabButton(admin, activeTab, Tab.PRESETS, Material.BOOKSHELF,
+                plugin.tr(admin, "gui.admin.tabs.presets")));
 
         boolean globalLocked = loadoutManager.isGlobalLoadoutLocked();
         inv.setItem(50, clickable(createUtility(globalLocked ? Material.BARRIER : Material.LIME_CONCRETE,
-                "Global Lock: " + (globalLocked ? "ON" : "OFF"),
-                globalLocked ? NamedTextColor.RED : NamedTextColor.GREEN,
-                List.of(Component.text("Click to toggle global loadout lock", NamedTextColor.GRAY))), (p, i, e, s) -> {
+                plugin.tr(admin, "gui.admin.global_lock.title", Map.of("state", globalLocked ? "ON" : "OFF")),
+                List.of(plugin.tr(admin, "gui.admin.global_lock.hint"))), (p, i, e, s) -> {
             loadoutManager.setGlobalLoadoutLocked(!globalLocked);
             String status = !globalLocked ? "locked" : "unlocked";
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, !globalLocked ? 1.0f : 0.8f);
-            p.sendMessage(Component.text("Global loadout is now " + status + ".", !globalLocked ? NamedTextColor.RED : NamedTextColor.GREEN));
+            p.sendMessage(plugin.tr(p, "gui.admin.global_lock.toggled", Map.of("state", status)));
             openTab(p, activeTab);
             e.setCancelled(true);
         }));
 
-        inv.setItem(52, clickable(createUtility(Material.CLOCK, "Apply Changes", NamedTextColor.YELLOW,
-                List.of(Component.text("Enforce immediately for online players", NamedTextColor.GRAY))), (p, i, e, s) -> {
+        inv.setItem(52, clickable(createUtility(Material.CLOCK, plugin.tr(admin, "gui.admin.apply_changes.title"),
+                List.of(plugin.tr(admin, "gui.admin.apply_changes.hint"))), (p, i, e, s) -> {
             int affected = loadoutManager.enforcePoliciesAndNotify();
-            p.sendMessage(Component.text("Applied policy changes. Updated " + affected + " online player(s).", NamedTextColor.GREEN));
+            p.sendMessage(plugin.tr(p, "gui.admin.apply_changes.done", Map.of("count", String.valueOf(affected))));
             openTab(p, activeTab);
             e.setCancelled(true);
         }));
 
-        inv.setItem(53, clickable(createUtility(Material.BARRIER, "Close", NamedTextColor.RED, List.of()), (p, i, e, s) -> {
+        inv.setItem(53, clickable(createUtility(Material.BARRIER, plugin.tr(admin, "gui.admin.close"), List.of()),
+                (p, i, e, s) -> {
             p.closeInventory();
             e.setCancelled(true);
         }));
     }
 
-    private InventoryItem tabButton(Player admin, Tab activeTab, Tab tab, Material material, String name) {
+    private InventoryItem tabButton(Player admin, Tab activeTab, Tab tab, Material material, Component name) {
         boolean active = activeTab == tab;
-        ItemStack stack = createUtility(material, name, active ? NamedTextColor.GREEN : NamedTextColor.YELLOW,
-                List.of(Component.text(active ? "Current tab" : "Click to switch", active ? NamedTextColor.GREEN : NamedTextColor.GRAY)));
+        ItemStack stack = createUtility(material, name,
+                List.of(plugin.tr(admin, active ? "gui.admin.tabs.current" : "gui.admin.tabs.click_to_switch")));
 
         if (active) {
             ItemMeta meta = stack.getItemMeta();
@@ -656,16 +725,18 @@ public class AdminLoadoutManagementGUI {
         });
     }
 
-    private ItemStack createInfoItem(LoadoutRole role, LoadoutFilterMode mode, int entries) {
-        return createUtility(Material.BOOK, role.name() + " Policy", NamedTextColor.AQUA,
+    private ItemStack createInfoItem(Player viewer, LoadoutRole role, LoadoutFilterMode mode, int entries) {
+        return createUtility(Material.BOOK,
+                plugin.tr(viewer, "gui.admin.loadout.info.title", Map.of("role", role.name())),
                 List.of(
-                        Component.text("Mode: " + mode.name(), NamedTextColor.GRAY),
-                        Component.text("Entries: " + entries, NamedTextColor.GRAY),
-                        Component.text("Changes apply in real-time", NamedTextColor.YELLOW)
+                        plugin.tr(viewer, "gui.admin.loadout.info.mode", Map.of("mode", mode.name())),
+                        plugin.tr(viewer, "gui.admin.loadout.info.entries", Map.of("entries", String.valueOf(entries))),
+                        plugin.tr(viewer, "gui.admin.loadout.info.changes")
                 ));
     }
 
-    private ItemStack createPlayerHead(Player player, PlayerLoadout loadout, boolean selected) {
+    private ItemStack createPlayerHead(Player viewer, Player player, PlayerLoadout loadout
+    ) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = item.getItemMeta();
         if (!(meta instanceof SkullMeta skullMeta)) {
@@ -673,59 +744,54 @@ public class AdminLoadoutManagementGUI {
         }
         OfflinePlayer offline = Bukkit.getOfflinePlayer(player.getUniqueId());
         skullMeta.setOwningPlayer(offline);
-        skullMeta.displayName(Component.text(player.getName(), selected ? NamedTextColor.GREEN : NamedTextColor.YELLOW, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
+        skullMeta.displayName(plugin.tr(viewer, "gui.admin.players.head_name", Map.of("player", player.getName())));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Hider items: " + loadout.getHiderItems().size(), NamedTextColor.GRAY));
-        lore.add(Component.text("Seeker items: " + loadout.getSeekerItems().size(), NamedTextColor.GRAY));
+        lore.add(plugin.tr(viewer, "gui.admin.players.hider_items",
+                Map.of("count", String.valueOf(loadout.getHiderItems().size()))));
+        lore.add(plugin.tr(viewer, "gui.admin.players.seeker_items",
+                Map.of("count", String.valueOf(loadout.getSeekerItems().size()))));
 
-        lore.add(Component.text("Hider locked: " + loadout.isHiderLocked(), loadout.isHiderLocked() ? NamedTextColor.RED : NamedTextColor.GREEN));
-        lore.add(Component.text("Seeker locked: " + loadout.isSeekerLocked(), loadout.isSeekerLocked() ? NamedTextColor.RED : NamedTextColor.GREEN));
-        lore.add(Component.text("Left: select, Right: edit", NamedTextColor.YELLOW));
+        lore.add(plugin.tr(viewer, "gui.admin.players.hider_locked",
+                Map.of("state", String.valueOf(loadout.isHiderLocked()))));
+        lore.add(plugin.tr(viewer, "gui.admin.players.seeker_locked",
+                Map.of("state", String.valueOf(loadout.isSeekerLocked()))));
+        lore.add(plugin.tr(viewer, "gui.admin.players.left_right_hint"));
         skullMeta.lore(lore);
         item.setItemMeta(skullMeta);
         return item;
     }
 
-    private ItemStack createActionButton(String name, Player target, Material material) {
+    private ItemStack createActionButton(Player viewer, Component title, Player target, Material material, LoadoutRole role) {
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text(target == null ? "Select a player first" : "Target: " + target.getName(), NamedTextColor.GRAY));
-        ItemStack item = createUtility(material, name, target == null ? NamedTextColor.DARK_GRAY : NamedTextColor.YELLOW, lore);
-        if (target != null && material == Material.IRON_DOOR) {
-            boolean hiderDoor = name.contains("Hider");
-            boolean lockActive = hiderDoor
-                    ? loadoutManager.isRoleLocked(target.getUniqueId(), LoadoutRole.HIDER)
-                    : loadoutManager.isRoleLocked(target.getUniqueId(), LoadoutRole.SEEKER);
-            lore.add(Component.text("Status: " + (lockActive ? "LOCKED" : "UNLOCKED"), lockActive ? NamedTextColor.RED : NamedTextColor.GREEN));
+        lore.add(target == null ? plugin.tr(viewer, "gui.admin.players.select_first") : plugin.tr(viewer,
+                "gui.admin.players.target", Map.of("player", target.getName())));
+        ItemStack item = createUtility(material, title, lore);
+        if (target != null && role != null) {
+            boolean lockActive = loadoutManager.isRoleLocked(target.getUniqueId(), role);
+            lore.add(plugin.tr(viewer, "gui.admin.players.status",
+                    Map.of("status", lockActive ? "LOCKED" : "UNLOCKED")));
             ItemMeta meta = item.getItemMeta();
-            if (lockActive) {
-                if (meta != null) {
-                    meta.setEnchantmentGlintOverride(true);
-                    meta.lore(lore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
-                    item.setItemMeta(meta);
-                }
-            } else {
-                if (meta != null) {
-                    meta.lore(lore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
-                    item.setItemMeta(meta);
-                }
+            if (meta != null) {
+                meta.lore(lore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
+                if (lockActive) meta.setEnchantmentGlintOverride(true);
+                item.setItemMeta(meta);
             }
         }
         return item;
     }
 
-    private ItemStack createLoadoutPolicyItem(LoadoutItemType type, LoadoutRole role, boolean highlighted, boolean allowed, List<Component> extraLore) {
+    private ItemStack createLoadoutPolicyItem(Player viewer, LoadoutItemType type, LoadoutRole role, boolean highlighted, List<Component> extraLore) {
         ItemStack item = getPreviewItemStack(type);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
         }
 
-        NamedTextColor color = highlighted ? NamedTextColor.GREEN : (allowed ? NamedTextColor.AQUA : NamedTextColor.RED);
-        meta.displayName(Component.text(humanize(type.name()), color, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+        meta.displayName(plugin.tr(viewer, "gui.admin.item.name", Map.of("name", humanize(type.name()))));
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Role: " + role.name(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(viewer, "gui.admin.loadout.item.role", Map.of("role", role.name())).decoration(
+                TextDecoration.ITALIC, false));
         lore.addAll(extraLore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
         meta.lore(lore);
 
@@ -740,7 +806,7 @@ public class AdminLoadoutManagementGUI {
         return item;
     }
 
-    private ItemStack createPerkPolicyItem(PerkDefinition perk, LoadoutRole role, boolean disabled, List<Component> extraLore) {
+    private ItemStack createPerkPolicyItem(Player viewer, PerkDefinition perk, LoadoutRole role, boolean disabled, List<Component> extraLore) {
         ItemStack item = new ItemStack(perk.getIcon());
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
@@ -748,13 +814,13 @@ public class AdminLoadoutManagementGUI {
         }
 
         Component display = disabled
-                ? perk.getDisplayName().color(NamedTextColor.RED).decorate(TextDecoration.STRIKETHROUGH)
+                ? perk.getDisplayName().decorate(TextDecoration.STRIKETHROUGH)
                 : perk.getDisplayName().decoration(TextDecoration.BOLD, true);
         meta.displayName(display.decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Perk ID: " + perk.getId(), NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Role: " + role.name(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(viewer, "gui.admin.perks.perk_id", Map.of("id", perk.getId())));
+        lore.add(plugin.tr(viewer, "gui.admin.perks.role", Map.of("role", role.name())));
         lore.addAll(extraLore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
         meta.lore(lore);
         item.setItemMeta(meta);
@@ -784,13 +850,11 @@ public class AdminLoadoutManagementGUI {
         return type.getItemId();
     }
 
-    private ItemStack createUtility(Material material, String name, NamedTextColor color, List<Component> lore) {
+    private ItemStack createUtility(Material material, Component title, List<Component> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) {
-            return item;
-        }
-        meta.displayName(Component.text(name, color, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+        if (meta == null) return item;
+        meta.displayName(title.decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false));
         meta.lore(lore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
         item.setItemMeta(meta);
         return item;
@@ -828,20 +892,4 @@ public class AdminLoadoutManagementGUI {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

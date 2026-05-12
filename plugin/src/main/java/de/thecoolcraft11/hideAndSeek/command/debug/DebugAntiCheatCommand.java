@@ -1,8 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.command.debug;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,7 +31,7 @@ public class DebugAntiCheatCommand implements DebugSubcommand {
     @Override
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /has debug anticheat <reset|show> [player]", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.anticheat.usage"));
             return true;
         }
 
@@ -44,7 +42,8 @@ public class DebugAntiCheatCommand implements DebugSubcommand {
         } else if ("show".equals(action)) {
             return handleShow(sender, args);
         } else {
-            sender.sendMessage(Component.text("Unknown action: " + action, NamedTextColor.RED));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.anticheat.unknown_action", java.util.Map.of("action", action)));
             return true;
         }
     }
@@ -54,15 +53,16 @@ public class DebugAntiCheatCommand implements DebugSubcommand {
 
         if (args.length < 2) {
             if (!(sender instanceof Player)) {
-                sender.sendMessage(Component.text("Please specify a player", NamedTextColor.RED));
-                return true;
+                sender.sendMessage(plugin.tr(sender, "command.debug.anticheat.specify_player"));
+                return false;
             }
             target = (Player) sender;
         } else {
             target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                sender.sendMessage(Component.text("Player not found: " + args[1], NamedTextColor.RED));
-                return true;
+                sender.sendMessage(plugin.tr(sender, "command.debug.anticheat.player_not_found",
+                        java.util.Map.of("player", args[1])));
+                return false;
             }
         }
 
@@ -73,8 +73,8 @@ public class DebugAntiCheatCommand implements DebugSubcommand {
 
         plugin.getAntiCheatVisibilityListener().refreshSoon();
 
-        sender.sendMessage(Component.text("Anti-cheat visibility reset for ", NamedTextColor.GREEN)
-                .append(Component.text(target.getName(), NamedTextColor.AQUA)));
+        sender.sendMessage(plugin.tr(sender, "command.debug.anticheat.success_reset",
+                java.util.Map.of("player", target.getName())));
 
         return true;
     }
@@ -84,15 +84,16 @@ public class DebugAntiCheatCommand implements DebugSubcommand {
 
         if (args.length < 2) {
             if (!(sender instanceof Player)) {
-                sender.sendMessage(Component.text("Please specify a player", NamedTextColor.RED));
-                return true;
+                sender.sendMessage(plugin.tr(sender, "command.debug.anticheat.specify_player"));
+                return false;
             }
             target = (Player) sender;
         } else {
             target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                sender.sendMessage(Component.text("Player not found: " + args[1], NamedTextColor.RED));
-                return true;
+                sender.sendMessage(plugin.tr(sender, "command.debug.anticheat.player_not_found",
+                        java.util.Map.of("player", args[1])));
+                return false;
             }
         }
 
@@ -103,8 +104,8 @@ public class DebugAntiCheatCommand implements DebugSubcommand {
 
         plugin.getAntiCheatVisibilityListener().refreshSoon();
 
-        sender.sendMessage(Component.text("Forced visibility for ", NamedTextColor.GREEN)
-                .append(Component.text(target.getName(), NamedTextColor.AQUA)));
+        sender.sendMessage(plugin.tr(sender, "command.debug.anticheat.success_show",
+                java.util.Map.of("player", target.getName())));
 
         return true;
     }

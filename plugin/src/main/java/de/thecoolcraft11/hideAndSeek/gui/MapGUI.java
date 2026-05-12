@@ -18,10 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class MapGUI {
     private static final String ADMIN_MAP_PERMISSION = "hideandseek.command.map";
@@ -38,7 +35,7 @@ public class MapGUI {
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("map_selector_" + player.getUniqueId())
-                .title("Select Map")
+                .title(plugin.trText(player, "gui.map_selector.title"))
                 .rows(rows)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -48,7 +45,7 @@ public class MapGUI {
         String currentMapName = HideAndSeek.getDataController().getCurrentMapName();
 
         boolean isRandomSelected = (currentMapName == null || currentMapName.isEmpty());
-        ItemStack randomMapItem = createMapMenuItem(isRandomSelected);
+        ItemStack randomMapItem = createMapMenuItem(isRandomSelected, player);
         InventoryItem randomItem = new InventoryItem(randomMapItem);
         randomItem.setClickHandler((p, item, event, slot) -> {
             selectRandomMap(p);
@@ -64,7 +61,8 @@ public class MapGUI {
             boolean voteDisabled = plugin.getMapManager().isMapVoteDisabled(mapName);
             MapData mapData = plugin.getMapManager().getMapData(mapName);
 
-            ItemStack mapItem = createMapItemWithData(mapName, mapData, isCurrentMap, voteDisabled, canManageMapVoting);
+            ItemStack mapItem = createMapItemWithData(mapName, mapData, isCurrentMap, voteDisabled, canManageMapVoting,
+                    player);
             InventoryItem mapGuiItem = getInventoryItem(mapName, mapItem,
                     canManageMapVoting);
             inventory.setItem(slot++, mapGuiItem);
@@ -92,7 +90,7 @@ public class MapGUI {
 
     private void toggleMapVoteDisabled(Player admin, String mapName) {
         if (!admin.hasPermission(ADMIN_MAP_PERMISSION)) {
-            admin.sendMessage(Component.text("You do not have permission to manage map voting.", NamedTextColor.RED));
+            admin.sendMessage(plugin.tr(admin, "gui.map_selector.admin.no_permission"));
             admin.playSound(admin.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return;
         }
@@ -101,10 +99,12 @@ public class MapGUI {
         MapData mapData = plugin.getMapManager().getMapData(mapName);
         String displayName = mapData != null ? mapData.getDisplayName() : mapName;
 
-        admin.sendMessage(Component.text("Map vote visibility for ", NamedTextColor.YELLOW)
-                .append(Component.text(displayName, NamedTextColor.GOLD))
-                .append(Component.text(": " + (nowDisabled ? "DISABLED" : "ENABLED"),
-                        nowDisabled ? NamedTextColor.RED : NamedTextColor.GREEN)));
+        admin.sendMessage(plugin.tr(admin, "gui.map_selector.admin.toggled",
+                Map.of(
+                        "name", displayName,
+                        "status", nowDisabled ? "DISABLED" : "ENABLED",
+                        "color", nowDisabled ? "red" : "green"
+                )));
         admin.playSound(admin.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, nowDisabled ? 0.8f : 1.2f);
 
         if (nowDisabled) {
@@ -114,15 +114,17 @@ public class MapGUI {
                 if (affectedPlayer == null) {
                     continue;
                 }
-                affectedPlayer.sendMessage(Component.text("Your vote for ", NamedTextColor.YELLOW)
-                        .append(Component.text(displayName, NamedTextColor.GOLD))
-                        .append(Component.text(" was reset because this map is now vote-disabled.",
-                                NamedTextColor.YELLOW)));
-                affectedPlayer.sendMessage(Component.text("Your readiness status was reset.", NamedTextColor.RED));
+                affectedPlayer.sendMessage(plugin.tr(affectedPlayer,
+                        "gui.map_selector.admin.player_reset_notify",
+                        Map.of("name", displayName)));
+
+                affectedPlayer.sendMessage(plugin.tr(affectedPlayer,
+                        "gui.map_selector.admin.player_readiness_reset"));
             }
             if (!affectedVoterIds.isEmpty()) {
-                admin.sendMessage(Component.text("Reset votes/readiness for " + affectedVoterIds.size() + " player(s).",
-                        NamedTextColor.YELLOW));
+                admin.sendMessage(plugin.tr(admin,
+                        "gui.map_selector.admin.reset_summary",
+                        Map.of("count", affectedVoterIds.size())));
             }
         }
 
@@ -133,8 +135,7 @@ public class MapGUI {
     private void selectRandomMap(Player player) {
         HideAndSeek.getDataController().setCurrentMapName(null, false);
 
-        player.sendMessage(Component.text("Map selection: ", NamedTextColor.GREEN)
-                .append(Component.text("Random", NamedTextColor.GOLD)));
+        player.sendMessage(plugin.tr(player, "gui.map_selector.feedback.selection_random"));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
         player.closeInventory();
 
@@ -148,7 +149,9 @@ public class MapGUI {
     private void selectSpecificMap(Player player, String mapName) {
         org.bukkit.World sourceWorld = Bukkit.getWorld(mapName);
         if (sourceWorld == null) {
-            player.sendMessage(Component.text("Map '" + mapName + "' not found or not loaded!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player,
+                    "gui.map_selector.feedback.error_not_found",
+                    Map.of("map", mapName)));
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return;
         }
@@ -158,8 +161,9 @@ public class MapGUI {
         MapData mapData = plugin.getMapManager().getMapData(mapName);
         String displayName = (mapData != null) ? mapData.getDisplayName() : mapName;
 
-        player.sendMessage(Component.text("Map selected: ", NamedTextColor.GREEN)
-                .append(Component.text(displayName, NamedTextColor.GOLD)));
+        player.sendMessage(plugin.tr(player,
+                "gui.map_selector.feedback.selection_specific",
+                Map.of("name", displayName)));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
         player.closeInventory();
 
@@ -171,22 +175,18 @@ public class MapGUI {
     }
 
 
-    private ItemStack createMapMenuItem(boolean highlight) {
+    private ItemStack createMapMenuItem(boolean highlight, Player player) {
         ItemStack item = new ItemStack(Material.COMPASS);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            NamedTextColor nameColor = highlight ? NamedTextColor.GREEN : NamedTextColor.AQUA;
 
-            meta.displayName(Component.text("Random Map", nameColor, TextDecoration.BOLD)
-                    .decoration(TextDecoration.ITALIC, false));
+            meta.displayName(plugin.tr(player, "gui.map_selector.random_map.name"));
 
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("Randomly select a map", NamedTextColor.GRAY)
-                    .decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.map_selector.random_map.description"));
 
             if (highlight) {
-                lore.add(Component.text("Selected", NamedTextColor.GREEN)
-                        .decoration(TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.map_selector.status.selected"));
             }
 
             meta.lore(lore);
@@ -196,9 +196,12 @@ public class MapGUI {
         return item;
     }
 
-    private ItemStack createMapItemWithData(String mapName, MapData mapData, boolean isCurrentMap, boolean voteDisabled, boolean canManageMapVoting) {
+    private ItemStack createMapItemWithData(String mapName, MapData mapData, boolean isCurrentMap,
+                                            boolean voteDisabled, boolean canManageMapVoting, Player player) {
+
         ItemStack item = new ItemStack(plugin.getMapManager().getMapIconMaterial(mapName, Material.GRASS_BLOCK));
         ItemMeta meta = item.getItemMeta();
+
         if (meta != null) {
             NamedTextColor nameColor = isCurrentMap ? NamedTextColor.GREEN : NamedTextColor.AQUA;
             String displayName = mapData != null ? mapData.getDisplayName() : mapName;
@@ -210,112 +213,144 @@ public class MapGUI {
 
             if (mapData != null) {
 
+
                 if (!mapData.getDescription().isEmpty()) {
-                    lore.add(Component.text(mapData.getDescription(), NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false));
+                    lore.add(plugin.tr(player, "gui.map_selector.data.description",
+                            Map.of("description", mapData.getDescription())));
                     lore.add(Component.empty());
                 }
 
 
                 if (mapData.getAuthor() != null && !mapData.getAuthor().isEmpty()) {
-                    lore.add(Component.text("By: ", NamedTextColor.WHITE)
-                            .append(Component.text(mapData.getAuthor(), NamedTextColor.YELLOW))
-                            .decoration(TextDecoration.ITALIC, false));
+                    lore.add(plugin.tr(player, "gui.map_selector.data.by",
+                            Map.of("author", mapData.getAuthor())));
                 }
 
 
                 if (mapData.getSize() != null && !mapData.getSize().isEmpty()) {
-                    lore.add(Component.text("Size: ", NamedTextColor.WHITE)
-                            .append(Component.text(mapData.getSize(), NamedTextColor.YELLOW))
-                            .decoration(TextDecoration.ITALIC, false));
+                    lore.add(plugin.tr(player, "gui.map_selector.data.size",
+                            Map.of("size", mapData.getSize())));
                 }
 
+
                 int spawnCount = mapData.getSpawnPoints().size();
-                lore.add(Component.text("Spawns: " + spawnCount, NamedTextColor.YELLOW)
-                        .decoration(TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.map_selector.data.spawns",
+                        Map.of("count", spawnCount)));
 
 
                 List<GameModeEnum> preferredModes = mapData.getPreferredModes();
                 if (!preferredModes.isEmpty()) {
-                    StringBuilder modesStr = new StringBuilder();
-                    for (int i = 0; i < preferredModes.size(); i++) {
-                        if (i > 0) modesStr.append(", ");
-                        modesStr.append(preferredModes.get(i).name());
-                    }
-                    lore.add(Component.text("Modes: " + modesStr, NamedTextColor.YELLOW)
-                            .decoration(TextDecoration.ITALIC, false));
+                    String modes = preferredModes.stream()
+                            .map(Enum::name)
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse("");
+
+                    lore.add(plugin.tr(player, "gui.map_selector.data.modes",
+                            Map.of("modes", modes)));
                 }
 
                 lore.add(Component.empty());
 
 
-                if (mapData.getMinPlayers() != null || mapData.getRecommendedPlayers() != null || mapData.getMaxPlayers() != null) {
-                    StringBuilder playerStr = new StringBuilder("Players: ");
+                if (mapData.getMinPlayers() != null || mapData.getMaxPlayers() != null || mapData.getRecommendedPlayers() != null) {
+
+                    String range = "";
                     if (mapData.getMinPlayers() != null) {
-                        playerStr.append(mapData.getMinPlayers()).append("-");
+                        range += mapData.getMinPlayers();
                     }
                     if (mapData.getMaxPlayers() != null) {
-                        playerStr.append(mapData.getMaxPlayers());
+                        range += "-" + mapData.getMaxPlayers();
                     }
+
+                    String recommended = "";
                     if (mapData.getRecommendedPlayers() != null) {
-                        playerStr.append(" (").append(mapData.getRecommendedPlayers()).append(" recommended)");
+                        recommended = plugin.trText(player, "gui.map_selector.data.players_recommended",
+                                Map.of("count", mapData.getRecommendedPlayers()));
                     }
-                    lore.add(Component.text(playerStr.toString(), NamedTextColor.LIGHT_PURPLE)
-                            .decoration(TextDecoration.ITALIC, false));
+
+                    lore.add(plugin.tr(player, "gui.map_selector.data.players",
+                            Map.of(
+                                    "range", range,
+                                    "recommended", recommended
+                            )));
                 }
 
 
                 if (mapData.getMinSeekers() != null || mapData.getMaxSeekers() != null) {
-                    StringBuilder seekerStr = new StringBuilder("Seekers: ");
+
+                    String range = "";
                     if (mapData.getMinSeekers() != null) {
-                        seekerStr.append(mapData.getMinSeekers()).append("-");
+                        range += mapData.getMinSeekers();
                     }
                     if (mapData.getMaxSeekers() != null) {
-                        seekerStr.append(mapData.getMaxSeekers());
+                        range += "-" + mapData.getMaxSeekers();
                     }
+
+                    String ratio = "";
                     if (mapData.getSeekersPerPlayers() != null && mapData.getSeekersPerPlayers() > 0) {
-                        seekerStr.append(" (1 per ").append(mapData.getSeekersPerPlayers()).append(" players)");
+                        ratio = plugin.trText(player, "gui.map_selector.data.seekers_ratio",
+                                Map.of("value", mapData.getSeekersPerPlayers()));
                     }
-                    lore.add(Component.text(seekerStr.toString(), NamedTextColor.LIGHT_PURPLE)
-                            .decoration(TextDecoration.ITALIC, false));
+
+                    lore.add(plugin.tr(player, "gui.map_selector.data.seekers",
+                            Map.of(
+                                    "range", range,
+                                    "ratio", ratio
+                            )));
                 }
 
 
                 if (mapData.getHidingTime() != null || mapData.getSeekingTime() != null) {
-                    StringBuilder timingStr = new StringBuilder("Time: ");
+
+                    String hiding = "";
                     if (mapData.getHidingTime() != null) {
-                        timingStr.append(mapData.getHidingTime()).append("s hiding");
+                        hiding = plugin.trText(player, "gui.map_selector.data.time_hiding",
+                                Map.of("seconds", mapData.getHidingTime()));
                     }
+
+                    String seeking = "";
                     if (mapData.getSeekingTime() != null) {
-                        if (mapData.getHidingTime() != null) timingStr.append(", ");
-                        timingStr.append(mapData.getSeekingTime()).append("s seeking");
+                        seeking = plugin.trText(player, "gui.map_selector.data.time_seeking",
+                                Map.of("seconds", mapData.getSeekingTime()));
                     }
-                    lore.add(Component.text(timingStr.toString(), NamedTextColor.LIGHT_PURPLE)
-                            .decoration(TextDecoration.ITALIC, false));
+
+                    lore.add(plugin.tr(player, "gui.map_selector.data.time",
+                            Map.of(
+                                    "hiding", hiding,
+                                    "seeking", seeking
+                            )));
                 }
             }
 
+
             if (isCurrentMap) {
-                lore.add(Component.text("Selected", NamedTextColor.GREEN)
-                        .decoration(TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.map_selector.status.selected"));
             }
 
-            lore.add(Component.text("Vote visibility: " + (voteDisabled ? "DISABLED" : "ENABLED"),
-                            voteDisabled ? NamedTextColor.RED : NamedTextColor.GREEN)
-                    .decoration(TextDecoration.ITALIC, false));
+
+            lore.add(plugin.tr(player, "gui.map_selector.status.vote_visibility",
+                    Map.of(
+                            "status", plugin.trText(player,
+                                    voteDisabled ? "common.state.disabled" : "common.state.enabled"),
+                            "color", voteDisabled ? "red" : "green"
+                    )));
+
+
             if (canManageMapVoting) {
-                lore.add(Component.text("Right click: toggle vote visibility", NamedTextColor.YELLOW)
-                        .decoration(TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.map_selector.status.toggle_hint"));
             }
 
             lore.add(Component.empty());
-            lore.add(Component.text("ID: " + mapName, NamedTextColor.DARK_GRAY)
-                    .decoration(TextDecoration.ITALIC, false));
+
+
+            lore.add(plugin.tr(player, "gui.map_selector.data.id",
+                    Map.of("id", mapName)));
 
             meta.lore(lore);
             meta.setEnchantmentGlintOverride(isCurrentMap);
             item.setItemMeta(meta);
         }
+
         return item;
     }
 }

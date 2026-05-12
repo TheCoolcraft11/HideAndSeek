@@ -1,9 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.command.debug;
 
+import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.minigameframework.progression.BoosterAPI;
 import de.thecoolcraft11.minigameframework.progression.PlayerBooster;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,24 +10,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class DebugBoosterCommand implements DebugSubcommand {
+    private final HideAndSeek plugin;
     private static final List<String> BOOSTER_TYPES = List.of("XP", "COIN");
+
+    public DebugBoosterCommand(HideAndSeek plugin) {
+        this.plugin = plugin;
+    }
 
 
     @Override
     public boolean handle(@NotNull CommandSender sender, @NonNull @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(Component.text(
-                    "Usage: /has debug booster <player> [add|remove|list|info] [type] [strength] [duration]",
-                    NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.booster.usage"));
             return true;
         }
 
         final Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.booster.player_not_found", Map.of("player", args[0])));
             return true;
         }
         final java.util.UUID targetId = target.getUniqueId();
@@ -37,39 +40,39 @@ public class DebugBoosterCommand implements DebugSubcommand {
         String boosterAction = args[1].toLowerCase();
 
         if (boosterAction.equals("list")) {
-            sender.sendMessage(Component.text("Available booster types: " + String.join(", ", BOOSTER_TYPES),
-                    NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.booster.available_types",
+                    Map.of("types", String.join(", ", BOOSTER_TYPES))));
             return true;
         }
 
         if (boosterAction.equals("info")) {
             List<PlayerBooster> boosters = BoosterAPI.getActiveBoosters(targetId);
             if (boosters.isEmpty()) {
-                sender.sendMessage(Component.text("No active boosters for " + targetName, NamedTextColor.YELLOW));
+                sender.sendMessage(plugin.tr(sender, "command.debug.booster.no_active", Map.of("player", targetName)));
             } else {
-                sender.sendMessage(Component.text("Active boosters for " + targetName + ":", NamedTextColor.GOLD));
+                sender.sendMessage(plugin.tr(sender, "command.debug.booster.header", Map.of("player", targetName)));
                 for (PlayerBooster booster : boosters) {
                     long remaining = BoosterAPI.getBoosterTimeRemaining(targetId, booster.type());
                     String timeStr = formatDuration(remaining);
-                    sender.sendMessage(Component.text(
-                            "  - " + booster.type().name() + ": " + String.format("%.2f",
-                                    booster.strength()) + "x (remaining: " + timeStr + ")",
-                            NamedTextColor.AQUA
-                    ));
+                    sender.sendMessage(plugin.tr(sender, "command.debug.booster.entry", Map.of(
+                            "type", booster.type().name(),
+                            "strength", String.format("%.2f", booster.strength()),
+                            "remaining", timeStr
+                    )));
                 }
             }
             return true;
         }
 
         if (!(boosterAction.equals("add") || boosterAction.equals("remove"))) {
-            sender.sendMessage(Component.text("Unknown booster action: " + boosterAction, NamedTextColor.RED));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.booster.unknown_action", Map.of("action", boosterAction)));
             return true;
         }
 
         if (args.length < 3) {
-            sender.sendMessage(Component.text(
-                    "Usage: /has debug booster <player> " + boosterAction + " <type> [strength] [duration]",
-                    NamedTextColor.YELLOW));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.booster.usage_action", Map.of("action", boosterAction)));
             return true;
         }
 
@@ -78,16 +81,15 @@ public class DebugBoosterCommand implements DebugSubcommand {
         try {
             boosterType = PlayerBooster.BoosterType.valueOf(boosterTypeStr);
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(Component.text("Invalid booster type: " + boosterTypeStr, NamedTextColor.RED));
-            sender.sendMessage(
-                    Component.text("Available types: " + String.join(", ", BOOSTER_TYPES), NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.booster.invalid_type", Map.of("type", boosterTypeStr)));
+            sender.sendMessage(plugin.tr(sender, "command.debug.booster.available_types",
+                    Map.of("types", String.join(", ", BOOSTER_TYPES))));
             return true;
         }
 
         if (boosterAction.equals("add")) {
             if (args.length < 5) {
-                sender.sendMessage(Component.text("Usage: /has debug booster <player> add <type> <strength> <duration>",
-                        NamedTextColor.YELLOW));
+                sender.sendMessage(plugin.tr(sender, "command.debug.booster.usage_add"));
                 return true;
             }
             float strength;
@@ -96,8 +98,8 @@ public class DebugBoosterCommand implements DebugSubcommand {
                 strength = Float.parseFloat(args[3]);
                 duration = Double.parseDouble(args[4]);
             } catch (NumberFormatException e) {
-                sender.sendMessage(Component.text("Invalid strength or duration: " + args[3] + ", " + args[4],
-                        NamedTextColor.RED));
+                sender.sendMessage(plugin.tr(sender, "command.debug.booster.invalid_strength_duration",
+                        Map.of("strength", args[3], "duration", args[4])));
                 return true;
             }
 
@@ -109,12 +111,18 @@ public class DebugBoosterCommand implements DebugSubcommand {
 
             long durationMs = (long) (duration * 60 * 1000);
             String timeStr = formatDuration(durationMs);
-            sender.sendMessage(Component.text("Applied " + boosterType.name() + " booster to " + targetName +
-                    " (" + String.format("%.2f", strength) + "x for " + timeStr + ")", NamedTextColor.GREEN));
+            sender.sendMessage(plugin.tr(sender, "command.debug.booster.applied", Map.of(
+                    "type", boosterType.name(),
+                    "player", targetName,
+                    "strength", String.format("%.2f", strength),
+                    "duration", timeStr
+            )));
         } else {
             BoosterAPI.removeBooster(targetId, boosterType);
-            sender.sendMessage(Component.text("Removed " + boosterType.name() + " booster from " + targetName,
-                    NamedTextColor.GREEN));
+            sender.sendMessage(plugin.tr(sender, "command.debug.booster.removed", Map.of(
+                    "type", boosterType.name(),
+                    "player", targetName
+            )));
         }
         return true;
     }

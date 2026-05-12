@@ -33,9 +33,10 @@ public class SeekingBossBarService {
         }
 
         maxHidersAtSeekingStart = Math.max(1, countHidersLeft());
+        Player referencePlayer = getAnyOnlinePlayer();
         plugin.getTeamBossBarManager().createGlobalBossBar(
                 GLOBAL_BAR_ID,
-                buildTitle(countHidersLeft(), countSeekers()),
+                buildTitle(countHidersLeft(), countSeekers(), referencePlayer),
                 resolveConfiguredColor(countHidersLeft()),
                 BarStyle.SOLID
         );
@@ -84,7 +85,9 @@ public class SeekingBossBarService {
         int seekers = countSeekers();
         float progress = resolveProgress(hidersLeft);
 
-        plugin.getTeamBossBarManager().updateGlobalBossBar(GLOBAL_BAR_ID, progress, buildTitle(hidersLeft, seekers));
+        Player referencePlayer = getAnyOnlinePlayer();
+        plugin.getTeamBossBarManager().updateGlobalBossBar(GLOBAL_BAR_ID, progress,
+                buildTitle(hidersLeft, seekers, referencePlayer));
         plugin.getTeamBossBarManager().updateGlobalColor(GLOBAL_BAR_ID, resolveConfiguredColor(hidersLeft));
         plugin.getTeamBossBarManager().setGlobalVisible(GLOBAL_BAR_ID, true);
 
@@ -228,17 +231,30 @@ public class SeekingBossBarService {
         return BarColor.RED;
     }
 
-    private Component buildTitle(int hidersLeft, int seekers) {
+    private Component buildTitle(int hidersLeft, int seekers, Player referencePlayer) {
         Object layoutObj = plugin.getSettingRegistry().get("game.seeking-bossbar.name-layout");
         SeekingBossBarNameLayout layout = (layoutObj instanceof SeekingBossBarNameLayout nameLayout)
                 ? nameLayout
                 : SeekingBossBarNameLayout.HIDERS_AND_SEEKERS;
 
         return switch (layout) {
-            case HIDERS_ONLY -> Component.text("Hiders Left: " + hidersLeft + "/" + maxHidersAtSeekingStart);
-            case SEEKERS_ONLY -> Component.text("Seekers: " + seekers);
-            case HIDERS_AND_SEEKERS ->
-                    Component.text("Hiders: " + hidersLeft + "/" + maxHidersAtSeekingStart + " | Seekers: " + seekers);
+            case HIDERS_ONLY -> {
+                String titleStr = plugin.trText(referencePlayer, "util.bossbar.hiders_left",
+                        java.util.Map.of("left", String.valueOf(hidersLeft), "max",
+                                String.valueOf(maxHidersAtSeekingStart)));
+                yield net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(titleStr);
+            }
+            case SEEKERS_ONLY -> {
+                String titleStr = plugin.trText(referencePlayer, "util.bossbar.seekers_only",
+                        java.util.Map.of("count", String.valueOf(seekers)));
+                yield net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(titleStr);
+            }
+            case HIDERS_AND_SEEKERS -> {
+                String titleStr = plugin.trText(referencePlayer, "util.bossbar.hiders_and_seekers",
+                        java.util.Map.of("hiders", String.valueOf(hidersLeft), "max",
+                                String.valueOf(maxHidersAtSeekingStart), "seekers", String.valueOf(seekers)));
+                yield net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(titleStr);
+            }
         };
     }
 
@@ -270,5 +286,10 @@ public class SeekingBossBarService {
 
     private boolean isNotSeekingPhase() {
         return !"seeking".equals(plugin.getStateManager().getCurrentPhaseId());
+    }
+
+    private Player getAnyOnlinePlayer() {
+        var onlinePlayers = Bukkit.getOnlinePlayers();
+        return onlinePlayers.isEmpty() ? null : onlinePlayers.iterator().next();
     }
 }

@@ -14,7 +14,6 @@ import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import de.thecoolcraft11.minigameframework.items.variants.ItemVariant;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -23,14 +22,11 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class SkinGUI {
-    private static final String ITEMS_TITLE = "Skin Selector";
-    private static final String VARIANTS_TITLE_PREFIX = "Skin Variants: ";
+    private static final String ITEMS_TITLE = "gui.skin.titles.selector";
+    private static final String VARIANTS_TITLE_PREFIX = "gui.skin.titles.variants";
 
     private final HideAndSeek plugin;
 
@@ -60,7 +56,7 @@ public class SkinGUI {
     public void open(Player player) {
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("skin_selector_" + player.getUniqueId())
-                .title(ITEMS_TITLE)
+                .title(plugin.trText(player, ITEMS_TITLE))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -85,7 +81,7 @@ public class SkinGUI {
             inventory.setItem(slot++, skinItem);
         }
 
-        InventoryItem backItem = new InventoryItem(createBackHint());
+        InventoryItem backItem = new InventoryItem(createBackHint(player));
         backItem.setClickHandler((p, item, event, s) -> {
             p.closeInventory();
             event.setCancelled(true);
@@ -122,7 +118,7 @@ public class SkinGUI {
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(VARIANTS_TITLE_PREFIX + humanize(logicalItemId))
+                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -151,8 +147,9 @@ public class SkinGUI {
             inventory.setItem(slot++, variantItem);
         }
 
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW, "Back", NamedTextColor.YELLOW,
-                List.of(Component.text("Return to skin item list", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
+                plugin.tr(player, "gui.skin.buttons.back"),
+                List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
         backBtn.setClickHandler((p, item, event, s) -> {
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 0.9f);
             open(p);
@@ -162,13 +159,14 @@ public class SkinGUI {
         backBtn.setAllowInsert(false);
         inventory.setItem(45, backBtn);
 
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER, "Clear Selection", NamedTextColor.RED,
-                List.of(Component.text("Remove saved skin for this item", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
+                plugin.tr(player, "gui.skin.buttons.clear_selection"),
+                List.of(plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC,
+                        false))));
         clearBtn.setClickHandler((p, item, event, s) -> {
             ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
             ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(Component.text("Cleared saved skin for ", NamedTextColor.YELLOW)
-                    .append(Component.text(humanize(logicalItemId), NamedTextColor.GOLD)));
+            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
             p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
             openVariants(p, logicalItemId);
             event.setCancelled(true);
@@ -189,7 +187,7 @@ public class SkinGUI {
     private void openKillEffectVariants(Player player, String logicalItemId) {
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(VARIANTS_TITLE_PREFIX + humanize(logicalItemId))
+                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -220,8 +218,9 @@ public class SkinGUI {
             inventory.setItem(slot++, variantItem);
         }
 
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW, "Back", NamedTextColor.YELLOW,
-                List.of(Component.text("Return to skin item list", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
+                plugin.tr(player, "gui.skin.buttons.back"),
+                List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
         backBtn.setClickHandler((p, item, event, s) -> {
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 0.9f);
             open(p);
@@ -231,13 +230,14 @@ public class SkinGUI {
         backBtn.setAllowInsert(false);
         inventory.setItem(45, backBtn);
 
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER, "Clear Selection", NamedTextColor.RED,
-                List.of(Component.text("Remove saved skin for this item", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
+                plugin.tr(player, "gui.skin.buttons.clear_selection"),
+                List.of(plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC,
+                        false))));
         clearBtn.setClickHandler((p, item, event, s) -> {
             ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
             ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(Component.text("Cleared saved skin for ", NamedTextColor.YELLOW)
-                    .append(Component.text(humanize(logicalItemId), NamedTextColor.GOLD)));
+            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
             p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
             openKillEffectVariants(p, logicalItemId);
             event.setCancelled(true);
@@ -258,7 +258,7 @@ public class SkinGUI {
     private void openWinSkinVariants(Player player, String logicalItemId) {
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(VARIANTS_TITLE_PREFIX + humanize(logicalItemId))
+                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -289,8 +289,9 @@ public class SkinGUI {
             inventory.setItem(slot++, variantItem);
         }
 
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW, "Back", NamedTextColor.YELLOW,
-                List.of(Component.text("Return to skin item list", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
+                plugin.tr(player, "gui.skin.buttons.back"),
+                List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
         backBtn.setClickHandler((p, item, event, s) -> {
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 0.9f);
             open(p);
@@ -300,13 +301,14 @@ public class SkinGUI {
         backBtn.setAllowInsert(false);
         inventory.setItem(45, backBtn);
 
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER, "Clear Selection", NamedTextColor.RED,
-                List.of(Component.text("Remove saved skin for this item", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
+                plugin.tr(player, "gui.skin.buttons.clear_selection"),
+                List.of(plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC,
+                        false))));
         clearBtn.setClickHandler((p, item, event, s) -> {
             ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
             ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(Component.text("Cleared saved skin for ", NamedTextColor.YELLOW)
-                    .append(Component.text(humanize(logicalItemId), NamedTextColor.GOLD)));
+            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
             p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
             openWinSkinVariants(p, logicalItemId);
             event.setCancelled(true);
@@ -327,7 +329,7 @@ public class SkinGUI {
     private void openDeathMessageVariants(Player player, String logicalItemId) {
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(VARIANTS_TITLE_PREFIX + humanize(logicalItemId))
+                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -358,8 +360,9 @@ public class SkinGUI {
             inventory.setItem(slot++, variantItem);
         }
 
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW, "Back", NamedTextColor.YELLOW,
-                List.of(Component.text("Return to skin item list", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
+                plugin.tr(player, "gui.skin.buttons.back"),
+                List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
         backBtn.setClickHandler((p, item, event, s) -> {
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 0.9f);
             open(p);
@@ -369,12 +372,14 @@ public class SkinGUI {
         backBtn.setAllowInsert(false);
         inventory.setItem(45, backBtn);
 
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER, "Clear Selection", NamedTextColor.RED,
-                List.of(Component.text("Remove saved death messages for this item", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))));
+        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
+                plugin.tr(player, "gui.skin.buttons.clear_selection"),
+                List.of(plugin.tr(player, "gui.skin.item.remove_saved_death_skin").decoration(TextDecoration.ITALIC,
+                        false))));
         clearBtn.setClickHandler((p, item, event, s) -> {
             ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
             ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(Component.text("Cleared saved death messages.", NamedTextColor.YELLOW));
+            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
             p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
             openDeathMessageVariants(p, logicalItemId);
             event.setCancelled(true);
@@ -398,27 +403,22 @@ public class SkinGUI {
             int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, variantId);
             if (!ItemSkinSelectionService.unlock(plugin, player.getUniqueId(), logicalItemId, variantId)) {
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.8f, 0.9f);
-                player.sendMessage(Component.text("Not enough coins. Need ", NamedTextColor.RED)
-                        .append(Component.text(cost, NamedTextColor.GOLD))
-                        .append(Component.text(" to unlock this skin.", NamedTextColor.RED)));
+                player.sendMessage(
+                        plugin.tr(player, "gui.skin.item.not_enough_coins", Map.of("cost", String.valueOf(cost))));
                 openVariants(player, logicalItemId);
                 return;
             }
 
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.9f, 1.2f);
-            player.sendMessage(Component.text("Unlocked skin ", NamedTextColor.GREEN)
-                    .append(Component.text(variantId, NamedTextColor.GOLD))
-                    .append(Component.text(" for ", NamedTextColor.GREEN))
-                    .append(Component.text(cost + " coins", NamedTextColor.YELLOW)));
+            player.sendMessage(plugin.tr(player, "gui.skin.item.unlocked_skin",
+                    Map.of("variant", variantId, "cost", String.valueOf(cost))));
         }
 
         ItemSkinSelectionService.setSelectedVariant(player.getUniqueId(), logicalItemId, variantId);
         ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.3f);
-        player.sendMessage(Component.text("Selected skin ", NamedTextColor.GREEN)
-                .append(Component.text(variantId, NamedTextColor.GOLD))
-                .append(Component.text(" for ", NamedTextColor.GREEN))
-                .append(Component.text(humanize(logicalItemId), NamedTextColor.YELLOW)));
+        player.sendMessage(plugin.tr(player, "gui.skin.item.selected_skin",
+                Map.of("variant", variantId, "item", humanize(logicalItemId))));
 
         if (clickType == ClickType.RIGHT) {
             player.closeInventory();
@@ -454,13 +454,16 @@ public class SkinGUI {
                 .count();
         int variantCount = plugin.getCustomItemManager().getVariantManager().getVariants(runtimeItemId).size();
 
-        meta.displayName(Component.text(humanize(logicalItemId), NamedTextColor.AQUA, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
+
+        meta.displayName(plugin.tr(player, "gui.skin.item.name", Map.of("name", humanize(logicalItemId))).decoration(
+                TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Unlocked: " + unlockedCount + "/" + variantCount, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Selected: " + ((selected == null || selected.isBlank()) ? "Default" : selected),
-                NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Left click to open", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.unlocked_count",
+                Map.of("unlocked", unlockedCount, "total", variantCount)).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.selected_variant", Map.of("selected",
+                (selected == null || selected.isBlank()) ? plugin.trText(player,
+                        "common.state.default") : selected)).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.left_click_open").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         meta.getPersistentDataContainer().set(
                 new org.bukkit.NamespacedKey(plugin, "skin_item_id"),
@@ -487,14 +490,18 @@ public class SkinGUI {
                 .filter(def -> ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, def.id()))
                 .count();
 
-        meta.displayName(Component.text("Kill Effects", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
+        meta.displayName(
+                plugin.tr(player, "gui.skin.category.kill_effects").decoration(TextDecoration.BOLD, true).decoration(
+                        TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Unlocked: " + unlockedCount + "/" + variantCount, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Selected: " + (selectedDef == null ? "Default" : selectedDef.displayName()), NamedTextColor.YELLOW)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Left click to open", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.unlocked_count",
+                Map.of("unlocked", unlockedCount, "total", variantCount)).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.selected_variant", Map.of("selected",
+                (selectedDef == null ? plugin.trText(player,
+                        "common.state.default") : selectedDef.displayName()))).decoration(TextDecoration.ITALIC,
+                false));
+        lore.add(plugin.tr(player, "gui.skin.item.left_click_open").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
 
         stack.setItemMeta(meta);
@@ -517,14 +524,18 @@ public class SkinGUI {
                 .filter(def -> ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, def.id()))
                 .count();
 
-        meta.displayName(Component.text("Win Skins", NamedTextColor.GOLD, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
+        meta.displayName(
+                plugin.tr(player, "gui.skin.category.win_skins").decoration(TextDecoration.BOLD, true).decoration(
+                        TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Unlocked: " + unlockedCount + "/" + variantCount, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Selected: " + (selectedDef == null ? "Default" : selectedDef.displayName()), NamedTextColor.YELLOW)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Left click to open", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.unlocked_count",
+                Map.of("unlocked", unlockedCount, "total", variantCount)).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.selected_variant", Map.of("selected",
+                (selectedDef == null ? plugin.trText(player,
+                        "common.state.default") : selectedDef.displayName()))).decoration(TextDecoration.ITALIC,
+                false));
+        lore.add(plugin.tr(player, "gui.skin.item.left_click_open").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
 
         stack.setItemMeta(meta);
@@ -547,14 +558,18 @@ public class SkinGUI {
                 .filter(def -> ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, def.id()))
                 .count();
 
-        meta.displayName(Component.text("Death Messages", NamedTextColor.DARK_RED, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
+        meta.displayName(
+                plugin.tr(player, "gui.skin.category.death_messages").decoration(TextDecoration.BOLD, true).decoration(
+                        TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Unlocked: " + unlockedCount + "/" + variantCount, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Selected: " + (selectedDef == null ? "Default" : selectedDef.displayName()), NamedTextColor.YELLOW)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Left click to open", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.unlocked_count",
+                Map.of("unlocked", unlockedCount, "total", variantCount)).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.selected_variant", Map.of("selected",
+                (selectedDef == null ? plugin.trText(player,
+                        "common.state.default") : selectedDef.displayName()))).decoration(TextDecoration.ITALIC,
+                false));
+        lore.add(plugin.tr(player, "gui.skin.item.left_click_open").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
 
         stack.setItemMeta(meta);
@@ -577,20 +592,22 @@ public class SkinGUI {
         int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, variant.getId());
         ItemRarity rarity = ItemSkinSelectionService.getRarity(logicalItemId, variant.getId());
 
-        meta.displayName(Component.text(label,
-                        selected ? NamedTextColor.GREEN : (unlocked ? NamedTextColor.AQUA : NamedTextColor.RED),
-                        TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
+        String stateColor = selected ? "green" : (unlocked ? "aqua" : "red");
+        Component variantTitle = plugin.tr(player, "gui.skin.item.variant_title",
+                Map.of("label", label, "color", stateColor));
+        meta.displayName(variantTitle.decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("ID: " + variant.getId(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Rarity: " + rarity.name(), getRarityColor(rarity)).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Cost: " + cost + " coins", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text(selected ? "Currently selected" : (unlocked ? "Click to select" : "Click to unlock + select"),
-                        selected ? NamedTextColor.GREEN : NamedTextColor.YELLOW)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Right click: select/unlock and close", NamedTextColor.DARK_GRAY)
-                .decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.id", Map.of("id", variant.getId())).decoration(TextDecoration.ITALIC,
+                false));
+        lore.add(plugin.tr(player, "gui.skin.item.rarity", Map.of("rarity", rarity.name())).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.cost", Map.of("cost", String.valueOf(cost))).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player,
+                selected ? "gui.skin.item.currently_selected" : (unlocked ? "gui.skin.item.click_to_select" : "gui.skin.item.click_to_unlock_select")).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.right_click_close").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
 
         meta.getPersistentDataContainer().set(
@@ -613,22 +630,23 @@ public class SkinGUI {
         boolean unlocked = ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, definition.id());
         int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, definition.id());
 
-        meta.displayName(Component.text(
-                        definition.displayName(),
-                        selected ? NamedTextColor.GREEN : (unlocked ? NamedTextColor.AQUA : NamedTextColor.RED),
-                        TextDecoration.BOLD
-                )
-                .decoration(TextDecoration.ITALIC, false));
+        String stateColor = selected ? "green" : (unlocked ? "aqua" : "red");
+        Component title = plugin.tr(player, "gui.skin.item.variant_title",
+                Map.of("label", definition.displayName(), "color", stateColor));
+        meta.displayName(title.decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("ID: " + definition.id(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Rarity: " + definition.rarity().name(), getRarityColor(definition.rarity())).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Cost: " + cost + " coins", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text(selected ? "Currently selected" : (unlocked ? "Click to select" : "Click to unlock + select"),
-                        selected ? NamedTextColor.GREEN : NamedTextColor.YELLOW)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Right click: select/unlock and close", NamedTextColor.DARK_GRAY)
-                .decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.id", Map.of("id", definition.id())).decoration(TextDecoration.ITALIC,
+                false));
+        lore.add(plugin.tr(player, "gui.skin.item.rarity",
+                Map.of("rarity", definition.rarity().name(), "color", getRarityTag(definition.rarity()))).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.cost", Map.of("cost", String.valueOf(cost))).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player,
+                selected ? "gui.skin.item.currently_selected" : (unlocked ? "gui.skin.item.click_to_select" : "gui.skin.item.click_to_unlock_select")).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.right_click_close").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
 
         stack.setItemMeta(meta);
@@ -647,22 +665,23 @@ public class SkinGUI {
         boolean unlocked = ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, definition.id());
         int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, definition.id());
 
-        meta.displayName(Component.text(
-                        definition.displayName(),
-                        selected ? NamedTextColor.GREEN : (unlocked ? NamedTextColor.AQUA : NamedTextColor.RED),
-                        TextDecoration.BOLD
-                )
-                .decoration(TextDecoration.ITALIC, false));
+        String stateColor = selected ? "green" : (unlocked ? "aqua" : "red");
+        Component title = plugin.tr(player, "gui.skin.item.variant_title",
+                Map.of("label", definition.displayName(), "color", stateColor));
+        meta.displayName(title.decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("ID: " + definition.id(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Rarity: " + definition.rarity().name(), getRarityColor(definition.rarity())).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Cost: " + cost + " coins", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text(selected ? "Currently selected" : (unlocked ? "Click to select" : "Click to unlock + select"),
-                        selected ? NamedTextColor.GREEN : NamedTextColor.YELLOW)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Right click: select/unlock and close", NamedTextColor.DARK_GRAY)
-                .decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.id", Map.of("id", definition.id())).decoration(TextDecoration.ITALIC,
+                false));
+        lore.add(plugin.tr(player, "gui.skin.item.rarity",
+                Map.of("rarity", definition.rarity().name(), "color", getRarityTag(definition.rarity()))).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.cost", Map.of("cost", String.valueOf(cost))).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player,
+                selected ? "gui.skin.item.currently_selected" : (unlocked ? "gui.skin.item.click_to_select" : "gui.skin.item.click_to_unlock_select")).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.right_click_close").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
 
         stack.setItemMeta(meta);
@@ -681,35 +700,39 @@ public class SkinGUI {
         boolean unlocked = ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, definition.id());
         int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, definition.id());
 
-        meta.displayName(Component.text(
-                        definition.displayName(),
-                        selected ? NamedTextColor.GREEN : (unlocked ? NamedTextColor.AQUA : NamedTextColor.RED),
-                        TextDecoration.BOLD
-                )
-                .decoration(TextDecoration.ITALIC, false));
+        String stateColor = selected ? "green" : (unlocked ? "aqua" : "red");
+        Component title = plugin.tr(player, "gui.skin.item.variant_title",
+                Map.of("label", definition.displayName(), "color", stateColor));
+        meta.displayName(title.decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("ID: " + definition.id(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Rarity: " + definition.rarity().name(), getRarityColor(definition.rarity())).decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Cost: " + cost + " coins", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.id", Map.of("id", definition.id())).decoration(TextDecoration.ITALIC,
+                false));
+        lore.add(plugin.tr(player, "gui.skin.item.rarity",
+                Map.of("rarity", definition.rarity().name(), "color", getRarityTag(definition.rarity()))).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.cost", Map.of("cost", String.valueOf(cost))).decoration(
+                TextDecoration.ITALIC, false));
 
         DeathMessageSkin skin = DeathMessageManager.getDeathMessageSkin(definition.id());
         if (skin != null) {
             Component envPreview = skin.getEnvironmentalDeathMessage(player.getName(), "CAMPING");
             Component killPreview = skin.getKillMessage(player.getName(), "Victim");
-            lore.add(Component.text("Preview (Env):", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
-            lore.add((envPreview == null ? Component.text(player.getName() + " was struck down for camping too long.", NamedTextColor.YELLOW) : envPreview)
+            lore.add(plugin.tr(player, "gui.skin.item.preview_env").decoration(TextDecoration.ITALIC, false));
+            lore.add((envPreview == null ? plugin.tr(player, "gui.skin.item.preview_env_default",
+                    Map.of("player", player.getName())) : envPreview)
                     .decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.text("Preview (Kill):", NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
-            lore.add((killPreview == null ? Component.text(player.getName() + " eliminated Victim.", NamedTextColor.YELLOW) : killPreview)
+            lore.add(plugin.tr(player, "gui.skin.item.preview_kill").decoration(TextDecoration.ITALIC, false));
+            lore.add((killPreview == null ? plugin.tr(player, "gui.skin.item.preview_kill_default",
+                    Map.of("player", player.getName(), "victim",
+                            plugin.trText(player, "gui.skin.preview.sample.victim"))) : killPreview)
                     .decoration(TextDecoration.ITALIC, false));
         }
 
-        lore.add(Component.text(selected ? "Currently selected" : (unlocked ? "Click to select" : "Click to unlock + select"),
-                        selected ? NamedTextColor.GREEN : NamedTextColor.YELLOW)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Right click: select/unlock and close", NamedTextColor.DARK_GRAY)
-                .decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player,
+                selected ? "gui.skin.item.currently_selected" : (unlocked ? "gui.skin.item.click_to_select" : "gui.skin.item.click_to_unlock_select")).decoration(
+                TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.skin.item.right_click_close").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
 
         stack.setItemMeta(meta);
@@ -717,38 +740,37 @@ public class SkinGUI {
         return stack;
     }
 
-    private ItemStack createBackHint() {
-        return createUtility(Material.BOOK, "Skin Selection",
-                NamedTextColor.YELLOW,
+    private ItemStack createBackHint(Player player) {
+        return createUtility(Material.BOOK, plugin.tr(player, "gui.skin.buttons.skin_selection"),
                 List.of(
-                        Component.text("Pick an item first", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                        Component.text("Then buy and equip skin variants", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                        plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false),
+                        plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC, false)
                 ));
     }
 
     private ItemStack createCoinsHint(Player player) {
         int coins = ItemSkinSelectionService.getCoins(player.getUniqueId());
-        return createUtility(Material.GOLD_NUGGET, "Coins: " + coins,
-                NamedTextColor.GOLD,
-                List.of(Component.text("Earn coins from round points", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+        return createUtility(Material.GOLD_NUGGET, plugin.tr(player, "gui.skin.buttons.coins", Map.of("coins", coins)),
+                List.of(plugin.tr(player, "gui.skin.item.earned_coins_hint").decoration(TextDecoration.ITALIC, false)));
     }
 
-    private NamedTextColor getRarityColor(ItemRarity rarity) {
+
+    private String getRarityTag(ItemRarity rarity) {
         return switch (rarity) {
-            case COMMON -> NamedTextColor.WHITE;
-            case UNCOMMON -> NamedTextColor.GREEN;
-            case RARE -> NamedTextColor.BLUE;
-            case EPIC -> NamedTextColor.DARK_PURPLE;
-            case LEGENDARY -> NamedTextColor.GOLD;
+            case COMMON -> "white";
+            case UNCOMMON -> "green";
+            case RARE -> "blue";
+            case EPIC -> "dark_purple";
+            case LEGENDARY -> "gold";
         };
     }
 
-    private ItemStack createUtility(Material material, String name, NamedTextColor color, List<Component> lore) {
+    private ItemStack createUtility(Material material, Component title, List<Component> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name, color, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
-            meta.lore(lore);
+            meta.displayName(title.decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false));
+            meta.lore(lore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
             item.setItemMeta(meta);
         }
         return item;

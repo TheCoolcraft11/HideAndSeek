@@ -4,14 +4,13 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.PerkRegistry;
 import de.thecoolcraft11.hideAndSeek.perk.PerkStateManager;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkDefinition;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class DebugPerksCommand implements DebugSubcommand {
@@ -45,13 +44,13 @@ public class DebugPerksCommand implements DebugSubcommand {
     @Override
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /has debug perks <player> [grant|revoke|list] [perkId]", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.usage"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.player_not_found", Map.of("player", args[0])));
             return true;
         }
 
@@ -62,8 +61,8 @@ public class DebugPerksCommand implements DebugSubcommand {
             case "revoke" -> handleRevoke(sender, target, args);
             case "list" -> handleList(sender, target);
             default -> {
-                sender.sendMessage(Component.text("Unknown action: " + action, NamedTextColor.RED));
-                sender.sendMessage(Component.text("Usage: /has debug perks <player> [grant|revoke|list] [perkId]", NamedTextColor.YELLOW));
+                sender.sendMessage(plugin.tr(sender, "command.debug.perks.unknown_action", Map.of("action", action)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.perks.usage"));
             }
         }
 
@@ -72,8 +71,8 @@ public class DebugPerksCommand implements DebugSubcommand {
 
     private void handleGrant(CommandSender sender, Player target, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(Component.text("Usage: /has debug perks <player> grant <perkId> [-f]", NamedTextColor.YELLOW));
-            sender.sendMessage(Component.text("Available perks:", NamedTextColor.GRAY));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.grant_usage"));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.available_perks"));
             listAvailablePerks(sender);
             return;
         }
@@ -88,29 +87,29 @@ public class DebugPerksCommand implements DebugSubcommand {
                 .orElse(null);
 
         if (perk == null) {
-            sender.sendMessage(Component.text("Unknown perk: " + perkId, NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.unknown_perk", Map.of("perk", perkId)));
             return;
         }
 
         boolean forceBypassCooldown = args.length >= 4 && "-f".equalsIgnoreCase(args[3]);
         boolean granted = stateManager.grantDebug(target, perk, forceBypassCooldown);
         if (!granted) {
-            sender.sendMessage(Component.text("Failed to grant perk ", NamedTextColor.RED)
-                    .append(Component.text(perkId, NamedTextColor.AQUA))
-                    .append(Component.text(" to ", NamedTextColor.RED))
-                    .append(Component.text(target.getName(), NamedTextColor.AQUA)));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.grant_failed", Map.of(
+                    "perk", perkId,
+                    "player", target.getName()
+            )));
             return;
         }
 
-        sender.sendMessage(Component.text("Granted and activated perk ", NamedTextColor.GREEN)
-                .append(Component.text(perkId, NamedTextColor.AQUA))
-                .append(Component.text(" for ", NamedTextColor.GREEN))
-                .append(Component.text(target.getName(), NamedTextColor.AQUA)));
+        sender.sendMessage(plugin.tr(sender, "command.debug.perks.grant_success", Map.of(
+                "perk", perkId,
+                "player", target.getName()
+        )));
     }
 
     private void handleRevoke(CommandSender sender, Player target, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(Component.text("Usage: /has debug perks <player> revoke <perkId>", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.revoke_usage"));
             return;
         }
 
@@ -120,12 +119,12 @@ public class DebugPerksCommand implements DebugSubcommand {
 
         if (stateManager.hasPurchased(targetId, perkId)) {
             stateManager.removePurchased(targetId, perkId);
-            sender.sendMessage(Component.text("Revoked perk ", NamedTextColor.GREEN)
-                    .append(Component.text(perkId, NamedTextColor.AQUA))
-                    .append(Component.text(" from ", NamedTextColor.GREEN))
-                    .append(Component.text(target.getName(), NamedTextColor.AQUA)));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.revoke_success", Map.of(
+                    "perk", perkId,
+                    "player", target.getName()
+            )));
         } else {
-            sender.sendMessage(Component.text("Player doesn't have perk: " + perkId, NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.not_owned", Map.of("perk", perkId)));
         }
     }
 
@@ -133,21 +132,21 @@ public class DebugPerksCommand implements DebugSubcommand {
         UUID targetId = target.getUniqueId();
         PerkStateManager stateManager = plugin.getPerkService().getStateManager();
 
-        sender.sendMessage(Component.text("\n=== Perks for " + target.getName() + " ===", NamedTextColor.GOLD));
+        sender.sendMessage(plugin.tr(sender, "command.debug.perks.list_header", Map.of("player", target.getName())));
 
         java.util.Set<String> perks = stateManager.getPurchased().getOrDefault(targetId, java.util.Set.of());
         if (perks.isEmpty()) {
-            sender.sendMessage(Component.text("No perks", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.none"));
         } else {
             for (String perkId : perks) {
-                sender.sendMessage(Component.text("  - " + perkId, NamedTextColor.GRAY));
+                sender.sendMessage(plugin.tr(sender, "command.debug.perks.list_entry", Map.of("perk", perkId)));
             }
         }
     }
 
     private void listAvailablePerks(CommandSender sender) {
         for (PerkDefinition perk : plugin.getPerkService().getRegistry().getAllPerks()) {
-            sender.sendMessage(Component.text("  - " + perk.getId(), NamedTextColor.GRAY));
+            sender.sendMessage(plugin.tr(sender, "command.debug.perks.list_entry", Map.of("perk", perk.getId())));
         }
     }
 }

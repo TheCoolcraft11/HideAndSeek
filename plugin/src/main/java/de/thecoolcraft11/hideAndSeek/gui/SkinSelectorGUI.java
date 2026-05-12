@@ -7,7 +7,6 @@ import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -40,12 +39,7 @@ public class SkinSelectorGUI {
         List<SkinData> skins = skinManager.resolveSkins(allowedSkinIds);
 
         if (skins.isEmpty()) {
-            player.sendMessage(
-                    Component.text(
-                            "No skins are configured for this map.",
-                            NamedTextColor.RED
-                    )
-            );
+            player.sendMessage(plugin.tr(player, "gui.skin_selector.errors.no_configured"));
             return;
         }
 
@@ -53,7 +47,7 @@ public class SkinSelectorGUI {
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("skin_selector_" + player.getUniqueId())
-                .title("Choose Your Skin")
+                .title(plugin.trText(player, "gui.skin_selector.title"))
                 .rows(rows)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -68,7 +62,7 @@ public class SkinSelectorGUI {
 
             boolean selected = skin.id().equals(currentSkinId);
 
-            ItemStack item = createSkinItem(skin, selected);
+            ItemStack item = createSkinItem(player, skin, selected);
 
             InventoryItem inventoryItem = getInventoryItem(skin, item, selected);
 
@@ -98,10 +92,7 @@ public class SkinSelectorGUI {
 
             if (skin.id().equals(assignedSkin)) {
                 p.sendMessage(
-                        Component.text(
-                                "You are already using that skin.",
-                                NamedTextColor.YELLOW
-                        )
+                        plugin.tr(p, "gui.skin_selector.errors.already_selected")
                 );
                 return;
             }
@@ -109,15 +100,7 @@ public class SkinSelectorGUI {
             skinManager.assignSkin(p, skin);
 
             p.sendMessage(
-                    Component.text(
-                            "Skin changed to ",
-                            NamedTextColor.GREEN
-                    ).append(
-                            Component.text(
-                                    skin.name(),
-                                    NamedTextColor.GOLD
-                            )
-                    )
+                    plugin.tr(p, "gui.skin_selector.feedback.changed", java.util.Map.of("skin", skin.name()))
             );
 
             p.closeInventory();
@@ -129,7 +112,7 @@ public class SkinSelectorGUI {
         return inventoryItem;
     }
 
-    private ItemStack createSkinItem(SkinData skin, boolean selected) {
+    private ItemStack createSkinItem(Player viewer, SkinData skin, boolean selected) {
 
         Material icon = skin.icon() != null
                 ? skin.icon()
@@ -144,12 +127,12 @@ public class SkinSelectorGUI {
         }
 
         meta.displayName(
-                Component.text(
-                                skin.name(),
+                plugin.tr(
+                                viewer,
                                 selected
-                                        ? NamedTextColor.GREEN
-                                        : NamedTextColor.WHITE,
-                                TextDecoration.BOLD
+                                        ? "gui.skin_selector.item.name_selected"
+                                        : "gui.skin_selector.item.name",
+                                java.util.Map.of("name", skin.name())
                         )
                         .decoration(TextDecoration.ITALIC, false)
         );
@@ -157,19 +140,13 @@ public class SkinSelectorGUI {
         List<Component> lore = new ArrayList<>();
 
         lore.add(
-                Component.text(
-                                "Click to apply this skin",
-                                NamedTextColor.GRAY
-                        )
+                plugin.tr(viewer, "gui.skin_selector.item.click_to_apply")
                         .decoration(TextDecoration.ITALIC, false)
         );
 
         if (selected) {
             lore.add(
-                    Component.text(
-                                    "✔ Currently active",
-                                    NamedTextColor.GREEN
-                            )
+                    plugin.tr(viewer, "gui.skin_selector.item.currently_active")
                             .decoration(TextDecoration.ITALIC, false)
             );
         }

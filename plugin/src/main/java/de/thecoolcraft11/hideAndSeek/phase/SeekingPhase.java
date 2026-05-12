@@ -13,8 +13,7 @@ import de.thecoolcraft11.hideAndSeek.util.map.MapData;
 import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.game.GamePhase;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -96,7 +95,8 @@ public class SeekingPhase implements GamePhase {
             Player player = Bukkit.getPlayer(playerId);
             if (player != null && player.isOnline()) {
                 player.setGameMode(GameMode.SURVIVAL);
-                player.sendMessage(Component.text("Seekers are coming! Run and hide!", NamedTextColor.GREEN));
+                String msg = plugin.trText(player, "phase.seeking.seekers_coming");
+                player.sendMessage(MiniMessage.miniMessage().deserialize(msg));
 
 
                 player.addPotionEffect(new org.bukkit.potion.PotionEffect(
@@ -128,7 +128,8 @@ public class SeekingPhase implements GamePhase {
             Player player = Bukkit.getPlayer(playerId);
             if (player != null && player.isOnline()) {
                 player.setGameMode(GameMode.SURVIVAL);
-                player.sendMessage(Component.text("Go find the hiders!", NamedTextColor.RED));
+                String msg = plugin.trText(player, "phase.seeking.hiders_message");
+                player.sendMessage(MiniMessage.miniMessage().deserialize(msg));
 
 
                 player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);

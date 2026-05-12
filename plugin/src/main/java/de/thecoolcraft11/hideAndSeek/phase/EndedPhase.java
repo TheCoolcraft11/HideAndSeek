@@ -15,7 +15,7 @@ import de.thecoolcraft11.minigameframework.game.GamePhase;
 import de.thecoolcraft11.minigameframework.progression.GameResult;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -228,52 +228,73 @@ public class EndedPhase implements GamePhase {
         Component winnerTitle;
         Component winnerSubtitle;
         NamedTextColor color;
-
-        if (hidersWin) {
-            winnerTitle = Component.text("HIDERS WIN!", NamedTextColor.GREEN, TextDecoration.BOLD);
-            winnerSubtitle = Component.text("They survived the seekers!", NamedTextColor.YELLOW);
-            color = NamedTextColor.GREEN;
-        } else {
-            winnerTitle = Component.text("SEEKERS WIN!", NamedTextColor.RED, TextDecoration.BOLD);
-            winnerSubtitle = Component.text("They found all the hiders!", NamedTextColor.YELLOW);
-            color = NamedTextColor.RED;
-        }
-
-        Title title = Title.title(
-                winnerTitle,
-                winnerSubtitle,
-                Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(5), Duration.ofSeconds(1))
-        );
+        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
 
 
         for (Player player : Bukkit.getOnlinePlayers()) {
+
+            if (hidersWin) {
+                String titleStr = hideAndSeekPlugin.trText(player, "phase.ended.hiders_win_title");
+                String subtitleStr = hideAndSeekPlugin.trText(player, "phase.ended.hiders_win_subtitle");
+                winnerTitle = MiniMessage.miniMessage().deserialize(titleStr);
+                winnerSubtitle = MiniMessage.miniMessage().deserialize(subtitleStr);
+                color = NamedTextColor.GREEN;
+            } else {
+                String titleStr = hideAndSeekPlugin.trText(player, "phase.ended.seekers_win_title");
+                String subtitleStr = hideAndSeekPlugin.trText(player, "phase.ended.seekers_win_subtitle");
+                winnerTitle = MiniMessage.miniMessage().deserialize(titleStr);
+                winnerSubtitle = MiniMessage.miniMessage().deserialize(subtitleStr);
+                color = NamedTextColor.RED;
+            }
+
+            Title title = Title.title(
+                    winnerTitle,
+                    winnerSubtitle,
+                    Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(5), Duration.ofSeconds(1))
+            );
+
+
             player.showTitle(title);
             player.sendMessage(Component.empty());
-            player.sendMessage(Component.text("═══════════════════════════════", color));
+
+            String colorStr = color == NamedTextColor.GREEN ? "green" : "red";
+            String boxLineStr = hideAndSeekPlugin.trText(player, "phase.ended.box_line",
+                    java.util.Map.of("color", colorStr));
+            player.sendMessage(MiniMessage.miniMessage().deserialize(boxLineStr));
             player.sendMessage(winnerTitle);
-            player.sendMessage(Component.text("═══════════════════════════════", color));
+            player.sendMessage(MiniMessage.miniMessage().deserialize(boxLineStr));
             player.sendMessage(Component.empty());
 
 
-            player.sendMessage(Component.text("POINTS:", NamedTextColor.GOLD, TextDecoration.BOLD));
+            String pointsHeaderStr = hideAndSeekPlugin.trText(player, "phase.ended.points_header");
+            player.sendMessage(MiniMessage.miniMessage().deserialize(pointsHeaderStr));
             HideAndSeek.getDataController().getAllPoints().entrySet().stream()
                     .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                     .forEach(entry -> {
                         Player scoredPlayer = Bukkit.getPlayer(entry.getKey());
                         if (scoredPlayer != null) {
-                            player.sendMessage(Component.text(scoredPlayer.getName() + ": " + entry.getValue() + " points", NamedTextColor.YELLOW));
+                            String pointsEntryStr = hideAndSeekPlugin.trText(player, "phase.ended.points_entry",
+                                    java.util.Map.of("player", scoredPlayer.getName(), "points",
+                                            String.valueOf(entry.getValue())));
+                            player.sendMessage(MiniMessage.miniMessage().deserialize(pointsEntryStr));
                         }
                     });
+
             int gainedCoins = coinGains.getOrDefault(player.getUniqueId(), 0);
             int totalCoins = ItemSkinSelectionService.getCoins(player.getUniqueId());
-            player.sendMessage(Component.text("COINS:", NamedTextColor.GOLD, TextDecoration.BOLD));
-            player.sendMessage(Component.text("+" + gainedCoins + " coins this round", NamedTextColor.YELLOW));
-            player.sendMessage(Component.text("Balance: " + totalCoins + " coins", NamedTextColor.AQUA));
+            String coinsHeaderStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_header");
+            player.sendMessage(MiniMessage.miniMessage().deserialize(coinsHeaderStr));
+            String coinsGainedStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_gained",
+                    java.util.Map.of("amount", String.valueOf(gainedCoins)));
+            player.sendMessage(MiniMessage.miniMessage().deserialize(coinsGainedStr));
+            String coinsBalanceStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_balance",
+                    java.util.Map.of("amount", String.valueOf(totalCoins)));
+            player.sendMessage(MiniMessage.miniMessage().deserialize(coinsBalanceStr));
             player.sendMessage(Component.empty());
         }
 
-        HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
-        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+        HideAndSeek hideAndSeekPluginForLog = (HideAndSeek) plugin;
+        if (hideAndSeekPluginForLog.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info((hidersWin ? "Hiders" : "Seekers") + " won the game!");
         }
     }

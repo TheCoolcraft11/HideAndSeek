@@ -7,7 +7,6 @@ import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,12 +43,7 @@ public class SkinStatsGUI {
                         || !gameModeObj.toString().equals("SKIN")
         ) {
 
-            player.sendMessage(
-                    Component.text(
-                            "Skin mode is not enabled!",
-                            NamedTextColor.RED
-                    )
-            );
+            player.sendMessage(plugin.tr(player, "gui.skin_stats.errors.disabled"));
 
             return;
         }
@@ -94,12 +88,7 @@ public class SkinStatsGUI {
 
         if (skinCounts.isEmpty()) {
 
-            player.sendMessage(
-                    Component.text(
-                            "No skins have been assigned yet!",
-                            NamedTextColor.YELLOW
-                    )
-            );
+            player.sendMessage(plugin.tr(player, "gui.skin_stats.errors.empty"));
 
             return;
         }
@@ -113,7 +102,7 @@ public class SkinStatsGUI {
                 plugin.getInventoryFramework()
         )
                 .id("skin_stats_" + player.getUniqueId())
-                .title("Skin Statistics")
+                .title(plugin.trText(player, "gui.skin_stats.title"))
                 .rows(rows)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -146,6 +135,7 @@ public class SkinStatsGUI {
                     : null;
 
             ItemStack item = createStatsItem(
+                    player,
                     skin,
                     count,
                     players
@@ -174,6 +164,7 @@ public class SkinStatsGUI {
     }
 
     private ItemStack createStatsItem(
+            Player viewer,
             SkinData skin,
             int count,
             List<String> players
@@ -190,11 +181,7 @@ public class SkinStatsGUI {
         if (meta != null) {
 
             meta.displayName(
-                    Component.text(
-                                    skin.name(),
-                                    NamedTextColor.GOLD,
-                                    TextDecoration.BOLD
-                            )
+                    plugin.tr(viewer, "gui.skin_stats.item.name", Map.of("skin", skin.name()))
                             .decoration(
                                     TextDecoration.ITALIC,
                                     false
@@ -204,16 +191,9 @@ public class SkinStatsGUI {
             List<Component> lore = new ArrayList<>();
 
             lore.add(Component.empty());
-
             lore.add(
-                    Component.text(
-                                    "Players: " + count,
-                                    NamedTextColor.YELLOW
-                            )
-                            .decoration(
-                                    TextDecoration.ITALIC,
-                                    false
-                            )
+                    plugin.tr(viewer, "gui.skin_stats.item.players_count", Map.of("count", count))
+                            .decoration(TextDecoration.ITALIC, false)
             );
 
             if (
@@ -231,30 +211,16 @@ public class SkinStatsGUI {
                 for (int i = 0; i < displayCount; i++) {
 
                     lore.add(
-                            Component.text(
-                                            "  • " + players.get(i),
-                                            NamedTextColor.GRAY
-                                    )
-                                    .decoration(
-                                            TextDecoration.ITALIC,
-                                            false
-                                    )
+                            plugin.tr(viewer, "gui.skin_stats.item.player_entry", Map.of("name", players.get(i)))
+                                    .decoration(TextDecoration.ITALIC, false)
                     );
                 }
 
                 if (players.size() > 10) {
 
                     lore.add(
-                            Component.text(
-                                            "  ... +"
-                                                    + (players.size() - 10)
-                                                    + " more",
-                                            NamedTextColor.DARK_GRAY
-                                    )
-                                    .decoration(
-                                            TextDecoration.ITALIC,
-                                            false
-                                    )
+                            plugin.tr(viewer, "gui.skin_stats.item.more_players", Map.of("count", players.size() - 10))
+                                    .decoration(TextDecoration.ITALIC, false)
                     );
                 }
             }

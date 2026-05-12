@@ -15,13 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ReadyGUI {
-    private static final String TITLE = "Ready Overview";
     private static final int MAX_DISPLAYED_PLAYERS = 27;
 
     private final HideAndSeek plugin;
@@ -32,12 +28,14 @@ public class ReadyGUI {
 
     public void open(Player viewer) {
         VoteManager voteManager = plugin.getVoteManager();
+
         if (!voteManager.isReadinessEnabled()) {
-            viewer.sendMessage(Component.text("Readiness is disabled.", NamedTextColor.RED));
+            viewer.sendMessage(plugin.tr(viewer, "gui.ready.errors.disabled"));
             return;
         }
+
         if (voteManager.isNotLobbyPhase()) {
-            viewer.sendMessage(Component.text("Readiness overview is only available in the lobby.", NamedTextColor.RED));
+            viewer.sendMessage(plugin.tr(viewer, "gui.ready.errors.lobby_only"));
             return;
         }
 
@@ -50,7 +48,7 @@ public class ReadyGUI {
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("ready_overview_" + viewer.getUniqueId())
-                .title(TITLE)
+                .title(plugin.trText(viewer, "gui.ready.title"))
                 .rows(totalRows)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -60,6 +58,7 @@ public class ReadyGUI {
         for (int i = 0; i < shownPlayers; i++) {
             Player listedPlayer = players.get(i);
             boolean ready = voteManager.isReady(listedPlayer.getUniqueId());
+
             int pairRow = i / 9;
             int column = i % 9;
             int headSlot = pairRow * 18 + column;
@@ -73,7 +72,7 @@ public class ReadyGUI {
             headItem.setMetadata("player_ready", ready);
             inventory.setItem(headSlot, headItem);
 
-            InventoryItem statusItem = new InventoryItem(createStatusPane(ready, listedPlayer.getUniqueId()));
+            InventoryItem statusItem = new InventoryItem(createStatusPane(ready, listedPlayer.getUniqueId(), viewer));
             statusItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             statusItem.setAllowTakeout(false);
             statusItem.setAllowInsert(false);
@@ -84,10 +83,13 @@ public class ReadyGUI {
 
         if (players.size() > MAX_DISPLAYED_PLAYERS) {
             int infoSlot = totalRows * 9 - 1;
-            InventoryItem infoItem = new InventoryItem(createOverflowInfo(players.size() - MAX_DISPLAYED_PLAYERS));
+
+            InventoryItem infoItem = new InventoryItem(createOverflowInfo(players.size() - MAX_DISPLAYED_PLAYERS,
+                    viewer));
             infoItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             infoItem.setAllowTakeout(false);
             infoItem.setAllowInsert(false);
+
             inventory.setItem(infoSlot, infoItem);
         }
 
@@ -98,54 +100,68 @@ public class ReadyGUI {
     private ItemStack createPlayerHeadItem(Player player, boolean ready) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta rawMeta = item.getItemMeta();
+
         if (!(rawMeta instanceof SkullMeta meta)) {
             return item;
         }
 
         meta.setOwningPlayer(player);
+
         meta.displayName(Component.text(player.getName(), NamedTextColor.AQUA, TextDecoration.BOLD)
                 .decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Status: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
-                .append(Component.text(ready ? "READY" : "NOT READY", ready ? NamedTextColor.GREEN : NamedTextColor.RED)));
-        lore.add(Component.text("Vote complete: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
-                .append(Component.text(plugin.getVoteManager().hasCompletedVote(player.getUniqueId()) ? "Yes" : "No", NamedTextColor.YELLOW)));
+
+        lore.add(plugin.tr(player, "gui.ready.status.title", Map.of("status", plugin.trText(player, ready
+                ? "gui.ready.status.ready"
+                : "gui.ready.status.not_ready"))));
+
+        lore.add(plugin.tr(player, "gui.ready.vote.title",
+                Map.of("status", plugin.trText(player, plugin.getVoteManager().hasCompletedVote(player.getUniqueId())
+                        ? "gui.ready.vote.complete_yes"
+                        : "gui.ready.vote.complete_no"))));
+
         meta.lore(lore);
-
         item.setItemMeta(meta);
         return item;
     }
 
-    private ItemStack createStatusPane(boolean ready, UUID playerId) {
-        ItemStack item = new ItemStack(ready ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE);
+    private ItemStack createStatusPane(boolean ready, UUID playerId, Player player) {
+        ItemStack item = new ItemStack(
+                ready ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE
+        );
+
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) {
-            return item;
-        }
+        if (meta == null) return item;
 
-        meta.displayName(Component.text(ready ? "Ready" : "Not Ready", ready ? NamedTextColor.GREEN : NamedTextColor.RED, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
-        meta.lore(List.of(
-                Component.text("Player UUID: " + playerId, NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false)
+        meta.displayName(plugin.tr(player,
+                ready ? "gui.ready.status.ready" : "gui.ready.status.not_ready"
         ));
+
+        meta.lore(List.of(
+                plugin.tr(player,
+                        "gui.ready.status.player_uuid",
+                        Map.of("uuid", playerId.toString())
+                )
+        ));
+
         item.setItemMeta(meta);
         return item;
     }
 
-    private ItemStack createOverflowInfo(int hiddenPlayers) {
+    private ItemStack createOverflowInfo(int hiddenPlayers, Player player) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) {
-            return item;
-        }
 
-        meta.displayName(Component.text("More players not shown", NamedTextColor.YELLOW, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
+        if (meta == null) return item;
+
+        meta.displayName(plugin.tr(player, "gui.ready.overflow.title"));
+
         meta.lore(List.of(
-                Component.text(hiddenPlayers + " additional players are online.", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false)
+                plugin.tr(player, "gui.ready.overflow.info",
+                        Map.of("count", hiddenPlayers))
         ));
+
         item.setItemMeta(meta);
         return item;
     }

@@ -2,8 +2,6 @@ package de.thecoolcraft11.hideAndSeek.command;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommand;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -12,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 public class MapCommand implements MinigameSubcommand {
     private final HideAndSeek plugin;
@@ -39,57 +38,64 @@ public class MapCommand implements MinigameSubcommand {
     @Override
     public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.only_players"));
             return;
         }
 
         if (!sender.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.no_permission"));
             return;
         }
-
 
         if (args.length == 0) {
             plugin.getMapGUI().open(player);
             return;
         }
 
-
         String mapName = args[0];
 
-
         List<String> availableMaps = plugin.getMapManager().getAvailableMaps();
+
         if (!availableMaps.contains(mapName)) {
-            player.sendMessage(Component.text("Map '" + mapName + "' not found!", NamedTextColor.RED));
-            player.sendMessage(Component.text("Available maps: " + String.join(", ", availableMaps), NamedTextColor.GRAY));
+            player.sendMessage(plugin.tr(player, "command.map.not_found",
+                    Map.of("map", mapName)));
+
+            player.sendMessage(plugin.tr(player, "command.map.available",
+                    Map.of("maps", String.join(", ", availableMaps))));
+
             return;
         }
-
 
         World sourceWorld = Bukkit.getWorld(mapName);
+
         if (sourceWorld == null) {
-            player.sendMessage(Component.text("Map world '" + mapName + "' is not loaded!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.map.not_loaded",
+                    Map.of("map", mapName)));
             return;
         }
 
-
         HideAndSeek.getDataController().setCurrentMapName(mapName, true);
-        player.sendMessage(Component.text("Map selected: ", NamedTextColor.GREEN)
-                .append(Component.text(mapName, NamedTextColor.GOLD)));
-        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
+        player.sendMessage(plugin.tr(player, "command.map.selected",
+                Map.of("map", mapName)));
+
+        player.playSound(player.getLocation(),
+                org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
+                1.0f,
+                1.0f);
     }
 
     @Override
     public @Nullable List<String> tabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (args.length == 0) {
+        List<String> maps = plugin.getMapManager().getAvailableMaps();
 
-            return plugin.getMapManager().getAvailableMaps();
+        if (args.length == 0) {
+            return maps;
         }
 
-
-        return plugin.getMapManager().getAvailableMaps().stream()
-                .filter(map -> map.toLowerCase().startsWith(args[0].toLowerCase()))
+        String prefix = args[0].toLowerCase();
+        return maps.stream()
+                .filter(map -> map.toLowerCase().startsWith(prefix))
                 .toList();
     }
 }

@@ -8,7 +8,6 @@ import de.thecoolcraft11.timer.MultiTimerManager.TimerType;
 import de.thecoolcraft11.timer.TimerInstance;
 import de.thecoolcraft11.timer.api.TimerBuilder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -211,8 +210,11 @@ public class TimerManager {
 
                 if (time > 0) {
                     if (time <= 5 || time == 10 || time == 30 || time % 15 == 0) {
-                        Component message = Component.text(time + " seconds remaining!", NamedTextColor.YELLOW);
                         for (var player : Bukkit.getOnlinePlayers()) {
+                            String messageStr = plugin.trText(player, "util.timer.hiding.seconds_remaining",
+                                    java.util.Map.of("time", String.valueOf(time)));
+                            Component message = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
+                                    messageStr);
                             player.sendActionBar(message);
                         }
                     }
@@ -236,8 +238,11 @@ public class TimerManager {
 
                 if (time > 0) {
                     if (time <= 10 || time == 30 || time == 60 || time % 60 == 0) {
-                        Component message = Component.text("Time remaining: " + formatTime(time), NamedTextColor.YELLOW);
                         for (var player : Bukkit.getOnlinePlayers()) {
+                            String messageStr = plugin.trText(player, "util.timer.seeking.time_remaining",
+                                    java.util.Map.of("time", formatTime(time)));
+                            Component message = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
+                                    messageStr);
                             player.sendActionBar(message);
                         }
                     }

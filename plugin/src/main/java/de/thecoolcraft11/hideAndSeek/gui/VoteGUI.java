@@ -8,10 +8,11 @@ import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -34,11 +35,11 @@ public class VoteGUI {
     public void open(Player player) {
         VoteManager voteManager = plugin.getVoteManager();
         if (!voteManager.isVotingEnabled()) {
-            player.sendMessage(Component.text("Voting is disabled.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.vote.errors.disabled"));
             return;
         }
         if (voteManager.isNotLobbyPhase()) {
-            player.sendMessage(Component.text("Voting is only available in the lobby.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.vote.errors.lobby_only"));
             return;
         }
         boolean gamemodeEnabled = voteManager.isGamemodeVotingEnabled();
@@ -63,7 +64,7 @@ public class VoteGUI {
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("vote_menu_" + player.getUniqueId() + "_" + System.currentTimeMillis())
-                .title("Vote")
+                .title(plugin.trText(player, "gui.vote.title"))
                 .rows(totalRows)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -74,7 +75,7 @@ public class VoteGUI {
         Set<UUID> eligibleVoters = voteManager.getOnlineVoterIds();
         int rowOffset = 0;
         if (gamemodeEnabled) {
-            rowOffset = addGamemodeRows(inventory, selectedGamemode, eligibleVoters, voteManager);
+            rowOffset = addGamemodeRows(inventory, player, selectedGamemode, eligibleVoters, voteManager);
         }
         if (separatorRows == 1 && rowOffset < totalRows) {
             fillSeparatorRow(inventory, rowOffset);
@@ -83,12 +84,13 @@ public class VoteGUI {
         int mapEndRowExclusive = totalRows - readinessRows - roleRows;
         if (mapEnabled && rowOffset < mapEndRowExclusive) {
             boolean lockMapVotes = gamemodeEnabled && selectedGamemode == null;
-            addMapRows(inventory, rowOffset, mapEndRowExclusive, displayMaps, selectedMap, selectedGamemode, lockMapVotes, eligibleVoters, voteManager);
+            addMapRows(inventory, player, rowOffset, mapEndRowExclusive, displayMaps, selectedMap, selectedGamemode,
+                    lockMapVotes, eligibleVoters, voteManager);
         }
         if (rolePreferenceEnabled) {
             int roleRow = totalRows - readinessRows - 1;
             if (roleRow >= 0 && roleRow < totalRows) {
-                fillRolePreferenceRow(inventory, roleRow, selectedRole, eligibleVoters, voteManager);
+                fillRolePreferenceRow(inventory, player, roleRow, selectedRole, eligibleVoters, voteManager);
             }
         }
         if (readinessRows == 1) {
@@ -97,7 +99,7 @@ public class VoteGUI {
         plugin.getInventoryFramework().openInventory(player, inventory);
     }
 
-    private int addGamemodeRows(FrameworkInventory inventory, GameModeEnum selectedGamemode, Set<UUID> eligibleVoters, VoteManager voteManager) {
+    private int addGamemodeRows(FrameworkInventory inventory, Player player, GameModeEnum selectedGamemode, Set<UUID> eligibleVoters, VoteManager voteManager) {
         Map<GameModeEnum, Long> modeVotes = voteManager.countGamemodeVotes(eligibleVoters);
         int slot = 0;
         for (GameModeEnum mode : GameModeEnum.values()) {
@@ -106,19 +108,20 @@ public class VoteGUI {
             }
             boolean selected = mode == selectedGamemode;
             long votes = modeVotes.getOrDefault(mode, 0L);
-            InventoryItem modeItem = new InventoryItem(createGamemodeItem(mode, selected, votes));
+            InventoryItem modeItem = new InventoryItem(createGamemodeItem(player, mode, selected, votes));
             final GameModeEnum clickedMode = mode;
             modeItem.setClickHandler((p, item, event, s) -> {
                 voteManager.castGamemodeVote(p.getUniqueId(), clickedMode);
                 boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
                 p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.2f);
-                p.sendMessage(Component.text("Voted gamemode: ", NamedTextColor.GREEN)
-                        .append(Component.text(clickedMode.name(), NamedTextColor.GOLD)));
+                p.sendMessage(plugin.tr(p, "gui.vote.feedback.gamemode_voted",
+                        Map.of("mode",
+                                plugin.trText(p, "gui.vote.gamemode." + clickedMode.name().toLowerCase(Locale.ROOT)))));
                 if (autoReady) {
-                    p.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+                    p.sendMessage(plugin.tr(p, "gui.vote.feedback.vote_complete"));
                 }
                 if (voteManager.tryAutoStartIfEveryoneReady()) {
-                    Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+                    plugin.broadcastTr("gui.vote.feedback.all_ready");
                 }
                 open(p);
                 event.setCancelled(true);
@@ -159,6 +162,7 @@ public class VoteGUI {
 
     private void addMapRows(
             FrameworkInventory inventory,
+            Player player,
             int rowOffset,
             int endRowExclusive,
             List<String> displayMaps,
@@ -175,7 +179,7 @@ public class VoteGUI {
         int startSlot = rowOffset * 9;
         int maxSlots = (endRowExclusive - rowOffset) * 9;
         if (displayMaps.isEmpty()) {
-            InventoryItem noMapItem = new InventoryItem(createNoMapsItem());
+            InventoryItem noMapItem = new InventoryItem(createNoMapsItem(player));
             noMapItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             noMapItem.setAllowTakeout(false);
             noMapItem.setAllowInsert(false);
@@ -189,12 +193,13 @@ public class VoteGUI {
             long votes = mapVotes.getOrDefault(mapName, 0L);
             MapData mapData = plugin.getMapManager().getMapData(mapName);
 
-            InventoryItem mapItem = new InventoryItem(createMapItem(mapName, mapData, selected, votes, lockMapVotes));
+            InventoryItem mapItem = new InventoryItem(
+                    createMapItem(player, mapName, mapData, selected, votes, lockMapVotes));
             final String clickedMap = mapName;
             mapItem.setClickHandler((p, item, event, s) -> {
                 if (voteManager.isGamemodeVotingEnabled() && voteManager.getGamemodeVote(p.getUniqueId()).isEmpty()) {
                     p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                    p.sendMessage(Component.text("Select a gamemode first to vote for maps.", NamedTextColor.RED));
+                    p.sendMessage(plugin.tr(p, "gui.vote.feedback.select_gamemode_first"));
                     event.setCancelled(true);
                     return;
                 }
@@ -205,7 +210,7 @@ public class VoteGUI {
                         currentModeVote).contains(clickedMap);
                 if (!mapStillVisible || !mapAllowedForMode) {
                     p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                    p.sendMessage(Component.text("This map is no longer available for voting.", NamedTextColor.RED));
+                    p.sendMessage(plugin.tr(p, "gui.vote.feedback.map_unavailable"));
                     open(p);
                     event.setCancelled(true);
                     return;
@@ -215,13 +220,13 @@ public class VoteGUI {
                 boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
                 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.1f);
                 String clickedMapDisplay = mapData != null ? mapData.getDisplayName() : clickedMap;
-                p.sendMessage(Component.text("Voted map: ", NamedTextColor.GREEN)
-                        .append(Component.text(clickedMapDisplay, NamedTextColor.GOLD)));
+                p.sendMessage(plugin.tr(p, "gui.vote.feedback.map_voted",
+                        Map.of("map", clickedMapDisplay)));
                 if (autoReady) {
-                    p.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+                    p.sendMessage(plugin.tr(p, "gui.vote.feedback.vote_complete"));
                 }
                 if (voteManager.tryAutoStartIfEveryoneReady()) {
-                    Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+                    plugin.broadcastTr("gui.vote.feedback.all_ready");
                 }
                 open(p);
                 event.setCancelled(true);
@@ -255,14 +260,14 @@ public class VoteGUI {
         headItem.setAllowInsert(false);
         inventory.setItem(headSlot, headItem);
 
-        InventoryItem toggleItem = new InventoryItem(createReadyToggleItem(ready, voteComplete));
+        InventoryItem toggleItem = new InventoryItem(createReadyToggleItem(player, ready, voteComplete));
         toggleItem.setClickHandler((p, item, event, slot) -> {
             boolean newReady = voteManager.toggleReady(p.getUniqueId());
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, newReady ? 1.2f : 0.9f);
-            p.sendMessage(Component.text("Ready status: ", NamedTextColor.GRAY)
-                    .append(Component.text(newReady ? "READY" : "NOT READY", newReady ? NamedTextColor.GREEN : NamedTextColor.RED)));
+            p.sendMessage(plugin.tr(p, "gui.vote.feedback.ready_status",
+                    Map.of("state", plugin.trText(p, newReady ? "common.state.ready" : "common.state.not_ready"))));
             if (voteManager.tryAutoStartIfEveryoneReady()) {
-                Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+                plugin.broadcastTr("gui.vote.feedback.all_ready");
             }
             open(p);
             event.setCancelled(true);
@@ -274,6 +279,7 @@ public class VoteGUI {
 
     private void fillRolePreferenceRow(
             FrameworkInventory inventory,
+            Player player,
             int row,
             PreferredRole selectedRole,
             Set<UUID> eligibleVoters,
@@ -292,18 +298,20 @@ public class VoteGUI {
         int hiderSlot = rowStart + 3;
         int seekerSlot = rowStart + 5;
 
-        InventoryItem hiderItem = new InventoryItem(createRolePreferenceItem(PreferredRole.HIDER, selectedRole == PreferredRole.HIDER, roleVotes.getOrDefault(PreferredRole.HIDER, 0L)));
+        InventoryItem hiderItem = new InventoryItem(
+                createRolePreferenceItem(player, PreferredRole.HIDER, selectedRole == PreferredRole.HIDER,
+                        roleVotes.getOrDefault(PreferredRole.HIDER, 0L)));
         hiderItem.setClickHandler((p, item, event, slot) -> {
             voteManager.castRolePreferenceVote(p.getUniqueId(), PreferredRole.HIDER);
             boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
-            p.sendMessage(Component.text("Preferred role: ", NamedTextColor.GREEN)
-                    .append(Component.text("HIDER", NamedTextColor.GOLD)));
+            p.sendMessage(plugin.tr(p, "gui.vote.feedback.preferred_role",
+                    Map.of("role", plugin.trText(p, "gui.vote.role.hider"))));
             if (autoReady) {
-                p.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+                p.sendMessage(plugin.tr(p, "gui.vote.feedback.vote_complete"));
             }
             if (voteManager.tryAutoStartIfEveryoneReady()) {
-                Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+                plugin.broadcastTr("gui.vote.feedback.all_ready");
             }
             open(p);
             event.setCancelled(true);
@@ -312,18 +320,20 @@ public class VoteGUI {
         hiderItem.setAllowInsert(false);
         inventory.setItem(hiderSlot, hiderItem);
 
-        InventoryItem seekerItem = new InventoryItem(createRolePreferenceItem(PreferredRole.SEEKER, selectedRole == PreferredRole.SEEKER, roleVotes.getOrDefault(PreferredRole.SEEKER, 0L)));
+        InventoryItem seekerItem = new InventoryItem(
+                createRolePreferenceItem(player, PreferredRole.SEEKER, selectedRole == PreferredRole.SEEKER,
+                        roleVotes.getOrDefault(PreferredRole.SEEKER, 0L)));
         seekerItem.setClickHandler((p, item, event, slot) -> {
             voteManager.castRolePreferenceVote(p.getUniqueId(), PreferredRole.SEEKER);
             boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
             p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
-            p.sendMessage(Component.text("Preferred role: ", NamedTextColor.GREEN)
-                    .append(Component.text("SEEKER", NamedTextColor.GOLD)));
+            p.sendMessage(plugin.tr(p, "gui.vote.feedback.preferred_role",
+                    Map.of("role", plugin.trText(p, "gui.vote.role.seeker"))));
             if (autoReady) {
-                p.sendMessage(Component.text("Vote complete. You are now ready.", NamedTextColor.GREEN));
+                p.sendMessage(plugin.tr(p, "gui.vote.feedback.vote_complete"));
             }
             if (voteManager.tryAutoStartIfEveryoneReady()) {
-                Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+                plugin.broadcastTr("gui.vote.feedback.all_ready");
             }
             open(p);
             event.setCancelled(true);
@@ -348,7 +358,7 @@ public class VoteGUI {
         return Math.max(1, (amount + 8) / 9);
     }
 
-    private ItemStack createGamemodeItem(GameModeEnum mode, boolean selected, long votes) {
+    private ItemStack createGamemodeItem(Player player, GameModeEnum mode, boolean selected, long votes) {
         Material icon = switch (mode) {
             case NORMAL -> Material.IRON_SWORD;
             case SMALL -> Material.IRON_NUGGET;
@@ -360,34 +370,37 @@ public class VoteGUI {
         if (meta == null) {
             return item;
         }
-        NamedTextColor nameColor = selected ? NamedTextColor.GREEN : NamedTextColor.AQUA;
-        meta.displayName(Component.text(mode.name(), nameColor, TextDecoration.BOLD)
+        meta.displayName(plugin.tr(player, "gui.vote.gamemode." + mode.name().toLowerCase(Locale.ROOT))
+                .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         if (plugin.getVoteManager().showVoteCounts()) {
-            lore.add(Component.text("Votes: " + votes, NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.votes", Map.of("votes", String.valueOf(votes)))
+                    .decoration(TextDecoration.ITALIC, false));
         }
         if (selected) {
-            lore.add(Component.text("Selected", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.selected").decoration(TextDecoration.ITALIC, false));
         }
-        lore.add(Component.text("Click to vote", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.vote.item.click_to_vote").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         item.setItemMeta(meta);
         applySelectionGlow(item, selected);
         return item;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private ItemStack createSeparatorItem() {
         ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(" ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            meta.displayName(Component.text(" "));
             item.setItemMeta(meta);
+            item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
         }
         return item;
     }
 
-    private ItemStack createMapItem(String mapName, MapData mapData, boolean selected, long votes, boolean lockedNoGamemode) {
+    private ItemStack createMapItem(Player player, String mapName, MapData mapData, boolean selected, long votes, boolean lockedNoGamemode) {
         Material icon = lockedNoGamemode
                 ? Material.DIRT_PATH
                 : plugin.getMapManager().getMapIconMaterial(mapName, Material.GRASS_BLOCK);
@@ -401,18 +414,21 @@ public class VoteGUI {
         meta.displayName(Component.text(displayName, nameColor, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         if (lockedNoGamemode) {
-            lore.add(Component.text("Select a gamemode first to vote for maps.", NamedTextColor.RED)
-                    .decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.locked_for_gamemode").decoration(TextDecoration.ITALIC, false));
         } else {
             if (plugin.getVoteManager().showVoteCounts()) {
-                lore.add(Component.text("Votes: " + votes, NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.vote.item.votes", Map.of("votes", String.valueOf(votes)))
+                        .decoration(TextDecoration.ITALIC, false));
             }
             if (mapData != null) {
                 if (!mapData.getDescription().isEmpty()) {
-                    lore.add(Component.text(mapData.getDescription(), NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+                    lore.add(plugin.tr(player, "gui.vote.item.map_description",
+                                    Map.of("description", mapData.getDescription()))
+                            .decoration(TextDecoration.ITALIC, false));
                 }
                 if (mapData.getSize() != null && !mapData.getSize().isEmpty()) {
-                    lore.add(Component.text("Size: " + mapData.getSize(), NamedTextColor.YELLOW)
+                    lore.add(plugin.tr(player, "gui.vote.item.size",
+                                    Map.of("size", mapData.getSize()))
                             .decoration(TextDecoration.ITALIC, false));
                 }
                 Integer minPlayers = mapData.getMinPlayers();
@@ -432,14 +448,15 @@ public class VoteGUI {
                     if (recommendedPlayers != null) {
                         playerInfo.append(" (recommended: ").append(recommendedPlayers).append(")");
                     }
-                    lore.add(Component.text(playerInfo.toString(), NamedTextColor.LIGHT_PURPLE)
+                    lore.add(plugin.tr(player, "gui.vote.item.players",
+                                    Map.of("players", playerInfo.toString()))
                             .decoration(TextDecoration.ITALIC, false));
                 }
             }
-            lore.add(Component.text("Click to vote", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.click_to_vote").decoration(TextDecoration.ITALIC, false));
         }
         if (selected) {
-            lore.add(Component.text("Selected", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.selected").decoration(TextDecoration.ITALIC, false));
         }
         meta.lore(lore);
         item.setItemMeta(meta);
@@ -447,7 +464,7 @@ public class VoteGUI {
         return item;
     }
 
-    private ItemStack createRolePreferenceItem(PreferredRole role, boolean selected, long votes) {
+    private ItemStack createRolePreferenceItem(Player player, PreferredRole role, boolean selected, long votes) {
         Material icon = role == PreferredRole.HIDER ? Material.LIME_WOOL : Material.RED_WOOL;
         ItemStack item = new ItemStack(icon);
         ItemMeta meta = item.getItemMeta();
@@ -455,19 +472,20 @@ public class VoteGUI {
             return item;
         }
 
-        NamedTextColor nameColor = role == PreferredRole.HIDER ? NamedTextColor.GREEN : NamedTextColor.RED;
-        meta.displayName(Component.text(role.displayName(), nameColor, TextDecoration.BOLD)
+        meta.displayName(plugin.tr(player, "gui.vote.role." + role.name().toLowerCase(Locale.ROOT))
+                .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
         if (plugin.getVoteManager().showVoteCounts()) {
-            lore.add(Component.text("Votes: " + votes, NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.votes", Map.of("votes", String.valueOf(votes)))
+                    .decoration(TextDecoration.ITALIC, false));
         }
-        lore.add(Component.text("Influences the role assignment", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.vote.item.influences_role").decoration(TextDecoration.ITALIC, false));
         if (selected) {
-            lore.add(Component.text("Selected", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.selected").decoration(TextDecoration.ITALIC, false));
         }
-        lore.add(Component.text("Click to vote", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.vote.item.click_to_vote").decoration(TextDecoration.ITALIC, false));
 
         meta.lore(lore);
         item.setItemMeta(meta);
@@ -488,12 +506,13 @@ public class VoteGUI {
         item.setItemMeta(meta);
     }
 
-    private ItemStack createNoMapsItem() {
+    private ItemStack createNoMapsItem(Player player) {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("No maps available :(", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(Component.text("There are no maps configured for this mode.", NamedTextColor.GRAY)
+            meta.displayName(plugin.tr(player, "gui.vote.item.no_maps_available")
+                    .decoration(TextDecoration.ITALIC, false));
+            meta.lore(List.of(plugin.tr(player, "gui.vote.item.no_maps_description")
                     .decoration(TextDecoration.ITALIC, false)));
             item.setItemMeta(meta);
         }
@@ -508,17 +527,21 @@ public class VoteGUI {
         }
 
         meta.setOwningPlayer(player);
-        meta.displayName(Component.text("Your Readiness", NamedTextColor.AQUA, TextDecoration.BOLD)
+        meta.displayName(plugin.tr(player, "gui.vote.item.your_readiness")
+                .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false));
         meta.lore(List.of(
-                Component.text("Status: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(ready ? "READY" : "NOT READY", ready ? NamedTextColor.GREEN : NamedTextColor.RED))
+                plugin.tr(player, "gui.vote.item.status",
+                        Map.of("state", plugin.trText(player,
+                                ready ? "common.state.ready" : "common.state.not_ready"
+                        ))
+                )
         ));
         item.setItemMeta(meta);
         return item;
     }
 
-    private ItemStack createReadyToggleItem(boolean ready, boolean voteComplete) {
+    private ItemStack createReadyToggleItem(Player player, boolean ready, boolean voteComplete) {
         Material material = ready ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
@@ -526,17 +549,19 @@ public class VoteGUI {
             return item;
         }
 
-        meta.displayName(Component.text(ready ? "Ready" : "Not Ready", ready ? NamedTextColor.GREEN : NamedTextColor.RED, TextDecoration.BOLD)
+        meta.displayName(plugin.tr(player, ready ? "common.state.ready" : "common.state.not_ready")
+                .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Click to toggle", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.vote.item.click_to_toggle").decoration(TextDecoration.ITALIC, false));
         if (!voteComplete && plugin.getVoteManager().isVotingEnabled()) {
-            lore.add(Component.text("Voting is not complete yet.", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.text("You can still ready manually.", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.voting_not_complete").decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.vote.item.can_still_ready").decoration(TextDecoration.ITALIC, false));
         }
         meta.lore(lore);
         item.setItemMeta(meta);
         applySelectionGlow(item, ready);
         return item;
     }
+
 }

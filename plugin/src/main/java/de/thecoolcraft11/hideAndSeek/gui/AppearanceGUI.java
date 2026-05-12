@@ -7,6 +7,8 @@ import de.thecoolcraft11.hideAndSeek.block.BlockStateFilter;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -67,13 +69,13 @@ public class AppearanceGUI {
     public void open(Player player, int targetPage) {
         String currentPhase = plugin.getStateManager().getCurrentPhaseId();
         if (!currentPhase.equals("hiding") && !currentPhase.equals("seeking")) {
-            player.sendMessage(Component.text("Appearance editor only available during Hiding or Seeking phases!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.appearance.errors.wrong_phase"));
             return;
         }
 
         Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
         if (chosenBlock == null) {
-            player.sendMessage(Component.text("You must choose a block first!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.appearance.errors.no_block"));
             return;
         }
 
@@ -122,7 +124,10 @@ public class AppearanceGUI {
         for (int i = 0; i < totalPages; i++) {
             FrameworkInventory inv = new InventoryBuilder(plugin.getInventoryFramework())
                     .id("appearance_" + player.getUniqueId() + "_page_" + i)
-                    .title("Customize Appearance (" + (i + 1) + "/" + totalPages + ")")
+                    .title(plugin.trText(player, "gui.appearance.title", Map.of(
+                            "page", String.valueOf(i + 1),
+                            "total", String.valueOf(totalPages)
+                    )))
                     .rows(6)
                     .allowOutsideClicks(false)
                     .allowDrag(false)
@@ -139,7 +144,7 @@ public class AppearanceGUI {
                 inv.setItem(slot, item);
             }
 
-            addFooter(inv);
+            addFooter(player, inv);
             inventories.add(inv);
         }
 
@@ -147,7 +152,8 @@ public class AppearanceGUI {
             FrameworkInventory current = inventories.get(i);
             if (i > 0) {
                 int finalI = i;
-                InventoryItem prevBtn = new InventoryItem(createNavArrow("◀ Previous"));
+                InventoryItem prevBtn = new InventoryItem(
+                        createNavArrow(plugin.trText(player, "gui.appearance.footer.previous")));
                 prevBtn.setClickHandler((p, item, event, slot) -> {
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.8f, 1.0f);
                     plugin.getInventoryFramework().openInventory(p, inventories.get(finalI - 1));
@@ -159,7 +165,8 @@ public class AppearanceGUI {
             }
             if (i < inventories.size() - 1) {
                 int finalI1 = i;
-                InventoryItem nextBtn = new InventoryItem(createNavArrow("Next ▶"));
+                InventoryItem nextBtn = new InventoryItem(
+                        createNavArrow(plugin.trText(player, "gui.appearance.footer.next")));
                 nextBtn.setClickHandler((p, item, event, slot) -> {
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.8f, 1.0f);
                     plugin.getInventoryFramework().openInventory(p, inventories.get(finalI1 + 1));
@@ -194,7 +201,7 @@ public class AppearanceGUI {
 
             int myPage = allItems.size() / 45;
 
-            InventoryItem variantItem = new InventoryItem(createVariantItem(variant, isSelected));
+            InventoryItem variantItem = new InventoryItem(createVariantItem(player, variant, isSelected));
             variantItem.setClickHandler((p, item, event, slot) -> {
                 BlockData previousData = HideAndSeek.getDataController().getChosenBlockData(p.getUniqueId());
                 BlockData newData = variant.createBlockData();
@@ -350,14 +357,14 @@ public class AppearanceGUI {
         while (items.size() % 9 != 0) items.add(new InventoryItem(new ItemStack(Material.AIR)));
     }
 
-    private void addFooter(FrameworkInventory inv) {
+    private void addFooter(Player player, FrameworkInventory inv) {
         ItemStack sep = createSeparatorItem();
         for (int i = 45; i < 54; i++) inv.setItem(i, new InventoryItem(sep));
-        inv.setItem(49, new InventoryItem(createConfirmItem()).onClick((p, t) -> p.closeInventory()));
+        inv.setItem(49, new InventoryItem(createConfirmItem(player)).onClick((p, t) -> p.closeInventory()));
     }
 
 
-    private ItemStack createVariantItem(Material material, boolean selected) {
+    private ItemStack createVariantItem(Player player, Material material, boolean selected) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -365,7 +372,7 @@ public class AppearanceGUI {
 
             if (selected) {
                 meta.setEnchantmentGlintOverride(true);
-                meta.lore(List.of(Component.text("Currently Selected", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+                meta.lore(List.of(plugin.tr(player, "common.state.selected").decoration(TextDecoration.ITALIC, false)));
             }
             item.setItemMeta(meta);
         }
@@ -391,10 +398,13 @@ public class AppearanceGUI {
             String prev = possible.isEmpty() ? "N/A" : possible.get((index - 1 + possible.size()) % possible.size());
 
             meta.lore(Arrays.asList(
-                    Component.text("Current: " + val, NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false),
-                    Component.text(""),
-                    Component.text("Left-Click: Cycle to " + next, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Right-Click: Cycle to " + prev, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                    plugin.tr(player, "gui.appearance.states.current", Map.of("value", val)).decoration(
+                            TextDecoration.ITALIC, false),
+                    Component.empty(),
+                    plugin.tr(player, "gui.appearance.states.cycle_next", Map.of("value", next)).decoration(
+                            TextDecoration.ITALIC, false),
+                    plugin.tr(player, "gui.appearance.states.cycle_prev", Map.of("value", prev)).decoration(
+                            TextDecoration.ITALIC, false)
             ));
 
             item.setItemMeta(meta);
@@ -429,21 +439,24 @@ public class AppearanceGUI {
         return item;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private ItemStack createSeparatorItem() {
         ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(Component.text(" "));
             item.setItemMeta(meta);
+            item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
         }
         return item;
     }
 
-    private ItemStack createConfirmItem() {
+    private ItemStack createConfirmItem(Player player) {
         ItemStack item = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Confirm", NamedTextColor.GREEN, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+            meta.displayName(
+                    plugin.tr(player, "gui.appearance.footer.confirm").decoration(TextDecoration.ITALIC, false));
             item.setItemMeta(meta);
         }
         return item;

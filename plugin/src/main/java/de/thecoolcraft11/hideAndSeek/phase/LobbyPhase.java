@@ -12,7 +12,7 @@ import de.thecoolcraft11.hideAndSeek.vote.VotingResult;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.game.GamePhase;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -66,8 +66,9 @@ public class LobbyPhase implements GamePhase {
         assignRoles(plugin);
 
 
-        Component message = Component.text("Hide and Seek is starting!", NamedTextColor.GOLD);
         for (Player player : Bukkit.getOnlinePlayers()) {
+            String msgStr = plugin.trText(player, "phase.lobby.starting");
+            Component message = MiniMessage.miniMessage().deserialize(msgStr);
             player.sendMessage(message);
         }
     }
@@ -195,8 +196,8 @@ public class LobbyPhase implements GamePhase {
                     plugin.getTeamManager().addRole(player, "seeker");
 
                     Title title = Title.title(
-                            Component.text("You are a SEEKER!", NamedTextColor.RED),
-                            Component.text("Find and tag the hiders!", NamedTextColor.YELLOW),
+                            plugin.tr(player, "phase.lobby.seeker_title"),
+                            plugin.tr(player, "phase.lobby.seeker_subtitle"),
                             Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
                     );
                     player.showTitle(title);
@@ -207,8 +208,8 @@ public class LobbyPhase implements GamePhase {
                     plugin.getTeamManager().addRole(player, "hider");
 
                     Title title = Title.title(
-                            Component.text("You are a HIDER!", NamedTextColor.GREEN),
-                            Component.text("Hide from the seekers!", NamedTextColor.YELLOW),
+                            plugin.tr(player, "phase.lobby.hider_title"),
+                            plugin.tr(player, "phase.lobby.hider_subtitle"),
                             Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
                     );
                     player.showTitle(title);
@@ -242,8 +243,8 @@ public class LobbyPhase implements GamePhase {
                         HideAndSeek.getDataController().addSeeker(player.getUniqueId());
                         plugin.getTeamManager().addRole(player, "seeker");
                         Title title = Title.title(
-                                Component.text("You are a SEEKER!", NamedTextColor.RED),
-                                Component.text("Find and tag the hiders!", NamedTextColor.YELLOW),
+                                plugin.tr(player, "phase.lobby.seeker_title"),
+                                plugin.tr(player, "phase.lobby.seeker_subtitle"),
                                 Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
                         );
                         player.showTitle(title);
@@ -253,8 +254,8 @@ public class LobbyPhase implements GamePhase {
                         HideAndSeek.getDataController().addHider(player.getUniqueId());
                         plugin.getTeamManager().addRole(player, "hider");
                         Title title = Title.title(
-                                Component.text("You are a HIDER!", NamedTextColor.GREEN),
-                                Component.text("Hide from the seekers!", NamedTextColor.YELLOW),
+                                plugin.tr(player, "phase.lobby.hider_title"),
+                                plugin.tr(player, "phase.lobby.hider_subtitle"),
                                 Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
                         );
                         player.showTitle(title);
@@ -281,8 +282,8 @@ public class LobbyPhase implements GamePhase {
                     plugin.getTeamManager().addRole(player, "hider");
 
                     Title title = Title.title(
-                            Component.text("You are a HIDER!", NamedTextColor.GREEN),
-                            Component.text("Hide from the seekers!", NamedTextColor.YELLOW),
+                            plugin.tr(player, "phase.lobby.hider_title"),
+                            plugin.tr(player, "phase.lobby.hider_subtitle"),
                             Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
                     );
                     player.showTitle(title);
@@ -293,8 +294,8 @@ public class LobbyPhase implements GamePhase {
                     plugin.getTeamManager().addRole(player, "seeker");
 
                     Title title = Title.title(
-                            Component.text("You are a SEEKER!", NamedTextColor.RED),
-                            Component.text("Find and tag the hiders!", NamedTextColor.YELLOW),
+                            plugin.tr(player, "phase.lobby.seeker_title"),
+                            plugin.tr(player, "phase.lobby.seeker_subtitle"),
                             Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
                     );
                     player.showTitle(title);

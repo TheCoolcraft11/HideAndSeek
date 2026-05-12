@@ -227,7 +227,7 @@ public final class UnstuckManager {
         long remaining = getRemainingCooldownMs(player.getUniqueId());
         if (remaining > 0L) {
             long secondsLeft = (long) Math.ceil(remaining / 1000.0);
-            return UnstuckResult.fail("Unstuck is on cooldown for " + secondsLeft + "s.");
+            return UnstuckResult.fail("command.unstuck.cooldown", java.util.Map.of("seconds", secondsLeft));
         }
 
         Location current = player.getLocation();
@@ -239,38 +239,41 @@ public final class UnstuckManager {
                         forcedSpawn,
                         UnstuckMethod.SPAWN,
                         getSpawnFallbackCooldownSeconds(),
-                        "Too many consecutive unstuck attempts. Sending you to spawn."
+                        "command.unstuck.too_many_attempts"
                 );
             }
-            return UnstuckResult.fail("Forced spawn fallback is not safe right now.");
+            return UnstuckResult.fail("command.unstuck.spawn_not_safe_fallback");
         }
 
         Location fromHistory = findHistoryRollback(player, current);
         if (fromHistory != null) {
-            return UnstuckResult.success(fromHistory, UnstuckMethod.HISTORY, getDefaultCooldownSeconds(), "Teleported to your last safe position.");
+            return UnstuckResult.success(fromHistory, UnstuckMethod.HISTORY, getDefaultCooldownSeconds(),
+                    "command.unstuck.success.history");
         }
 
         int nearbyScanRadius = Math.max(1, getIntSetting("game.unstuck.scan-radius", 3));
         Location nearby = findNearbySafeGround(player, current, nearbyScanRadius, current);
         if (nearby != null) {
-            return UnstuckResult.success(nearby, UnstuckMethod.NEARBY, getDefaultCooldownSeconds(), "Teleported to a nearby safe block.");
+            return UnstuckResult.success(nearby, UnstuckMethod.NEARBY, getDefaultCooldownSeconds(),
+                    "command.unstuck.success.nearby");
         }
 
         if (!isPlayerStationary(player)) {
-            return UnstuckResult.fail("No safe position found yet. Stay still for a few seconds and retry.");
+            return UnstuckResult.fail("command.unstuck.no_safe_position_yet");
         }
 
         double seekerRange = getDoubleSetting("game.unstuck.seeker-range", 15.0);
         if (hasNearbyOpponentsAt(player, spawn, seekerRange)) {
-            return UnstuckResult.fail("Spawn is not safe right now.");
+            return UnstuckResult.fail("command.unstuck.spawn_not_safe");
         }
 
         Location safeSpawn = findSpawnFallbackLocation(player, spawn, current);
         if (safeSpawn == null) {
-            return UnstuckResult.fail("No safe unstuck location was found.");
+            return UnstuckResult.fail("command.unstuck.no_safe_location");
         }
 
-        return UnstuckResult.success(safeSpawn, UnstuckMethod.SPAWN, getSpawnFallbackCooldownSeconds(), "Teleported to spawn as a last resort.");
+        return UnstuckResult.success(safeSpawn, UnstuckMethod.SPAWN, getSpawnFallbackCooldownSeconds(),
+                "command.unstuck.success.spawn_fallback");
     }
 
     private void recordAllPlayersInSeeking() {
@@ -627,13 +630,18 @@ public final class UnstuckManager {
     }
 
     public record UnstuckResult(boolean success, @Nullable Location location, @Nullable UnstuckMethod method,
-                                int cooldownSeconds, @Nullable String message) {
-        public static UnstuckResult fail(String message) {
-            return new UnstuckResult(false, null, null, 0, message);
+                                int cooldownSeconds, @Nullable String messageKey,
+                                java.util.Map<String, Object> placeholders) {
+        public static UnstuckResult fail(String messageKey) {
+            return new UnstuckResult(false, null, null, 0, messageKey, java.util.Map.of());
         }
 
-        public static UnstuckResult success(Location location, UnstuckMethod method, int cooldownSeconds, String message) {
-            return new UnstuckResult(true, location, method, cooldownSeconds, message);
+        public static UnstuckResult fail(String messageKey, java.util.Map<String, Object> placeholders) {
+            return new UnstuckResult(false, null, null, 0, messageKey, placeholders);
+        }
+
+        public static UnstuckResult success(Location location, UnstuckMethod method, int cooldownSeconds, String messageKey) {
+            return new UnstuckResult(true, location, method, cooldownSeconds, messageKey, java.util.Map.of());
         }
     }
 

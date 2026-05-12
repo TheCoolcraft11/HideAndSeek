@@ -9,7 +9,6 @@ import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -41,7 +40,7 @@ public class PlayerStatsGUI {
     private void open(Player viewer, Player target, StatsPage page) {
         PlayerStatsService service = PlayerStatsService.getActive();
         if (service == null) {
-            viewer.sendMessage(Component.text("Stats service is not available.", NamedTextColor.RED));
+            viewer.sendMessage(plugin.tr(viewer, "gui.stats.service_unavailable"));
             return;
         }
 
@@ -49,35 +48,32 @@ public class PlayerStatsGUI {
 
         FrameworkInventory inv = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("player_stats_" + viewer.getUniqueId() + "_" + target.getUniqueId() + "_" + page.name())
-                .title(page == StatsPage.OVERVIEW ? "Stats: " + target.getName()
-                        : "Stats: " + target.getName() + " » " + formatPageName(page))
+                .title(page == StatsPage.OVERVIEW
+                        ? plugin.trText(viewer, "gui.stats.title", Map.of("player", target.getName()))
+                        : plugin.trText(viewer, "gui.stats.title_with_page",
+                        Map.of("player", target.getName(), "page", formatPageName(viewer, page))))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
                 .allowPlayerInventoryInteraction(false)
                 .build();
 
-
         fillBorder(inv);
 
-
-        inv.setItem(0, buildPlayerHead(target, stats));
-
+        inv.setItem(0, buildPlayerHead(viewer, target, stats));
 
         switch (page) {
-            case OVERVIEW -> fillOverview(inv, stats);
-            case COMBAT -> fillCombat(inv, stats);
-            case ITEMS -> fillItems(inv, stats);
-            case MAPS -> fillMaps(inv, stats);
-            case PERKS -> fillPerks(inv, stats);
+            case OVERVIEW -> fillOverview(inv, viewer, stats);
+            case COMBAT -> fillCombat(inv, viewer, stats);
+            case ITEMS -> fillItems(inv, viewer, stats);
+            case MAPS -> fillMaps(inv, viewer, stats);
+            case PERKS -> fillPerks(inv, viewer, stats);
         }
-
 
         buildTabs(inv, viewer, target, page);
 
-
-        InventoryItem closeBtn = new InventoryItem(utility(Material.BARRIER, "Close",
-                NamedTextColor.RED, List.of()));
+        InventoryItem closeBtn = new InventoryItem(
+                utility(Material.BARRIER, plugin.tr(viewer, "gui.stats.close"), List.of()));
         closeBtn.setClickHandler((p, item, event, slot) -> {
             p.closeInventory();
             event.setCancelled(true);
@@ -90,68 +86,76 @@ public class PlayerStatsGUI {
     }
 
     private void fillOverview(FrameworkInventory inv,
+                              Player viewer,
                               PlayerStatsService.PlayerStatsRecord stats) {
-
         long totalGames = stats.hiderWins + stats.seekerWins + stats.totalHiderDeaths;
         double winRate = totalGames == 0 ? 0.0 : (double) (stats.hiderWins + stats.seekerWins) / totalGames * 100.0;
 
         List<Component> wlLore = List.of(
-                lore("Hider Wins: ", NamedTextColor.GREEN, stats.hiderWins),
-                lore("Seeker Wins: ", NamedTextColor.RED, stats.seekerWins),
-                lore("Hider Deaths: ", NamedTextColor.GRAY, stats.totalHiderDeaths),
+                plugin.tr(viewer, "gui.stats.overview.hider_wins", Map.of("value", stats.hiderWins)),
+                plugin.tr(viewer, "gui.stats.overview.seeker_wins", Map.of("value", stats.seekerWins)),
+                plugin.tr(viewer, "gui.stats.overview.hider_deaths", Map.of("value", stats.totalHiderDeaths)),
                 Component.empty(),
-                lore("Win Rate: ", NamedTextColor.GOLD, String.format("%.1f%%", winRate))
+                plugin.tr(viewer, "gui.stats.overview.win_rate", Map.of("value", String.format("%.1f%%", winRate)))
         );
-        inv.setItem(10, stat(Material.LIME_STAINED_GLASS, "Win / Loss", NamedTextColor.GREEN, wlLore));
+        inv.setItem(10, stat(Material.LIME_STAINED_GLASS, plugin.tr(viewer, "gui.stats.overview.win_loss"), wlLore));
 
 
         List<Component> roundsLore = List.of(
-                lore("Hider Rounds: ", NamedTextColor.AQUA, stats.hiderRoundsPlayed),
-                lore("Seeker Rounds: ", NamedTextColor.RED, stats.seekerRoundsPlayed),
-                lore("Last Hider Standing: ", NamedTextColor.GOLD, stats.totalRoundsAsLastHider)
+                plugin.tr(viewer, "gui.stats.overview.hider_rounds", Map.of("value", stats.hiderRoundsPlayed)),
+                plugin.tr(viewer, "gui.stats.overview.seeker_rounds", Map.of("value", stats.seekerRoundsPlayed)),
+                plugin.tr(viewer, "gui.stats.overview.last_hider_standing",
+                        Map.of("value", stats.totalRoundsAsLastHider))
         );
-        inv.setItem(12, stat(Material.BOOK, "Rounds Played", NamedTextColor.AQUA, roundsLore));
+        inv.setItem(12, stat(Material.BOOK, plugin.tr(viewer, "gui.stats.overview.rounds_played"), roundsLore));
 
 
         long totalSurvivalSec = stats.hiderSurvivalMs / 1000;
         long longestSurvivalSec = stats.longestHiderSurvivalMs / 1000;
         List<Component> survivalLore = List.of(
-                lore("Total Survival: ", NamedTextColor.GREEN, formatDuration(totalSurvivalSec)),
-                lore("Longest Survival: ", NamedTextColor.GOLD, formatDuration(longestSurvivalSec))
+                plugin.tr(viewer, "gui.stats.overview.total_survival",
+                        Map.of("value", formatDuration(viewer, totalSurvivalSec))),
+                plugin.tr(viewer, "gui.stats.overview.longest_survival",
+                        Map.of("value", formatDuration(viewer, longestSurvivalSec)))
         );
-        inv.setItem(14, stat(Material.CLOCK, "Survival Time", NamedTextColor.YELLOW, survivalLore));
+        inv.setItem(14, stat(Material.CLOCK, plugin.tr(viewer, "gui.stats.overview.survival_time"), survivalLore));
 
 
         long totalPlaySec = stats.totalPlaytimeMs / 1000;
         List<Component> playtimeLore = List.of(
-                lore("Total Playtime: ", NamedTextColor.AQUA, formatDuration(totalPlaySec))
+                plugin.tr(viewer, "gui.stats.overview.total_playtime",
+                        Map.of("value", formatDuration(viewer, totalPlaySec)))
         );
-        inv.setItem(16, stat(Material.COMPASS, "Playtime", NamedTextColor.AQUA, playtimeLore));
+        inv.setItem(16, stat(Material.COMPASS, plugin.tr(viewer, "gui.stats.overview.playtime"), playtimeLore));
 
 
         List<Component> ecoLore = List.of(
-                lore("Points Earned: ", NamedTextColor.GOLD, stats.totalPointsEarned),
-                lore("Coins Earned: ", NamedTextColor.YELLOW, stats.totalCoinsEarned)
+                plugin.tr(viewer, "gui.stats.overview.points_earned", Map.of("value", stats.totalPointsEarned)),
+                plugin.tr(viewer, "gui.stats.overview.coins_earned", Map.of("value", stats.totalCoinsEarned))
         );
-        inv.setItem(28, stat(Material.GOLD_INGOT, "Economy", NamedTextColor.GOLD, ecoLore));
+        inv.setItem(28, stat(Material.GOLD_INGOT, plugin.tr(viewer, "gui.stats.overview.economy"), ecoLore));
 
 
         List<Component> tauntLore = List.of(
-                lore("Total Taunts: ", NamedTextColor.LIGHT_PURPLE, stats.totalTauntsUsed)
+                plugin.tr(viewer, "gui.stats.overview.total_taunts", Map.of("value", stats.totalTauntsUsed))
         );
-        inv.setItem(30, stat(Material.CAT_SPAWN_EGG, "Taunts Used", NamedTextColor.LIGHT_PURPLE, tauntLore));
+        inv.setItem(30, stat(Material.CAT_SPAWN_EGG, plugin.tr(viewer, "gui.stats.overview.taunts_used"), tauntLore));
 
         List<Component> modeLore = new ArrayList<>();
         if (stats.gameModesPlayed.isEmpty()) {
-            modeLore.add(Component.text("No games played yet.", NamedTextColor.DARK_GRAY)
-                    .decoration(TextDecoration.ITALIC, false));
+            modeLore.add(plugin.tr(viewer, "gui.stats.overview.no_games_played"));
         } else {
             for (Map.Entry<String, Long> e : stats.gameModesPlayed.entrySet()) {
-                modeLore.add(lore(e.getKey() + ": ", NamedTextColor.AQUA,
-                        e.getValue() + " game" + (e.getValue() == 1 ? "" : "s")));
+                modeLore.add(plugin.tr(viewer, "gui.stats.overview.game_mode_entry", Map.of(
+                        "mode", e.getKey(),
+                        "count", e.getValue(),
+                        "suffix", e.getValue() == 1
+                                ? plugin.trText(viewer, "gui.stats.overview.game_singular")
+                                : plugin.trText(viewer, "gui.stats.overview.games_plural")
+                )));
             }
         }
-        inv.setItem(32, stat(Material.COMPASS, "Game Modes", NamedTextColor.AQUA, modeLore));
+        inv.setItem(32, stat(Material.COMPASS, plugin.tr(viewer, "gui.stats.overview.game_modes"), modeLore));
 
 
         long hiddenSec = stats.totalHiddenInBlockModeMs / 1000;
@@ -159,70 +163,76 @@ public class PlayerStatsGUI {
         long totalBlockSec = hiddenSec + unhiddenSec;
         double hiddenPct = totalBlockSec == 0 ? 0.0 : (double) hiddenSec / totalBlockSec * 100.0;
         List<Component> blockLore = List.of(
-                lore("Time Hidden: ", NamedTextColor.GREEN, formatDuration(hiddenSec)),
-                lore("Time Exposed: ", NamedTextColor.RED, formatDuration(unhiddenSec)),
-                lore("Hidden Rate: ", NamedTextColor.GOLD, String.format("%.1f%%", hiddenPct))
+                plugin.tr(viewer, "gui.stats.overview.time_hidden", Map.of("value", formatDuration(viewer, hiddenSec))),
+                plugin.tr(viewer, "gui.stats.overview.time_exposed",
+                        Map.of("value", formatDuration(viewer, unhiddenSec))),
+                plugin.tr(viewer, "gui.stats.overview.hidden_rate", Map.of("value", String.format("%.1f%%", hiddenPct)))
         );
-        inv.setItem(34, stat(Material.GRASS_BLOCK, "Block Mode", NamedTextColor.GREEN, blockLore));
+        inv.setItem(34, stat(Material.GRASS_BLOCK, plugin.tr(viewer, "gui.stats.overview.block_mode"), blockLore));
     }
 
 
     private void fillCombat(FrameworkInventory inv,
+                            Player viewer,
                             PlayerStatsService.PlayerStatsRecord stats) {
 
         List<Component> killsLore = List.of(
-                lore("Total Kills: ", NamedTextColor.RED, stats.totalSeekerKills),
-                lore("Best in One Round: ", NamedTextColor.GOLD, stats.mostKillsInASeekerRound)
+                plugin.tr(viewer, "gui.stats.combat.total_kills", Map.of("value", stats.totalSeekerKills)),
+                plugin.tr(viewer, "gui.stats.combat.best_round", Map.of("value", stats.mostKillsInASeekerRound))
         );
-        inv.setItem(10, stat(Material.IRON_SWORD, "Seeker Kills", NamedTextColor.RED, killsLore));
+        inv.setItem(10, stat(Material.IRON_SWORD, plugin.tr(viewer, "gui.stats.combat.seeker_kills"), killsLore));
 
 
         List<Component> damageLore = List.of(
-                lore("Total Damage: ", NamedTextColor.GOLD, String.format("%.1f", stats.totalDamageDealt))
+                plugin.tr(viewer, "gui.stats.combat.total_damage",
+                        Map.of("value", String.format("%.1f", stats.totalDamageDealt)))
         );
-        inv.setItem(12, stat(Material.GOLDEN_SWORD, "Damage Dealt", NamedTextColor.GOLD, damageLore));
+        inv.setItem(12, stat(Material.GOLDEN_SWORD, plugin.tr(viewer, "gui.stats.combat.damage_dealt"), damageLore));
 
 
         List<Component> deathsLore = List.of(
-                lore("Times Found: ", NamedTextColor.GRAY, stats.totalHiderDeaths)
+                plugin.tr(viewer, "gui.stats.combat.times_found", Map.of("value", stats.totalHiderDeaths))
         );
-        inv.setItem(14, stat(Material.SKELETON_SKULL, "Hider Deaths", NamedTextColor.GRAY, deathsLore));
+        inv.setItem(14, stat(Material.SKELETON_SKULL, plugin.tr(viewer, "gui.stats.combat.hider_deaths"), deathsLore));
 
 
         double kd = stats.totalHiderDeaths == 0
                 ? stats.totalSeekerKills
                 : (double) stats.totalSeekerKills / stats.totalHiderDeaths;
         List<Component> kdLore = List.of(
-                lore("Kills: ", NamedTextColor.GREEN, stats.totalSeekerKills),
-                lore("Deaths: ", NamedTextColor.RED, stats.totalHiderDeaths),
+                plugin.tr(viewer, "gui.stats.combat.kills", Map.of("value", stats.totalSeekerKills)),
+                plugin.tr(viewer, "gui.stats.combat.deaths", Map.of("value", stats.totalHiderDeaths)),
                 Component.empty(),
-                lore("K/D: ", NamedTextColor.GOLD, String.format("%.2f", kd))
+                plugin.tr(viewer, "gui.stats.combat.kd", Map.of("value", String.format("%.2f", kd)))
         );
-        inv.setItem(16, stat(Material.SHIELD, "K/D Ratio", NamedTextColor.GOLD, kdLore));
+        inv.setItem(16, stat(Material.SHIELD, plugin.tr(viewer, "gui.stats.combat.kd_ratio"), kdLore));
 
 
         List<Component> survivalLore = List.of(
-                lore("Total as Hider: ", NamedTextColor.GREEN, formatDuration(stats.hiderSurvivalMs / 1000)),
-                lore("Longest Round: ", NamedTextColor.GOLD, formatDuration(stats.longestHiderSurvivalMs / 1000))
+                plugin.tr(viewer, "gui.stats.combat.total_as_hider",
+                        Map.of("value", formatDuration(viewer, stats.hiderSurvivalMs / 1000))),
+                plugin.tr(viewer, "gui.stats.combat.longest_round",
+                        Map.of("value", formatDuration(viewer, stats.longestHiderSurvivalMs / 1000)))
         );
-        inv.setItem(28, stat(Material.CLOCK, "Hider Survival", NamedTextColor.GREEN, survivalLore));
+        inv.setItem(28, stat(Material.CLOCK, plugin.tr(viewer, "gui.stats.combat.hider_survival"), survivalLore));
 
 
         List<Component> lastHiderLore = List.of(
-                lore("Times Last Hider: ", NamedTextColor.LIGHT_PURPLE, stats.totalRoundsAsLastHider)
+                plugin.tr(viewer, "gui.stats.combat.times_last_hider", Map.of("value", stats.totalRoundsAsLastHider))
         );
         inv.setItem(30,
-                stat(Material.TOTEM_OF_UNDYING, "Last Hider Standing", NamedTextColor.LIGHT_PURPLE, lastHiderLore));
+                stat(Material.TOTEM_OF_UNDYING, plugin.tr(viewer, "gui.stats.combat.last_hider_standing"),
+                        lastHiderLore));
     }
 
 
     private void fillItems(FrameworkInventory inv,
+                           Player viewer,
                            PlayerStatsService.PlayerStatsRecord stats) {
         if (stats.items.isEmpty()) {
             InventoryItem empty = new InventoryItem(utility(Material.GRAY_STAINED_GLASS_PANE,
-                    "No Item Data", NamedTextColor.DARK_GRAY,
-                    List.of(Component.text("No items have been tracked yet.", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false))));
+                    plugin.tr(viewer, "gui.stats.items.no_data"),
+                    List.of(plugin.tr(viewer, "gui.stats.items.no_tracked"))));
             empty.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             empty.setAllowTakeout(false);
             empty.setAllowInsert(false);
@@ -248,11 +258,12 @@ public class PlayerStatsGUI {
             Material icon = resolveItemIcon(itemId);
 
             List<Component> lore = List.of(
-                    lore("Times Equipped: ", NamedTextColor.AQUA, usage.equipped),
-                    lore("Times Used: ", NamedTextColor.GREEN, usage.used)
+                    plugin.tr(viewer, "gui.stats.items.times_equipped", Map.of("value", usage.equipped)),
+                    plugin.tr(viewer, "gui.stats.items.times_used", Map.of("value", usage.used))
             );
 
-            InventoryItem itemDisplay = stat(icon, displayName, NamedTextColor.YELLOW, lore);
+            InventoryItem itemDisplay = stat(icon,
+                    plugin.tr(viewer, "gui.stats.item.display_name", Map.of("name", displayName)), lore);
             itemDisplay.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             itemDisplay.setAllowTakeout(false);
             itemDisplay.setAllowInsert(false);
@@ -273,12 +284,12 @@ public class PlayerStatsGUI {
     }
 
     private void fillMaps(FrameworkInventory inv,
+                          Player viewer,
                           PlayerStatsService.PlayerStatsRecord stats) {
         if (stats.mapsPlayed.isEmpty()) {
             InventoryItem empty = new InventoryItem(utility(Material.GRAY_STAINED_GLASS_PANE,
-                    "No Map Data", NamedTextColor.DARK_GRAY,
-                    List.of(Component.text("No maps have been tracked yet.", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false))));
+                    plugin.tr(viewer, "gui.stats.maps.no_data"),
+                    List.of(plugin.tr(viewer, "gui.stats.maps.no_tracked"))));
             empty.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             empty.setAllowTakeout(false);
             empty.setAllowInsert(false);
@@ -307,11 +318,12 @@ public class PlayerStatsGUI {
                     mapName).getDisplayName() : mapName;
 
             List<Component> lore = List.of(
-                    lore("Times Played: ", NamedTextColor.AQUA, games),
-                    lore("Share: ", NamedTextColor.GOLD, String.format("%.1f%%", pct))
+                    plugin.tr(viewer, "gui.stats.maps.times_played", Map.of("value", games)),
+                    plugin.tr(viewer, "gui.stats.maps.share", Map.of("value", String.format("%.1f%%", pct)))
             );
 
-            InventoryItem mapItem = stat(icon, prettyName, NamedTextColor.GREEN, lore);
+            InventoryItem mapItem = stat(icon,
+                    plugin.tr(viewer, "gui.stats.item.display_name", Map.of("name", prettyName)), lore);
             mapItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             mapItem.setAllowTakeout(false);
             mapItem.setAllowInsert(false);
@@ -320,6 +332,7 @@ public class PlayerStatsGUI {
     }
 
     private void fillPerks(FrameworkInventory inv,
+                           Player viewer,
                            PlayerStatsService.PlayerStatsRecord stats) {
 
         int slot = 10;
@@ -332,12 +345,11 @@ public class PlayerStatsGUI {
                 String perkName = humanizeItemId(entry.getKey());
 
                 List<Component> lore = List.of(
-                        lore("Times Used: ", NamedTextColor.AQUA, entry.getValue())
+                        plugin.tr(viewer, "gui.stats.perks.times_used", Map.of("value", entry.getValue()))
                 );
 
                 inv.setItem(slot++, stat(Material.ENCHANTED_BOOK,
-                        "Perk: " + perkName,
-                        NamedTextColor.LIGHT_PURPLE,
+                        plugin.tr(viewer, "gui.stats.perks.name", Map.of("perk", perkName)),
                         lore));
             }
         }
@@ -347,22 +359,25 @@ public class PlayerStatsGUI {
 
     private void buildTabs(FrameworkInventory inv, Player viewer, Player target, StatsPage active) {
 
-        inv.setItem(45, tab(viewer, target, active, StatsPage.OVERVIEW, Material.BOOK, "Overview"));
-        inv.setItem(46, tab(viewer, target, active, StatsPage.COMBAT, Material.IRON_SWORD, "Combat"));
-        inv.setItem(47, tab(viewer, target, active, StatsPage.ITEMS, Material.BLAZE_POWDER, "Items"));
-        inv.setItem(48, tab(viewer, target, active, StatsPage.MAPS, Material.MAP, "Maps"));
-        inv.setItem(49, tab(viewer, target, active, StatsPage.PERKS, Material.LIGHT, "Perks"));
+        inv.setItem(45, tab(viewer, target, active, StatsPage.OVERVIEW, Material.BOOK));
+        inv.setItem(46, tab(viewer, target, active, StatsPage.COMBAT, Material.IRON_SWORD));
+        inv.setItem(47, tab(viewer, target, active, StatsPage.ITEMS, Material.BLAZE_POWDER));
+        inv.setItem(48, tab(viewer, target, active, StatsPage.MAPS, Material.MAP));
+        inv.setItem(49, tab(viewer, target, active, StatsPage.PERKS, Material.LIGHT));
     }
 
 
     private InventoryItem tab(Player viewer, Player target, StatsPage active,
-                              StatsPage page, Material icon, String label) {
+                              StatsPage page, Material icon) {
         boolean isActive = active == page;
+        Component label = plugin.tr(viewer, page.tabKey());
+        if (isActive) {
+            label = label.append(plugin.tr(viewer, "gui.stats.tabs.selected_suffix"));
+        }
+
         ItemStack stack = utility(icon,
-                label + (isActive ? " (Selected)" : ""),
-                isActive ? NamedTextColor.GREEN : NamedTextColor.YELLOW,
-                List.of(Component.text(isActive ? "Current tab" : "Click to open", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false)));
+                label,
+                List.of(plugin.tr(viewer, isActive ? "gui.stats.tabs.current" : "gui.stats.tabs.click_to_open")));
 
         if (isActive) {
             ItemMeta meta = stack.getItemMeta();
@@ -384,16 +399,17 @@ public class PlayerStatsGUI {
         return btn;
     }
 
-    private InventoryItem buildPlayerHead(Player target, PlayerStatsService.PlayerStatsRecord stats) {
+    private InventoryItem buildPlayerHead(Player viewer, Player target, PlayerStatsService.PlayerStatsRecord stats) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         if (head.getItemMeta() instanceof SkullMeta skullMeta) {
             skullMeta.setOwningPlayer(target);
-            skullMeta.displayName(Component.text(target.getName(), NamedTextColor.AQUA, TextDecoration.BOLD)
+            skullMeta.displayName(plugin.tr(viewer, "gui.stats.player_head.name", Map.of("player", target.getName()))
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = List.of(
-                    lore("Hider Wins: ", NamedTextColor.GREEN, stats.hiderWins),
-                    lore("Seeker Wins: ", NamedTextColor.RED, stats.seekerWins),
-                    lore("Rounds Played: ", NamedTextColor.GRAY, stats.hiderRoundsPlayed + stats.seekerRoundsPlayed)
+                    plugin.tr(viewer, "gui.stats.player_head.hider_wins", Map.of("value", stats.hiderWins)),
+                    plugin.tr(viewer, "gui.stats.player_head.seeker_wins", Map.of("value", stats.seekerWins)),
+                    plugin.tr(viewer, "gui.stats.player_head.rounds_played",
+                            Map.of("value", stats.hiderRoundsPlayed + stats.seekerRoundsPlayed))
             );
             skullMeta.lore(lore);
             head.setItemMeta(skullMeta);
@@ -408,7 +424,7 @@ public class PlayerStatsGUI {
 
 
     private void fillBorder(FrameworkInventory inv) {
-        ItemStack pane = utility(Material.GRAY_STAINED_GLASS_PANE, " ", NamedTextColor.DARK_GRAY, List.of());
+        ItemStack pane = utility(Material.GRAY_STAINED_GLASS_PANE, Component.empty(), List.of());
         InventoryItem border = new InventoryItem(pane);
         border.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
         border.setAllowTakeout(false);
@@ -426,12 +442,11 @@ public class PlayerStatsGUI {
     }
 
 
-    private InventoryItem stat(Material material, String name, NamedTextColor color, List<Component> lore) {
+    private InventoryItem stat(Material material, Component name, List<Component> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name, color, TextDecoration.BOLD)
-                    .decoration(TextDecoration.ITALIC, false));
+            meta.displayName(name.decoration(TextDecoration.ITALIC, false));
             meta.lore(lore.stream()
                     .map(c -> c.decoration(TextDecoration.ITALIC, false))
                     .toList());
@@ -442,12 +457,11 @@ public class PlayerStatsGUI {
     }
 
 
-    private ItemStack utility(Material material, String name, NamedTextColor color, List<Component> lore) {
+    private ItemStack utility(Material material, Component name, List<Component> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name, color, TextDecoration.BOLD)
-                    .decoration(TextDecoration.ITALIC, false));
+            meta.displayName(name.decoration(TextDecoration.ITALIC, false));
             meta.lore(lore.stream()
                     .map(c -> c.decoration(TextDecoration.ITALIC, false))
                     .toList());
@@ -456,33 +470,50 @@ public class PlayerStatsGUI {
         return item;
     }
 
-    private Component lore(String label, NamedTextColor valueColor, long value) {
-        return Component.text(label, NamedTextColor.GRAY)
-                .append(Component.text(String.valueOf(value), valueColor))
-                .decoration(TextDecoration.ITALIC, false);
+    private String formatDuration(Player viewer, long seconds) {
+        if (seconds < 60) {
+            return plugin.trText(viewer, "gui.stats.duration.seconds", Map.of("value", seconds));
+        }
+        if (seconds < 3600) {
+            return plugin.trText(viewer, "gui.stats.duration.minutes_seconds", Map.of(
+                    "minutes", seconds / 60,
+                    "seconds", seconds % 60
+            ));
+        }
+        return plugin.trText(viewer, "gui.stats.duration.hours_minutes", Map.of(
+                "hours", seconds / 3600,
+                "minutes", (seconds % 3600) / 60
+        ));
     }
 
-    private Component lore(String label, NamedTextColor valueColor, String value) {
-        return Component.text(label, NamedTextColor.GRAY)
-                .append(Component.text(value, valueColor))
-                .decoration(TextDecoration.ITALIC, false);
-    }
 
-    private String formatDuration(long seconds) {
-        if (seconds < 60) return seconds + "s";
-        if (seconds < 3600) return (seconds / 60) + "m " + (seconds % 60) + "s";
-        return (seconds / 3600) + "h " + ((seconds % 3600) / 60) + "m";
+    private String formatPageName(Player viewer, StatsPage page) {
+        return plugin.trText(viewer, page.pageKey());
     }
 
 
-    private String formatPageName(StatsPage page) {
-        return switch (page) {
-            case OVERVIEW -> "Overview";
-            case COMBAT -> "Combat";
-            case ITEMS -> "Items";
-            case MAPS -> "Maps";
-            case PERKS -> "Details";
-        };
+    private enum StatsPage {
+        OVERVIEW("gui.stats.page.overview", "gui.stats.tabs.overview"),
+        COMBAT("gui.stats.page.combat", "gui.stats.tabs.combat"),
+        ITEMS("gui.stats.page.items", "gui.stats.tabs.items"),
+        MAPS("gui.stats.page.maps", "gui.stats.tabs.maps"),
+        PERKS("gui.stats.page.perks", "gui.stats.tabs.perks");
+
+        private final String pageKey;
+        private final String tabKey;
+
+        StatsPage(String pageKey, String tabKey) {
+            this.pageKey = pageKey;
+            this.tabKey = tabKey;
+        }
+
+        private String pageKey() {
+            return pageKey;
+        }
+
+        private String tabKey() {
+            return tabKey;
+        }
     }
 
     private String humanizeItemId(String itemId) {
@@ -509,14 +540,5 @@ public class PlayerStatsGUI {
         if (item == null) item = SeekerItems.getItem(itemId);
         if (item == null) return Material.PAPER;
         return item.createItem(plugin).getType();
-    }
-
-
-    private enum StatsPage {
-        OVERVIEW,
-        COMBAT,
-        ITEMS,
-        MAPS,
-        PERKS
     }
 }

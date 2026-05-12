@@ -19,4 +19,3 @@ public final class PerkSeekerAutoAimSettingGroup implements SettingGroup {
                         Material.BARRIER, true));
     }
 }
-

@@ -3,9 +3,6 @@ package de.thecoolcraft11.hideAndSeek.command;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommand;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -13,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class ReadyCommand implements MinigameSubcommand {
@@ -43,44 +41,56 @@ public class ReadyCommand implements MinigameSubcommand {
     @Override
     public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         VoteManager voteManager = plugin.getVoteManager();
+
         if (!voteManager.isReadinessEnabled()) {
-            sender.sendMessage(Component.text("Readiness is disabled.", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.ready.disabled"));
             return;
         }
 
         if (args.length > 0 && args[0].equalsIgnoreCase("gui")) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
+                sender.sendMessage(plugin.tr(sender, "common.command.only_players"));
                 return;
             }
+
             if (!sender.hasPermission(GUI_PERMISSION)) {
-                sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
+                sender.sendMessage(plugin.tr(sender, "command.ready.no_gui_permission"));
                 return;
             }
+
             plugin.getReadyGUI().open(player);
             return;
         }
 
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.only_players"));
             return;
         }
+
         if (!sender.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.no_permission"));
             return;
         }
+
         if (voteManager.isNotLobbyPhase()) {
-            player.sendMessage(Component.text("Ready status can only be changed in the lobby.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.ready.only_lobby"));
             return;
         }
 
         boolean ready = voteManager.toggleReady(player.getUniqueId());
-        player.sendMessage(Component.text("Ready status: ", NamedTextColor.GRAY)
-                .append(Component.text(ready ? "READY" : "NOT READY", ready ? NamedTextColor.GREEN : NamedTextColor.RED)));
-        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, ready ? 1.2f : 0.9f);
+
+        player.sendMessage(plugin.tr(player, "command.ready.status", Map.of(
+                "state", plugin.trText(player,
+                        ready ? "command.ready.state.ready" : "command.ready.state.not_ready")
+        )));
+
+        player.playSound(player.getLocation(),
+                Sound.UI_BUTTON_CLICK,
+                1.0f,
+                ready ? 1.2f : 0.9f);
 
         if (voteManager.tryAutoStartIfEveryoneReady()) {
-            Bukkit.broadcast(Component.text("All players are ready. Starting the round!", NamedTextColor.GREEN));
+            plugin.broadcastTr("command.ready.all_ready_start");
         }
     }
 

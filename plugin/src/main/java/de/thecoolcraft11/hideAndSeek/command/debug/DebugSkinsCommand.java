@@ -3,8 +3,6 @@ package de.thecoolcraft11.hideAndSeek.command.debug;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.minigameframework.items.variants.ItemVariant;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -45,13 +43,14 @@ public class DebugSkinsCommand implements DebugSubcommand {
     @Override
     public boolean handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /has debug skins <player> [list|unlock|lock|reset] [itemId:variantId]", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.skins.usage"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.skins.player_not_found", java.util.Map.of("player", args[0])));
             return true;
         }
 
@@ -63,8 +62,9 @@ public class DebugSkinsCommand implements DebugSubcommand {
             case "lock" -> handleLock(sender, args);
             case "reset" -> handleReset(sender);
             default -> {
-                sender.sendMessage(Component.text("Unknown action: " + action, NamedTextColor.RED));
-                sender.sendMessage(Component.text("Usage: /has debug skins <player> [list|unlock|lock|reset] [itemId:variantId]", NamedTextColor.YELLOW));
+                sender.sendMessage(
+                        plugin.tr(sender, "command.debug.skins.unknown_action", java.util.Map.of("action", action)));
+                sender.sendMessage(plugin.tr(sender, "command.debug.skins.usage"));
             }
         }
 
@@ -73,20 +73,21 @@ public class DebugSkinsCommand implements DebugSubcommand {
 
     private void handleList(CommandSender sender, Player target) {
         int coins = ItemSkinSelectionService.getCoins(target.getUniqueId());
-        sender.sendMessage(Component.text("\n=== Skins for " + target.getName() + " ===", NamedTextColor.GOLD));
-        sender.sendMessage(Component.text("Coins: " + coins, NamedTextColor.YELLOW));
-        sender.sendMessage(Component.text("(Detailed list not implemented - use /items list instead)", NamedTextColor.GRAY));
+        sender.sendMessage(
+                plugin.tr(sender, "command.debug.skins.list_header", java.util.Map.of("player", target.getName())));
+        sender.sendMessage(plugin.tr(sender, "command.debug.skins.list_coins", java.util.Map.of("coins", coins)));
+        sender.sendMessage(plugin.tr(sender, "command.debug.skins.list_hint"));
     }
 
     private void handleUnlock(CommandSender sender, Player target, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(Component.text("Usage: /has debug skins <player> unlock <itemId:variantId>", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.skins.unlock_usage"));
             return;
         }
 
         String[] parts = args[2].split(":");
         if (parts.length != 2) {
-            sender.sendMessage(Component.text("Invalid format. Use itemId:variantId", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.skins.invalid_format"));
             return;
         }
 
@@ -94,28 +95,26 @@ public class DebugSkinsCommand implements DebugSubcommand {
         String variantId = parts[1];
 
         if (ItemSkinSelectionService.unlock(plugin, target.getUniqueId(), itemId, variantId)) {
-            sender.sendMessage(Component.text("Unlocked ", NamedTextColor.GREEN)
-                    .append(Component.text(itemId + ":" + variantId, NamedTextColor.AQUA))
-                    .append(Component.text(" for ", NamedTextColor.GREEN))
-                    .append(Component.text(target.getName(), NamedTextColor.AQUA)));
+            sender.sendMessage(plugin.tr(sender, "command.debug.skins.unlocked_success",
+                    java.util.Map.of("skin", itemId + ":" + variantId, "player", target.getName())));
         } else {
-            sender.sendMessage(Component.text("Failed to unlock skin (already unlocked?)", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.skins.unlock_failed"));
         }
     }
 
     private void handleLock(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(Component.text("Usage: /has debug skins <player> lock <itemId:variantId>", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.skins.lock_usage"));
             return;
         }
 
 
-        sender.sendMessage(Component.text("Lock function not implemented", NamedTextColor.YELLOW));
+        sender.sendMessage(plugin.tr(sender, "command.debug.skins.lock_not_implemented"));
     }
 
     private void handleReset(CommandSender sender) {
 
-        sender.sendMessage(Component.text("Reset function not fully implemented", NamedTextColor.YELLOW));
+        sender.sendMessage(plugin.tr(sender, "command.debug.skins.reset_not_implemented"));
     }
 }
 

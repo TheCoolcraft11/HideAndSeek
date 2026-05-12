@@ -2,8 +2,6 @@ package de.thecoolcraft11.hideAndSeek.command;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommand;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -38,20 +36,21 @@ public class LoadoutCommand implements MinigameSubcommand {
     @Override
     public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.only_players"));
             return;
         }
 
         if (!sender.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.no_permission"));
             return;
         }
 
         if (args.length > 0 && "admin".equalsIgnoreCase(args[0])) {
             if (!sender.hasPermission(ADMIN_PERMISSION)) {
-                sender.sendMessage(Component.text("You don't have permission to use admin loadout management!", NamedTextColor.RED));
+                sender.sendMessage(plugin.tr(sender, "command.loadout.no_admin_permission"));
                 return;
             }
+
             plugin.getAdminLoadoutManagementGUI().open(player);
             return;
         }

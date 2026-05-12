@@ -1,8 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.command.debug;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,14 +19,14 @@ public class DebugXPCommand implements DebugSubcommand {
     @Override
     public boolean handle(@NotNull CommandSender sender, @NonNull @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(
-                    Component.text("Usage: /has debug xp <player> [set|give|remove] <amount>", NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(sender, "command.debug.xp.usage"));
             return true;
         }
 
         final Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.xp.player_not_found", java.util.Map.of("player", args[0])));
             return true;
         }
         final java.util.UUID targetId = target.getUniqueId();
@@ -38,15 +36,15 @@ public class DebugXPCommand implements DebugSubcommand {
 
         if (action.equals("set") || action.equals("give") || action.equals("remove")) {
             if (args.length < 3) {
-                sender.sendMessage(Component.text("Usage: /has debug xp <player> [set|give|remove] <amount>",
-                        NamedTextColor.YELLOW));
+                sender.sendMessage(plugin.tr(sender, "command.debug.xp.usage"));
                 return true;
             }
             long amount;
             try {
                 amount = Long.parseLong(args[2]);
             } catch (NumberFormatException e) {
-                sender.sendMessage(Component.text("Invalid amount: " + args[2], NamedTextColor.RED));
+                sender.sendMessage(
+                        plugin.tr(sender, "command.debug.xp.invalid_amount", java.util.Map.of("value", args[2])));
                 return true;
             }
             var dataStore = plugin.getPlayerDataStore();
@@ -60,14 +58,14 @@ public class DebugXPCommand implements DebugSubcommand {
                 }
                 final long resultXp = newXp;
                 dataStore.setXp(targetId, newXp).thenRun(() ->
-                        sender.sendMessage(
-                                Component.text("XP for " + targetName + " is now " + resultXp, NamedTextColor.GREEN))
+                        sender.sendMessage(plugin.tr(sender, "command.debug.xp.success",
+                                java.util.Map.of("player", targetName, "amount", resultXp)))
                 );
             });
             return true;
         }
 
-        sender.sendMessage(Component.text("Unknown action: " + action, NamedTextColor.RED));
+        sender.sendMessage(plugin.tr(sender, "command.debug.xp.unknown_action", java.util.Map.of("action", action)));
         return true;
     }
 

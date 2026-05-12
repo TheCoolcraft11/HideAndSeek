@@ -6,8 +6,7 @@ import de.thecoolcraft11.hideAndSeek.items.hider.*;
 import de.thecoolcraft11.hideAndSeek.items.seeker.*;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommand;
 import de.thecoolcraft11.minigameframework.items.variants.ItemVariant;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import de.thecoolcraft11.minigameframework.translation.TranslationArguments;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -44,17 +43,17 @@ public class ItemSkinCommand implements MinigameSubcommand {
     @Override
     public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.only_players"));
             return;
         }
 
         if (!sender.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.no_permission"));
             return;
         }
 
         if (!"lobby".equalsIgnoreCase(plugin.getStateManager().getCurrentPhaseId())) {
-            player.sendMessage(Component.text("You can only switch item skins in the lobby.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.skin.only_lobby"));
             return;
         }
 
@@ -75,8 +74,10 @@ public class ItemSkinCommand implements MinigameSubcommand {
 
         String logicalItemId = resolveLogicalItemId(args[0]);
         if (logicalItemId == null) {
-            player.sendMessage(Component.text("Unknown item: " + args[0], NamedTextColor.RED));
-            player.sendMessage(Component.text("Use /mg skin list <item> to see available variants.", NamedTextColor.GRAY));
+            player.sendMessage(plugin.tr(player, "command.skin.unknown_item",
+                    Map.of("item", args[0])));
+            player.sendMessage(plugin.tr(player, "command.skin.list_hint",
+                    Map.of("item", args[0])));
             return;
         }
 
@@ -84,12 +85,13 @@ public class ItemSkinCommand implements MinigameSubcommand {
         var variantManager = plugin.getCustomItemManager().getVariantManager();
 
         if (!variantManager.hasVariants(runtimeItemId)) {
-            player.sendMessage(Component.text("This item has no registered skins.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.skin.no_variants"));
             return;
         }
 
         String variantInput = args[1];
         ItemVariant targetVariant = variantManager.getVariant(runtimeItemId, variantInput);
+
         if (targetVariant == null) {
             targetVariant = variantManager.getVariants(runtimeItemId).stream()
                     .filter(v -> v.getId().equalsIgnoreCase(variantInput))
@@ -98,16 +100,18 @@ public class ItemSkinCommand implements MinigameSubcommand {
         }
 
         if (targetVariant == null) {
-            player.sendMessage(Component.text("Unknown skin variant: " + variantInput, NamedTextColor.RED));
-            player.sendMessage(Component.text("Use /mg skin list " + args[0] + " to see available variants.", NamedTextColor.GRAY));
+            player.sendMessage(plugin.tr(player, "command.skin.unknown_variant",
+                    Map.of("variant", variantInput)));
+            player.sendMessage(plugin.tr(player, "command.skin.list_hint",
+                    Map.of("item", args[0])));
             return;
         }
 
         if (!ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, targetVariant.getId())) {
             int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, targetVariant.getId());
-            player.sendMessage(Component.text("This skin is locked (", NamedTextColor.RED)
-                    .append(Component.text(cost + " coins", NamedTextColor.GOLD))
-                    .append(Component.text("). Buy it in /mg skin.", NamedTextColor.RED)));
+
+            player.sendMessage(plugin.tr(player, "command.skin.locked",
+                    Map.of("cost", String.valueOf(cost))));
             return;
         }
 
@@ -115,13 +119,16 @@ public class ItemSkinCommand implements MinigameSubcommand {
         ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
 
         String displayName = targetVariant.getDisplayName();
-        String shownName = (displayName == null || displayName.isBlank()) ? targetVariant.getId() : displayName;
-        player.sendMessage(Component.text("Selected skin: ", NamedTextColor.GREEN)
-                .append(Component.text(shownName, NamedTextColor.GOLD))
-                .append(Component.text(" for ", NamedTextColor.GREEN))
-                .append(Component.text(logicalItemId, NamedTextColor.YELLOW)));
-        player.sendMessage(Component.text("This skin will be applied the next time the item is given to you.", NamedTextColor.GRAY));
+        String shownName = (displayName == null || displayName.isBlank())
+                ? targetVariant.getId()
+                : displayName;
 
+        player.sendMessage(plugin.tr(player, "command.skin.selected", Map.of(
+                "skin", shownName,
+                "item", logicalItemId
+        )));
+
+        player.sendMessage(plugin.tr(player, "command.skin.apply_hint"));
     }
 
     @Override
@@ -157,13 +164,14 @@ public class ItemSkinCommand implements MinigameSubcommand {
 
     private void handleList(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(Component.text("Usage: /mg skin list <item>", NamedTextColor.YELLOW));
+            player.sendMessage(plugin.tr(player, "command.skin.usage_list"));
             return;
         }
 
         String logicalItemId = resolveLogicalItemId(args[1]);
         if (logicalItemId == null) {
-            player.sendMessage(Component.text("Unknown item: " + args[1], NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.skin.unknown_item",
+                    Map.of("item", args[1])));
             return;
         }
 
@@ -171,24 +179,47 @@ public class ItemSkinCommand implements MinigameSubcommand {
         List<ItemVariant> variants = plugin.getCustomItemManager().getVariantManager().getVariants(runtimeItemId);
 
         if (variants.isEmpty()) {
-            player.sendMessage(Component.text("No skins registered for this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.skin.no_variants"));
             return;
         }
 
-        player.sendMessage(Component.text("Available skins for " + logicalItemId + ":", NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("Coins: " + ItemSkinSelectionService.getCoins(player.getUniqueId()), NamedTextColor.GOLD));
+        player.sendMessage(plugin.tr(player, "command.skin.list_header",
+                Map.of("item", logicalItemId)));
+
+        int coins = ItemSkinSelectionService.getCoins(player.getUniqueId());
+        player.sendMessage(plugin.tr(player, "command.skin.coins",
+                TranslationArguments.ofNamed(Map.of()).withCount(coins)));
+
         for (ItemVariant variant : variants) {
-            String display = variant.getDisplayName().isEmpty() ? variant.getId() : variant.getDisplayName();
-            boolean unlocked = ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, variant.getId());
+            String display = variant.getDisplayName().isEmpty()
+                    ? variant.getId()
+                    : variant.getDisplayName();
+
+            boolean unlocked = ItemSkinSelectionService.isUnlocked(
+                    player.getUniqueId(), logicalItemId, variant.getId());
+
             int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, variant.getId());
             String rarity = ItemSkinSelectionService.getRarity(logicalItemId, variant.getId()).name();
-            player.sendMessage(Component.text(" - " + variant.getId() + " (" + display + ") [" + rarity + "] [" + cost + "c] " + (unlocked ? "UNLOCKED" : "LOCKED"), NamedTextColor.GRAY));
+
+            String stateKey = unlocked
+                    ? "command.skin.state.unlocked"
+                    : "command.skin.state.locked";
+
+            String rarityKey = "command.skin.rarity." + rarity;
+
+            player.sendMessage(plugin.tr(player, "command.skin.list_entry", Map.of(
+                    "id", variant.getId(),
+                    "display", display,
+                    "rarity", plugin.trText(player, rarityKey),
+                    "cost", String.valueOf(cost),
+                    "state", plugin.trText(player, stateKey)
+            )));
         }
     }
 
     private void sendUsage(Player player) {
-        player.sendMessage(Component.text("Usage: /mg skin <item> <variant_id>", NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("Usage: /mg skin list <item>", NamedTextColor.YELLOW));
+        player.sendMessage(plugin.tr(player, "command.skin.usage_main"));
+        player.sendMessage(plugin.tr(player, "command.skin.usage_list"));
     }
 
     private void registerItems() {

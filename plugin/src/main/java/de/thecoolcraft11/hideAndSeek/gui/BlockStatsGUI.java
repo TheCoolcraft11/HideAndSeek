@@ -26,7 +26,7 @@ public class BlockStatsGUI {
         var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         if (gameModeObj == null || !gameModeObj.toString().equals("BLOCK")) {
-            player.sendMessage(Component.text("Block mode is not enabled!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.block_stats.errors.mode_disabled"));
             return;
         }
         boolean showNames = plugin.getSettingRegistry().get("game.blockstats.show-names", false);
@@ -43,14 +43,14 @@ public class BlockStatsGUI {
             }
         }
         if (blockCounts.isEmpty()) {
-            player.sendMessage(Component.text("No blocks have been chosen yet!", NamedTextColor.YELLOW));
+            player.sendMessage(plugin.tr(player, "gui.block_stats.errors.no_blocks"));
             return;
         }
         int rows = Math.min(6, (blockCounts.size() + 8) / 9);
 
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("block_stats_" + player.getUniqueId())
-                .title("Block Statistics")
+                .title(plugin.trText(player, "gui.block_stats.title"))
                 .rows(rows)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -65,7 +65,7 @@ public class BlockStatsGUI {
             Material material = entry.getKey();
             int count = entry.getValue();
             List<String> players = showNames ? blockPlayers.get(material) : null;
-            ItemStack item = createStatsItem(material, count, players);
+            ItemStack item = createStatsItem(material, count, players, player);
 
             InventoryItem statsItem = new InventoryItem(item);
             statsItem.setClickHandler((p, invItem, event, s) -> event.setCancelled(true));
@@ -80,7 +80,7 @@ public class BlockStatsGUI {
         plugin.getInventoryFramework().openInventory(player, inventory);
     }
 
-    private ItemStack createStatsItem(Material material, int count, List<String> players) {
+    private ItemStack createStatsItem(Material material, int count, List<String> players, Player viewer) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -89,17 +89,18 @@ public class BlockStatsGUI {
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
             lore.add(Component.empty());
-            lore.add(Component.text("Players: " + count, NamedTextColor.YELLOW)
+            lore.add(plugin.tr(viewer, "gui.block_stats.item.players_count", Map.of("count", count))
                     .decoration(TextDecoration.ITALIC, false));
             if (players != null && !players.isEmpty()) {
                 lore.add(Component.empty());
                 int displayCount = Math.min(players.size(), 10);
                 for (int i = 0; i < displayCount; i++) {
-                    lore.add(Component.text("  • " + players.get(i), NamedTextColor.GRAY)
+                    lore.add(plugin.tr(viewer, "gui.block_stats.item.player_entry", Map.of("name", players.get(i)))
                             .decoration(TextDecoration.ITALIC, false));
                 }
                 if (players.size() > 10) {
-                    lore.add(Component.text("  ... +" + (players.size() - 10) + " more", NamedTextColor.DARK_GRAY)
+                    lore.add(
+                            plugin.tr(viewer, "gui.block_stats.item.more_players", Map.of("count", players.size() - 10))
                             .decoration(TextDecoration.ITALIC, false));
                 }
             }

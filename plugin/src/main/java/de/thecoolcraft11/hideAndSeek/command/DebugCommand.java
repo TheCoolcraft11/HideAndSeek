@@ -3,8 +3,6 @@ package de.thecoolcraft11.hideAndSeek.command;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.command.debug.*;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommand;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +25,7 @@ public class DebugCommand implements MinigameSubcommand {
 
     private void registerSubcommands() {
         subcommands.put("anticheat", new DebugAntiCheatCommand(plugin));
-        subcommands.put("points", new DebugPointsCommand());
+        subcommands.put("points", new DebugPointsCommand(plugin));
         subcommands.put("coins", new DebugCoinsCommand(plugin));
         subcommands.put("skins", new DebugSkinsCommand(plugin));
         subcommands.put("loadout", new DebugLoadoutCommand(plugin));
@@ -36,7 +34,7 @@ public class DebugCommand implements MinigameSubcommand {
         subcommands.put("unstuck", new DebugUnstuckCommand(plugin));
         subcommands.put("migrateyaml", new DebugMigrateYamlCommand(plugin));
         subcommands.put("xp", new DebugXPCommand(plugin));
-        subcommands.put("booster", new DebugBoosterCommand());
+        subcommands.put("booster", new DebugBoosterCommand(plugin));
     }
 
     @Override
@@ -76,7 +74,7 @@ public class DebugCommand implements MinigameSubcommand {
     @Override
     public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!sender.hasPermission(PERMISSION)) {
-            sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.no_permission"));
             return;
         }
 
@@ -89,7 +87,8 @@ public class DebugCommand implements MinigameSubcommand {
         DebugSubcommand subcommand = subcommands.get(subcommandName);
 
         if (subcommand == null) {
-            sender.sendMessage(Component.text("Unknown debug subcommand: " + subcommandName, NamedTextColor.RED));
+            sender.sendMessage(
+                    plugin.tr(sender, "command.debug.unknown_subcommand", Map.of("subcommand", subcommandName)));
             sendHelp(sender);
             return;
         }
@@ -99,25 +98,17 @@ public class DebugCommand implements MinigameSubcommand {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(Component.text("\n" + "=== Debug Command Help ===", NamedTextColor.GOLD));
-        sender.sendMessage(Component.text("/has debug anticheat [reset|show] [player]", NamedTextColor.YELLOW)
-                .append(Component.text(" - Reset anti-cheat visibility", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/has debug points <player> [set|give|remove] <amount>", NamedTextColor.YELLOW)
-                .append(Component.text(" - Manage player points", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/has debug coins <player> [set|give|remove] <amount>", NamedTextColor.YELLOW)
-                .append(Component.text(" - Manage player coins", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/has debug skins <player> [list|unlock|lock|reset]", NamedTextColor.YELLOW)
-                .append(Component.text(" - Manage player skins", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/has debug loadout <player> [reset|items|give]", NamedTextColor.YELLOW)
-                .append(Component.text(" - Manage player loadout", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/has debug perks <player> [grant|revoke|list] [perkId] [-f]", NamedTextColor.YELLOW)
-                .append(Component.text(" - Manage player perks", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/has debug config [test|validate] [-a]", NamedTextColor.YELLOW)
-                .append(Component.text(" - Test configuration and maps", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/has debug unstuck <player> [history|nearby|spawn]", NamedTextColor.YELLOW)
-                .append(Component.text(" - Forcefully unstuck a player", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/migrateyaml or /has debug migrateyaml", NamedTextColor.YELLOW)
-                .append(Component.text(" - Migrate YAML player data into database", NamedTextColor.GRAY)));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.header"));
+
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.anticheat"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.points"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.coins"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.skins"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.loadout"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.perks"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.config"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.unstuck"));
+        sender.sendMessage(plugin.tr(sender, "command.debug.help.migrateyaml"));
     }
 }
 

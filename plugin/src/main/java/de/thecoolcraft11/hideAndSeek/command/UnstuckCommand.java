@@ -1,11 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.command;
-
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.util.DataController;
 import de.thecoolcraft11.hideAndSeek.util.UnstuckManager;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommand;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -52,44 +49,49 @@ public class UnstuckCommand implements MinigameSubcommand {
     @Override
     public void handle(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "common.command.only_players"));
             return;
         }
 
         boolean isHider = dataController.getHiders().contains(player.getUniqueId());
         boolean isSeeker = dataController.getSeekers().contains(player.getUniqueId());
+
         if (!isHider && !isSeeker) {
-            player.sendMessage(Component.text("Only hiders and seekers can use /mg unstuck.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.unstuck.not_participant"));
             return;
         }
 
         if (!"seeking".equals(plugin.getStateManager().getCurrentPhaseId())) {
-            player.sendMessage(Component.text("You can only use this during the seeking phase.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.unstuck.wrong_phase"));
             return;
         }
 
         if (pendingTeleports.containsKey(player.getUniqueId())) {
-            player.sendMessage(Component.text("Unstuck is already charging. Wait, move, or sneak to cancel.", NamedTextColor.YELLOW));
+            player.sendMessage(plugin.tr(player, "command.unstuck.already_charging"));
             return;
         }
 
         long cooldownMs = unstuckManager.getRemainingCooldownMs(player.getUniqueId());
         if (cooldownMs > 0L) {
             long secondsLeft = (long) Math.ceil(cooldownMs / 1000.0);
-            player.sendMessage(Component.text("Unstuck is on cooldown for " + secondsLeft + "s.", NamedTextColor.RED));
+
+            player.sendMessage(plugin.tr(player, "command.unstuck.cooldown",
+                    Map.of("seconds", String.valueOf(secondsLeft))));
             return;
         }
 
         boolean worldSpawnMode = args.length > 0 && isWorldSpawnArgument(args[0]);
+
         if (args.length > 0 && !worldSpawnMode) {
-            player.sendMessage(Component.text("Usage: /mg unstuck [spawn]", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.unstuck.usage"));
             return;
         }
 
         if (!isSeeker) {
             double seekerRange = plugin.getSettingRegistry().get("game.unstuck.seeker-range", 15.0);
+
             if (unstuckManager.hasNearbyOpponents(player, seekerRange)) {
-                player.sendMessage(Component.text("A seeker is too close. Try again when it is safe.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "command.unstuck.seeker_too_close"));
                 return;
             }
         }
@@ -99,14 +101,23 @@ public class UnstuckCommand implements MinigameSubcommand {
             return;
         }
 
-        UnstuckManager.UnstuckResult result = unstuckManager.tryFindSafePosition(player, dataController.getRoundSpawnPoint());
+        UnstuckManager.UnstuckResult result =
+                unstuckManager.tryFindSafePosition(player, dataController.getRoundSpawnPoint());
+
         if (!result.success() || result.location() == null || result.method() == null) {
-            String message = result.message() == null ? "No safe unstuck position found." : result.message();
-            player.sendMessage(Component.text(message, NamedTextColor.RED));
+            String messageKey = result.messageKey() != null ? result.messageKey() : "command.unstuck.default_fail_message";
+            player.sendMessage(plugin.tr(player, messageKey, result.placeholders()));
             return;
         }
 
-        startDelayedTeleport(player, result.location(), result.cooldownSeconds(), result.method(), false, result.message());
+        String completionMessageKey = result.messageKey();
+        startDelayedTeleport(player,
+                result.location(),
+                result.cooldownSeconds(),
+                result.method(),
+                false,
+                completionMessageKey,
+                result.placeholders());
     }
 
     private void startWorldSpawnUnstuck(Player player) {
@@ -116,7 +127,7 @@ public class UnstuckCommand implements MinigameSubcommand {
 
         var spawnTarget = unstuckManager.resolveWorldSpawnTarget(player);
         if (spawnTarget == null) {
-            player.sendMessage(Component.text("World spawn is not safe right now.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "command.unstuck.spawn_not_safe"));
             return;
         }
 
@@ -126,7 +137,8 @@ public class UnstuckCommand implements MinigameSubcommand {
                 unstuckManager.getSpawnFallbackCooldownSeconds(),
                 UnstuckManager.UnstuckMethod.SPAWN,
                 true,
-                "Teleported to world spawn."
+                "command.unstuck.spawn_success",
+                Map.of()
         );
     }
 
@@ -135,14 +147,15 @@ public class UnstuckCommand implements MinigameSubcommand {
                                       int cooldownSeconds,
                                       UnstuckManager.UnstuckMethod method,
                                       boolean worldSpawnMode,
-                                      @Nullable String completionMessage) {
+                                      @Nullable String resultMessageKey,
+                                      Map<String, Object> resultPlaceholders) {
         final long chargeMs = 5000L;
         final double maxMoveDistance = 1.5;
         final long cancelSneakMs = 3000L;
         final var startLocation = player.getLocation().clone();
 
-        player.sendMessage(Component.text("Unstuck charging for 5s. Do not move more than 1.5 blocks.", NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("Sneak for 3s to cancel.", NamedTextColor.GRAY));
+        player.sendMessage(plugin.tr(player, "command.unstuck.charge_start"));
+        player.sendMessage(plugin.tr(player, "command.unstuck.cancel_hint"));
 
         final long[] sneakStartedAt = new long[]{-1L};
         final long startedAt = System.currentTimeMillis();
@@ -155,14 +168,14 @@ public class UnstuckCommand implements MinigameSubcommand {
 
             if (!"seeking".equals(plugin.getStateManager().getCurrentPhaseId())) {
                 cancelPending(player.getUniqueId());
-                player.sendMessage(Component.text("Unstuck canceled because the game phase changed.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "command.unstuck.canceled.phase"));
                 return;
             }
 
             if (!player.getWorld().equals(startLocation.getWorld())
                     || player.getLocation().distance(startLocation) > maxMoveDistance) {
                 cancelPending(player.getUniqueId());
-                player.sendMessage(Component.text("Unstuck canceled because you moved too far.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "command.unstuck.canceled.moved"));
                 return;
             }
 
@@ -171,7 +184,7 @@ public class UnstuckCommand implements MinigameSubcommand {
                     sneakStartedAt[0] = System.currentTimeMillis();
                 } else if (System.currentTimeMillis() - sneakStartedAt[0] >= cancelSneakMs) {
                     cancelPending(player.getUniqueId());
-                    player.sendMessage(Component.text("Unstuck canceled by sneaking.", NamedTextColor.RED));
+                    player.sendMessage(plugin.tr(player, "command.unstuck.canceled.sneak"));
                     return;
                 }
             } else {
@@ -188,22 +201,22 @@ public class UnstuckCommand implements MinigameSubcommand {
 
             boolean teleported = player.teleport(target);
             if (!teleported) {
-                player.sendMessage(Component.text("Teleport failed. Please try again.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "command.unstuck.failed"));
                 return;
             }
 
             unstuckManager.recordSuccessfulUnstuck(player.getUniqueId(), target, method);
             unstuckManager.applyCooldown(player.getUniqueId(), cooldownSeconds);
 
-            if (completionMessage != null && !completionMessage.isBlank()) {
-                NamedTextColor color = method == UnstuckManager.UnstuckMethod.SPAWN ? NamedTextColor.YELLOW : NamedTextColor.GREEN;
-                player.sendMessage(Component.text(completionMessage, color));
+            // Send the result message or use default message based on the method
+            if (resultMessageKey != null && !resultMessageKey.isBlank()) {
+                player.sendMessage(plugin.tr(player, resultMessageKey, resultPlaceholders));
             } else if (worldSpawnMode) {
-                player.sendMessage(Component.text("Teleported to world spawn.", NamedTextColor.YELLOW));
+                player.sendMessage(plugin.tr(player, "command.unstuck.success.fallback"));
             } else if (method == UnstuckManager.UnstuckMethod.SPAWN) {
-                player.sendMessage(Component.text("Unstuck fallback used: sent near spawn.", NamedTextColor.YELLOW));
+                player.sendMessage(plugin.tr(player, "command.unstuck.success.spawn"));
             } else {
-                player.sendMessage(Component.text("Teleported to a safe unstuck location.", NamedTextColor.GREEN));
+                player.sendMessage(plugin.tr(player, "command.unstuck.success.safe"));
             }
 
             player.getWorld().spawnParticle(Particle.PORTAL, target, 24, 0.3, 0.5, 0.3, 0.1);

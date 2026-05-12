@@ -7,8 +7,6 @@ import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 import de.thecoolcraft11.hideAndSeek.playerdata.DatabasePlayerDataStore;
 import de.thecoolcraft11.minigameframework.storage.sql.stats.GlobalStatsAPI;
 import de.thecoolcraft11.minigameframework.storage.sql.stats.MinigameStatsAPI;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -40,44 +38,41 @@ public class DebugMigrateYamlCommand implements DebugSubcommand {
         boolean playersOnline = !Bukkit.getOnlinePlayers().isEmpty();
 
         if (playersOnline && !force) {
-            sender.sendMessage(Component.text(
-                    "Migration blocked: players are currently online.",
-                    NamedTextColor.RED));
-
-            sender.sendMessage(Component.text(
-                    "All players must be offline before running this command to avoid data corruption. Run it from the console.",
-                    NamedTextColor.YELLOW));
-
-            sender.sendMessage(Component.text(
-                    "Use --force to override (risk of data corruption).",
-                    NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.blocked_online"));
+            sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.blocked_offline"));
+            sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.blocked_force"));
 
             return false;
         }
 
         if (!GlobalStatsAPI.isAvailable() || !MinigameStatsAPI.isAvailable()) {
-            sender.sendMessage(Component.text("Migration aborted: GlobalStatsAPI/MinigameStatsAPI are not available.", NamedTextColor.RED));
+            sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.unavailable"));
             return false;
         }
 
-        sender.sendMessage(Component.text("Starting YAML -> database migration...", NamedTextColor.YELLOW));
+        sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.start"));
 
         CompletableFuture.supplyAsync(this::readMigrationSource)
                 .thenCompose(this::migrateToDatabase)
                 .whenComplete((report, error) -> {
                     if (error != null) {
-                        runOnMain(() -> sender.sendMessage(Component.text("Migration failed: " + error.getMessage(), NamedTextColor.RED)));
+                        runOnMain(() -> sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.failed",
+                                java.util.Map.of("error", error.getMessage()))));
                         return;
                     }
 
                     runOnMain(() -> {
-                        sender.sendMessage(Component.text("Migration complete.", NamedTextColor.GREEN));
-                        sender.sendMessage(Component.text("Players migrated: " + report.playersMigrated.get(), NamedTextColor.AQUA));
-                        sender.sendMessage(Component.text("Fields migrated: " + report.fieldsMigrated.get(), NamedTextColor.AQUA));
-                        sender.sendMessage(Component.text("Failures: " + report.failures.size(), report.failures.isEmpty() ? NamedTextColor.GREEN : NamedTextColor.RED));
+                        sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.complete"));
+                        sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.players_migrated",
+                                java.util.Map.of("count", String.valueOf(report.playersMigrated.get()))));
+                        sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.fields_migrated",
+                                java.util.Map.of("count", String.valueOf(report.fieldsMigrated.get()))));
+                        sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.failures",
+                                java.util.Map.of("count", String.valueOf(report.failures.size()))));
                         int limit = Math.min(10, report.failures.size());
                         for (int i = 0; i < limit; i++) {
-                            sender.sendMessage(Component.text(" - " + report.failures.get(i), NamedTextColor.GRAY));
+                            sender.sendMessage(plugin.tr(sender, "command.debug.migrateyaml.failure_entry",
+                                    java.util.Map.of("failure", report.failures.get(i))));
                         }
                     });
                 });

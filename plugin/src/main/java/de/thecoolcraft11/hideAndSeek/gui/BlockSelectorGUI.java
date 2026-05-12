@@ -32,17 +32,17 @@ public class BlockSelectorGUI {
 
     public void open(Player player) {
         if (!plugin.getStateManager().getCurrentPhaseId().equals("hiding")) {
-            player.sendMessage(Component.text("Block selector only available during Hiding phase!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.block_selector.errors.wrong_phase"));
             return;
         }
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.block_selector.errors.not_a_hider"));
             return;
         }
         var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
         if (gameModeObj == null || !gameModeObj.toString().equals("BLOCK")) {
-            player.sendMessage(Component.text("Block mode is not enabled!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.block_selector.errors.mode_disabled"));
             return;
         }
         String currentMap = HideAndSeek.getDataController().getCurrentMapName();
@@ -51,7 +51,7 @@ public class BlockSelectorGUI {
             allowedBlocks = plugin.getMapManager().getAllowedBlocksForMap(currentMap);
         }
         if (allowedBlocks.isEmpty()) {
-            player.sendMessage(Component.text("No allowed blocks configured for this map!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.block_selector.errors.no_blocks_configured"));
             return;
         }
 
@@ -114,7 +114,7 @@ public class BlockSelectorGUI {
         int rows = Math.min(6, (displayMaterials.size() + 8) / 9);
         FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                 .id("block_selector_" + player.getUniqueId())
-                .title("Choose Your Block")
+                .title(plugin.trText(player, "gui.block_selector.title"))
                 .rows(rows)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -126,7 +126,7 @@ public class BlockSelectorGUI {
         for (Material material : displayMaterials) {
             if (slot >= rows * 9) break;
             BlockAppearanceConfig config = configMap.get(material);
-            ItemStack item = createBlockItem(material, currentlyChosen == material);
+            ItemStack item = createBlockItem(player, material, currentlyChosen == material);
 
             InventoryItem blockItem = getSelectedItem(material, item, config);
             blockItem.setMetadata("material", material.name());
@@ -158,8 +158,9 @@ public class BlockSelectorGUI {
 
                 de.thecoolcraft11.hideAndSeek.items.HiderItems.updateAppearanceItem(p, plugin);
 
-                p.sendMessage(Component.text("Selected ", NamedTextColor.GREEN)
-                        .append(Component.text(formatName(material.name()), NamedTextColor.GOLD)));
+                p.sendMessage(plugin.tr(p, "gui.block_selector.selection_success", Map.of(
+                        "name", formatName(material.name())
+                )));
 
                 if (config.isAllowAllVariants() || config.hasVariantGroup() || config.isAllowAllBlockStates() || !config.getAllowedStates().isEmpty()) {
                     p.closeInventory();
@@ -219,7 +220,7 @@ public class BlockSelectorGUI {
         return materialName.equals(base);
     }
 
-    private ItemStack createBlockItem(Material material, boolean isSelected) {
+    private ItemStack createBlockItem(Player player, Material material, boolean isSelected) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -227,7 +228,10 @@ public class BlockSelectorGUI {
             meta.displayName(Component.text(name,
                             isSelected ? NamedTextColor.GREEN : NamedTextColor.YELLOW, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(Component.text("Click to select", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+            meta.lore(List.of(
+                    plugin.tr(player, "gui.block_selector.item.click_to_select")
+                            .decoration(TextDecoration.ITALIC, false)
+            ));
             item.setItemMeta(meta);
         }
         return item;

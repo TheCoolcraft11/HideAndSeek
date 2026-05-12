@@ -31,8 +31,7 @@ public class SlotPreferencesGUI {
 
     public void open(Player player, boolean isHider) {
         if (!loadoutManager.canModifyLoadout()) {
-            player.sendMessage(
-                    Component.text("Slot preferences can only be modified in the lobby!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "gui.slotprefs.cant-modify"));
             return;
         }
 
@@ -41,7 +40,7 @@ public class SlotPreferencesGUI {
         FrameworkInventory inv = new de.thecoolcraft11.minigameframework.inventory.InventoryBuilder(
                 plugin.getInventoryFramework())
                 .id("slot_prefs_" + player.getUniqueId() + "_" + (isHider ? "hider" : "seeker"))
-                .title(isHider ? "Hider Slot Preferences" : "Seeker Slot Preferences")
+                .title(plugin.trText(player, isHider ? "gui.slotprefs.hider.title" : "gui.slotprefs.seeker.title"))
                 .rows(6)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -51,7 +50,7 @@ public class SlotPreferencesGUI {
         PlayerLoadout loadout = loadoutManager.getLoadout(player.getUniqueId());
 
 
-        InventoryItem infoItem = new InventoryItem(createInfoItem(maxItems));
+        InventoryItem infoItem = new InventoryItem(createInfoItem(player, maxItems));
         infoItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
         infoItem.setAllowTakeout(false);
         infoItem.setAllowInsert(false);
@@ -65,7 +64,7 @@ public class SlotPreferencesGUI {
             SlotPreference preference = isHider ? loadout.getHiderSlotPreference(
                     slotNumber) : loadout.getSeekerSlotPreference(slotNumber);
 
-            InventoryItem slotItem = new InventoryItem(createPrimarySlotItem(i, preference));
+            InventoryItem slotItem = new InventoryItem(createPrimarySlotItem(player, i, preference));
             slotItem.setClickHandler((p, item, event, s) -> {
                 if (event.isRightClick()) {
 
@@ -76,7 +75,8 @@ public class SlotPreferencesGUI {
                     }
                     loadoutManager.saveLoadout(p.getUniqueId());
                     p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
-                    p.sendMessage(Component.text("Cleared preference for slot " + slotNumber, NamedTextColor.YELLOW));
+                    p.sendMessage(plugin.tr(player, "gui.slotprefs.cleared.slot",
+                            java.util.Map.of("slot", String.valueOf(slotNumber))));
                     open(p, isHider);
                 } else {
 
@@ -95,7 +95,7 @@ public class SlotPreferencesGUI {
             SlotPreference preference = isHider ? loadout.getHiderSlotPreference(
                     slotNumber) : loadout.getSeekerSlotPreference(slotNumber);
 
-            InventoryItem slotItem = new InventoryItem(createFallbackSlotItem(i, preference));
+            InventoryItem slotItem = new InventoryItem(createFallbackSlotItem(player, i, preference));
             slotItem.setClickHandler((p, item, event, s) -> {
                 if (event.isRightClick()) {
 
@@ -109,7 +109,8 @@ public class SlotPreferencesGUI {
                         }
                         loadoutManager.saveLoadout(p.getUniqueId());
                         p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
-                        p.sendMessage(Component.text("Cleared fallback for slot " + slotNumber, NamedTextColor.YELLOW));
+                        p.sendMessage(plugin.tr(player, "gui.slotprefs.cleared.fallback",
+                                java.util.Map.of("slot", String.valueOf(slotNumber))));
                     }
                     open(p, isHider);
                 } else {
@@ -119,7 +120,7 @@ public class SlotPreferencesGUI {
                     if (current != null) {
                         openPreferenceSelector(p, slotNumber, isHider, true);
                     } else {
-                        p.sendMessage(Component.text("Set a primary preference first!", NamedTextColor.RED));
+                        p.sendMessage(plugin.tr(player, "gui.slotprefs.error.set-primary-first"));
                         p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                     }
                 }
@@ -132,9 +133,10 @@ public class SlotPreferencesGUI {
 
 
         InventoryItem clearAllButton = new InventoryItem(
-                createUtilityItem(Material.BARRIER, "Clear All Preferences", NamedTextColor.RED,
-                        List.of(Component.text("Click to clear all slot preferences", NamedTextColor.GRAY).decoration(
-                                TextDecoration.ITALIC, false))));
+                createUtilityItem(Material.BARRIER, plugin.trText(player, "gui.slotprefs.clear_all.title"),
+                        NamedTextColor.RED,
+                        List.of(plugin.tr(player, "gui.slotprefs.clear_all.hint").decoration(TextDecoration.ITALIC,
+                                false))));
         clearAllButton.setClickHandler((p, item, event, slot) -> {
             if (isHider) {
                 loadout.clearHiderSlotPreferences();
@@ -143,7 +145,7 @@ public class SlotPreferencesGUI {
             }
             loadoutManager.saveLoadout(p.getUniqueId());
             p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 0.8f);
-            p.sendMessage(Component.text("Cleared all slot preferences", NamedTextColor.YELLOW));
+            p.sendMessage(plugin.tr(player, "gui.slotprefs.cleared.all"));
             open(p, isHider);
             event.setCancelled(true);
         });
@@ -153,8 +155,9 @@ public class SlotPreferencesGUI {
 
 
         InventoryItem backButton = new InventoryItem(
-                createUtilityItem(Material.ARROW, "Back to Loadout", NamedTextColor.YELLOW,
-                        List.of(Component.text("Return to loadout editor", NamedTextColor.GRAY).decoration(
+                createUtilityItem(Material.ARROW, plugin.trText(player, "gui.slotprefs.back_to_loadout"),
+                        NamedTextColor.YELLOW,
+                        List.of(plugin.tr(player, "gui.slotprefs.back_to_loadout.hint").decoration(
                                 TextDecoration.ITALIC, false))));
         backButton.setClickHandler((p, item, event, slot) -> {
             LoadoutGUI gui = new LoadoutGUI(loadoutManager, plugin);
@@ -172,7 +175,10 @@ public class SlotPreferencesGUI {
         FrameworkInventory inv = new de.thecoolcraft11.minigameframework.inventory.InventoryBuilder(
                 plugin.getInventoryFramework())
                 .id("pref_selector_" + player.getUniqueId() + "_" + slot + "_" + (isFallback ? "fb" : "primary"))
-                .title("Select " + (isFallback ? "Fallback" : "Primary") + " ItemType for Slot " + slot)
+                .title(plugin.trText(player, "gui.slotprefs.selector.title", java.util.Map.of(
+                        "mode", isFallback ? "Fallback" : "Primary",
+                        "slot", String.valueOf(slot)
+                )))
                 .rows(3)
                 .allowOutsideClicks(false)
                 .allowDrag(false)
@@ -181,7 +187,7 @@ public class SlotPreferencesGUI {
 
         int slotIndex = 9;
         for (ItemType itemType : ItemType.values()) {
-            InventoryItem typeItem = new InventoryItem(createItemTypeItem(itemType));
+            InventoryItem typeItem = new InventoryItem(createItemTypeItem(player, itemType));
             typeItem.setClickHandler((p, item, event, s) -> {
                 PlayerLoadout loadout = loadoutManager.getLoadout(p.getUniqueId());
                 SlotPreference existing = isFallback ?
@@ -207,17 +213,17 @@ public class SlotPreferencesGUI {
 
 
                 if (!isFallback) {
-                    p.sendMessage(
-                            Component.text("Set slot " + slot + " primary preference to " + formatName(itemType.name()),
-                                    NamedTextColor.GREEN));
-                    p.sendMessage(Component.text(
-                            "You can now set a fallback preference. Left-click a slot again if you don't want a fallback.",
-                            NamedTextColor.YELLOW));
+                    p.sendMessage(plugin.tr(player, "gui.slotprefs.set.primary", java.util.Map.of(
+                            "slot", String.valueOf(slot),
+                            "type", formatName(itemType.name())
+                    )));
+                    p.sendMessage(plugin.tr(player, "gui.slotprefs.primary.hint"));
                     open(p, isHider);
                 } else {
-                    p.sendMessage(Component.text(
-                            "Set slot " + slot + " fallback preference to " + formatName(itemType.name()),
-                            NamedTextColor.GREEN));
+                    p.sendMessage(plugin.tr(player, "gui.slotprefs.set.fallback", java.util.Map.of(
+                            "slot", String.valueOf(slot),
+                            "type", formatName(itemType.name())
+                    )));
                     open(p, isHider);
                 }
                 event.setCancelled(true);
@@ -228,8 +234,10 @@ public class SlotPreferencesGUI {
         }
 
 
-        InventoryItem backButton = new InventoryItem(createUtilityItem(Material.ARROW, "Back", NamedTextColor.YELLOW,
-                List.of(Component.text("Return to slot preferences", NamedTextColor.GRAY).decoration(
+        InventoryItem backButton = new InventoryItem(
+                createUtilityItem(Material.ARROW, plugin.trText(player, "gui.slotprefs.back_to_preferences.title"),
+                        NamedTextColor.YELLOW,
+                        List.of(plugin.tr(player, "gui.slotprefs.back_to_preferences.hint").decoration(
                         TextDecoration.ITALIC, false))));
         backButton.setClickHandler((p, item, event, s) -> {
             open(p, isHider);
@@ -242,72 +250,74 @@ public class SlotPreferencesGUI {
         plugin.getInventoryFramework().openInventory(player, inv);
     }
 
-    private ItemStack createInfoItem(int maxItems) {
+    private ItemStack createInfoItem(Player player, int maxItems) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text("Slot Preferences", NamedTextColor.AQUA, TextDecoration.BOLD)
+        meta.displayName(plugin.tr(player, "gui.slotprefs.info.title").color(NamedTextColor.AQUA)
+                .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false));
         meta.lore(Arrays.asList(
-                Component.text("Configure " + maxItems + " slot preferences", NamedTextColor.GRAY).decoration(
+                plugin.tr(player, "gui.slotprefs.info.configure", java.util.Map.of("count", String.valueOf(maxItems)))
+                        .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                plugin.tr(player, "gui.slotprefs.info.top_row").color(NamedTextColor.GREEN).decoration(
+                        TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false),
+                plugin.tr(player, "gui.slotprefs.info.bottom_row").color(NamedTextColor.YELLOW).decoration(
+                        TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false),
+                Component.empty(),
+                plugin.tr(player, "gui.slotprefs.info.primary").color(NamedTextColor.GRAY).decoration(
                         TextDecoration.ITALIC, false),
-                Component.text("TOP ROW: Primary Preferences", NamedTextColor.GREEN, TextDecoration.BOLD).decoration(
-                        TextDecoration.ITALIC, false),
-                Component.text("BOTTOM ROW: Fallback Preferences", NamedTextColor.YELLOW,
-                        TextDecoration.BOLD).decoration(
+                plugin.tr(player, "gui.slotprefs.info.fallback").color(NamedTextColor.GRAY).decoration(
                         TextDecoration.ITALIC, false),
                 Component.empty(),
-                Component.text("Primary: Item placed first if available", NamedTextColor.GRAY).decoration(
+                plugin.tr(player, "gui.slotprefs.info.click_primary").color(NamedTextColor.YELLOW).decoration(
                         TextDecoration.ITALIC, false),
-                Component.text("Fallback: Used if primary item unavailable", NamedTextColor.GRAY).decoration(
+                plugin.tr(player, "gui.slotprefs.info.click_fallback").color(NamedTextColor.YELLOW).decoration(
                         TextDecoration.ITALIC, false),
-                Component.empty(),
-                Component.text("Left click PRIMARY to select ItemType", NamedTextColor.YELLOW).decoration(
-                        TextDecoration.ITALIC, false),
-                Component.text("Left click FALLBACK to add backup (if primary set)", NamedTextColor.YELLOW).decoration(
-                        TextDecoration.ITALIC, false),
-                Component.text("Right click any slot to clear it", NamedTextColor.RED).decoration(
+                plugin.tr(player, "gui.slotprefs.info.click_clear").color(NamedTextColor.RED).decoration(
                         TextDecoration.ITALIC, false)
         ));
         item.setItemMeta(meta);
         return item;
     }
 
-    private ItemStack createPrimarySlotItem(int slot, SlotPreference preference) {
+    private ItemStack createPrimarySlotItem(Player player, int slot, SlotPreference preference) {
         Material material = preference == null ? Material.LIGHT_BLUE_STAINED_GLASS_PANE : getColorForItemType(
                 preference.primary());
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
 
-        String title = "Slot " + slot + " (Primary)";
+        String title = plugin.trText(player, "gui.slotprefs.slot.primary.title",
+                java.util.Map.of("slot", String.valueOf(slot)));
         NamedTextColor color = preference == null ? NamedTextColor.GRAY : NamedTextColor.GREEN;
         meta.displayName(Component.text(title, color, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
         if (preference != null) {
-            lore.add(Component.text("Preference: " + formatName(preference.primary().name()),
-                    NamedTextColor.GOLD).decoration(
-                    TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.slotprefs.slot.primary.preference",
+                            java.util.Map.of("type", formatName(preference.primary().name())))
+                    .color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
             if (preference.hasFallback()) {
-                lore.add(Component.text("Fallback: " + formatName(preference.fallback().name()),
-                        NamedTextColor.AQUA).decoration(
-                        TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.slotprefs.slot.fallback.preference",
+                                java.util.Map.of("type", formatName(preference.fallback().name())))
+                        .color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false));
             }
         } else {
-            lore.add(Component.text("No preference set", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.slotprefs.slot.no_preference").color(NamedTextColor.GRAY).decoration(
+                    TextDecoration.ITALIC, false));
         }
         lore.add(Component.empty());
         lore.add(
-                Component.text("Left click to set/modify", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC,
-                        false));
-        lore.add(Component.text("Right click to clear all", NamedTextColor.RED).decoration(TextDecoration.ITALIC,
-                false));
+                plugin.tr(player, "gui.slotprefs.slot.left_click").color(NamedTextColor.YELLOW).decoration(
+                        TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.slotprefs.slot.right_click_clear").color(NamedTextColor.RED).decoration(
+                TextDecoration.ITALIC, false));
 
         meta.lore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
-    private ItemStack createFallbackSlotItem(int slot, SlotPreference preference) {
+    private ItemStack createFallbackSlotItem(Player player, int slot, SlotPreference preference) {
         boolean hasPreference = preference != null;
         Material material = !hasPreference ? Material.LIGHT_GRAY_STAINED_GLASS_PANE :
                 (preference.hasFallback() ? getColorForItemType(
@@ -315,38 +325,38 @@ public class SlotPreferencesGUI {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
 
-        String title = "Slot " + slot + " (Fallback)";
+        String title = plugin.trText(player, "gui.slotprefs.slot.fallback.title",
+                java.util.Map.of("slot", String.valueOf(slot)));
         NamedTextColor color = !hasPreference ? NamedTextColor.DARK_GRAY :
                 (preference.hasFallback() ? NamedTextColor.GREEN : NamedTextColor.GRAY);
         meta.displayName(Component.text(title, color, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
         if (hasPreference) {
-            lore.add(Component.text("Primary: " + formatName(preference.primary().name()),
-                    NamedTextColor.GOLD).decoration(
-                    TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.slotprefs.slot.primary.preference",
+                            java.util.Map.of("type", formatName(preference.primary().name())))
+                    .color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
             if (preference.hasFallback()) {
-                lore.add(Component.text("Fallback: " + formatName(preference.fallback().name()),
-                        NamedTextColor.AQUA).decoration(
-                        TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.slotprefs.slot.fallback.preference",
+                                java.util.Map.of("type", formatName(preference.fallback().name())))
+                        .color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false));
             } else {
-                lore.add(Component.text("No fallback set", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC,
-                        false));
+                lore.add(plugin.tr(player, "gui.slotprefs.slot.no_fallback").color(NamedTextColor.GRAY).decoration(
+                        TextDecoration.ITALIC, false));
             }
         } else {
-            lore.add(Component.text("Set primary preference first", NamedTextColor.DARK_GRAY).decoration(
-                    TextDecoration.ITALIC, false));
+            lore.add(plugin.tr(player, "gui.slotprefs.slot.set_primary_first").color(
+                    NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
         }
         lore.add(Component.empty());
         lore.add(
-                Component.text(hasPreference ? "Left click to set/modify" : "N/A (set primary first)",
-                        hasPreference ? NamedTextColor.YELLOW : NamedTextColor.DARK_GRAY).decoration(
-                        TextDecoration.ITALIC,
-                        false));
+                plugin.tr(player,
+                                hasPreference ? "gui.slotprefs.slot.left_click" : "gui.slotprefs.slot.na_set_primary_first")
+                        .color(hasPreference ? NamedTextColor.YELLOW : NamedTextColor.DARK_GRAY)
+                        .decoration(TextDecoration.ITALIC, false));
         if (preference != null && preference.hasFallback()) {
-            lore.add(Component.text("Right click to clear fallback", NamedTextColor.RED).decoration(
-                    TextDecoration.ITALIC,
-                    false));
+            lore.add(plugin.tr(player, "gui.slotprefs.slot.right_click_clear_fallback").color(
+                    NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
         }
 
         meta.lore(lore);
@@ -354,17 +364,20 @@ public class SlotPreferencesGUI {
         return item;
     }
 
-    private ItemStack createItemTypeItem(ItemType itemType) {
+    private ItemStack createItemTypeItem(Player player, ItemType itemType) {
         Material material = getColorForItemType(itemType);
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
 
         NamedTextColor color = getColorForItemTypeText(itemType);
-        meta.displayName(Component.text(formatName(itemType.name()), color, TextDecoration.BOLD)
+        meta.displayName(
+                plugin.tr(player, "gui.slotprefs.item.name", java.util.Map.of("name", formatName(itemType.name())))
+                        .color(color)
+                        .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Click to set this as the preference", NamedTextColor.YELLOW).decoration(
+        lore.add(plugin.tr(player, "gui.slotprefs.item.click_set").color(NamedTextColor.YELLOW).decoration(
                 TextDecoration.ITALIC, false));
         meta.lore(lore);
         item.setItemMeta(meta);
@@ -417,13 +430,4 @@ public class SlotPreferencesGUI {
         return result.toString();
     }
 }
-
-
-
-
-
-
-
-
-
 
