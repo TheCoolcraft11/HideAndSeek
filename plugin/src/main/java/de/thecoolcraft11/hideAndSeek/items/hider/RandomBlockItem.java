@@ -5,6 +5,7 @@ import de.thecoolcraft11.hideAndSeek.block.BlockAppearanceConfig;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.model.SkinData;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
@@ -111,6 +112,10 @@ public class RandomBlockItem implements GameItem {
             randomizeBlock(player, plugin);
         }
 
+        if (plugin.getSettingRegistry().get("game.mode") == GameModeEnum.SKIN) {
+            randomizeSkin(player, plugin);
+        }
+
     }
 
     public static void randomizeBlock(Player player, HideAndSeek plugin) {
@@ -212,6 +217,71 @@ public class RandomBlockItem implements GameItem {
                 .append(Component.text(HiderItemUtil.formatName(chosenMaterial.name()), NamedTextColor.GOLD)));
     }
 
+    public static void randomizeSkin(Player player, HideAndSeek plugin) {
+        if (player == null) {
+            return;
+        }
+        if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
+            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            return;
+        }
+        if (isHiderCursed(player.getUniqueId())) {
+            player.sendMessage(Component.text("You are cursed and cannot change skins right now!", NamedTextColor.RED));
+            return;
+        }
+
+
+        String currentMap = HideAndSeek.getDataController().getCurrentMapName();
+        if (currentMap == null || currentMap.isEmpty()) {
+            player.sendMessage(Component.text("No active map found.", NamedTextColor.RED));
+            return;
+        }
+
+        List<String> allowedBlocks = plugin.getMapManager().getAllowedSkinsForMap(currentMap);
+        if (allowedBlocks.isEmpty()) {
+            player.sendMessage(Component.text("No allowed skins configured for this map.", NamedTextColor.RED));
+            return;
+        }
+
+        List<String> possibleBlocks = allowedBlocks.stream()
+                .filter(block -> !block.equalsIgnoreCase(
+                        plugin.getSkinManager().getAssignedSkinId(player.getUniqueId())))
+                .toList();
+
+        String chosenPattern = possibleBlocks.get(new Random().nextInt(allowedBlocks.size()));
+        SkinData chosenSkin = plugin.getSkinManager().getSkinById(chosenPattern);
+
+        plugin.getSkinManager().assignSkin(player, chosenSkin);
+
+
+        if (ItemSkinSelectionService.isSelected(player, ID, "skin_shapeshifter_dust")) {
+            player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1, 0), 18, 0.35, 0.35, 0.35,
+                    0.02);
+            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 10, 0.35, 0.35, 0.35,
+                    0.1);
+            player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.9f, 1.4f);
+        } else if (ItemSkinSelectionService.isSelected(player, ID, "skin_mystery_box")) {
+            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1, 0), 12, 0.35, 0.35,
+                    0.35, 0.03);
+            player.getWorld().spawnParticle(Particle.NOTE, player.getLocation().add(0, 1, 0), 6, 0.25, 0.25, 0.25, 1.0);
+            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 0.8f, 1.2f);
+        }
+
+        boolean mysteryBox = ItemSkinSelectionService.isSelected(player, ID, "skin_mystery_box");
+        if (mysteryBox) {
+            player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.25, 0.3, 0.25,
+                    0.02);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 6, 0.2, 0.25,
+                    0.2, 0.02);
+            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.35f, 1.55f);
+        }
+
+        HiderItemUtil.updateAppearanceItem(player, plugin);
+
+        player.sendMessage(Component.text("Transformed into ", NamedTextColor.GREEN)
+                .append(Component.text(HiderItemUtil.formatName(chosenSkin.name()), NamedTextColor.GOLD)));
+    }
+
     public static void randomizeBlockFor(Player player, HideAndSeek plugin, boolean forceUnhide) {
         if (player == null) {
             return;
@@ -222,6 +292,14 @@ public class RandomBlockItem implements GameItem {
         } else {
             randomizeBlock(player, plugin);
         }
+    }
+
+
+    public static void randomizeSkinFor(Player player, HideAndSeek plugin) {
+        if (player == null) {
+            return;
+        }
+        randomizeSkin(player, plugin);
     }
 
     @Override

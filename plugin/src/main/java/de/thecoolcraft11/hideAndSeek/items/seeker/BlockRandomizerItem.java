@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem.randomizeBlockFor;
+import static de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem.randomizeSkinFor;
 
 public class BlockRandomizerItem implements GameItem {
     public static final String ID = "has_seeker_block_randomizer";
@@ -50,37 +51,28 @@ public class BlockRandomizerItem implements GameItem {
         return "Force all hiders to reroll their disguise blocks.";
     }
 
-    @Override
-    public void register(HideAndSeek plugin) {
-        int randCooldown = plugin.getSettingRegistry().get("seeker-items.block-randomizer.cooldown", 45);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeAllBlocks(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeAllBlocks(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(randCooldown * 20)
-                .withCustomCooldown(randCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-    }
-
-    private static void randomizeAllBlocks(Player seeker, HideAndSeek plugin) {
+    private static void randomizeAll(Player seeker, HideAndSeek plugin) {
         var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
-        if (gameModeObj == null || !gameModeObj.toString().equals("BLOCK")) {
-            seeker.sendMessage(Component.text("Block Randomizer is only available in BLOCK mode.", NamedTextColor.RED));
-            return;
+        if (gameModeObj != null && gameModeObj.toString().equals("BLOCK")) {
+            randomizeBlocks(seeker, plugin);
+        } else if (gameModeObj != null && gameModeObj.toString().equals("SKIN")) {
+            randomizeSkins(seeker, plugin);
+        } else {
+            seeker.sendMessage(
+                    Component.text("Block Randomizer is only available in BLOCK or SKIN mode.", NamedTextColor.RED));
         }
 
+
+    }
+
+    private static void randomizeBlocks(Player seeker, HideAndSeek plugin) {
         boolean glitchCore = ItemSkinSelectionService.isSelected(seeker, ID, "skin_glitch_core");
         boolean chaosMagic = ItemSkinSelectionService.isSelected(seeker, ID, "skin_chaos_magic");
 
         if (chaosMagic) {
-            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1, 0), 10, 0.25, 0.3, 0.25, 0.02);
+            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1, 0), 10, 0.25, 0.3, 0.25,
+                    0.02);
             seeker.playSound(seeker.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.35f, 1.55f);
         }
 
@@ -91,19 +83,80 @@ public class BlockRandomizerItem implements GameItem {
             randomizeBlockFor(hider, plugin, true);
 
             if (glitchCore) {
-                hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1, 0), 18, 0.4, 0.4, 0.4, 0.08);
-                hider.getWorld().spawnParticle(Particle.PORTAL, hider.getLocation().add(0, 1, 0), 12, 0.3, 0.3, 0.3, 0.1);
+                hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1, 0), 18, 0.4, 0.4,
+                        0.4, 0.08);
+                hider.getWorld().spawnParticle(Particle.PORTAL, hider.getLocation().add(0, 1, 0), 12, 0.3, 0.3, 0.3,
+                        0.1);
                 hider.playSound(hider.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.9f, 1.4f);
             } else if (chaosMagic) {
-                hider.getWorld().spawnParticle(Particle.WITCH, hider.getLocation().add(0, 1, 0), 16, 0.4, 0.4, 0.4, 0.08);
-                hider.getWorld().spawnParticle(Particle.ENCHANT, hider.getLocation().add(0, 1, 0), 10, 0.4, 0.4, 0.4, 0.1);
+                hider.getWorld().spawnParticle(Particle.WITCH, hider.getLocation().add(0, 1, 0), 16, 0.4, 0.4, 0.4,
+                        0.08);
+                hider.getWorld().spawnParticle(Particle.ENCHANT, hider.getLocation().add(0, 1, 0), 10, 0.4, 0.4, 0.4,
+                        0.1);
                 hider.playSound(hider.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 0.8f, 1.3f);
             } else {
-                hider.getWorld().spawnParticle(Particle.ENCHANT, hider.getLocation().add(0, 1, 0), 15, 0.4, 0.4, 0.4, 0.1);
+                hider.getWorld().spawnParticle(Particle.ENCHANT, hider.getLocation().add(0, 1, 0), 15, 0.4, 0.4, 0.4,
+                        0.1);
                 hider.playSound(hider.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 1.0f, 1.5f);
             }
             count++;
         }
         seeker.sendMessage(Component.text("Blocks randomized! (" + count + " hiders)", NamedTextColor.GREEN));
+    }
+
+    private static void randomizeSkins(Player seeker, HideAndSeek plugin) {
+        boolean glitchCore = ItemSkinSelectionService.isSelected(seeker, ID, "skin_glitch_core");
+        boolean chaosMagic = ItemSkinSelectionService.isSelected(seeker, ID, "skin_chaos_magic");
+
+        if (chaosMagic) {
+            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1, 0), 10, 0.25, 0.3, 0.25,
+                    0.02);
+            seeker.playSound(seeker.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.35f, 1.55f);
+        }
+
+        int count = 0;
+        for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+            Player hider = Bukkit.getPlayer(hiderId);
+            if (hider == null) continue;
+            randomizeSkinFor(hider, plugin);
+
+            if (glitchCore) {
+                hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1, 0), 18, 0.4, 0.4,
+                        0.4, 0.08);
+                hider.getWorld().spawnParticle(Particle.PORTAL, hider.getLocation().add(0, 1, 0), 12, 0.3, 0.3, 0.3,
+                        0.1);
+                hider.playSound(hider.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.9f, 1.4f);
+            } else if (chaosMagic) {
+                hider.getWorld().spawnParticle(Particle.WITCH, hider.getLocation().add(0, 1, 0), 16, 0.4, 0.4, 0.4,
+                        0.08);
+                hider.getWorld().spawnParticle(Particle.ENCHANT, hider.getLocation().add(0, 1, 0), 10, 0.4, 0.4, 0.4,
+                        0.1);
+                hider.playSound(hider.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 0.8f, 1.3f);
+            } else {
+                hider.getWorld().spawnParticle(Particle.ENCHANT, hider.getLocation().add(0, 1, 0), 15, 0.4, 0.4, 0.4,
+                        0.1);
+                hider.playSound(hider.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 1.0f, 1.5f);
+            }
+            count++;
+        }
+        seeker.sendMessage(Component.text("Blocks randomized! (" + count + " hiders)", NamedTextColor.GREEN));
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int randCooldown = plugin.getSettingRegistry().get("seeker-items.block-randomizer.cooldown", 45);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeAll(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeAll(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin))
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(randCooldown * 20)
+                .withCustomCooldown(randCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
     }
 }

@@ -88,6 +88,10 @@ public class SkinManager {
         return skinRegistry.get(assignedSkins.get(playerId));
     }
 
+    public SkinData getSkinById(String id) {
+        return skinRegistry.get(id);
+    }
+
     public void assignSkin(Player player, SkinData skin) {
         if (isNotSkinMode()) return;
         if (player == null || skin == null) return;

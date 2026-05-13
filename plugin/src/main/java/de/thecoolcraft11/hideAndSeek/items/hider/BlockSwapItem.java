@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek.items.hider;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
+import de.thecoolcraft11.hideAndSeek.model.SkinData;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
@@ -80,23 +81,37 @@ public class BlockSwapItem implements GameItem {
 
     private static void blockSwap(ItemInteractionContext context, HideAndSeek plugin) {
         Player player = context.getPlayer();
-        if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
-            context.skipCooldown();
-            return;
-        }
-        if (!"BLOCK".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
-            player.sendMessage(Component.text("Block swap is only available in BLOCK mode.", NamedTextColor.RED));
-            context.skipCooldown();
-            return;
-        }
-        if (isHiderCursed(player.getUniqueId())) {
-            player.sendMessage(Component.text("You are cursed and cannot swap blocks!", NamedTextColor.RED));
-            context.skipCooldown();
-            return;
-        }
+        if ("BLOCK".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
+            if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
+                player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+                context.skipCooldown();
+                return;
+            }
+            if (isHiderCursed(player.getUniqueId())) {
+                player.sendMessage(Component.text("You are cursed and cannot swap blocks!", NamedTextColor.RED));
+                context.skipCooldown();
+                return;
+            }
 
-        blockSwap(player, plugin);
+            blockSwap(player, plugin);
+        } else if ("SKIN".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
+            if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
+                player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+                context.skipCooldown();
+                return;
+            }
+            if (isHiderCursed(player.getUniqueId())) {
+                player.sendMessage(Component.text("You are cursed and cannot swap skins!", NamedTextColor.RED));
+                context.skipCooldown();
+                return;
+            }
+
+            skinSwap(player, plugin);
+        } else {
+            player.sendMessage(
+                    Component.text("Block swap is only available in BLOCK or SKIN mode.", NamedTextColor.RED));
+            context.skipCooldown();
+        }
     }
 
     private static void blockSwap(Player player, HideAndSeek plugin) {
@@ -206,5 +221,87 @@ public class BlockSwapItem implements GameItem {
             player.sendMessage(Component.text("Swapped blocks with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
             finalTarget.sendMessage(Component.text("Swapped blocks with " + player.getName() + "!", NamedTextColor.GREEN));
         }, 2L);
+    }
+
+    private static void skinSwap(Player player, HideAndSeek plugin) {
+        double range = plugin.getSettingRegistry().get("hider-items.block-swap.range", 50.0);
+        Player target = null;
+        double closest = range;
+
+        for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+            if (hiderId.equals(player.getUniqueId())) {
+                continue;
+            }
+            Player other = Bukkit.getPlayer(hiderId);
+            if (other == null || !other.isOnline()) {
+                continue;
+            }
+            double dist = other.getLocation().distance(player.getLocation());
+            if (dist <= closest) {
+                closest = dist;
+                target = other;
+            }
+        }
+
+        if (target == null) {
+            player.sendMessage(Component.text("No hider nearby to swap with!", NamedTextColor.RED));
+            return;
+        }
+
+        final Player finalTarget = target;
+
+        SkinData playerSkin = plugin.getSkinManager().getAssignedSkin(player.getUniqueId());
+        SkinData targetSkin = plugin.getSkinManager().getAssignedSkin(finalTarget.getUniqueId());
+
+        plugin.getSkinManager().assignSkin(player, targetSkin);
+        plugin.getSkinManager().assignSkin(finalTarget, playerSkin);
+
+        boolean magicMirror = ItemSkinSelectionService.isSelected(player, ID, "skin_magic_mirror");
+        boolean quantumLink = ItemSkinSelectionService.isSelected(player, ID, "skin_quantum_link");
+
+        player.getWorld().spawnParticle(Particle.PORTAL, player.getLocation(), 20, 0.2, 0.5, 0.2, 1.0);
+        finalTarget.getWorld().spawnParticle(Particle.PORTAL, finalTarget.getLocation(), 20, 0.2, 0.5, 0.2, 1.0);
+
+        if (magicMirror) {
+            player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
+            finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
+            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
+        } else if (quantumLink) {
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation(), 20, 0.3, 0.3, 0.3, 0.05);
+            finalTarget.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, finalTarget.getLocation(), 20, 0.3, 0.3, 0.3,
+                    0.05);
+            player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25,
+                    0.08);
+            finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4,
+                    0.25, 0.08);
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
+            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
+        } else {
+            player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05, 1);
+            finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3, 0.3,
+                    0.05, 1);
+            player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25,
+                    0.08);
+            finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4,
+                    0.25, 0.08);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+        }
+
+        if (quantumLink) {
+            player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2,
+                    0.02);
+            finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation().add(0, 1, 0), 8, 0.2, 0.25,
+                    0.2, 0.02);
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
+            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
+        }
+
+        HiderItemUtil.updateAppearanceItem(player, plugin);
+        HiderItemUtil.updateAppearanceItem(finalTarget, plugin);
+
+        player.sendMessage(Component.text("Swapped skins with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
+        finalTarget.sendMessage(Component.text("Swapped skins with " + player.getName() + "!", NamedTextColor.GREEN));
     }
 }
