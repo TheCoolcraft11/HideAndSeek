@@ -101,6 +101,8 @@ public final class GameCoreSettingGroup implements SettingGroup {
                         "Ticks between contact punishment hits", Material.GOLD_NUGGET),
                 new DoubleSettingSpec("game.small-mode.hider-size", 0.5, 0.0, 2.0,
                         "Size scale for SMALL mode hiders (0.1 = tiny, 1.0 = normal)", Material.SLIME_BALL),
+                new DoubleSettingSpec("game.skin-mode.hider-size", 0.5, 0.0, 2.0,
+                        "Size scale for SMALL mode hiders (0.1 = tiny, 1.0 = normal)", Material.SLIME_BALL),
                 new BooleanSettingSpec("game.team-distribution.random", true,
                         "Enable random distribution of players into hider/seeker teams", Material.PLAYER_HEAD, true),
                 new BooleanSettingSpec("game.voting.game-mode-enabled", true,

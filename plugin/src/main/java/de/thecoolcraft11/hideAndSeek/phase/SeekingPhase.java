@@ -84,7 +84,14 @@ public class SeekingPhase implements GamePhase {
         GameModeEnum gameMode = (gameModeObj instanceof GameModeEnum) ?
                 (GameModeEnum) gameModeObj : GameModeEnum.NORMAL;
         double seekerSize = 1.0;
+
         if (gameMode == GameModeEnum.SMALL) {
+            var seekerSizeResult = plugin.getSettingService().getSetting("game.small-mode.seeker-size");
+            Object seekerSizeObj = seekerSizeResult.isSuccess() ? seekerSizeResult.getValue() : 1.0;
+            seekerSize = (seekerSizeObj instanceof Number) ? ((Number) seekerSizeObj).doubleValue() : 1.0;
+        }
+
+        if (gameMode == GameModeEnum.SMALL || gameMode == GameModeEnum.SKIN) {
             var seekerSizeResult = plugin.getSettingService().getSetting("game.small-mode.seeker-size");
             Object seekerSizeObj = seekerSizeResult.isSuccess() ? seekerSizeResult.getValue() : 1.0;
             seekerSize = (seekerSizeObj instanceof Number) ? ((Number) seekerSizeObj).doubleValue() : 1.0;

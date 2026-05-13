@@ -139,13 +139,6 @@ public class HidingPhase implements GamePhase {
         }
 
 
-        if (gameMode == GameModeEnum.SMALL) {
-            var seekerSizeResult = plugin.getSettingService().getSetting("game.small-mode.seeker-size");
-            Object seekerSizeObj = seekerSizeResult.isSuccess() ? seekerSizeResult.getValue() : 1.0;
-            if ((seekerSizeObj instanceof Number)) {
-                ((Number) seekerSizeObj).doubleValue();
-            }
-        }
 
 
         if (gameMode == GameModeEnum.BLOCK) {
@@ -194,13 +187,27 @@ public class HidingPhase implements GamePhase {
         }
 
 
+        double sizeModifier = 1.0;
 
-        var sizeResult = plugin.getSettingService().getSetting("game.small-mode.hider-size");
-        Object sizeObj = sizeResult.isSuccess() ? sizeResult.getValue() : 0.5;
-        double sizeModifier = (sizeObj instanceof Double) ? (Double) sizeObj : 0.5;
-        if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
-            plugin.getLogger().info("Size modifier: " + sizeModifier);
+        if (gameMode == GameModeEnum.SMALL) {
+            var sizeResult = plugin.getSettingService().getSetting("game.small-mode.hider-size");
+            Object sizeObj = sizeResult.isSuccess() ? sizeResult.getValue() : 0.5;
+            sizeModifier = (sizeObj instanceof Double) ? (Double) sizeObj : 0.5;
+            if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Size modifier: " + sizeModifier);
+            }
         }
+
+
+        if (gameMode == GameModeEnum.SKIN) {
+            var sizeResult = plugin.getSettingService().getSetting("game.small-mode.hider-size");
+            Object sizeObj = sizeResult.isSuccess() ? sizeResult.getValue() : 0.5;
+            sizeModifier = (sizeObj instanceof Double) ? (Double) sizeObj : 0.5;
+            if (hideAndSeekPlugin.getDebugSettings().isVerboseLoggingEnabled()) {
+                plugin.getLogger().info("Size modifier: " + sizeModifier);
+            }
+        }
+
 
 
         var hiderHealthResult = plugin.getSettingService().getSetting("game.hiders.health");
@@ -320,7 +327,7 @@ public class HidingPhase implements GamePhase {
                 }
 
 
-                if (gameMode == GameModeEnum.SMALL) {
+                if (gameMode == GameModeEnum.SMALL || gameMode == GameModeEnum.SKIN) {
                     final double finalSizeModifier = sizeModifier;
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         try {

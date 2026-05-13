@@ -49,6 +49,8 @@ public final class GameAdvancedSettingGroup implements SettingGroup {
                         true),
                 new DoubleSettingSpec("game.small-mode.seeker-size", 1.0, 0.1, 2.0,
                         "Size scale for seekers in SMALL mode (1.0 = normal size)", Material.MAGMA_CREAM),
+                new DoubleSettingSpec("game.skin-mode.seeker-size", 1.0, 0.1, 2.0,
+                        "Size scale for seekers in SMALL mode (1.0 = normal size)", Material.MAGMA_CREAM),
                 new BooleanSettingSpec("game.blockstats.show-names", false, "Show player names in Block Statistics GUI",
                         Material.NAME_TAG, true),
                 new BooleanSettingSpec("game.blockstats.enabled", true,

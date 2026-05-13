@@ -52,6 +52,9 @@ public class SettingRegistrar {
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.small-mode").icon(Material.SLIME_BALL).build());
 
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("game.skin-mode").icon(Material.SNOWBALL).build());
+
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.team-distribution").icon(Material.PLAYER_HEAD).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("game.teams").icon(Material.WHITE_BANNER).build());
