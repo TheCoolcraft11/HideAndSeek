@@ -47,3 +47,12 @@ permissions:
   hideandseek.command.stats:
     description: Allows using /mg stats command
     default: true
+  hideandseek.role.hider:
+    description: Player is currently assigned as a hider in an active HideAndSeek round.
+    default: false
+  hideandseek.role.seeker:
+    description: Player is currently assigned as a seeker in an active HideAndSeek round.
+    default: false
+  hideandseek.role.spectator:
+    description: Player is a spectator during an active HideAndSeek round.
+    default: false

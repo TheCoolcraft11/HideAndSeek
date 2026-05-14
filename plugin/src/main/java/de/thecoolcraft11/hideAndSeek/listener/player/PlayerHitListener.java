@@ -31,6 +31,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Team;
 
@@ -593,6 +594,9 @@ public class PlayerHitListener implements Listener {
         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info(hider.getName() + " was eliminated and joined the seekers (INVASION mode)");
         }
+        PermissionAttachment attachment = HideAndSeek.getDataController().getAttachment(hider);
+        attachment.unsetPermission("hideandseek.role.hider");
+        attachment.setPermission("hideandseek.role.seeker", true);
     }
 
     private void cleanupBlockModeHider(Player hider) {

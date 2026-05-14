@@ -2,14 +2,18 @@ package de.thecoolcraft11.hideAndSeek.util;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.*;
 
 public class DataController {
 
     private static DataController instance;
+    private final HideAndSeek plugin;
     private final List<UUID> hiders;
     private final Set<UUID> allHiders;
     private final List<UUID> seekers;
@@ -33,9 +37,12 @@ public class DataController {
     private boolean mapSelectionLocked;
     private long roundStartTime;
     private long roundEndTime;
+    private final Map<UUID, PermissionAttachment> attachments;
 
 
-    public DataController() {
+    public DataController(HideAndSeek plugin) {
+        this.plugin = plugin;
+
         this.hiders = new ArrayList<>();
         this.allHiders = new HashSet<>();
         this.seekers = new ArrayList<>();
@@ -58,6 +65,7 @@ public class DataController {
         this.mapSelectionLocked = false;
         this.roundStartTime = 0L;
         this.roundEndTime = 0L;
+        this.attachments = new HashMap<>();
     }
 
     public void setup() {
@@ -68,7 +76,10 @@ public class DataController {
 
     public static DataController getInstance() {
         if (instance == null) {
-            instance = new DataController();
+            HideAndSeek plugin = Bukkit.getPluginManager().getPlugin(
+                    "HideAndSeek") instanceof HideAndSeek ? (HideAndSeek) Bukkit.getPluginManager().getPlugin(
+                    "HideAndSeek") : null;
+            instance = new DataController(plugin);
         }
         return instance;
     }
@@ -382,5 +393,13 @@ public class DataController {
 
     public void setRoundEndTime(long roundEndTime) {
         this.roundEndTime = roundEndTime;
+    }
+
+
+    public PermissionAttachment getAttachment(Player player) {
+        return attachments.computeIfAbsent(
+                player.getUniqueId(),
+                uuid -> player.addAttachment(plugin)
+        );
     }
 }

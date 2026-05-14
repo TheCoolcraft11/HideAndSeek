@@ -91,7 +91,6 @@ public final class HideAndSeek extends MinigameFramework {
     private PlayerStatsGUI playerStatsGUI;
     private SkinManager skinManager;
     private SkinSelectorGUI skinSelectorGUI;
-    private SkinStatsGUI skinStatsGUI;
 
     @Override
     protected void onGameEnable() {
@@ -539,4 +538,5 @@ public final class HideAndSeek extends MinigameFramework {
             }
         }
     }
+
 }

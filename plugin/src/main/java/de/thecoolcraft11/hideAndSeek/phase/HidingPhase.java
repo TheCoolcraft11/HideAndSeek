@@ -231,6 +231,7 @@ public class HidingPhase implements GamePhase {
                 seeker.sendMessage(MiniMessage.miniMessage().deserialize(msg));
                 seeker.setGlowing(false);
                 Objects.requireNonNull(seeker.getAttribute(Attribute.SCALE)).setBaseValue(1.0);
+                HideAndSeek.getDataController().getAttachment(seeker).setPermission("hideandseek.role.seeker", true);
 
 
                 seeker.addPotionEffect(new PotionEffect(
@@ -276,6 +277,7 @@ public class HidingPhase implements GamePhase {
                 hider.setGameMode(GameMode.SURVIVAL);
                 hider.setWalkSpeed(0.2f);
                 hider.setGlowing(false);
+                HideAndSeek.getDataController().getAttachment(hider).setPermission("hideandseek.role.hider", true);
 
                 var maxHealth = hider.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
                 if (maxHealth != null) {
@@ -359,6 +361,7 @@ public class HidingPhase implements GamePhase {
             spectator.setInvulnerable(true);
             spectator.setSilent(true);
             spectator.setGlowing(false);
+            HideAndSeek.getDataController().getAttachment(spectator).setPermission("hideandseek.role.spectator", true);
         }
 
         if (gameMode == GameModeEnum.BLOCK || gameMode == GameModeEnum.SKIN) {

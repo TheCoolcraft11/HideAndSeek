@@ -1,9 +1,11 @@
 package de.thecoolcraft11.hideAndSeek.util;
 
+import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
@@ -17,15 +19,13 @@ public final class PlayerStateResetUtil {
     private static final float DEFAULT_EXP = 0.0f;
     private static final int DEFAULT_LEVEL = 0;
 
-    private PlayerStateResetUtil() {
-    }
-
 
     public static void resetPlayerCompletely(Player player, boolean clearInventory) {
         resetAttributes(player);
         resetGameState(player, clearInventory);
         resetStatus(player);
         resetCosmetics(player);
+        resetPermissions(player);
     }
 
     public static void resetPlayerForSpectator(Player player, boolean clearInventory) {
@@ -33,6 +33,7 @@ public final class PlayerStateResetUtil {
         player.setGameMode(GameMode.SPECTATOR);
         player.setAllowFlight(true);
         player.setFlying(true);
+        resetPermissions(player).setPermission("has.spectator", true);
     }
 
     private static void resetGameState(Player player, boolean clearInventory) {
@@ -108,5 +109,13 @@ public final class PlayerStateResetUtil {
         player.setGlowing(false);
         player.setInvisible(false);
         player.setSilent(false);
+    }
+
+    private static PermissionAttachment resetPermissions(Player player) {
+        PermissionAttachment attachment = HideAndSeek.getDataController().getAttachment(player);
+        attachment.unsetPermission("hideandseek.role.hider");
+        attachment.unsetPermission("hideandseek.role.seeker");
+        attachment.unsetPermission("hideandseek.role.spectator");
+        return attachment;
     }
 }
