@@ -134,7 +134,7 @@ public class HASExpansion extends PlaceholderExpansion {
                 return role;
             }
 
-            case "mode": {
+            case "mode_colored": {
                 GameModeEnum mode = HideAndSeek.getActiveInstance().getSettingRegistry().get("game.mode");
                 return switch (mode) {
                     case NORMAL -> "<green>Normal</green>";
