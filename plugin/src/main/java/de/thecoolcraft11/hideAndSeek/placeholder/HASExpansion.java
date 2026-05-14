@@ -39,35 +39,70 @@ public class HASExpansion extends PlaceholderExpansion {
         return true;
     }
 
-    @Override
-    public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
 
-        if (player == null) return "0";
+    private static final char[] SMALL_CAPS_MAP = new char[26];
 
-        String minigameId = HideAndSeek.getActiveInstance().getName();
+    static {
+        SMALL_CAPS_MAP[0] = 'ᴀ';
+        SMALL_CAPS_MAP[1] = 'ʙ';
+        SMALL_CAPS_MAP[2] = 'ᴄ';
+        SMALL_CAPS_MAP[3] = 'ᴅ';
+        SMALL_CAPS_MAP[4] = 'ᴇ';
+        SMALL_CAPS_MAP[5] = 'ꜰ';
+        SMALL_CAPS_MAP[6] = 'ɢ';
+        SMALL_CAPS_MAP[7] = 'ʜ';
+        SMALL_CAPS_MAP[8] = 'ɪ';
+        SMALL_CAPS_MAP[9] = 'ᴊ';
+        SMALL_CAPS_MAP[10] = 'ᴋ';
+        SMALL_CAPS_MAP[11] = 'ʟ';
+        SMALL_CAPS_MAP[12] = 'ᴍ';
+        SMALL_CAPS_MAP[13] = 'ɴ';
+        SMALL_CAPS_MAP[14] = 'ᴏ';
+        SMALL_CAPS_MAP[15] = 'ᴘ';
+        SMALL_CAPS_MAP[16] = 'ǫ';
+        SMALL_CAPS_MAP[17] = 'ʀ';
+        SMALL_CAPS_MAP[18] = 's';
+        SMALL_CAPS_MAP[19] = 'ᴛ';
+        SMALL_CAPS_MAP[20] = 'ᴜ';
+        SMALL_CAPS_MAP[21] = 'ᴠ';
+        SMALL_CAPS_MAP[22] = 'ᴡ';
+        SMALL_CAPS_MAP[23] = 'x';
+        SMALL_CAPS_MAP[24] = 'ʏ';
+        SMALL_CAPS_MAP[25] = 'ᴢ';
+    }
 
+    private static String toSmallCaps(String input) {
+        char[] chars = input.toLowerCase().toCharArray();
+        StringBuilder out = new StringBuilder(chars.length);
 
-        String predefined = handleSimpleParams(player, params);
-        if (predefined != null) return predefined;
-        String coloredPredefined = handleSimpleColoredParams(player, params);
-        if (coloredPredefined != null) return coloredPredefined;
+        boolean insideTag = false;
 
+        for (char c : chars) {
+            if (c == '<') {
+                insideTag = true;
+                out.append(c);
+                continue;
+            }
 
-        ParsedPlaceholder parsed = parseParams(params);
+            if (c == '>') {
+                insideTag = false;
+                out.append(c);
+                continue;
+            }
 
-        StatValue value = MinigameStatsAPI.getCachedStat(
-                player.getUniqueId(),
-                minigameId,
-                parsed.statKey
-        );
+            if (insideTag) {
+                out.append(c);
+                continue;
+            }
 
-        if (value == null) return parsed.defaultValue;
-
-        if (parsed.path == null || parsed.path.isEmpty()) {
-            return value.asString();
+            if (c >= 'a' && c <= 'z') {
+                out.append(SMALL_CAPS_MAP[c - 'a']);
+            } else {
+                out.append(c);
+            }
         }
 
-        return resolveJsonPath(value, parsed.path, parsed.defaultValue);
+        return out.toString();
     }
 
 
@@ -118,35 +153,41 @@ public class HASExpansion extends PlaceholderExpansion {
         }
     }
 
-    private String handleSimpleColoredParams(Player player, String params) {
+    @Override
+    public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
 
-        switch (params.toLowerCase()) {
+        if (player == null) return "0";
 
-            case "role_colored": {
-                Team team = HideAndSeek.getActiveInstance().getTeamManager().getTeam(
-                        HideAndSeek.getActiveInstance().getTeamManager().getPlayerTeam(player));
-                TextColor color = team.color();
-                String role = "<" + color.asHexString() + ">" + (HideAndSeek.getDataController().getHiders().contains(
-                        player.getUniqueId()) ? "Hider" : "Seeker");
-                if (HideAndSeek.getActiveInstance().getStateManager().isPhase("lobby"))
-                    role = "<gray>N/A</gray>";
+        boolean smallCaps = false;
 
-                return role;
-            }
+        if (params.contains("|sc")) smallCaps = true;
+        params = params.replaceFirst("\\|sc$", "");
 
-            case "mode_colored": {
-                GameModeEnum mode = HideAndSeek.getActiveInstance().getSettingRegistry().get("game.mode");
-                return switch (mode) {
-                    case NORMAL -> "<green>Normal</green>";
-                    case BLOCK -> "<blue>Block</blue>";
-                    case SMALL -> "<yellow>Small</yellow>";
-                    case SKIN -> "<red>Skin</red>";
-                };
-            }
+        String minigameId = HideAndSeek.getActiveInstance().getName();
 
-            default:
-                return null;
+
+        String predefined = handleSimpleParams(player, params);
+        if (predefined != null) return smallCaps ? toSmallCaps(predefined) : predefined;
+        String coloredPredefined = handleSimpleColoredParams(player, params);
+        if (coloredPredefined != null) return smallCaps ? toSmallCaps(coloredPredefined) : coloredPredefined;
+
+
+        ParsedPlaceholder parsed = parseParams(params);
+
+        StatValue value = MinigameStatsAPI.getCachedStat(
+                player.getUniqueId(),
+                minigameId,
+                parsed.statKey
+        );
+
+        if (value == null) return parsed.defaultValue;
+
+        if (parsed.path == null || parsed.path.isEmpty()) {
+            return smallCaps ? toSmallCaps(value.asString()) : value.asString();
         }
+
+        return smallCaps ? toSmallCaps(resolveJsonPath(value, parsed.path, parsed.defaultValue)) : resolveJsonPath(
+                value, parsed.path, parsed.defaultValue);
     }
 
     private ParsedPlaceholder parseParams(String params) {
@@ -277,4 +318,36 @@ public class HASExpansion extends PlaceholderExpansion {
             this.defaultValue = defaultValue;
         }
     }
+
+    private String handleSimpleColoredParams(Player player, String params) {
+
+        switch (params.toLowerCase()) {
+
+            case "role_colored": {
+                Team team = HideAndSeek.getActiveInstance().getTeamManager().getTeam(
+                        HideAndSeek.getActiveInstance().getTeamManager().getPlayerTeam(player));
+                TextColor color = team.color();
+                String role = "<" + color.asHexString() + ">" + (HideAndSeek.getDataController().getHiders().contains(
+                        player.getUniqueId()) ? "Hider" : "Seeker");
+                if (HideAndSeek.getActiveInstance().getStateManager().isPhase("lobby"))
+                    role = "<#696969>N/A</#696969>";
+
+                return role;
+            }
+
+            case "mode_colored": {
+                GameModeEnum mode = HideAndSeek.getActiveInstance().getSettingRegistry().get("game.mode");
+                return switch (mode) {
+                    case NORMAL -> "<green>Normal</green>";
+                    case BLOCK -> "<blue>Block</blue>";
+                    case SMALL -> "<yellow>Small</yellow>";
+                    case SKIN -> "<red>Skin</red>";
+                };
+            }
+
+            default:
+                return null;
+        }
+    }
+
 }

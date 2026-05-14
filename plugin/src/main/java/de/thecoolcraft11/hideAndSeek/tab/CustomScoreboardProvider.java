@@ -19,6 +19,7 @@ public class CustomScoreboardProvider {
 
     private static final String TEMPLATE_ID = "hideandseek_main";
     private final FileConfiguration config;
+    private final boolean enabled;
     private final boolean smallCaps;
     private final boolean underline;
     private final boolean paddingEnabled;
@@ -64,6 +65,7 @@ public class CustomScoreboardProvider {
         this.scoreboardManager = plugin.getScoreboardManager();
         this.config = plugin.getConfig();
 
+        this.enabled = config.getBoolean("scoreboard.enabled");
         this.smallCaps = config.getBoolean("scoreboard.title.small-caps");
         this.underline = config.getBoolean("scoreboard.title.underline");
         this.paddingEnabled = config.getBoolean("scoreboard.formatting.padding");
@@ -102,6 +104,7 @@ public class CustomScoreboardProvider {
     }
 
     public void apply(Player player) {
+        if (!enabled) return;
         if (!scoreboardManager.hasScoreboard(player)) {
             scoreboardManager.createScoreboard(player,
                     buildTitle().style(Style.style().color(TextColor.color(0xFFFFFF)).decorate(TextDecoration.UNDERLINED).build()));
@@ -119,6 +122,7 @@ public class CustomScoreboardProvider {
     }
 
     public void updateTitle(Player player) {
+        if (!enabled) return;
         scoreboardManager.updateTitle(player, buildGradientTitle(toSmallCaps("HideAndSeek"), animationTick));
     }
 

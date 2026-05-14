@@ -130,6 +130,7 @@ tab:
         color: "#FFFFFF" # White
 
 scoreboard:
+  enabled: true
   title:
     text: "HideAndSeek"
     small-caps: true
