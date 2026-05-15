@@ -234,7 +234,7 @@ public final class HideAndSeek extends MinigameFramework {
                             case COMMON -> "white";
                             case UNCOMMON -> "green";
                             case RARE -> "blue";
-                            case EPIC -> "purple";
+                            case EPIC -> "light_purple";
                             case LEGENDARY -> "gold";
                         };
                         return Component.text("<" + color + ">" + itemType.getRarity().name() + "</" + color + ">");
