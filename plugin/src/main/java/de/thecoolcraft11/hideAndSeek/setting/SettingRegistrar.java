@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.setting;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.seeker.CameraItem;
 import de.thecoolcraft11.hideAndSeek.setting.group.*;
 import de.thecoolcraft11.minigameframework.config.SectionDefinition;
 import org.bukkit.Material;
@@ -173,7 +174,8 @@ public class SettingRegistrar {
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.firework-rocket").icon(Material.FIREWORK_ROCKET).build());
 
-        plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.medkit").icon(Material.GOLDEN_APPLE).build());
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("hider-items.medkit").icon(Material.FLOWER_BANNER_PATTERN).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("hider-items.totem").icon(Material.TOTEM_OF_UNDYING).build());
 
@@ -214,6 +216,9 @@ public class SettingRegistrar {
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.proximity-sensor").icon(Material.REDSTONE_TORCH).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.assistant").icon(Material.ZOMBIE_HEAD).build());
+
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("seeker-items.camera").icon(CameraItem.createCameraHeadItem()).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("seeker-items.cage-trap").icon(Material.IRON_BARS).build());
 

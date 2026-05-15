@@ -25,11 +25,21 @@ public final class IntegerSettingSpec implements SettingSpec {
 
     private final BiFunction<HideAndSeek, Object, ItemStack> itemProvider;
 
+    private final ItemStack iconStack;
+
     public IntegerSettingSpec(String key, int fallback, int min, int max, String description, Material icon) {
-        this(key, fallback, min, max, description, icon, null);
+        this(key, fallback, min, max, description, icon, null, null);
+    }
+
+    public IntegerSettingSpec(String key, int fallback, int min, int max, String description, ItemStack iconStack) {
+        this(key, fallback, min, max, description, null, null, iconStack);
     }
 
     public IntegerSettingSpec(String key, int fallback, int min, int max, String description, Material icon, BiFunction<HideAndSeek, Object, ItemStack> itemProvider) {
+        this(key, fallback, min, max, description, icon, itemProvider, null);
+    }
+
+    public IntegerSettingSpec(String key, int fallback, int min, int max, String description, Material icon, BiFunction<HideAndSeek, Object, ItemStack> itemProvider, ItemStack iconStack) {
         this.key = key;
         this.fallback = fallback;
         this.min = min;
@@ -37,12 +47,19 @@ public final class IntegerSettingSpec implements SettingSpec {
         this.description = description;
         this.icon = icon;
         this.itemProvider = itemProvider;
+        this.iconStack = iconStack;
     }
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
-        var builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(fallback).range(
-                min, max).description(description).customIcon(icon);
+        SettingDefinition.Builder<Integer> builder;
+        if (iconStack != null) {
+            builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(fallback).range(
+                    min, max).description(description).customIcon(iconStack);
+        } else {
+            builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(fallback).range(
+                    min, max).description(description).customIcon(icon);
+        }
         if (itemProvider != null) {
             builder.itemProvider(value -> itemProvider.apply(plugin, value));
         }

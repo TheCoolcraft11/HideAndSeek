@@ -64,7 +64,8 @@ public class CameraItem implements GameItem {
         Player player = context.getPlayer();
 
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.", NamedTextColor.RED));
+            player.sendMessage(
+                    Component.text("The Camera is not available on this server version.", NamedTextColor.RED));
             return;
         }
 
@@ -227,7 +228,7 @@ public class CameraItem implements GameItem {
         return adjusted;
     }
 
-    private static ItemStack createCameraHeadItem() {
+    public static ItemStack createCameraHeadItem() {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         if (meta == null) return head;

@@ -1,5 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.setting.group;
 
+import de.thecoolcraft11.hideAndSeek.items.seeker.CameraItem;
 import de.thecoolcraft11.hideAndSeek.setting.spec.BooleanSettingSpec;
 import de.thecoolcraft11.hideAndSeek.setting.spec.DoubleSettingSpec;
 import de.thecoolcraft11.hideAndSeek.setting.spec.IntegerSettingSpec;
@@ -163,8 +164,12 @@ public final class SeekerItemsSettingGroup implements SettingGroup {
                         "Wander radius phase 2 (20-50 seconds)", Material.COMPASS),
                 new DoubleSettingSpec("seeker-items.assistant.wander-radius-phase3", 40.0, 5.0, 100.0,
                         "Wander radius phase 3 (after 50 seconds)", Material.COMPASS),
+                new IntegerSettingSpec("seeker-items.camera.max-placed", 5, 1, 10,
+                        "Amount of maximum placeable cameras", CameraItem.createCameraHeadItem()),
+                new IntegerSettingSpec("seeker-items.camera.cooldown", 2, 0, 25,
+                        "Cooldown for placing cameras", Material.CLOCK),
                 new IntegerSettingSpec("seeker-items.sword-of-seeking.cooldown", 5, 0, 60,
-                        "Cooldown for thrown seeker sword in seconds  ", Material.CLOCK),
+                        "Cooldown for thrown seeker sword in seconds", Material.CLOCK),
                 new IntegerSettingSpec("seeker-items.seeker-sword-throw.max-charge-seconds", 5, 1, 15,
                         "Maximum sword charge time in seconds", Material.CLOCK),
                 new DoubleSettingSpec("seeker-items.seeker-sword-throw.min-speed", 0.8, 0.2, 5.0,
