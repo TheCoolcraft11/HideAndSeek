@@ -137,13 +137,97 @@ public class LobbyPhase implements GamePhase {
 
         HideAndSeek hideAndSeekPlugin = (HideAndSeek) plugin;
 
-        Team hidersTeam;
-        Team seekersTeam;
+        Team hidersTeam = null;
+        Team seekersTeam = null;
 
+        var fixedSeekerTeamResult = plugin.getSettingService().getSetting("game.teams.fixed-seeker-team");
+        String fixedSeekerTeamName =
+                (fixedSeekerTeamResult.isSuccess() && fixedSeekerTeamResult.getValue() instanceof String)
+                        ? (String) fixedSeekerTeamResult.getValue()
+                        : "";
+
+        var fixedHiderTeamResult = plugin.getSettingService().getSetting("game.teams.fixed-hider-team");
+        String fixedHiderTeamName =
+                (fixedHiderTeamResult.isSuccess() && fixedHiderTeamResult.getValue() instanceof String)
+                        ? (String) fixedHiderTeamResult.getValue()
+                        : "";
+
+        boolean useFixedSeekerTeam =
+                fixedSeekerTeamName != null && !fixedSeekerTeamName.trim().isEmpty();
+
+        boolean useFixedHiderTeam =
+                fixedHiderTeamName != null && !fixedHiderTeamName.trim().isEmpty();
+
+        if (useFixedSeekerTeam) {
+            seekersTeam = plugin.getTeamManager().getTeam(fixedSeekerTeamName);
+
+            if (seekersTeam == null) {
+                plugin.getLogger().warning(
+                        "Fixed seeker team '" + fixedSeekerTeamName + "' not found!"
+                );
+                useFixedSeekerTeam = false;
+            }
+        }
+
+        if (useFixedHiderTeam) {
+            hidersTeam = plugin.getTeamManager().getTeam(fixedHiderTeamName);
+
+            if (hidersTeam == null) {
+                plugin.getLogger().warning(
+                        "Fixed hider team '" + fixedHiderTeamName + "' not found!"
+                );
+                useFixedHiderTeam = false;
+            }
+        }
+
+        if (useFixedSeekerTeam && useFixedHiderTeam) {
+
+            if (seekersTeam == hidersTeam) {
+                plugin.getLogger().warning(
+                        "Fixed seeker and hider teams cannot be the same!"
+                );
+
+                useFixedSeekerTeam = false;
+                useFixedHiderTeam = false;
+            }
+        }
+
+        if (!useFixedSeekerTeam && !useFixedHiderTeam) {
+
+            Random random = new Random();
+
+            hidersTeam = teams.get(random.nextInt(2));
+            seekersTeam = teams.get((teams.indexOf(hidersTeam) + 1) % 2);
+
+        } else {
+
+            if (!useFixedSeekerTeam) {
+                Team finalHidersTeam = hidersTeam;
+                seekersTeam = teams.stream()
+                        .filter(team -> !team.equals(finalHidersTeam))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (!useFixedHiderTeam) {
+                Team finalSeekersTeam = seekersTeam;
+                hidersTeam = teams.stream()
+                        .filter(team -> !team.equals(finalSeekersTeam))
+                        .findFirst()
+                        .orElse(null);
+            }
+        }
 
         var randomDistResult = plugin.getSettingService().getSetting("game.team-distribution.random");
         Object randomDistObj = randomDistResult.isSuccess() ? randomDistResult.getValue() : true;
         boolean randomDistribution = (randomDistObj instanceof Boolean) ? (Boolean) randomDistObj : true;
+
+        for (Team team : teams) {
+            for (Player player : plugin.getTeamManager().getPlayersInTeam(team)) {
+                plugin.getTeamManager().removeRole(player, "hider");
+                plugin.getTeamManager().removeRole(player, "seeker");
+            }
+        }
 
         if (randomDistribution) {
 
@@ -171,9 +255,6 @@ public class LobbyPhase implements GamePhase {
                     currentMapData
             );
 
-            Random random = new Random();
-            hidersTeam = teams.get(random.nextInt(2));
-            seekersTeam = teams.get((teams.indexOf(hidersTeam) + 1) % 2);
 
             java.util.Collections.shuffle(allPlayers);
 
@@ -191,6 +272,12 @@ public class LobbyPhase implements GamePhase {
 
                 if (selectedSeekerIds.contains(player.getUniqueId())) {
 
+                    if (seekersTeam == null) {
+                        plugin.getLogger().severe(
+                                "No seekers team found, skipping assignment for player " + player.getName());
+                        return;
+                    }
+
                     plugin.getTeamManager().addPlayerToTeam(player, seekersTeam.getName());
                     HideAndSeek.getDataController().addSeeker(player.getUniqueId());
                     plugin.getTeamManager().addRole(player, "seeker");
@@ -202,6 +289,12 @@ public class LobbyPhase implements GamePhase {
                     );
                     player.showTitle(title);
                 } else {
+
+                    if (hidersTeam == null) {
+                        plugin.getLogger().severe(
+                                "No hiders team found, skipping assignment for player " + player.getName());
+                        return;
+                    }
 
                     plugin.getTeamManager().addPlayerToTeam(player, hidersTeam.getName());
                     HideAndSeek.getDataController().addHider(player.getUniqueId());
@@ -220,62 +313,6 @@ public class LobbyPhase implements GamePhase {
             if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                 plugin.getLogger().info("Fixed team distribution enabled");
             }
-
-            var fixedSeekerTeamResult = plugin.getSettingService().getSetting("game.teams.fixed-seeker-team");
-            String fixedSeekerTeamName = (fixedSeekerTeamResult.isSuccess() && fixedSeekerTeamResult.getValue() instanceof String) ?
-                    (String) fixedSeekerTeamResult.getValue() : "";
-
-            boolean useFixedSeekerTeam = fixedSeekerTeamName != null && !fixedSeekerTeamName.trim().isEmpty();
-
-            if (useFixedSeekerTeam) {
-
-                seekersTeam = plugin.getTeamManager().getTeam(fixedSeekerTeamName);
-                if (seekersTeam == null) {
-                    plugin.getLogger().warning("Fixed seeker team '" + fixedSeekerTeamName + "' not found! Using team-based assignment.");
-                    useFixedSeekerTeam = false;
-                } else {
-                    hidersTeam = teams.get((teams.indexOf(seekersTeam) + 1) % 2);
-                    if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
-                        plugin.getLogger().info("Using fixed seeker team: " + seekersTeam.getName());
-                    }
-
-                    for (Player player : plugin.getTeamManager().getPlayersInTeam(seekersTeam)) {
-                        HideAndSeek.getDataController().addSeeker(player.getUniqueId());
-                        plugin.getTeamManager().addRole(player, "seeker");
-                        Title title = Title.title(
-                                plugin.tr(player, "phase.lobby.seeker_title"),
-                                plugin.tr(player, "phase.lobby.seeker_subtitle"),
-                                Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
-                        );
-                        player.showTitle(title);
-                    }
-
-                    for (Player player : plugin.getTeamManager().getPlayersInTeam(hidersTeam)) {
-                        HideAndSeek.getDataController().addHider(player.getUniqueId());
-                        plugin.getTeamManager().addRole(player, "hider");
-                        Title title = Title.title(
-                                plugin.tr(player, "phase.lobby.hider_title"),
-                                plugin.tr(player, "phase.lobby.hider_subtitle"),
-                                Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
-                        );
-                        player.showTitle(title);
-                    }
-                }
-            }
-
-            if (!useFixedSeekerTeam) {
-
-                Random random = new Random();
-                hidersTeam = teams.get(random.nextInt(2));
-                seekersTeam = teams.get((teams.indexOf(hidersTeam) + 1) % 2);
-
-
-                for (Team team : teams) {
-                    for (Player player : plugin.getTeamManager().getPlayersInTeam(team)) {
-                        plugin.getTeamManager().removeRole(player, "hider");
-                        plugin.getTeamManager().removeRole(player, "seeker");
-                    }
-                }
 
                 for (Player player : plugin.getTeamManager().getPlayersInTeam(hidersTeam)) {
                     HideAndSeek.getDataController().addHider(player.getUniqueId());
@@ -300,7 +337,6 @@ public class LobbyPhase implements GamePhase {
                     );
                     player.showTitle(title);
                 }
-            }
         }
     }
 
