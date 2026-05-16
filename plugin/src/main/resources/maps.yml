@@ -24,6 +24,9 @@
 #     - "*CANDLE{RED_CANDLE}"
 #     - "OAK_LOG[*]"
 #     - "OAK_TRAPDOOR[half,open,facing]"
+#   allowed-skins:
+#     - "oak_log"
+#     - "stone"
 #   seeker-break-blocks:                            # Optional: Per-map seeker break list (falls back to config.yml)
 #     - "SHORT_GRASS"
 #     - "TALL_GRASS"
@@ -116,4 +119,6 @@ map1:
     - "OAK_PLANKS"
     - "*CANDLE{RED_CANDLE}"
     - "OAK_TRAPDOOR[half,open,facing]"
-
+  allowed-skins:
+    - "oak_log"
+    - "stone"

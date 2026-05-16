@@ -230,6 +230,8 @@ public class HidingPhase implements GamePhase {
                 String msg = plugin.trText(seeker, "phase.ended.wait_for_hiders");
                 seeker.sendMessage(MiniMessage.miniMessage().deserialize(msg));
                 seeker.setGlowing(false);
+                seeker.addPotionEffect(
+                        new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 9, false, false, false));
                 Objects.requireNonNull(seeker.getAttribute(Attribute.SCALE)).setBaseValue(1.0);
                 HideAndSeek.getDataController().getAttachment(seeker).setPermission("hideandseek.role.seeker", true);
 
@@ -711,7 +713,7 @@ public class HidingPhase implements GamePhase {
             player.sendMessage(mapMessage);
 
             if (displayMode == MapInfoDisplayMode.NAME_AUTHOR_DESCRIPTION) {
-                player.sendMessage(Component.text(description, NamedTextColor.GRAY));
+                player.sendMessage(MiniMessage.miniMessage().deserialize(description));
             }
             player.sendMessage(boxLineComponent);
         }

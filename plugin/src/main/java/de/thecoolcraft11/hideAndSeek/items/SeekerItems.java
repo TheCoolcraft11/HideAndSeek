@@ -99,7 +99,8 @@ public final class SeekerItems {
         removeItems(player);
         giveLoadoutItems(player, plugin);
         ItemSkinSelectionService.applySelectedVariants(player, plugin);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 4, false, false, false));
+        player.addPotionEffect(
+                new PotionEffect(PotionEffectType.REGENERATION, Integer.MAX_VALUE, 9, false, false, false));
     }
 
 

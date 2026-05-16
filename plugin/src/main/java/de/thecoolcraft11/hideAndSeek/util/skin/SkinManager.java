@@ -31,6 +31,10 @@ public class SkinManager {
 
         File file = new File(plugin.getDataFolder(), "skins.yml");
 
+        if (!file.exists()) {
+            plugin.saveResource("skins.yml", false);
+        }
+
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
         for (String key : config.getKeys(false)) {
