@@ -41,6 +41,7 @@ public class PerkRegistry {
         allPerks.add(new ScentTrailPerk());
         allPerks.add(new AutoAimPerk());
         allPerks.add(new HitDisplayPerk());
+        allPerks.add(new SwordBouncePerk());
     }
 
     public void selectRoundPerks() {

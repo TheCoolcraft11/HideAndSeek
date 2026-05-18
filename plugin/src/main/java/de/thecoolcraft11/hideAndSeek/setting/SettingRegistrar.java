@@ -123,6 +123,9 @@ public class SettingRegistrar {
         plugin.getSectionRegistry().register(SectionDefinition.builder("perks.perk.seeker_scent_trail").icon(Material.DIRT_PATH).build());
 
         plugin.getSectionRegistry().register(
+                SectionDefinition.builder("perks.perk.seeker_sword_bounce").icon(Material.RABBIT_FOOT).build());
+
+        plugin.getSectionRegistry().register(
                 SectionDefinition.builder("perks.perk.seeker_auto_aim").icon(Material.TARGET).build());
 
         plugin.getSectionRegistry().register(
@@ -325,6 +328,7 @@ public class SettingRegistrar {
                 new PerkSeekerScentTrailSettingGroup(),
                 new PerkSeekerAutoAimSettingGroup(),
                 new PerkSeekerHitDisplaySettingGroup(),
+                new PerkSeekerSwordBounceSettingGroup(),
                 new PerkSeekerMapTeleportSettingGroup(),
                 new PerkSeekerRandomSwapSettingGroup(),
                 new TimerSettingGroup(),

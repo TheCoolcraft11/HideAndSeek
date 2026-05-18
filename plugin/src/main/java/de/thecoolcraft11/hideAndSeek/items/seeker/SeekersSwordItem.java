@@ -6,6 +6,7 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.nms.NmsCapabilities;
 import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.AutoAimPerk;
 import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.HitDisplayPerk;
+import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.SwordBouncePerk;
 import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
@@ -35,7 +36,9 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.*;
@@ -91,10 +94,14 @@ public class SeekersSwordItem implements GameItem {
                 .build());
     }
 
-    private static boolean isSwordTarget(Player seeker, Entity entity) {
-        return entity instanceof Player target
-                && !target.getUniqueId().equals(seeker.getUniqueId())
-                && HideAndSeek.getDataController().getHiders().contains(target.getUniqueId());
+    private static boolean isSwordTarget(Player seeker, Entity entity, Set<UUID> excludedTargets) {
+        if (!(entity instanceof Player target)) {
+            return false;
+        }
+        UUID targetId = target.getUniqueId();
+        return !targetId.equals(seeker.getUniqueId())
+                && HideAndSeek.getDataController().getHiders().contains(targetId)
+                && (excludedTargets == null || !excludedTargets.contains(targetId));
     }
 
     private void releaseSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
@@ -137,7 +144,8 @@ public class SeekersSwordItem implements GameItem {
         swordChargeXp.remove(playerId);
     }
 
-    private static Entity raycastHiderHit(Player seeker, HideAndSeek plugin, Location previous, Vector direction, double distance, double hitbox) {
+    private static Entity raycastHiderHit(Player seeker, HideAndSeek plugin, Location previous, Vector direction,
+                                          double distance, double hitbox, Set<UUID> excludedTargets) {
         World world = previous.getWorld();
         if (world == null) {
             return null;
@@ -150,7 +158,7 @@ public class SeekersSwordItem implements GameItem {
                     direction,
                     distance,
                     hitbox,
-                    entity -> isSwordTarget(seeker, entity)
+                    entity -> isSwordTarget(seeker, entity, excludedTargets)
             );
             if (hitEntity != null) {
                 return hitEntity;
@@ -162,9 +170,51 @@ public class SeekersSwordItem implements GameItem {
                 direction,
                 distance,
                 hitbox,
-                entity -> isSwordTarget(seeker, entity)
+                entity -> isSwordTarget(seeker, entity, excludedTargets)
         );
         return entityTrace == null ? null : entityTrace.getHitEntity();
+    }
+
+    private static Player findRicochetTarget(Location from, double maxRange,
+                                             Set<UUID> excludedTargets) {
+        Player best = null;
+        double bestDistance = Double.MAX_VALUE;
+
+        for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
+            if (excludedTargets != null && excludedTargets.contains(hiderId)) {
+                continue;
+            }
+
+            Player hider = Bukkit.getPlayer(hiderId);
+            if (hider == null || !hider.isOnline() || hider.isDead() || hider.getGameMode() == GameMode.SPECTATOR) {
+                continue;
+            }
+            if (!hider.getWorld().equals(from.getWorld())) {
+                continue;
+            }
+
+            double distance = hider.getLocation().distance(from);
+            if (distance <= 0.001 || distance > maxRange) {
+                continue;
+            }
+
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = hider;
+            }
+        }
+
+        return best;
+    }
+
+    private static Vector buildRicochetVelocity(Location from, Player target, Vector currentVelocity, double speedRetention) {
+        Vector toTarget = target.getEyeLocation().add(0.0, -0.15, 0.0).toVector().subtract(from.toVector());
+        if (toTarget.lengthSquared() <= 1.0E-6 || currentVelocity.lengthSquared() <= 1.0E-6) {
+            return currentVelocity;
+        }
+
+        double speed = Math.max(0.15, currentVelocity.length() * speedRetention);
+        return toTarget.normalize().multiply(speed);
     }
 
     private static Vector steerVelocityTowardHider(Location from, Vector velocity, HideAndSeek plugin, double hitbox) {
@@ -238,7 +288,6 @@ public class SeekersSwordItem implements GameItem {
     private void startSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
         context.skipCooldown();
         Player seeker = context.getPlayer();
-        plugin.getLogger().info("Test");
         int maxChargeSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
         long maxChargeMs = maxChargeSeconds * 1000L;
         double minSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.min-speed", 0.8);
@@ -306,6 +355,13 @@ public class SeekersSwordItem implements GameItem {
         int stuckSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.stuck-seconds", 12));
         double hitbox = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.hitbox", 0.4);
         boolean autoAim = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), AutoAimPerk.ID);
+        boolean bounce = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), SwordBouncePerk.ID);
+        int maxBounces = Math.max(0, plugin.getSettingRegistry().get("perks.perk.seeker_sword_bounce.max-bounces", 2));
+        double bounceRange = plugin.getSettingRegistry().get("perks.perk.seeker_sword_bounce.search-range", 24.0d);
+        double bounceSpeedRetention = plugin.getSettingRegistry().get("perks.perk.seeker_sword_bounce.speed-retention",
+                0.85d);
+        double bounceDamageMultiplier = plugin.getSettingRegistry().get(
+                "perks.perk.seeker_sword_bounce.damage-multiplier", 0.80d);
 
         double speed = minSpeed + (maxSpeed - minSpeed) * chargeRatio;
         boolean energyBlade = ItemSkinSelectionService.isSelected(seeker, ID, "skin_energy_blade");
@@ -315,6 +371,9 @@ public class SeekersSwordItem implements GameItem {
         Vector lookDirection = eyeLocation.getDirection().normalize();
         Location start = eyeLocation.clone().add(lookDirection.clone().multiply(0.6)).add(0, -0.2, 0);
         final Vector[] velocity = {lookDirection.multiply(speed)};
+        final Set<UUID> hitTargets = new HashSet<>();
+        final int[] remainingBounces = {bounce ? maxBounces : 0};
+        final int[] bounceHits = {0};
 
         ItemStack swordDisplayItem = getSwordDisplayItem(seeker, plugin);
         ItemDisplay swordDisplay = start.getWorld().spawn(start, ItemDisplay.class, display -> {
@@ -372,10 +431,11 @@ public class SeekersSwordItem implements GameItem {
                 }
                 Vector direction = travel.clone().normalize();
 
-                Entity hitEntity = raycastHiderHit(seeker, plugin, previous, direction, distance, hitbox);
+                Entity hitEntity = raycastHiderHit(seeker, plugin, previous, direction, distance, hitbox,
+                        bounce ? hitTargets : null);
 
                 if (hitEntity instanceof Player target) {
-                    double damage = getThrownSwordDamage(seeker);
+                    double damage = getThrownSwordDamage(seeker) * Math.pow(bounceDamageMultiplier, bounceHits[0]);
                     target.damage(damage, seeker);
                     target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 10, 0.25, 0.4, 0.25, 0.02);
                     target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
@@ -389,6 +449,22 @@ public class SeekersSwordItem implements GameItem {
                     } else if (giantSpatula) {
                         target.getWorld().spawnParticle(Particle.CLOUD, target.getLocation().add(0, 1, 0), 10, 0.22, 0.3, 0.22, 0.02);
                         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.45f, 1.25f);
+                    }
+
+                    if (bounce && remainingBounces[0] > 0) {
+                        hitTargets.add(target.getUniqueId());
+                        Player nextTarget = findRicochetTarget(target.getLocation().clone().add(0, 1, 0),
+                                bounceRange, hitTargets);
+                        if (nextTarget != null) {
+                            remainingBounces[0]--;
+                            bounceHits[0]++;
+                            Location bounceOrigin = target.getLocation().clone().add(0, 1, 0);
+                            velocity[0] = buildRicochetVelocity(bounceOrigin, nextTarget, velocity[0],
+                                    bounceSpeedRetention);
+                            current = bounceOrigin.clone().add(velocity[0].clone().normalize().multiply(0.15));
+                            swordDisplay.teleport(current);
+                            return;
+                        }
                     }
 
                     removeDisplay();
@@ -515,6 +591,13 @@ public class SeekersSwordItem implements GameItem {
         Location current = eyeLocation.clone().add(lookDirection.clone().multiply(0.6)).add(0, -0.2, 0);
         Vector velocity = lookDirection.multiply(speed);
         boolean autoAim = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), AutoAimPerk.ID);
+        boolean bounce = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), SwordBouncePerk.ID);
+        int remainingBounces = bounce ? Math.max(0,
+                plugin.getSettingRegistry().get("perks.perk.seeker_sword_bounce.max-bounces", 2)) : 0;
+        double bounceRange = plugin.getSettingRegistry().get("perks.perk.seeker_sword_bounce.search-range", 24.0d);
+        double bounceSpeedRetention = plugin.getSettingRegistry().get("perks.perk.seeker_sword_bounce.speed-retention",
+                0.85d);
+        Set<UUID> hitTargets = new HashSet<>();
 
         for (int ticks = 0; ticks < maxFlightSeconds * 20; ticks++) {
             Location previous = current.clone();
@@ -531,11 +614,24 @@ public class SeekersSwordItem implements GameItem {
             }
 
             Vector direction = travel.clone().normalize();
-            Entity hitEntity = raycastHiderHit(seeker, plugin, previous, direction, distance, hitbox);
-            if (hitEntity != null) {
+            Entity hitEntity = raycastHiderHit(seeker, plugin, previous, direction, distance, hitbox,
+                    bounce ? hitTargets : null);
+            if (hitEntity instanceof Player target) {
                 Location impact = hitEntity.getLocation().add(0, 1, 0);
                 seeker.spawnParticle(Particle.ENCHANTED_HIT, impact, 8, 0.12, 0.12, 0.12, 0.01);
                 seeker.spawnParticle(Particle.SWEEP_ATTACK, impact, 2, 0.08, 0.08, 0.08, 0.0);
+                if (bounce && remainingBounces > 0) {
+                    hitTargets.add(target.getUniqueId());
+                    Player nextTarget = findRicochetTarget(target.getLocation().clone().add(0, 1, 0),
+                            bounceRange, hitTargets);
+                    if (nextTarget != null) {
+                        remainingBounces--;
+                        Location bounceOrigin = target.getLocation().clone().add(0, 1, 0);
+                        velocity = buildRicochetVelocity(bounceOrigin, nextTarget, velocity, bounceSpeedRetention);
+                        current = bounceOrigin.clone().add(velocity.clone().normalize().multiply(0.15));
+                        continue;
+                    }
+                }
                 return;
             }
 
