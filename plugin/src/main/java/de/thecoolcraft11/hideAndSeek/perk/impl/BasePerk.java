@@ -47,7 +47,8 @@ public abstract class BasePerk implements PerkDefinition {
 
     @Override
     public int getCost() {
-        return 0;
+        HideAndSeek plugin = (HideAndSeek) HideAndSeek.getActiveInstance();
+        return plugin == null ? 0 : plugin.getSettingRegistry().get("perks.perk." + getId() + ".cost", 0);
     }
 
     @Override

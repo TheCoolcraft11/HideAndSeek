@@ -52,7 +52,7 @@ public class RelocatePerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 280;
+        return super.getCost();
     }
 
     public static void clearWarningsFor(UUID playerId) {

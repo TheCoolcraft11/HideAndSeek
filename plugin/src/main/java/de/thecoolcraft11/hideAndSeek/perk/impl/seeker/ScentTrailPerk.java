@@ -49,7 +49,7 @@ public class ScentTrailPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 90;
+        return super.getCost();
     }
 
     @Override

@@ -54,7 +54,7 @@ public class TrapSensePerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 60;
+        return super.getCost();
     }
 
     @Override

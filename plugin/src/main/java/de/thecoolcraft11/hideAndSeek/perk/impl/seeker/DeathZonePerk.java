@@ -62,7 +62,7 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
 
     @Override
     public int getCost() {
-        return 350;
+        return super.getCost();
     }
 
     public static void clearWarningsFor(UUID playerId) {

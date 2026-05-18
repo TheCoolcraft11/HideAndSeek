@@ -51,7 +51,7 @@ public class RandomSwapPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 250;
+        return super.getCost();
     }
 
     @Override

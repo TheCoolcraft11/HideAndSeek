@@ -50,7 +50,7 @@ public class SeekerWarningPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 140;
+        return super.getCost();
     }
 
     @Override

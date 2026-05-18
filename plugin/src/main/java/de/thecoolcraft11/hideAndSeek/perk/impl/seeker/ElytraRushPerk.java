@@ -54,7 +54,7 @@ public class ElytraRushPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 180;
+        return super.getCost();
     }
 
     @Override

@@ -45,7 +45,7 @@ public class SwordBouncePerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 460;
+        return super.getCost();
     }
 
     @Override

@@ -58,7 +58,7 @@ public class MapTeleportPerk extends BasePerk implements DelayedActivationPerk {
 
     @Override
     public int getCost() {
-        return 150;
+        return super.getCost();
     }
 
     @Override

@@ -55,7 +55,7 @@ public class ProximityMeterPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 100;
+        return super.getCost();
     }
 
     @Override

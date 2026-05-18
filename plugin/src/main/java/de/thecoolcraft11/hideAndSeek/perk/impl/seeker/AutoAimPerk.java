@@ -45,7 +45,7 @@ public class AutoAimPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 180;
+        return super.getCost();
     }
 
     @Override

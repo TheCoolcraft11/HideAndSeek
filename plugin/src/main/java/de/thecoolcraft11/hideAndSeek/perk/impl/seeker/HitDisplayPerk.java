@@ -45,7 +45,7 @@ public class HitDisplayPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 120;
+        return super.getCost();
     }
 
     @Override

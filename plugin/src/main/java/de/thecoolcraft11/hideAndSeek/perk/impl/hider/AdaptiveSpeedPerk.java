@@ -49,7 +49,7 @@ public class AdaptiveSpeedPerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 80;
+        return super.getCost();
     }
 
     @Override

@@ -53,7 +53,7 @@ public class ExtraLifePerk extends BasePerk {
 
     @Override
     public int getCost() {
-        return 200;
+        return super.getCost();
     }
 
     @Override
