@@ -8,6 +8,8 @@ import de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
@@ -423,8 +425,10 @@ public class PlayerStatsGUI {
     }
 
 
+    @SuppressWarnings("UnstableApiUsage")
     private void fillBorder(FrameworkInventory inv) {
         ItemStack pane = utility(Material.GRAY_STAINED_GLASS_PANE, Component.empty(), List.of());
+        pane.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
         InventoryItem border = new InventoryItem(pane);
         border.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
         border.setAllowTakeout(false);
