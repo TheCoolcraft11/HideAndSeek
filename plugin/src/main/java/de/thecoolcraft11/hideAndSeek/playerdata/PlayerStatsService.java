@@ -18,6 +18,8 @@ public final class PlayerStatsService {
 
     private final HideAndSeek plugin;
     private final Map<UUID, PlayerStatsRecord> cache = new ConcurrentHashMap<>();
+    private final Set<UUID> loadingPlayers = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> loadedPlayers = ConcurrentHashMap.newKeySet();
 
     private final Set<UUID> countedSeekerRounds = ConcurrentHashMap.newKeySet();
     private final Set<UUID> countedHiderRounds = ConcurrentHashMap.newKeySet();
@@ -37,22 +39,28 @@ public final class PlayerStatsService {
     }
 
     public void loadPlayer(UUID playerId, String playerName) {
-        cache.computeIfAbsent(playerId, ignored -> new PlayerStatsRecord());
+        if (loadedPlayers.contains(playerId) || !loadingPlayers.add(playerId)) {
+            return;
+        }
+
+        PlayerStatsRecord record = new PlayerStatsRecord();
+        cache.put(playerId, record);
         plugin.getPlayerDataStore().getWins(playerId);
         plugin.getPlayerDataStore().getLosses(playerId);
         plugin.getPlayerDataStore().getStats(playerId)
                 .thenAccept(json -> {
                     PlayerStatsRecord loaded = PlayerStatsRecord.fromJson(json);
-                    PlayerStatsRecord record = cache.computeIfAbsent(playerId, ignored -> new PlayerStatsRecord());
                     synchronized (record) {
                         record.mergeFrom(loaded);
                     }
+                    loadedPlayers.add(playerId);
                 })
                 .exceptionally(ex -> {
                     plugin.getLogger().warning(
                             "Failed to load tracked stats for " + playerName + " (" + playerId + "): " + ex.getMessage());
                     return null;
-                });
+                })
+                .whenComplete((ignored, throwable) -> loadingPlayers.remove(playerId));
     }
 
     public CompletableFuture<Void> savePlayer(UUID playerId) {
