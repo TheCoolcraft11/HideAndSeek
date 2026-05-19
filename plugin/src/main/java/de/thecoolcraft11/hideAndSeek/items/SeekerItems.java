@@ -119,6 +119,8 @@ public final class SeekerItems {
         Object skinStatsEnabledObj = skinStatsEnabledResult.isSuccess() ? skinStatsEnabledResult.getValue() : null;
         var crowBarEnabledResult = plugin.getSettingService().getSetting("seeker-items.crowbar.enabled");
         Object crowbarEnabledObj = crowBarEnabledResult.isSuccess() ? crowBarEnabledResult.getValue() : null;
+        var skinSizeResult = plugin.getSettingService().getSetting("game.skin-mode.hider-size");
+        Object skinSizeResultObj = skinSizeResult.isSuccess() ? skinSizeResult.getValue() : 0.5f;
         boolean isBlockMode = gameModeObj != null && gameModeObj.toString().equals("BLOCK");
         boolean isSmallMode = gameModeObj != null && gameModeObj.toString().equals("SMALL");
         boolean isSkinMode = gameModeObj != null && gameModeObj.toString().equals("SKIN");
@@ -126,7 +128,7 @@ public final class SeekerItems {
         boolean blockStatsEnabled = blockStatsEnabledObj != null && blockStatsEnabledObj.toString().equals("true");
         boolean skinStatsEnabled = skinStatsEnabledObj != null && skinStatsEnabledObj.toString().equals("true");
         boolean crowBarEnabled = crowbarEnabledObj != null && crowbarEnabledObj.toString().equals("true");
-
+        double skinSize = (double) skinSizeResultObj;
 
         ItemStack sword = plugin.getCustomItemManager().getIdentifiedItemStack(SeekersSwordItem.ID, player);
         if (sword != null) {
@@ -290,7 +292,7 @@ public final class SeekerItems {
 
         }
 
-        if (isSmallMode || (isBlockMode && isBlockSmall)) {
+        if (isSmallMode || (isBlockMode && isBlockSmall) || (isSkinMode && skinSize < 1.0)) {
             if (!crowBarEnabled) return;
             ItemStack slot7Item = player.getInventory().getItem(7);
             if (slot7Item == null || slot7Item.getType().isAir()) {
@@ -298,7 +300,6 @@ public final class SeekerItems {
                 if (blockStats != null) {
                     CustomModelDataUtil.setCustomModelData(blockStats, CrowbarItem.ID);
                     player.getInventory().setItem(7, blockStats);
-                    recordItemEquipped(plugin, player, CrowbarItem.ID);
                     if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
                         plugin.getLogger().info("Gave Crowbar to " + player.getName() + " in slot 7");
                     }
