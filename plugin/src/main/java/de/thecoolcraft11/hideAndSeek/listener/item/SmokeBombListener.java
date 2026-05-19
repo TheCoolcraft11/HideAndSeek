@@ -83,9 +83,9 @@ public class SmokeBombListener implements Listener {
 
 
         if ("spore_cloud".equals(skin)) {
-            world.spawnParticle(Particle.SPORE_BLOSSOM_AIR, impactLocation, 500, 1.2, 1.0, 1.2, 0.02);
+            world.spawnParticle(Particle.SPORE_BLOSSOM_AIR, impactLocation, 500, 1.2, 1.0, 1.2, 0.02, null, true);
         } else {
-            world.spawnParticle(Particle.CLOUD, impactLocation, 500, 1.2, 1.0, 1.2, 0.02);
+            world.spawnParticle(Particle.CLOUD, impactLocation, 500, 1.2, 1.0, 1.2, 0.02, null, true);
         }
 
         final int finalDuration = duration;
@@ -131,7 +131,10 @@ public class SmokeBombListener implements Listener {
                         1.5,
                         finalRadius * 0.5,
                         0,
-                        new Particle.DustOptions("spore_cloud".equals(skin) ? Color.fromRGB(95, 125, 65) : Color.fromRGB(120, 120, 120), 2.0f)
+                        new Particle.DustOptions(
+                                "spore_cloud".equals(skin) ? Color.fromRGB(95, 125, 65) : Color.fromRGB(120, 120, 120),
+                                2.0f),
+                        true
                 );
 
                 world.spawnParticle(
@@ -142,7 +145,10 @@ public class SmokeBombListener implements Listener {
                         1.5,
                         finalRadius * 0.5,
                         0,
-                        new Particle.DustOptions("spore_cloud".equals(skin) ? Color.fromRGB(145, 180, 110) : Color.fromRGB(160, 160, 160), 5.0f)
+                        new Particle.DustOptions(
+                                "spore_cloud".equals(skin) ? Color.fromRGB(145, 180, 110) : Color.fromRGB(160, 160,
+                                        160), 5.0f),
+                        true
                 );
 
                 for (int i = 0; i < 20; i++) {
@@ -160,7 +166,9 @@ public class SmokeBombListener implements Listener {
                             0.05,
                             0.05,
                             0.05,
-                            0.01
+                            0.01,
+                            null,
+                            true
                     );
                 }
 
