@@ -1,5 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.nms;
 
+import de.thecoolcraft11.hideAndSeek.nms.meta.NmsAdapterMeta;
 import org.bukkit.Bukkit;
 
 import java.io.File;
@@ -31,15 +32,17 @@ public final class NmsLoader {
                     String name = entries.nextElement().getName();
 
 
-                    if (name.startsWith(path) && name.endsWith(".class") && !name.contains("$")) {
+                    if (name.startsWith(path) && name.endsWith("Meta.class") && !name.contains("$")) {
                         String className = name.replace('/', '.').substring(0, name.length() - 6);
 
                         try {
-                            Class<?> clazz = Class.forName(className);
+                            Class<?> clazz = Class.forName(className, false, NmsLoader.class.getClassLoader());
 
-                            if (NmsAdapter.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
-                                NmsAdapter adapter = (NmsAdapter) clazz.getDeclaredConstructor().newInstance();
-                                if (adapter.isCompatible(serverVersion)) {
+                            if (NmsAdapterMeta.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
+                                NmsAdapterMeta meta = (NmsAdapterMeta) clazz.getDeclaredConstructor().newInstance();
+                                System.out.println(serverVersion);
+                                if (meta.supports(serverVersion)) {
+                                    NmsAdapter adapter = meta.implementation().getDeclaredConstructor().newInstance();
                                     logger.info("Matched and Loaded: " + adapter.name());
                                     return adapter;
                                 }

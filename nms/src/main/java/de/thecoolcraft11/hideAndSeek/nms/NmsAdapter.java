@@ -24,8 +24,6 @@ public interface NmsAdapter {
 
     boolean isAvailable();
 
-    boolean isCompatible(String version);
-
     Set<NmsCapabilities> capabilities();
 
     boolean hasNmsCapabilities();

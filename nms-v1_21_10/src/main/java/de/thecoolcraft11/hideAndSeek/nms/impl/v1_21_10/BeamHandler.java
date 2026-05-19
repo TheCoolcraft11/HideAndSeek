@@ -63,7 +63,7 @@ public final class BeamHandler {
 
     private void sendAlertBeam(Plugin plugin, Location hiderLocation, BlockPos pos) {
         int switches = 6;
-        int interval = 4;
+        int interval = 12;
 
         for (int i = 0; i < switches; i++) {
             final String stepColor = (i % 2 == 0) ? "red" : "green";

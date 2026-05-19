@@ -11,8 +11,10 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -305,4 +307,13 @@ public class AssistantProjectileListener implements Listener {
         loc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, directHit ? 16 : 8, 0.4, 0.6, 0.4, 0.03);
     }
 
+    @EventHandler
+    public void onBurn(EntityCombustEvent event) {
+        if (event.getEntity() instanceof Zombie zombie) {
+            NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "assistant_entity");
+            if (zombie.getPersistentDataContainer().has(key, PersistentDataType.BOOLEAN)) {
+                event.setCancelled(true);
+            }
+        }
+    }
 }

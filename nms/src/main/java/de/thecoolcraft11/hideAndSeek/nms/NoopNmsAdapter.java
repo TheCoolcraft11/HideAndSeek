@@ -32,11 +32,6 @@ public class NoopNmsAdapter implements NmsAdapter {
     }
 
     @Override
-    public boolean isCompatible(String version) {
-        return true;
-    }
-
-    @Override
     public Set<NmsCapabilities> capabilities() {
         return Collections.emptySet();
     }

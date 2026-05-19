@@ -63,7 +63,7 @@ public final class AssistantProjectile {
                 case SKIN_BATTLE_MECH -> sb.setItem(new ItemStack(Material.BEACON));
                 case SKIN_GHOST_DRONE -> sb.setItem(new ItemStack(Material.STRUCTURE_VOID));
                 case SKIN_STEEL_GOLEM -> sb.setItem(new ItemStack(Material.IRON_BLOCK));
-                default -> sb.setItem(new ItemStack(Material.SOUL_TORCH));
+                case null, default -> sb.setItem(new ItemStack(Material.SOUL_TORCH));
             }
             sb.getPersistentDataContainer().set(projectileKey(plugin), PersistentDataType.BOOLEAN, true);
             sb.getPersistentDataContainer().set(seekerKey(plugin), PersistentDataType.STRING, seekerUUID.toString());
