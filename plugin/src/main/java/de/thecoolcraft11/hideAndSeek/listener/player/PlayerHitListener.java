@@ -434,7 +434,7 @@ public class PlayerHitListener implements Listener {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         PlayerStateResetUtil.resetPlayerForSpectator(player, false);
                         plugin.getAntiCheatVisibilityListener().refreshSoon();
-                    }, 1L);
+                    }, 3L);
                 } else if (gameStyle == GameStyleEnum.INVASION) {
 
                     Location deathLocation = player.getLocation();
@@ -446,7 +446,7 @@ public class PlayerHitListener implements Listener {
                         plugin.getPerkShopUI().refreshForPlayer(player);
                         player.sendMessage(Component.text("You were transformed! You're now a seeker!", NamedTextColor.GREEN));
                         plugin.getAntiCheatVisibilityListener().refreshSoon();
-                    }, 1L);
+                    }, 3L);
                 }
             } else if (gameStyle == GameStyleEnum.INFINITE &&
                     HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
@@ -466,7 +466,7 @@ public class PlayerHitListener implements Listener {
 
                     player.sendMessage(Component.text("You respawned! Keep hiding!", NamedTextColor.GREEN));
                     plugin.getAntiCheatVisibilityListener().refreshSoon();
-                }, 1L);
+                }, 3L);
             }
         }
     }
@@ -537,7 +537,7 @@ public class PlayerHitListener implements Listener {
             );
             hider.showTitle(title);
             plugin.getAntiCheatVisibilityListener().refreshSoon();
-        }, 1L);
+        }, 3L);
 
         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info(hider.getName() + " was eliminated and is now spectating (moved to seeker team)");
@@ -589,7 +589,7 @@ public class PlayerHitListener implements Listener {
             );
             hider.showTitle(title);
             plugin.getAntiCheatVisibilityListener().refreshSoon();
-        }, 1L);
+        }, 3L);
 
         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info(hider.getName() + " was eliminated and joined the seekers (INVASION mode)");
