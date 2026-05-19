@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.util;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.minigameframework.MinigameFramework;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -25,6 +26,7 @@ public final class PlayerStateResetUtil {
         resetGameState(player, clearInventory);
         resetStatus(player);
         resetCosmetics(player);
+        resetCooldowns(player);
         resetPermissions(player);
     }
 
@@ -117,5 +119,12 @@ public final class PlayerStateResetUtil {
         attachment.unsetPermission("hideandseek.role.seeker");
         attachment.unsetPermission("hideandseek.role.spectator");
         return attachment;
+    }
+
+    private static void resetCooldowns(Player player) {
+        MinigameFramework.getActiveInstance().getCustomItemManager().getAllItems().forEach(item -> {
+            item.resetPlayerCooldowns(player.getUniqueId());
+            item.resetPlayerUses(player.getUniqueId());
+        });
     }
 }
