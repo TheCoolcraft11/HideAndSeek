@@ -15,6 +15,7 @@ import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import de.thecoolcraft11.minigameframework.items.variants.ItemVariant;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -23,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class SkinGUI {
     private static final String ITEMS_TITLE = "gui.skin.titles.selector";
@@ -53,50 +55,64 @@ public class SkinGUI {
         return out.toString();
     }
 
-    public void open(Player player) {
-        FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
-                .id("skin_selector_" + player.getUniqueId())
-                .title(plugin.trText(player, ITEMS_TITLE))
-                .rows(6)
-                .allowOutsideClicks(false)
-                .allowDrag(false)
-                .allowPlayerInventoryInteraction(false)
-                .build();
+    /**
+     * Helper to fetch coins asynchronously and run the action on the main thread.
+     */
+    private void withCoins(Player player, Consumer<Integer> action) {
+        ItemSkinSelectionService.getCoins(player.getUniqueId())
+                .exceptionally(ex -> {
+                    plugin.getLogger().severe("Failed to fetch coins for " + player.getName() + ": " + ex.getMessage());
+                    return 0;
+                })
+                .thenAccept(coins -> Bukkit.getScheduler().runTask(plugin, () -> action.accept(coins)));
+    }
 
-        List<String> logicalItems = getLogicalItems();
-        int slot = 0;
-        for (String logicalItemId : logicalItems) {
-            if (slot >= 45) {
-                break;
+    public void open(Player player) {
+        withCoins(player, coins -> {
+            FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
+                    .id("skin_selector_" + player.getUniqueId())
+                    .title(plugin.trText(player, ITEMS_TITLE))
+                    .rows(6)
+                    .allowOutsideClicks(false)
+                    .allowDrag(false)
+                    .allowPlayerInventoryInteraction(false)
+                    .build();
+
+            List<String> logicalItems = getLogicalItems();
+            int slot = 0;
+            for (String logicalItemId : logicalItems) {
+                if (slot >= 45) {
+                    break;
+                }
+                InventoryItem skinItem = new InventoryItem(createLogicalItemButton(player, logicalItemId));
+                skinItem.setClickHandler((p, item, event, s) -> {
+                    p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.1f);
+                    openVariants(p, logicalItemId);
+                    event.setCancelled(true);
+                });
+                skinItem.setAllowTakeout(false);
+                skinItem.setAllowInsert(false);
+                skinItem.setMetadata("logical_item_id", logicalItemId);
+                inventory.setItem(slot++, skinItem);
             }
-            InventoryItem skinItem = new InventoryItem(createLogicalItemButton(player, logicalItemId));
-            skinItem.setClickHandler((p, item, event, s) -> {
-                p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.1f);
-                openVariants(p, logicalItemId);
+
+            InventoryItem backItem = new InventoryItem(createBackHint(player));
+            backItem.setClickHandler((p, item, event, s) -> {
+                p.closeInventory();
                 event.setCancelled(true);
             });
-            skinItem.setAllowTakeout(false);
-            skinItem.setAllowInsert(false);
-            skinItem.setMetadata("logical_item_id", logicalItemId);
-            inventory.setItem(slot++, skinItem);
-        }
+            backItem.setAllowTakeout(false);
+            backItem.setAllowInsert(false);
+            inventory.setItem(49, backItem);
 
-        InventoryItem backItem = new InventoryItem(createBackHint(player));
-        backItem.setClickHandler((p, item, event, s) -> {
-            p.closeInventory();
-            event.setCancelled(true);
+            InventoryItem coinsItem = new InventoryItem(createCoinsHint(player, coins));
+            coinsItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
+            coinsItem.setAllowTakeout(false);
+            coinsItem.setAllowInsert(false);
+            inventory.setItem(50, coinsItem);
+
+            plugin.getInventoryFramework().openInventory(player, inventory);
         });
-        backItem.setAllowTakeout(false);
-        backItem.setAllowInsert(false);
-        inventory.setItem(49, backItem);
-
-        InventoryItem coinsItem = new InventoryItem(createCoinsHint(player));
-        coinsItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
-        coinsItem.setAllowTakeout(false);
-        coinsItem.setAllowInsert(false);
-        inventory.setItem(50, coinsItem);
-
-        plugin.getInventoryFramework().openInventory(player, inventory);
     }
 
     private void openVariants(Player player, String logicalItemId) {
@@ -113,182 +129,178 @@ public class SkinGUI {
             return;
         }
 
-        String runtimeItemId = ItemSkinSelectionService.resolveRuntimeItemId(player, logicalItemId);
-        List<ItemVariant> variants = plugin.getCustomItemManager().getVariantManager().getVariants(runtimeItemId);
+        withCoins(player, coins -> {
+            String runtimeItemId = ItemSkinSelectionService.resolveRuntimeItemId(player, logicalItemId);
+            List<ItemVariant> variants = plugin.getCustomItemManager().getVariantManager().getVariants(runtimeItemId);
 
-        FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
-                .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
-                .rows(6)
-                .allowOutsideClicks(false)
-                .allowDrag(false)
-                .allowPlayerInventoryInteraction(false)
-                .build();
+            FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
+                    .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .rows(6)
+                    .allowOutsideClicks(false)
+                    .allowDrag(false)
+                    .allowPlayerInventoryInteraction(false)
+                    .build();
 
-        int slot = 0;
-        String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
-        if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, selected)) {
-            selected = null;
-        }
-        for (ItemVariant variant : variants) {
-            if (slot >= 45) {
-                break;
+            int slot = 0;
+            String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
+            if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId,
+                    selected)) {
+                selected = null;
             }
-            String variantId = variant.getId();
-            InventoryItem variantItem = new InventoryItem(createVariantButton(player, logicalItemId, variant, selected));
-            variantItem.setClickHandler((p, item, event, s) -> {
-                handleVariantClick(p, logicalItemId, variantId, event.getClick());
-                event.setCancelled(true);
-            });
-            variantItem.setAllowTakeout(false);
-            variantItem.setAllowInsert(false);
-            variantItem.setMetadata("variant_id", variantId);
-            variantItem.setMetadata("logical_item_id", logicalItemId);
-            inventory.setItem(slot++, variantItem);
-        }
+            for (ItemVariant variant : variants) {
+                if (slot >= 45) {
+                    break;
+                }
+                String variantId = variant.getId();
+                InventoryItem variantItem = new InventoryItem(
+                        createVariantButton(player, logicalItemId, variant, selected));
+                variantItem.setClickHandler((p, item, event, s) -> {
+                    handleVariantClick(p, logicalItemId, variantId, event.getClick());
+                    event.setCancelled(true);
+                });
+                variantItem.setAllowTakeout(false);
+                variantItem.setAllowInsert(false);
+                variantItem.setMetadata("variant_id", variantId);
+                variantItem.setMetadata("logical_item_id", logicalItemId);
+                inventory.setItem(slot++, variantItem);
+            }
 
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
-                plugin.tr(player, "gui.skin.buttons.back"),
-                List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
-        backBtn.setClickHandler((p, item, event, s) -> {
-            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 0.9f);
-            open(p);
-            event.setCancelled(true);
+            addVariantUtilityButtons(player, inventory, logicalItemId, coins);
+            plugin.getInventoryFramework().openInventory(player, inventory);
         });
-        backBtn.setAllowTakeout(false);
-        backBtn.setAllowInsert(false);
-        inventory.setItem(45, backBtn);
-
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
-                plugin.tr(player, "gui.skin.buttons.clear_selection"),
-                List.of(plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC,
-                        false))));
-        clearBtn.setClickHandler((p, item, event, s) -> {
-            ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
-            ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
-            p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
-            openVariants(p, logicalItemId);
-            event.setCancelled(true);
-        });
-        clearBtn.setAllowTakeout(false);
-        clearBtn.setAllowInsert(false);
-        inventory.setItem(53, clearBtn);
-
-        InventoryItem coinsItem = new InventoryItem(createCoinsHint(player));
-        coinsItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
-        coinsItem.setAllowTakeout(false);
-        coinsItem.setAllowInsert(false);
-        inventory.setItem(49, coinsItem);
-
-        plugin.getInventoryFramework().openInventory(player, inventory);
     }
 
     private void openKillEffectVariants(Player player, String logicalItemId) {
-        FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
-                .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
-                .rows(6)
-                .allowOutsideClicks(false)
-                .allowDrag(false)
-                .allowPlayerInventoryInteraction(false)
-                .build();
+        withCoins(player, coins -> {
+            FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
+                    .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .rows(6)
+                    .allowOutsideClicks(false)
+                    .allowDrag(false)
+                    .allowPlayerInventoryInteraction(false)
+                    .build();
 
-        int slot = 0;
-        String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
-        if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, selected)) {
-            selected = null;
-        }
-
-        for (KillEffectSkins.Definition definition : KillEffectSkins.getDefinitions()) {
-            if (slot >= 45) {
-                break;
+            int slot = 0;
+            String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
+            if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId,
+                    selected)) {
+                selected = null;
             }
 
-            String variantId = definition.id();
-            InventoryItem variantItem = new InventoryItem(createKillEffectVariantButton(player, logicalItemId, definition, selected));
-            variantItem.setClickHandler((p, item, event, s) -> {
-                handleVariantClick(p, logicalItemId, variantId, event.getClick());
-                event.setCancelled(true);
-            });
-            variantItem.setAllowTakeout(false);
-            variantItem.setAllowInsert(false);
-            variantItem.setMetadata("variant_id", variantId);
-            variantItem.setMetadata("logical_item_id", logicalItemId);
-            inventory.setItem(slot++, variantItem);
-        }
+            for (KillEffectSkins.Definition definition : KillEffectSkins.getDefinitions()) {
+                if (slot >= 45) {
+                    break;
+                }
 
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
-                plugin.tr(player, "gui.skin.buttons.back"),
-                List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
-        backBtn.setClickHandler((p, item, event, s) -> {
-            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 0.9f);
-            open(p);
-            event.setCancelled(true);
+                String variantId = definition.id();
+                InventoryItem variantItem = new InventoryItem(
+                        createKillEffectVariantButton(player, logicalItemId, definition, selected));
+                variantItem.setClickHandler((p, item, event, s) -> {
+                    handleVariantClick(p, logicalItemId, variantId, event.getClick());
+                    event.setCancelled(true);
+                });
+                variantItem.setAllowTakeout(false);
+                variantItem.setAllowInsert(false);
+                variantItem.setMetadata("variant_id", variantId);
+                variantItem.setMetadata("logical_item_id", logicalItemId);
+                inventory.setItem(slot++, variantItem);
+            }
+
+            addVariantUtilityButtons(player, inventory, logicalItemId, coins);
+            plugin.getInventoryFramework().openInventory(player, inventory);
         });
-        backBtn.setAllowTakeout(false);
-        backBtn.setAllowInsert(false);
-        inventory.setItem(45, backBtn);
-
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
-                plugin.tr(player, "gui.skin.buttons.clear_selection"),
-                List.of(plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC,
-                        false))));
-        clearBtn.setClickHandler((p, item, event, s) -> {
-            ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
-            ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
-            p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
-            openKillEffectVariants(p, logicalItemId);
-            event.setCancelled(true);
-        });
-        clearBtn.setAllowTakeout(false);
-        clearBtn.setAllowInsert(false);
-        inventory.setItem(53, clearBtn);
-
-        InventoryItem coinsItem = new InventoryItem(createCoinsHint(player));
-        coinsItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
-        coinsItem.setAllowTakeout(false);
-        coinsItem.setAllowInsert(false);
-        inventory.setItem(49, coinsItem);
-
-        plugin.getInventoryFramework().openInventory(player, inventory);
     }
 
     private void openWinSkinVariants(Player player, String logicalItemId) {
-        FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
-                .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
-                .rows(6)
-                .allowOutsideClicks(false)
-                .allowDrag(false)
-                .allowPlayerInventoryInteraction(false)
-                .build();
+        withCoins(player, coins -> {
+            FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
+                    .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .rows(6)
+                    .allowOutsideClicks(false)
+                    .allowDrag(false)
+                    .allowPlayerInventoryInteraction(false)
+                    .build();
 
-        int slot = 0;
-        String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
-        if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, selected)) {
-            selected = null;
-        }
-
-        for (WinSkinSkins.Definition definition : WinSkinSkins.getDefinitions()) {
-            if (slot >= 45) {
-                break;
+            int slot = 0;
+            String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
+            if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId,
+                    selected)) {
+                selected = null;
             }
 
-            String variantId = definition.id();
-            InventoryItem variantItem = new InventoryItem(createWinSkinVariantButton(player, logicalItemId, definition, selected));
-            variantItem.setClickHandler((p, item, event, s) -> {
-                handleVariantClick(p, logicalItemId, variantId, event.getClick());
-                event.setCancelled(true);
-            });
-            variantItem.setAllowTakeout(false);
-            variantItem.setAllowInsert(false);
-            variantItem.setMetadata("variant_id", variantId);
-            variantItem.setMetadata("logical_item_id", logicalItemId);
-            inventory.setItem(slot++, variantItem);
-        }
+            for (WinSkinSkins.Definition definition : WinSkinSkins.getDefinitions()) {
+                if (slot >= 45) {
+                    break;
+                }
 
+                String variantId = definition.id();
+                InventoryItem variantItem = new InventoryItem(
+                        createWinSkinVariantButton(player, logicalItemId, definition, selected));
+                variantItem.setClickHandler((p, item, event, s) -> {
+                    handleVariantClick(p, logicalItemId, variantId, event.getClick());
+                    event.setCancelled(true);
+                });
+                variantItem.setAllowTakeout(false);
+                variantItem.setAllowInsert(false);
+                variantItem.setMetadata("variant_id", variantId);
+                variantItem.setMetadata("logical_item_id", logicalItemId);
+                inventory.setItem(slot++, variantItem);
+            }
+
+            addVariantUtilityButtons(player, inventory, logicalItemId, coins);
+            plugin.getInventoryFramework().openInventory(player, inventory);
+        });
+    }
+
+    private void openDeathMessageVariants(Player player, String logicalItemId) {
+        withCoins(player, coins -> {
+            FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
+                    .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .rows(6)
+                    .allowOutsideClicks(false)
+                    .allowDrag(false)
+                    .allowPlayerInventoryInteraction(false)
+                    .build();
+
+            int slot = 0;
+            String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
+            if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId,
+                    selected)) {
+                selected = null;
+            }
+
+            for (DeathMessageSkins.Definition definition : DeathMessageSkins.getDefinitions()) {
+                if (slot >= 45) {
+                    break;
+                }
+
+                String variantId = definition.id();
+                InventoryItem variantItem = new InventoryItem(
+                        createDeathMessageVariantButton(player, logicalItemId, definition, selected));
+                variantItem.setClickHandler((p, item, event, s) -> {
+                    handleVariantClick(p, logicalItemId, variantId, event.getClick());
+                    event.setCancelled(true);
+                });
+                variantItem.setAllowTakeout(false);
+                variantItem.setAllowInsert(false);
+                variantItem.setMetadata("variant_id", variantId);
+                variantItem.setMetadata("logical_item_id", logicalItemId);
+                inventory.setItem(slot++, variantItem);
+            }
+
+            addVariantUtilityButtons(player, inventory, logicalItemId, coins);
+            plugin.getInventoryFramework().openInventory(player, inventory);
+        });
+    }
+
+    /**
+     * Shared logic for adding Back, Clear, and Coins buttons to variant inventories.
+     */
+    private void addVariantUtilityButtons(Player player, FrameworkInventory inventory, String logicalItemId, int coins) {
         InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
                 plugin.tr(player, "gui.skin.buttons.back"),
                 List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
@@ -310,110 +322,46 @@ public class SkinGUI {
             ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
             p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
             p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
-            openWinSkinVariants(p, logicalItemId);
+            refreshCurrentGUI(p, logicalItemId);
             event.setCancelled(true);
         });
         clearBtn.setAllowTakeout(false);
         clearBtn.setAllowInsert(false);
         inventory.setItem(53, clearBtn);
 
-        InventoryItem coinsItem = new InventoryItem(createCoinsHint(player));
+        InventoryItem coinsItem = new InventoryItem(createCoinsHint(player, coins));
         coinsItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
         coinsItem.setAllowTakeout(false);
         coinsItem.setAllowInsert(false);
         inventory.setItem(49, coinsItem);
-
-        plugin.getInventoryFramework().openInventory(player, inventory);
-    }
-
-    private void openDeathMessageVariants(Player player, String logicalItemId) {
-        FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
-                .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
-                .rows(6)
-                .allowOutsideClicks(false)
-                .allowDrag(false)
-                .allowPlayerInventoryInteraction(false)
-                .build();
-
-        int slot = 0;
-        String selected = ItemSkinSelectionService.getSelectedVariant(player, logicalItemId);
-        if (selected != null && !ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, selected)) {
-            selected = null;
-        }
-
-        for (DeathMessageSkins.Definition definition : DeathMessageSkins.getDefinitions()) {
-            if (slot >= 45) {
-                break;
-            }
-
-            String variantId = definition.id();
-            InventoryItem variantItem = new InventoryItem(createDeathMessageVariantButton(player, logicalItemId, definition, selected));
-            variantItem.setClickHandler((p, item, event, s) -> {
-                handleVariantClick(p, logicalItemId, variantId, event.getClick());
-                event.setCancelled(true);
-            });
-            variantItem.setAllowTakeout(false);
-            variantItem.setAllowInsert(false);
-            variantItem.setMetadata("variant_id", variantId);
-            variantItem.setMetadata("logical_item_id", logicalItemId);
-            inventory.setItem(slot++, variantItem);
-        }
-
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
-                plugin.tr(player, "gui.skin.buttons.back"),
-                List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
-        backBtn.setClickHandler((p, item, event, s) -> {
-            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 0.9f);
-            open(p);
-            event.setCancelled(true);
-        });
-        backBtn.setAllowTakeout(false);
-        backBtn.setAllowInsert(false);
-        inventory.setItem(45, backBtn);
-
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
-                plugin.tr(player, "gui.skin.buttons.clear_selection"),
-                List.of(plugin.tr(player, "gui.skin.item.remove_saved_death_skin").decoration(TextDecoration.ITALIC,
-                        false))));
-        clearBtn.setClickHandler((p, item, event, s) -> {
-            ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
-            ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
-            p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
-            openDeathMessageVariants(p, logicalItemId);
-            event.setCancelled(true);
-        });
-        clearBtn.setAllowTakeout(false);
-        clearBtn.setAllowInsert(false);
-        inventory.setItem(53, clearBtn);
-
-        InventoryItem coinsItem = new InventoryItem(createCoinsHint(player));
-        coinsItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
-        coinsItem.setAllowTakeout(false);
-        coinsItem.setAllowInsert(false);
-        inventory.setItem(49, coinsItem);
-
-        plugin.getInventoryFramework().openInventory(player, inventory);
     }
 
     private void handleVariantClick(Player player, String logicalItemId, String variantId, ClickType clickType) {
         boolean unlocked = ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, variantId);
         if (!unlocked) {
             int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, variantId);
-            if (!ItemSkinSelectionService.unlock(plugin, player.getUniqueId(), logicalItemId, variantId)) {
-                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.8f, 0.9f);
-                player.sendMessage(
-                        plugin.tr(player, "gui.skin.item.not_enough_coins", Map.of("cost", String.valueOf(cost))));
-                openVariants(player, logicalItemId);
-                return;
-            }
+            ItemSkinSelectionService.unlock(plugin, player.getUniqueId(), logicalItemId, variantId).thenAccept(
+                    success -> Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (!success) {
+                            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.8f, 0.9f);
+                            player.sendMessage(plugin.tr(player, "gui.skin.item.not_enough_coins",
+                                    Map.of("cost", String.valueOf(cost))));
+                            refreshCurrentGUI(player, logicalItemId);
+                            return;
+                        }
 
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.9f, 1.2f);
-            player.sendMessage(plugin.tr(player, "gui.skin.item.unlocked_skin",
-                    Map.of("variant", variantId, "cost", String.valueOf(cost))));
+                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.9f, 1.2f);
+                        player.sendMessage(plugin.tr(player, "gui.skin.item.unlocked_skin",
+                                Map.of("variant", variantId, "cost", String.valueOf(cost))));
+
+                        applyAndFeedback(player, logicalItemId, variantId, clickType);
+                    }));
+        } else {
+            applyAndFeedback(player, logicalItemId, variantId, clickType);
         }
+    }
 
+    private void applyAndFeedback(Player player, String logicalItemId, String variantId, ClickType clickType) {
         ItemSkinSelectionService.setSelectedVariant(player.getUniqueId(), logicalItemId, variantId);
         ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.3f);
@@ -425,8 +373,20 @@ public class SkinGUI {
             return;
         }
 
-        openVariants(player, logicalItemId);
+        refreshCurrentGUI(player, logicalItemId);
     }
+
+    private void refreshCurrentGUI(Player player, String logicalItemId) {
+        switch (logicalItemId) {
+            case KillEffectSkins.LOGICAL_ITEM_ID -> openKillEffectVariants(player, logicalItemId);
+            case WinSkinSkins.LOGICAL_ITEM_ID -> openWinSkinVariants(player, logicalItemId);
+            case DeathMessageSkins.LOGICAL_ITEM_ID -> openDeathMessageVariants(player, logicalItemId);
+            case null, default -> openVariants(player, logicalItemId);
+        }
+    }
+
+
+
 
     private ItemStack createLogicalItemButton(Player player, String logicalItemId) {
         if (KillEffectSkins.LOGICAL_ITEM_ID.equals(logicalItemId)) {
@@ -748,8 +708,7 @@ public class SkinGUI {
                 ));
     }
 
-    private ItemStack createCoinsHint(Player player) {
-        int coins = ItemSkinSelectionService.getCoins(player.getUniqueId());
+    private ItemStack createCoinsHint(Player player, int coins) {
         return createUtility(Material.GOLD_NUGGET, plugin.tr(player, "gui.skin.buttons.coins", Map.of("coins", coins)),
                 List.of(plugin.tr(player, "gui.skin.item.earned_coins_hint").decoration(TextDecoration.ITALIC, false)));
     }

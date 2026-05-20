@@ -1,8 +1,9 @@
 package de.thecoolcraft11.hideAndSeek.tab;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
-import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
+import de.thecoolcraft11.minigameframework.storage.sql.framework.GlobalStatType;
+import de.thecoolcraft11.minigameframework.storage.sql.stats.GlobalStatsAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -79,7 +80,7 @@ public class CustomTabProvider {
         int h = HideAndSeek.getDataController().getHiders().size();
         int s = HideAndSeek.getDataController().getSeekers().size();
         int p = HideAndSeek.getDataController().getPoints(player.getUniqueId());
-        int c = ItemSkinSelectionService.getCoins(player.getUniqueId());
+        int c = Math.toIntExact(GlobalStatsAPI.getCachedStat(player.getUniqueId(), GlobalStatType.COINS));
         GameModeEnum mode = HideAndSeek.getActiveInstance().getSettingRegistry().get("game.mode");
 
         String modeText = switch (mode) {

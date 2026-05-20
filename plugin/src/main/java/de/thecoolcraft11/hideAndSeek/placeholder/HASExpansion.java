@@ -182,7 +182,6 @@ public class HASExpansion extends PlaceholderExpansion {
             PlayerStatsService statsService = PlayerStatsService.getActive();
             if (statsService == null) return parsed.defaultValue;
             PlayerStatsRecord record = statsService.getSnapshot(player.getUniqueId());
-            if (record == null) return parsed.defaultValue;
 
             JsonElement root = JsonParser.parseString(new Gson().toJson(record));
 

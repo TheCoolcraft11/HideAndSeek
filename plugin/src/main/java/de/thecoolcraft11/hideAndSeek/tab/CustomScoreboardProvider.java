@@ -2,6 +2,8 @@ package de.thecoolcraft11.hideAndSeek.tab;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.minigameframework.manager.ScoreboardManager;
+import de.thecoolcraft11.minigameframework.storage.sql.framework.GlobalStatType;
+import de.thecoolcraft11.minigameframework.storage.sql.stats.GlobalStatsAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
@@ -175,7 +177,7 @@ public class CustomScoreboardProvider {
         int h = de.thecoolcraft11.hideAndSeek.HideAndSeek.getDataController().getHiders().size();
         int s = de.thecoolcraft11.hideAndSeek.HideAndSeek.getDataController().getSeekers().size();
         int p = de.thecoolcraft11.hideAndSeek.HideAndSeek.getDataController().getPoints(player.getUniqueId());
-        int c = de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService.getCoins(player.getUniqueId());
+        int c = Math.toIntExact(GlobalStatsAPI.getCachedStat(player.getUniqueId(), GlobalStatType.COINS));
         de.thecoolcraft11.hideAndSeek.model.GameModeEnum mode = de.thecoolcraft11.hideAndSeek.HideAndSeek.getActiveInstance().getSettingRegistry().get("game.mode");
         String modeText = switch (mode) {
             case NORMAL -> "Normal";

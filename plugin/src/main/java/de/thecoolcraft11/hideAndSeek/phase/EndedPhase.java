@@ -281,16 +281,21 @@ public class EndedPhase implements GamePhase {
                     });
 
             int gainedCoins = coinGains.getOrDefault(player.getUniqueId(), 0);
-            int totalCoins = ItemSkinSelectionService.getCoins(player.getUniqueId());
-            String coinsHeaderStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_header");
-            player.sendMessage(MiniMessage.miniMessage().deserialize(coinsHeaderStr));
-            String coinsGainedStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_gained",
-                    java.util.Map.of("amount", String.valueOf(gainedCoins)));
-            player.sendMessage(MiniMessage.miniMessage().deserialize(coinsGainedStr));
-            String coinsBalanceStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_balance",
-                    java.util.Map.of("amount", String.valueOf(totalCoins)));
-            player.sendMessage(MiniMessage.miniMessage().deserialize(coinsBalanceStr));
-            player.sendMessage(Component.empty());
+
+            ItemSkinSelectionService.getCoins(player.getUniqueId()).thenAccept(totalCoins -> {
+                String coinsHeaderStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_header");
+                player.sendMessage(MiniMessage.miniMessage().deserialize(coinsHeaderStr));
+
+                String coinsGainedStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_gained",
+                        java.util.Map.of("amount", String.valueOf(gainedCoins)));
+                player.sendMessage(MiniMessage.miniMessage().deserialize(coinsGainedStr));
+
+                String coinsBalanceStr = hideAndSeekPlugin.trText(player, "phase.ended.coins_balance",
+                        java.util.Map.of("amount", String.valueOf(totalCoins)));
+                player.sendMessage(MiniMessage.miniMessage().deserialize(coinsBalanceStr));
+
+                player.sendMessage(Component.empty());
+            });
         }
 
         HideAndSeek hideAndSeekPluginForLog = (HideAndSeek) plugin;

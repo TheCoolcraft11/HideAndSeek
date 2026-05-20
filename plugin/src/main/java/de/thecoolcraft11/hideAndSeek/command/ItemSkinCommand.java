@@ -186,35 +186,36 @@ public class ItemSkinCommand implements MinigameSubcommand {
         player.sendMessage(plugin.tr(player, "command.skin.list_header",
                 Map.of("item", logicalItemId)));
 
-        int coins = ItemSkinSelectionService.getCoins(player.getUniqueId());
-        player.sendMessage(plugin.tr(player, "command.skin.coins",
-                TranslationArguments.ofNamed(Map.of()).withCount(coins)));
+        ItemSkinSelectionService.getCoins(player.getUniqueId()).thenAccept(coins -> {
+            player.sendMessage(plugin.tr(player, "command.skin.coins",
+                    TranslationArguments.ofNamed(Map.of()).withCount(coins)));
 
-        for (ItemVariant variant : variants) {
-            String display = variant.getDisplayName().isEmpty()
-                    ? variant.getId()
-                    : variant.getDisplayName();
+            for (ItemVariant variant : variants) {
+                String display = variant.getDisplayName().isEmpty()
+                        ? variant.getId()
+                        : variant.getDisplayName();
 
-            boolean unlocked = ItemSkinSelectionService.isUnlocked(
-                    player.getUniqueId(), logicalItemId, variant.getId());
+                boolean unlocked = ItemSkinSelectionService.isUnlocked(
+                        player.getUniqueId(), logicalItemId, variant.getId());
 
-            int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, variant.getId());
-            String rarity = ItemSkinSelectionService.getRarity(logicalItemId, variant.getId()).name();
+                int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, variant.getId());
+                String rarity = ItemSkinSelectionService.getRarity(logicalItemId, variant.getId()).name();
 
-            String stateKey = unlocked
-                    ? "command.skin.state.unlocked"
-                    : "command.skin.state.locked";
+                String stateKey = unlocked
+                        ? "command.skin.state.unlocked"
+                        : "command.skin.state.locked";
 
-            String rarityKey = "command.skin.rarity." + rarity;
+                String rarityKey = "command.skin.rarity." + rarity;
 
-            player.sendMessage(plugin.tr(player, "command.skin.list_entry", Map.of(
-                    "id", variant.getId(),
-                    "display", display,
-                    "rarity", plugin.trText(player, rarityKey),
-                    "cost", String.valueOf(cost),
-                    "state", plugin.trText(player, stateKey)
-            )));
-        }
+                player.sendMessage(plugin.tr(player, "command.skin.list_entry", Map.of(
+                        "id", variant.getId(),
+                        "display", display,
+                        "rarity", plugin.trText(player, rarityKey),
+                        "cost", String.valueOf(cost),
+                        "state", plugin.trText(player, stateKey)
+                )));
+            }
+        });
     }
 
     private void sendUsage(Player player) {

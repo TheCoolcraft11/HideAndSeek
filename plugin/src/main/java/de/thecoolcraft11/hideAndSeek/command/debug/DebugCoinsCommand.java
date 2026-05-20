@@ -59,28 +59,27 @@ public class DebugCoinsCommand implements DebugSubcommand {
         }
 
         switch (action) {
-            case "set" -> {
-
-
-                int current = ItemSkinSelectionService.getCoins(targetId);
+            case "set" -> ItemSkinSelectionService.getCoins(targetId).thenAccept(current -> {
                 int diff = amount - current;
                 if (diff != 0) {
                     ItemSkinSelectionService.addCoins(plugin, targetId, diff, true);
                 }
                 sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_set",
                         java.util.Map.of("player", target.getName(), "amount", amount)));
-            }
+            });
             case "give" -> {
                 ItemSkinSelectionService.addCoins(plugin, targetId, amount, true);
-                int newCoins = ItemSkinSelectionService.getCoins(targetId);
-                sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_give",
-                        java.util.Map.of("amount", amount, "player", target.getName(), "new_total", newCoins)));
+                ItemSkinSelectionService.getCoins(targetId).thenAccept(
+                        newCoins -> sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_give",
+                                java.util.Map.of("amount", amount, "player", target.getName(), "new_total",
+                                        newCoins))));
             }
             case "remove" -> {
                 ItemSkinSelectionService.addCoins(plugin, targetId, -amount, true);
-                int newCoins = ItemSkinSelectionService.getCoins(targetId);
-                sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_remove",
-                        java.util.Map.of("amount", amount, "player", target.getName(), "new_total", newCoins)));
+                ItemSkinSelectionService.getCoins(targetId).thenAccept(
+                        newCoins -> sender.sendMessage(plugin.tr(sender, "command.debug.coins.success_remove",
+                                java.util.Map.of("amount", amount, "player", target.getName(), "new_total",
+                                        newCoins))));
             }
             default -> {
                 sender.sendMessage(
