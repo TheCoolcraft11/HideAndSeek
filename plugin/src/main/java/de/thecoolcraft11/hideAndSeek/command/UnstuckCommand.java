@@ -208,7 +208,7 @@ public class UnstuckCommand implements MinigameSubcommand {
             unstuckManager.recordSuccessfulUnstuck(player.getUniqueId(), target, method);
             unstuckManager.applyCooldown(player.getUniqueId(), cooldownSeconds);
 
-            // Send the result message or use default message based on the method
+
             if (resultMessageKey != null && !resultMessageKey.isBlank()) {
                 player.sendMessage(plugin.tr(player, resultMessageKey, resultPlaceholders));
             } else if (worldSpawnMode) {

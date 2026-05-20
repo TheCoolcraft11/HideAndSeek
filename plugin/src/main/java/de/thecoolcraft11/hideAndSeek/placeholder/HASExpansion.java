@@ -1,8 +1,12 @@
 package de.thecoolcraft11.hideAndSeek.placeholder;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
+import de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService;
+import de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.PlayerStatsRecord;
 import de.thecoolcraft11.minigameframework.storage.sql.stats.MinigameStatsAPI;
 import de.thecoolcraft11.minigameframework.storage.sql.stats.StatValue;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -158,9 +162,8 @@ public class HASExpansion extends PlaceholderExpansion {
 
         if (player == null) return "0";
 
-        boolean smallCaps = false;
+        boolean smallCaps = params.contains("|sc");
 
-        if (params.contains("|sc")) smallCaps = true;
         params = params.replaceFirst("\\|sc$", "");
 
         String minigameId = HideAndSeek.getActiveInstance().getName();
@@ -174,11 +177,40 @@ public class HASExpansion extends PlaceholderExpansion {
 
         ParsedPlaceholder parsed = parseParams(params);
 
+
+        if (parsed.statKey.equalsIgnoreCase("stats")) {
+            PlayerStatsService statsService = PlayerStatsService.getActive();
+            if (statsService == null) return parsed.defaultValue;
+            PlayerStatsRecord record = statsService.getSnapshot(player.getUniqueId());
+            if (record == null) return parsed.defaultValue;
+
+            JsonElement root = JsonParser.parseString(new Gson().toJson(record));
+
+            if (parsed.path == null || parsed.path.isEmpty()) {
+                String out = root.isJsonPrimitive() ? root.getAsString() : root.toString();
+                return smallCaps ? toSmallCaps(out) : out;
+            }
+
+            return smallCaps ? toSmallCaps(resolveJsonPathFromElement(root, parsed.path, parsed.defaultValue))
+                    : resolveJsonPathFromElement(root, parsed.path, parsed.defaultValue);
+        }
+
+
         StatValue value = MinigameStatsAPI.getCachedStat(
                 player.getUniqueId(),
                 minigameId,
                 parsed.statKey
         );
+
+        if (value == null) {
+            try {
+                String canonical = de.thecoolcraft11.hideAndSeek.playerdata.DatabasePlayerDataStore.MINIGAME_ID;
+                if (!canonical.equals(minigameId)) {
+                    value = MinigameStatsAPI.getCachedStat(player.getUniqueId(), canonical, parsed.statKey);
+                }
+            } catch (Exception ignored) {
+            }
+        }
 
         if (value == null) return parsed.defaultValue;
 
@@ -244,6 +276,11 @@ public class HASExpansion extends PlaceholderExpansion {
             }
 
 
+            if (part.equalsIgnoreCase("human") || part.equalsIgnoreCase("duration") || part.equalsIgnoreCase("time")) {
+                return formatMillisHumanReadable(current, defaultValue);
+            }
+
+
             if (part.startsWith("contains(") && part.endsWith(")")) {
                 return handleContains(current, part, defaultValue);
             }
@@ -271,10 +308,95 @@ public class HASExpansion extends PlaceholderExpansion {
         return formatJson(current, defaultValue);
     }
 
+    private String resolveJsonPathFromElement(JsonElement root, String path, String defaultValue) {
+
+        JsonElement current = root;
+
+        String[] parts = path.split("\\.");
+
+        for (String part : parts) {
+
+            if (current == null || current.isJsonNull()) {
+                return defaultValue;
+            }
+
+            if (part.equalsIgnoreCase("size")) {
+                if (current.isJsonArray()) return String.valueOf(current.getAsJsonArray().size());
+                if (current.isJsonObject()) return String.valueOf(current.getAsJsonObject().size());
+                return defaultValue;
+            }
+
+            if (part.equalsIgnoreCase("human") || part.equalsIgnoreCase("duration") || part.equalsIgnoreCase("time")) {
+                return formatMillisHumanReadable(current, defaultValue);
+            }
+
+            if (part.startsWith("contains(") && part.endsWith(")")) {
+                if (!current.isJsonArray()) return defaultValue;
+                String search = part.substring(9, part.length() - 1);
+                for (JsonElement el : current.getAsJsonArray()) {
+                    if (el != null && el.isJsonPrimitive()) {
+                        if (el.getAsString().equalsIgnoreCase(search)) {
+                            return "true";
+                        }
+                    }
+                }
+                return "false";
+            }
+
+            if (current.isJsonArray()) {
+                try {
+                    int index = Integer.parseInt(part);
+                    current = current.getAsJsonArray().get(index);
+                    continue;
+                } catch (Exception e) {
+                    return defaultValue;
+                }
+            }
+
+            if (current.isJsonObject()) {
+                current = current.getAsJsonObject().get(part);
+                continue;
+            }
+
+            return defaultValue;
+        }
+
+        if (current == null || current.isJsonNull()) return defaultValue;
+        if (current.isJsonPrimitive()) return current.getAsString();
+        return current.toString();
+    }
+
     private String handleSize(JsonElement current, String defaultValue) {
         if (current.isJsonArray()) return String.valueOf(current.getAsJsonArray().size());
         if (current.isJsonObject()) return String.valueOf(current.getAsJsonObject().size());
         return defaultValue;
+    }
+
+    private String formatMillisHumanReadable(JsonElement current, String defaultValue) {
+
+        if (current == null || current.isJsonNull()) {
+            return defaultValue;
+        }
+
+        long millis;
+        try {
+            if (current.isJsonPrimitive()) {
+                millis = current.getAsLong();
+            } else {
+                return defaultValue;
+            }
+        } catch (Exception e) {
+            return defaultValue;
+        }
+
+        long seconds = Math.max(0L, millis / 1000L);
+        if (seconds < 60) {
+            return seconds + "s";
+        }
+        if (seconds < 3600) {
+            return (seconds / 60) + "m " + (seconds % 60) + "s";
+        }
+        return (seconds / 3600) + "h " + ((seconds % 3600) / 60) + "m";
     }
 
     private String handleContains(JsonElement current, String part, String defaultValue) {
