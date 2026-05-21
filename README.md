@@ -66,11 +66,12 @@ https://github.com/user-attachments/assets/ebb8a135-0015-4d5d-8daa-06d11a6f2318
 
 ## Game Modes
 
-| Mode     | Description                                                                                                            |
-|----------|------------------------------------------------------------------------------------------------------------------------|
-| `NORMAL` | Hiders hide in the map as themselves. Seekers hunt them down using their sword and utility items.                      |
-| `BLOCK`  | Hiders disguise as configurable blocks and blend into the scenery. Seekers must spot inconsistencies.                  |
-| `SMALL`  | Hiders are scaled down to a configurable size, making them much harder to spot. Seekers can optionally be resized too. |
+| Mode     | Description                                                                                                                                                                       |
+|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `NORMAL` | Hiders hide in the map as themselves. Seekers hunt them down using their sword and utility items.                                                                                 |
+| `BLOCK`  | Hiders disguise as configurable blocks and blend into the scenery. Seekers must spot inconsistencies.                                                                             |
+| `SMALL`  | Hiders are scaled down to a configurable size, making them much harder to spot. Seekers can optionally be resized too.                                                            |
+| `SKIN`   | Hiders disguise using custom skins (e.g. block-like or environment-matching skins) to blend into the landscape. They may also be optionally scaled down for increased difficulty. |
 
 Game modes can be changed via the in-game settings GUI or voted on by players in the lobby.
 
