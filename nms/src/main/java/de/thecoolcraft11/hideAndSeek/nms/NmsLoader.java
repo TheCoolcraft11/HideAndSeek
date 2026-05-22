@@ -40,7 +40,6 @@ public final class NmsLoader {
 
                             if (NmsAdapterMeta.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
                                 NmsAdapterMeta meta = (NmsAdapterMeta) clazz.getDeclaredConstructor().newInstance();
-                                System.out.println(serverVersion);
                                 if (meta.supports(serverVersion)) {
                                     NmsAdapter adapter = meta.implementation().getDeclaredConstructor().newInstance();
                                     logger.info("Matched and Loaded: " + adapter.name());
