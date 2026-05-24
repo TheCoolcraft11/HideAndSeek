@@ -2,6 +2,7 @@ package de.thecoolcraft11.hideAndSeek;
 
 import de.thecoolcraft11.hideAndSeek.command.*;
 import de.thecoolcraft11.hideAndSeek.gui.*;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
 import de.thecoolcraft11.hideAndSeek.items.*;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
@@ -195,6 +196,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(adrenalineRushListener, this);
         Bukkit.getPluginManager().registerEvents(new SpectatorTeleportListener(this), this);
 
+        GUIItems.registerAll(getGuiItemRegistry());
 
         worldBorderCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this,
                 () -> playerHitListener.checkWorldBorderDamage(),
@@ -535,7 +537,7 @@ public final class HideAndSeek extends MinigameFramework {
 
         for (String mapName : mapManager.getAvailableMaps()) {
             if (mapName != null && !mapName.isBlank()) {
-                Material icon = mapManager.getMapIconMaterial(mapName, Material.GRASS_BLOCK);
+                ItemStack icon = mapManager.getMapIcon(mapName, new ItemStack(Material.GRASS_BLOCK));
                 getWorldManager().setWorldIcon(mapName, icon);
             }
         }

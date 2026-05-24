@@ -313,9 +313,9 @@ public class PlayerStatsGUI {
             long games = entry.getValue();
             double pct = totalGames == 0 ? 0.0 : (double) games / totalGames * 100.0;
 
-            Material icon = plugin.getMapManager() != null
-                    ? plugin.getMapManager().getMapIconMaterial(mapName, Material.GRASS_BLOCK)
-                    : Material.GRASS_BLOCK;
+            ItemStack icon = plugin.getMapManager() != null
+                    ? plugin.getMapManager().getMapIcon(mapName, new ItemStack(Material.GRASS_BLOCK))
+                    : new ItemStack(Material.GRASS_BLOCK);
             String prettyName = plugin.getMapManager() != null ? plugin.getMapManager().getMapData(
                     mapName).getDisplayName() : mapName;
 
@@ -448,6 +448,19 @@ public class PlayerStatsGUI {
 
     private InventoryItem stat(Material material, Component name, List<Component> lore) {
         ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.displayName(name.decoration(TextDecoration.ITALIC, false));
+            meta.lore(lore.stream()
+                    .map(c -> c.decoration(TextDecoration.ITALIC, false))
+                    .toList());
+            item.setItemMeta(meta);
+        }
+
+        return new InventoryItem(item);
+    }
+
+    private InventoryItem stat(ItemStack item, Component name, List<Component> lore) {
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(name.decoration(TextDecoration.ITALIC, false));

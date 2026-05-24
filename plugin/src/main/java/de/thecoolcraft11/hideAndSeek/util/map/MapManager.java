@@ -8,6 +8,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
@@ -149,8 +150,9 @@ public class MapManager {
         return mapDataCache.get(mapName);
     }
 
-    public Material getMapIconMaterial(String mapName, Material fallback) {
-        Material safeFallback = (fallback == null || fallback.isAir()) ? Material.GRASS_BLOCK : fallback;
+    public ItemStack getMapIcon(String mapName, ItemStack fallback) {
+        ItemStack safeFallback = (fallback == null || fallback.getType().isAir()) ? new ItemStack(
+                Material.GRASS_BLOCK) : fallback;
         if (mapName == null || mapName.isBlank()) {
             return safeFallback;
         }
@@ -161,43 +163,22 @@ public class MapManager {
         }
 
         String iconName = mapData.getIcon().trim();
-        Material iconMaterial = resolveIconMaterial(iconName);
-        if (iconMaterial == null) {
-            plugin.getLogger().warning("Invalid icon material for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.name());
+        ItemStack icon;
+        try {
+            icon = Bukkit.getItemFactory().createItemStack(iconName);
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning(
+                    "Invalid icon material for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.getType().name());
             return safeFallback;
         }
-        if (iconMaterial.isAir()) {
-            plugin.getLogger().warning("Map icon material cannot be air for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.name());
+        if (icon.getType().isAir()) {
+            plugin.getLogger().warning(
+                    "Map icon material cannot be air for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.getType().name());
             return safeFallback;
         }
-        return iconMaterial;
+        return icon;
     }
 
-    private Material resolveIconMaterial(String rawIconName) {
-        if (rawIconName == null || rawIconName.isBlank()) {
-            return null;
-        }
-
-
-        String normalizedName = rawIconName.trim()
-                .replace(' ', '_')
-                .replace('-', '_')
-                .toUpperCase(Locale.ROOT);
-
-        Material material = Material.getMaterial(normalizedName);
-        if (material != null) {
-            return material;
-        }
-
-
-        material = Material.matchMaterial(rawIconName);
-        if (material != null) {
-            return material;
-        }
-
-
-        return Material.matchMaterial(normalizedName);
-    }
 
     private void loadVoteDisabledMaps() {
         synchronized (voteDisabledMaps) {

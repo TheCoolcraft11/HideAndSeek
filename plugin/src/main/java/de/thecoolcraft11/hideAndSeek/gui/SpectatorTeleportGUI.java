@@ -1,6 +1,10 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -37,9 +41,10 @@ public final class SpectatorTeleportGUI {
     private static final String PDC_KEY = "spec_gui_action";
     private static final String ACT_PREV = "prev";
     private static final String ACT_NEXT = "next";
-    private static final String ACT_SEP = "sep";
     private static final String ACT_IND = "indicator";
     private static final String ACT_TP = "tp:";
+
+    private static final HideAndSeek plugin = (HideAndSeek) HideAndSeek.getActiveInstance();
 
 
     private static final Map<UUID, Integer> pages = new HashMap<>();
@@ -142,8 +147,7 @@ public final class SpectatorTeleportGUI {
             if (target != null && target.isOnline()) {
                 player.teleport(target.getLocation());
                 player.sendActionBar(
-                        Component.text("Teleported to ", NamedTextColor.GRAY)
-                                .append(Component.text(target.getName(), NamedTextColor.YELLOW))
+                        plugin.tr(player, "gui.spectator.teleported", Map.of("target", target.getName()))
                 );
                 player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
             }
@@ -187,13 +191,13 @@ public final class SpectatorTeleportGUI {
             int idx = offset + i;
             spectator.getInventory().setItem(
                     ROW1_START + i,
-                    idx < hiders.size() ? buildHead(plugin, hiders.get(idx), true) : null
+                    idx < hiders.size() ? buildHead(plugin, spectator, hiders.get(idx), true) : null
             );
         }
 
 
         for (int slot = ROW2_START; slot <= ROW2_END; slot++) {
-            spectator.getInventory().setItem(slot, buildSeparator(plugin));
+            spectator.getInventory().setItem(slot, item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem()));
         }
 
 
@@ -201,20 +205,24 @@ public final class SpectatorTeleportGUI {
             if (page > 0) {
                 spectator.getInventory().setItem(ROW2_PREV,
                         buildNav(plugin,
-                                Component.text("◀  Previous page", NamedTextColor.GRAY),
+                                plugin.tr(spectator, "gui.spectator.previous_page"),
                                 ACT_PREV,
-                                "Page " + page + " / " + (maxPage + 1)));
+                                plugin.tr(spectator, "gui.spectator.page_info",
+                                        Map.of("current", page, "total", maxPage + 1)),
+                                true));
             }
 
             spectator.getInventory().setItem(ROW2_INDICATOR,
-                    buildIndicator(plugin, page + 1, maxPage + 1));
+                    buildIndicator(plugin, spectator, page + 1, maxPage + 1));
 
             if (page < maxPage) {
                 spectator.getInventory().setItem(ROW2_NEXT,
                         buildNav(plugin,
-                                Component.text("Next page  ▶", NamedTextColor.GRAY),
+                                plugin.tr(spectator, "gui.spectator.next_page"),
                                 ACT_NEXT,
-                                "Page " + (page + 2) + " / " + (maxPage + 1)));
+                                plugin.tr(spectator, "gui.spectator.page_info",
+                                        Map.of("current", page + 2, "total", maxPage + 1)),
+                                false));
             }
         }
 
@@ -223,14 +231,14 @@ public final class SpectatorTeleportGUI {
             int idx = offset + i;
             spectator.getInventory().setItem(
                     ROW3_START + i,
-                    idx < seekers.size() ? buildHead(plugin, seekers.get(idx), false) : null
+                    idx < seekers.size() ? buildHead(plugin, spectator, seekers.get(idx), false) : null
             );
         }
     }
 
 
-    private static ItemStack buildHead(HideAndSeek plugin, Player target, boolean isHider) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+    private static ItemStack buildHead(HideAndSeek plugin, Player spectator, Player target, boolean isHider) {
+        ItemStack skull = item(GUIItems.ST_TARGET, new ItemStack(Material.PLAYER_HEAD));
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
 
         meta.setOwningPlayer(target);
@@ -242,8 +250,8 @@ public final class SpectatorTeleportGUI {
         );
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text(isHider ? "Hider" : "Seeker",
-                        isHider ? NamedTextColor.GREEN : NamedTextColor.RED)
+        lore.add(plugin.tr(spectator, isHider ? "gui.spectator.role_hider" : "gui.spectator.role_seeker")
+                .colorIfAbsent(isHider ? NamedTextColor.GREEN : NamedTextColor.RED)
                 .decoration(TextDecoration.ITALIC, false));
 
         if (isHider) {
@@ -256,13 +264,15 @@ public final class SpectatorTeleportGUI {
             NamedTextColor hpColor = pct > 60 ? NamedTextColor.GREEN
                     : pct > 30 ? NamedTextColor.YELLOW
                       : NamedTextColor.RED;
-            lore.add(Component.text("HP: ", NamedTextColor.GRAY)
+            lore.add(plugin.tr(spectator, "gui.spectator.hp_label")
+                    .colorIfAbsent(NamedTextColor.GRAY)
                     .append(Component.text(bar + " " + pct + "%", hpColor))
                     .decoration(TextDecoration.ITALIC, false));
         }
 
         lore.add(Component.empty());
-        lore.add(Component.text("Click to teleport", NamedTextColor.AQUA)
+        lore.add(plugin.tr(spectator, "gui.spectator.click_to_teleport")
+                .colorIfAbsent(NamedTextColor.AQUA)
                 .decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         tag(plugin, meta, ACT_TP + target.getName());
@@ -270,22 +280,15 @@ public final class SpectatorTeleportGUI {
         return skull;
     }
 
-    private static ItemStack buildSeparator(HideAndSeek plugin) {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.empty());
-        tag(plugin, meta, ACT_SEP);
-        item.setItemMeta(meta);
-        return item;
-    }
 
     private static ItemStack buildNav(HideAndSeek plugin,
-                                      Component name, String action, String hint) {
-        ItemStack item = new ItemStack(Material.ARROW);
+                                      Component name, String action, Component hint, boolean previous) {
+        ItemStack item = item(previous ? GUIItems.KEY_PREVIOUS : GUIItems.KEY_NEXT,
+                new ItemStack(Material.ARROW));
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(name.decoration(TextDecoration.ITALIC, false));
+        meta.displayName(name.colorIfAbsent(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         meta.lore(List.of(
-                Component.text(hint, NamedTextColor.DARK_GRAY)
+                hint.colorIfAbsent(NamedTextColor.DARK_GRAY)
                         .decoration(TextDecoration.ITALIC, false)
         ));
         tag(plugin, meta, action);
@@ -293,20 +296,26 @@ public final class SpectatorTeleportGUI {
         return item;
     }
 
-    private static ItemStack buildIndicator(HideAndSeek plugin, int currentPage, int totalPages) {
-        ItemStack item = new ItemStack(Material.BOOK);
+    @SuppressWarnings("UnstableApiUsage")
+    private static ItemStack buildIndicator(HideAndSeek plugin, Player spectator, int currentPage, int totalPages) {
+        ItemStack item = item(GUIItems.ST_INDICATOR, new ItemStack(Material.BOOK));
         ItemMeta meta = item.getItemMeta();
         meta.displayName(
-                Component.text("Page " + currentPage + " / " + totalPages, NamedTextColor.WHITE,
-                                TextDecoration.BOLD)
+                plugin.tr(spectator, "gui.spectator.page_info",
+                                Map.of("current", currentPage, "total", totalPages))
+                        .colorIfAbsent(NamedTextColor.WHITE)
+                        .decorate(TextDecoration.BOLD)
                         .decoration(TextDecoration.ITALIC, false)
         );
         meta.lore(List.of(
-                Component.text("Use ◀ / ▶ to navigate", NamedTextColor.GRAY)
+                plugin.tr(spectator, "gui.spectator.nav_hint")
+                        .colorIfAbsent(NamedTextColor.GRAY)
                         .decoration(TextDecoration.ITALIC, false)
         ));
         tag(plugin, meta, ACT_IND);
         item.setItemMeta(meta);
+        item.setData(DataComponentTypes.CUSTOM_MODEL_DATA,
+                CustomModelData.customModelData().addFloat(currentPage).addFloat(totalPages).build());
         return item;
     }
 
@@ -390,5 +399,9 @@ public final class SpectatorTeleportGUI {
             Bukkit.getScheduler().cancelTask(refreshTaskId);
             refreshTaskId = -1;
         }
+    }
+
+    private static ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.SPECTATOR_TELEPORT, key, fallback);
     }
 }
