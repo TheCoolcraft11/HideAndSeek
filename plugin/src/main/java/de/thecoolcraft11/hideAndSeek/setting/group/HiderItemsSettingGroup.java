@@ -245,7 +245,7 @@ public final class HiderItemsSettingGroup implements SettingGroup {
                         "Seconds a player must stand inside a gateway before teleporting",
                         Material.HEAVY_WEIGHTED_PRESSURE_PLATE),
                 new BooleanSettingSpec("hider-items.remote-gateway.seeker-can-use", false,
-                        "Allow seekers to use remote gateways", Material.IRON_SWORD, false),
+                        "Allow seekers to use remote gateways", Material.IRON_SWORD, true),
                 new IntegerSettingSpec("hider-items.ghost-essence.cooldown", 25, 0, 300,
                         "Cooldown for ghost essence in seconds", Material.CLOCK),
                 new IntegerSettingSpec("hider-items.ghost-essence.max-radius", 15, 1, 100,

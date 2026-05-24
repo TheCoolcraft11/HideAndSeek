@@ -49,12 +49,14 @@ public final class DoubleSettingSpec implements SettingSpec {
         plugin.getConfigRegistry().register("settings." + key, Double.class, fallback);
         if (iconStack != null) {
             plugin.getSettingRegistry().register(
-                    SettingDefinition.builder(key, SettingType.DOUBLE, Double.class).defaultValue(fallback).rangeDouble(
+                    SettingDefinition.builder(key, SettingType.DOUBLE, Double.class).defaultValue(
+                            resolver.get(plugin, key, fallback)).rangeDouble(
                             min,
                             max).description(description).customIcon(iconStack).build());
         } else {
             plugin.getSettingRegistry().register(
-                    SettingDefinition.builder(key, SettingType.DOUBLE, Double.class).defaultValue(fallback).rangeDouble(
+                    SettingDefinition.builder(key, SettingType.DOUBLE, Double.class).defaultValue(
+                            resolver.get(plugin, key, fallback)).rangeDouble(
                             min,
                             max).description(description).customIcon(icon).build());
         }

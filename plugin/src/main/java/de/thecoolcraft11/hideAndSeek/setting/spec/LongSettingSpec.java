@@ -34,7 +34,8 @@ public final class LongSettingSpec implements SettingSpec {
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
         plugin.getConfigRegistry().register("settings." + key, Long.class, fallback);
         plugin.getSettingRegistry().register(
-                SettingDefinition.builder(key, SettingType.LONG, Long.class).defaultValue(fallback).rangeLong(min,
+                SettingDefinition.builder(key, SettingType.LONG, Long.class).defaultValue(
+                        resolver.get(plugin, key, fallback)).rangeLong(min,
                         max).description(description).customIcon(icon).build());
     }
 }

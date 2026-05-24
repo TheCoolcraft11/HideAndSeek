@@ -31,12 +31,12 @@ public final class StringSettingSpec implements SettingSpec {
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
+        plugin.getConfigRegistry().register("settings." + key, String.class, fallback);
         var builder = SettingDefinition.builder(key, SettingType.STRING, String.class).defaultValue(
-                fallback).description(description).customIcon(icon);
+                resolver.get(plugin, key, fallback)).description(description).customIcon(icon);
         if (itemProvider != null) {
             builder.itemProvider(value -> itemProvider.apply(plugin, value));
         }
-        plugin.getConfigRegistry().register("settings." + key, String.class, fallback);
         plugin.getSettingRegistry().register(builder.build());
     }
 }

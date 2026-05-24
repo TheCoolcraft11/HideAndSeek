@@ -34,7 +34,8 @@ public final class FloatSettingSpec implements SettingSpec {
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
         plugin.getConfigRegistry().register("settings." + key, Float.class, fallback);
         plugin.getSettingRegistry().register(
-                SettingDefinition.builder(key, SettingType.FLOAT, Float.class).defaultValue(fallback).rangeFloat(min,
+                SettingDefinition.builder(key, SettingType.FLOAT, Float.class).defaultValue(
+                        resolver.get(plugin, key, fallback)).rangeFloat(min,
                         max).description(description).customIcon(icon).build());
     }
 }

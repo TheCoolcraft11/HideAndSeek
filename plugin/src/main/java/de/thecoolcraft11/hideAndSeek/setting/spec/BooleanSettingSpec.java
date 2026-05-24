@@ -30,13 +30,13 @@ public final class BooleanSettingSpec implements SettingSpec {
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
+        plugin.getConfigRegistry().register("settings." + key, Boolean.class, fallback);
         var builder = SettingDefinition.builder(key, SettingType.BOOLEAN, Boolean.class).defaultValue(
-                fallback).description(description).customIcon(icon);
+                resolver.get(plugin, key, fallback)).description(description).customIcon(icon);
         if (useValueIcons) {
             builder.valueIconStacks(Map.of(Boolean.TRUE, iconHelper.enchanted(icon, true), Boolean.FALSE,
                     iconHelper.enchanted(icon, false)));
         }
-        plugin.getConfigRegistry().register("settings." + key, Boolean.class, fallback);
         plugin.getSettingRegistry().register(builder.build());
     }
 }

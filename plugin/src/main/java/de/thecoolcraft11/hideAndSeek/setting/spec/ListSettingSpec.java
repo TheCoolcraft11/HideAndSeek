@@ -29,7 +29,8 @@ public final class ListSettingSpec implements SettingSpec {
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
         plugin.getConfigRegistry().register("settings." + key, List.class, fallback);
         plugin.getSettingRegistry().register(
-                SettingDefinition.builder(key, SettingType.LIST, List.class).defaultValue(fallback).description(
+                SettingDefinition.builder(key, SettingType.LIST, List.class).defaultValue(
+                        resolver.get(plugin, key, fallback)).description(
                         description).customIcon(icon).build());
     }
 }

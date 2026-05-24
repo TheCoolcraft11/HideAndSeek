@@ -52,18 +52,20 @@ public final class IntegerSettingSpec implements SettingSpec {
 
     @Override
     public void register(HideAndSeek plugin, SettingValueResolver resolver, SettingIconHelper iconHelper) {
+        plugin.getConfigRegistry().register("settings." + key, Integer.class, fallback);
         SettingDefinition.Builder<Integer> builder;
         if (iconStack != null) {
-            builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(fallback).range(
+            builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(
+                    resolver.get(plugin, key, fallback)).range(
                     min, max).description(description).customIcon(iconStack);
         } else {
-            builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(fallback).range(
+            builder = SettingDefinition.builder(key, SettingType.INTEGER, Integer.class).defaultValue(
+                    resolver.get(plugin, key, fallback)).range(
                     min, max).description(description).customIcon(icon);
         }
         if (itemProvider != null) {
             builder.itemProvider(value -> itemProvider.apply(plugin, value));
         }
-        plugin.getConfigRegistry().register("settings." + key, Integer.class, fallback);
         plugin.getSettingRegistry().register(builder.build());
     }
 }
