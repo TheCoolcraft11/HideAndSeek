@@ -150,9 +150,14 @@ public class PlayerHitListener implements Listener {
 
 
                 Component customKillMessage = deathMessageService.getKillMessage(killer, deceased);
-                if (customKillMessage != null) {
-                    event.deathMessage(customKillMessage);
+                if (customKillMessage == null) {
+                    customKillMessage = Component.text(killer.getName(), NamedTextColor.GREEN)
+                            .append(Component.text(" found ", NamedTextColor.YELLOW))
+                            .append(Component.text(deceased.getName(), NamedTextColor.GREEN))
+                            .append(Component.text("!", NamedTextColor.YELLOW));
                 }
+
+                event.deathMessage(customKillMessage);
 
                 handleHiderElimination(deceased, killer, gameStyle);
             }
