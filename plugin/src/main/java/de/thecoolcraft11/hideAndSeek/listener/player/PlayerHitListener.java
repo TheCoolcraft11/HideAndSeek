@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.listener.player;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.SpectatorTeleportGUI;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
@@ -529,6 +530,8 @@ public class PlayerHitListener implements Listener {
 
 
             cleanupBlockModeHider(hider);
+
+            SpectatorTeleportGUI.give(plugin, hider);
 
             Title title = Title.title(
                     Component.text("YOU WERE FOUND!", NamedTextColor.RED),

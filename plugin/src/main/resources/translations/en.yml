@@ -836,6 +836,16 @@ gui:
       no_slots: "<red>No slots available</red>"
       click_to_remove_selected: "<red>Click to remove</red>"
       no_description: ""
+  spectator:
+    teleported: "<gray>Teleported to <yellow>{target}</yellow>"
+    previous_page: "◀  Previous page"
+    next_page: "Next page  ▶"
+    page_info: "Page {current} / {total}"
+    nav_hint: "Use ◀ / ▶ to navigate"
+    click_to_teleport: "Click to teleport"
+    hp_label: "HP: "
+    role_hider: "Hider"
+    role_seeker: "Seeker"
 util:
   adrenaline_rush:
     hider:

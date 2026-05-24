@@ -247,4 +247,16 @@ public class NmsAdapterImpl implements NmsAdapter {
     public Entity spawnSeekerAssistant(Plugin plugin, Player seeker, Location location, String assistantSkin) {
         return seekerAssistantHandler.spawnSeekerAssistant(plugin, seeker, location, assistantSkin);
     }
+
+    @Override
+    public void injectSpectatorInventoryHandler(Player player,
+                                                java.util.function.IntConsumer onSlotClick) {
+        SpectatorInventoryHandler.inject(player, onSlotClick);
+    }
+
+    @Override
+    public void removeSpectatorInventoryHandler(Player player) {
+        SpectatorInventoryHandler.remove(player);
+    }
+
 }

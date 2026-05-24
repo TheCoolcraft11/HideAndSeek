@@ -193,6 +193,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new PerkListener(this, perkService), this);
         Bukkit.getPluginManager().registerEvents(new PlayerTeamListener(this), this);
         Bukkit.getPluginManager().registerEvents(adrenalineRushListener, this);
+        Bukkit.getPluginManager().registerEvents(new SpectatorTeleportListener(this), this);
 
 
         worldBorderCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this,
@@ -331,6 +332,7 @@ public final class HideAndSeek extends MinigameFramework {
         KillEffectManager.clear();
         WinSkinManager.clear();
         DeathMessageManager.clear();
+        SpectatorTeleportGUI.removeAll(this);
         RemoteGatewayItem.clearAllGateways();
         ItemSkinSelectionService.shutdown(this);
         LoadoutDataService.shutdown(this);

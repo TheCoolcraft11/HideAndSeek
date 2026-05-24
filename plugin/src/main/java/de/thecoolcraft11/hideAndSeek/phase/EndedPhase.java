@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.phase;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.SpectatorTeleportGUI;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.effects.win.WinSkinService;
 import de.thecoolcraft11.hideAndSeek.items.hider.RemoteGatewayItem;
@@ -203,7 +204,7 @@ public class EndedPhase implements GamePhase {
 
         HideAndSeek.getDataController().reset();
         RemoteGatewayItem.clearAllGateways();
-
+        SpectatorTeleportGUI.removeAll(hideAndSeekPlugin);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerStateResetUtil.resetPlayerCompletely(player, true);

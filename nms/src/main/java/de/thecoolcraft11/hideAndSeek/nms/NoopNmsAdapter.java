@@ -137,4 +137,15 @@ public class NoopNmsAdapter implements NmsAdapter {
     public void injectDialogFilter(UUID playerUuid, Plugin plugin, BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
 
     }
+
+    @Override
+    public void injectSpectatorInventoryHandler(Player player,
+                                                java.util.function.IntConsumer onSlotClick) {
+    }
+
+    @Override
+    public void removeSpectatorInventoryHandler(Player player) {
+    }
+
+
 }

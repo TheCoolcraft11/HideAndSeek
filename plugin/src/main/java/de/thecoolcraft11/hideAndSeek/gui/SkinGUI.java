@@ -55,9 +55,6 @@ public class SkinGUI {
         return out.toString();
     }
 
-    /**
-     * Helper to fetch coins asynchronously and run the action on the main thread.
-     */
     private void withCoins(Player player, Consumer<Integer> action) {
         ItemSkinSelectionService.getCoins(player.getUniqueId())
                 .exceptionally(ex -> {
@@ -297,9 +294,6 @@ public class SkinGUI {
         });
     }
 
-    /**
-     * Shared logic for adding Back, Clear, and Coins buttons to variant inventories.
-     */
     private void addVariantUtilityButtons(Player player, FrameworkInventory inventory, String logicalItemId, int coins) {
         InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
                 plugin.tr(player, "gui.skin.buttons.back"),
