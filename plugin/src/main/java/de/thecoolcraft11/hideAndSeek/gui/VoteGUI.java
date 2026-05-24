@@ -534,8 +534,8 @@ public class VoteGUI {
     }
 
     private ItemStack createReadyToggleItem(Player player, boolean ready, boolean voteComplete) {
-        Material material = ready ? item(GUIItems.VOTE_READY,
-                new ItemStack(Material.LIME_STAINED_GLASS_PANE)).getType() : item(GUIItems.VOTE_NOT_READY,
+        Material material = ready ? item(GUIItems.KEY_READY,
+                new ItemStack(Material.LIME_STAINED_GLASS_PANE)).getType() : item(GUIItems.KEY_NOT_READY,
                 new ItemStack(Material.RED_STAINED_GLASS_PANE)).getType();
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();

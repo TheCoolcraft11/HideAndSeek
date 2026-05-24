@@ -16,6 +16,8 @@ public class GUIItems {
     public static final String KEY_SEPERATOR = "seperator";
     public static final String KEY_PREVIOUS = "previous";
     public static final String KEY_NEXT = "next";
+    public static final String KEY_READY = "ready";
+    public static final String KEY_NOT_READY = "not_ready";
 
     public static final String SKIN_COIN = "coin";
 
@@ -30,11 +32,14 @@ public class GUIItems {
     public static final String VOTE_ROLE_HIDER = "role_hider";
     public static final String VOTE_ROLE_SEEKER = "role_seeker";
     public static final String VOTE_SELF = "self";
-    public static final String VOTE_READY = "ready";
-    public static final String VOTE_NOT_READY = "not_ready";
 
     public static final String ST_TARGET = "teleport_target";
     public static final String ST_INDICATOR = "indicator";
+
+    public static final String R_PLAYER = "player";
+    public static final String R_OVERFLOW = "overflow";
+
+    public static final String MAP_RANDOM = "random";
 
     public static void registerAll(GuiItemRegistry registry) {
         registry.registerDefault(GUINames.SKIN, SKIN_COIN, new ItemStack(Material.GOLD_NUGGET));
@@ -55,8 +60,8 @@ public class GUIItems {
         registry.registerDefault(GUINames.VOTE, VOTE_ROLE_HIDER, new ItemStack(Material.LIME_WOOL));
         registry.registerDefault(GUINames.VOTE, VOTE_ROLE_SEEKER, new ItemStack(Material.RED_WOOL));
         registry.registerDefault(GUINames.VOTE, VOTE_SELF, new ItemStack(Material.PLAYER_HEAD));
-        registry.registerDefault(GUINames.VOTE, VOTE_READY, new ItemStack(Material.LIME_STAINED_GLASS_PANE));
-        registry.registerDefault(GUINames.VOTE, VOTE_NOT_READY, new ItemStack(Material.RED_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.VOTE, KEY_READY, new ItemStack(Material.LIME_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.VOTE, KEY_NOT_READY, new ItemStack(Material.RED_STAINED_GLASS_PANE));
 
         registry.registerDefault(GUINames.SPECTATOR_TELEPORT, KEY_SEPERATOR, createSeparatorItem());
         registry.registerDefault(GUINames.SPECTATOR_TELEPORT, KEY_SEPERATOR, createSeparatorItem());
@@ -64,6 +69,14 @@ public class GUIItems {
         registry.registerDefault(GUINames.SPECTATOR_TELEPORT, KEY_PREVIOUS, new ItemStack(Material.ARROW));
         registry.registerDefault(GUINames.SPECTATOR_TELEPORT, KEY_NEXT, new ItemStack(Material.ARROW));
         registry.registerDefault(GUINames.SPECTATOR_TELEPORT, ST_INDICATOR, new ItemStack(Material.BOOK));
+
+        registry.registerDefault(GUINames.READY, R_PLAYER, new ItemStack(Material.PLAYER_HEAD));
+        registry.registerDefault(GUINames.READY, KEY_READY, new ItemStack(Material.LIME_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.READY, KEY_NOT_READY, new ItemStack(Material.RED_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.READY, R_OVERFLOW, new ItemStack(Material.BOOK));
+
+        registry.registerDefault(GUINames.MAP, KEY_FALLBACK, new ItemStack(Material.GRASS_BLOCK));
+        registry.registerDefault(GUINames.MAP, MAP_RANDOM, new ItemStack(Material.COMPASS));
     }
 
 

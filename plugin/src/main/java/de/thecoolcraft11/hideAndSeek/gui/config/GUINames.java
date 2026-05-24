@@ -6,4 +6,6 @@ public class GUINames {
     public static final String SKIN_SELECTOR = "skin_selector";
     public static final String VOTE = "vote";
     public static final String SPECTATOR_TELEPORT = "spectator_teleport";
+    public static final String READY = "ready";
+    public static final String MAP = "map";
 }
