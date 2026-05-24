@@ -1,6 +1,7 @@
-package de.thecoolcraft11.hideAndSeek.perk;
+package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.perk.PerkShopMode;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkDefinition;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -22,17 +23,17 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-@SuppressWarnings("ALL")
-public class PerkShopUI {
+public class PerkShopGUI {
 
-    public static final Component SHOP_TITLE = Component.text("Perk Shop", NamedTextColor.GOLD);
-    private static final String SHOP_LIGHT_KEY = "perk_shop_light";
+    public static final String SHOP_TITLE_KEY = "gui.perks.title";
+    public static final String SHOP_LIGHT_KEY = "perk_shop_light";
 
     private final HideAndSeek plugin;
 
-    public PerkShopUI(HideAndSeek plugin) {
+    public PerkShopGUI(HideAndSeek plugin) {
         this.plugin = plugin;
         startRefreshTask();
     }
@@ -42,7 +43,7 @@ public class PerkShopUI {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.isOnline()) {
                     boolean hasPerkItems = hasAnyShopRowItem(player);
-                    boolean hasShopOpen = SHOP_TITLE.equals(player.getOpenInventory().title());
+                    boolean hasShopOpen = isShopInventoryOpen(player);
 
                     if (hasPerkItems || hasShopOpen) {
                         refreshForPlayer(player);
@@ -50,6 +51,12 @@ public class PerkShopUI {
                 }
             }
         }, 5L, 5L);
+    }
+
+    private boolean isShopInventoryOpen(Player player) {
+        Component currentTitle = player.getOpenInventory().title();
+
+        return currentTitle.equals(plugin.tr(player, SHOP_TITLE_KEY));
     }
 
     public void givePerkItems(Player player) {
@@ -60,7 +67,6 @@ public class PerkShopUI {
 
         List<PerkDefinition> perks = getRoundPerksForPlayer(player);
         List<Integer> rowSlots = getConfiguredSlots();
-
 
         for (int slot : rowSlots) {
             player.getInventory().setItem(slot, buildPlaceholderItem());
@@ -89,14 +95,15 @@ public class PerkShopUI {
         } else {
             removePerkItems(player);
         }
-        if (SHOP_TITLE.equals(player.getOpenInventory().title())) {
+        if (isShopInventoryOpen(player)) {
             openShopInventory(player);
         }
     }
 
     public void openShopInventory(Player player) {
         List<PerkDefinition> perks = getRoundPerksForPlayer(player);
-        Inventory inv = Bukkit.createInventory(null, 9, SHOP_TITLE);
+
+        Inventory inv = Bukkit.createInventory(null, 9, plugin.tr(player, SHOP_TITLE_KEY));
         int[] displaySlots = {1, 4, 7};
 
         for (int i = 0; i < Math.min(perks.size(), displaySlots.length); i++) {
@@ -108,6 +115,7 @@ public class PerkShopUI {
         player.openInventory(inv);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public ItemStack buildShopItem(PerkDefinition perk, boolean locked, Player player) {
         int cost = plugin.getSettingRegistry().get("perks.perk." + perk.getId() + ".cost", perk.getCost());
         int balance = HideAndSeek.getDataController().getPoints(player.getUniqueId());
@@ -129,20 +137,19 @@ public class PerkShopUI {
 
             if (sold.getItemMeta() instanceof BlockDataMeta blockDataMeta) {
                 int level = soldOutGlobally ? 0 : 15;
-
-                org.bukkit.block.data.BlockData bd = Material.LIGHT.createBlockData();
-                ((org.bukkit.block.data.type.Light) bd).setLevel(level);
-
+                org.bukkit.block.data.type.Light bd = (org.bukkit.block.data.type.Light) Material.LIGHT.createBlockData();
+                bd.setLevel(level);
                 blockDataMeta.setBlockData(bd);
                 sold.setItemMeta(blockDataMeta);
             }
 
             ItemMeta meta = sold.getItemMeta();
+
             meta.displayName(perk.getDisplayName()
                     .decoration(TextDecoration.STRIKETHROUGH, true)
                     .color(NamedTextColor.GRAY)
                     .decoration(TextDecoration.ITALIC, false)
-                    .append(Component.text(" [LOCKED]", NamedTextColor.DARK_GRAY)));
+                    .append(plugin.tr(player, "gui.perks.locked_suffix")));
 
             List<Component> lockedLore = new ArrayList<>();
             lockedLore.add(perk.getDescription().color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
@@ -151,20 +158,21 @@ public class PerkShopUI {
             if (perk.getTarget() == PerkTarget.HIDER) {
                 Player owner = Bukkit.getPlayer(plugin.getPerkStateManager().getFiniteOwnerUUID(perk.getId()));
                 if (owner != null) {
-                    lockedLore.add(Component.text("Owned by: " + owner.getName(), NamedTextColor.YELLOW)
+
+                    lockedLore.add(plugin.tr(player, "gui.perks.owned_by", Map.of("owner", owner.getName()))
                             .decoration(TextDecoration.ITALIC, false));
                 }
                 lockedLore.add(Component.empty());
             }
 
+
             Component reason = soldOutGlobally
-                    ? Component.text("Sold out (global limit reached)", NamedTextColor.DARK_RED)
-                    : Component.text("Already purchased", NamedTextColor.DARK_GREEN);
+                    ? plugin.tr(player, "gui.perks.sold_out")
+                    : plugin.tr(player, "gui.perks.already_purchased");
             lockedLore.add(reason.decoration(TextDecoration.ITALIC, false));
 
             meta.lore(lockedLore);
             sold.setItemMeta(meta);
-
             sold.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.BLOCK_DATA).build());
             markProtectedShopLight(sold);
 
@@ -185,43 +193,44 @@ public class PerkShopUI {
         if (isSeekerPerk) {
             if (finitePerk) {
                 int buyers = plugin.getPerkStateManager().getFiniteBuyerCount(perk.getId());
-                lore.add(Component.text("Finite seeker perk", NamedTextColor.AQUA)
-                        .decoration(TextDecoration.ITALIC, false));
+
+                lore.add(plugin.tr(player, "gui.perks.finite_seeker").decoration(TextDecoration.ITALIC, false));
                 if (finiteLimit > 0) {
-                    lore.add(Component.text("Owners: " + buyers + "/" + finiteLimit, NamedTextColor.GRAY)
+                    lore.add(plugin.tr(player, "gui.perks.owners_limit", Map.of("buyers", buyers, "limit", finiteLimit))
                             .decoration(TextDecoration.ITALIC, false));
                 } else {
-                    lore.add(Component.text("Owners: " + buyers + "/unlimited", NamedTextColor.GRAY)
+                    lore.add(plugin.tr(player, "gui.perks.owners_unlimited", Map.of("buyers", buyers))
                             .decoration(TextDecoration.ITALIC, false));
                 }
             } else {
-                lore.add(Component.text("Rebuyable with cooldown", NamedTextColor.AQUA)
-                        .decoration(TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.perks.rebuyable").decoration(TextDecoration.ITALIC, false));
                 long maxCooldownTicks = plugin.getPerkRegistry().getRebuyCooldownTicks(perk);
                 long maxSeconds = Math.max(0L, (maxCooldownTicks + 19L) / 20L);
                 NamedTextColor cooldownColor = cooldownTicks > 0L ? NamedTextColor.YELLOW : NamedTextColor.GREEN;
-                lore.add(Component.text("Cooldown: " + maxSeconds + "s", cooldownColor)
-                        .decoration(TextDecoration.ITALIC, false));
+                lore.add(plugin.tr(player, "gui.perks.cooldown", Map.of("seconds", maxSeconds))
+                        .color(cooldownColor).decoration(TextDecoration.ITALIC, false));
             }
         }
 
-        lore.add(Component.text("Cost: " + cost + " pts", canAfford ? NamedTextColor.GOLD : NamedTextColor.RED)
-                .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("Balance: " + balance + " pts", canAfford ? NamedTextColor.GREEN : NamedTextColor.RED)
-                .decoration(TextDecoration.ITALIC, false));
+
+        lore.add(plugin.tr(player, "gui.perks.cost", Map.of("cost", cost))
+                .color(canAfford ? NamedTextColor.GOLD : NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
+        lore.add(plugin.tr(player, "gui.perks.balance", Map.of("balance", balance))
+                .color(canAfford ? NamedTextColor.GREEN : NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
         lore.add(Component.empty());
+
 
         Component statusLine;
         if (cooldownTicks > 0L) {
             long seconds = Math.max(1L, (cooldownTicks + 19L) / 20L);
-            statusLine = Component.text("Cooldown: " + seconds + "s", NamedTextColor.YELLOW);
+            statusLine = plugin.tr(player, "gui.perks.cooldown", Map.of("seconds", seconds)).color(
+                    NamedTextColor.YELLOW);
         } else if (canAfford) {
-            statusLine = Component.text("Click to purchase", NamedTextColor.AQUA);
+            statusLine = plugin.tr(player, "gui.perks.click_to_purchase");
         } else {
-            statusLine = Component.text("Not enough points", NamedTextColor.DARK_RED);
+            statusLine = plugin.tr(player, "gui.perks.not_enough_points");
         }
-        lore.add(statusLine
-                .decoration(TextDecoration.ITALIC, false));
+        lore.add(statusLine.decoration(TextDecoration.ITALIC, false));
 
         meta.lore(lore);
         meta.getPersistentDataContainer().set(
@@ -230,7 +239,6 @@ public class PerkShopUI {
                 perk.getId());
 
         item.setItemMeta(meta);
-
         item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.BLOCK_DATA).build());
 
         return item;
@@ -252,24 +260,22 @@ public class PerkShopUI {
                 .get(new NamespacedKey(plugin, "perk_shop_item"), PersistentDataType.STRING);
     }
 
+    public void refreshAllPlayersWithShopItems() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!player.isOnline()) {
+                continue;
+            }
+            refreshForPlayer(player);
+        }
+    }
+
+
     public void clearAll() {
         for (Player p : Bukkit.getOnlinePlayers()) {
             removePerkItems(p);
         }
     }
 
-    public void refreshAllPlayersWithShopItems() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!player.isOnline()) {
-                continue;
-            }
-            boolean hasPerkItems = hasAnyShopRowItem(player);
-            boolean hasShopOpen = SHOP_TITLE.equals(player.getOpenInventory().title());
-            if (hasPerkItems || hasShopOpen) {
-                refreshForPlayer(player);
-            }
-        }
-    }
 
     private List<PerkDefinition> getRoundPerksForPlayer(Player player) {
         boolean isHider = HideAndSeek.getDataController().getHiders().contains(player.getUniqueId());
@@ -336,6 +342,7 @@ public class PerkShopUI {
         return false;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private ItemStack buildPlaceholderItem() {
         ItemStack lightBlock = new ItemStack(Material.LIGHT);
         lightBlock.unsetData(DataComponentTypes.BLOCK_DATA);
@@ -366,5 +373,3 @@ public class PerkShopUI {
         item.setItemMeta(meta);
     }
 }
-
-

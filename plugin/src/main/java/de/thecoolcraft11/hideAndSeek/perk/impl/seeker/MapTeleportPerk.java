@@ -132,7 +132,7 @@ public class MapTeleportPerk extends BasePerk implements DelayedActivationPerk {
     private void refundPurchase(Player player, HideAndSeek plugin, int cost) {
         plugin.getPerkService().getStateManager().removePurchased(player.getUniqueId(), getId());
         HideAndSeek.getDataController().addPoints(player.getUniqueId(), cost);
-        plugin.getPerkShopUI().refreshForPlayer(player);
+        plugin.getPerkShopGUI().refreshForPlayer(player);
     }
 }
 

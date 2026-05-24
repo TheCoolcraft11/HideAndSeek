@@ -1,9 +1,9 @@
 package de.thecoolcraft11.hideAndSeek.listener.perk;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.PerkShopGUI;
 import de.thecoolcraft11.hideAndSeek.perk.PerkService;
 import de.thecoolcraft11.hideAndSeek.perk.PerkShopMode;
-import de.thecoolcraft11.hideAndSeek.perk.PerkShopUI;
 import de.thecoolcraft11.hideAndSeek.perk.definition.DelayedActivationPerk;
 import de.thecoolcraft11.hideAndSeek.perk.impl.seeker.ElytraRushPerk;
 import net.kyori.adventure.text.Component;
@@ -46,9 +46,9 @@ public class PerkListener implements Listener {
             return;
         }
 
-        if (PerkShopUI.SHOP_TITLE.equals(event.getView().title())) {
+        if (plugin.tr(player, PerkShopGUI.SHOP_TITLE_KEY).equals(event.getView().title())) {
             event.setCancelled(true);
-            String perkId = perkService.getShopUI().getPerkIdFromItem(event.getCurrentItem());
+            String perkId = perkService.getShopGUI().getPerkIdFromItem(event.getCurrentItem());
             if (perkId == null) {
                 return;
             }
@@ -59,14 +59,14 @@ public class PerkListener implements Listener {
                     .ifPresent(perk -> {
                         perkService.getStateManager().purchase(player, perk);
                         if (!(perk instanceof DelayedActivationPerk)) {
-                            perkService.getShopUI().openShopInventory(player);
+                            perkService.getShopGUI().openShopInventory(player);
                         }
                     });
             return;
         }
 
         if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) {
-            String perkId = perkService.getShopUI().getPerkIdFromItem(event.getCurrentItem());
+            String perkId = perkService.getShopGUI().getPerkIdFromItem(event.getCurrentItem());
             if (perkId == null) {
                 return;
             }
@@ -81,7 +81,7 @@ public class PerkListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        perkService.getShopUI().removePerkItems(event.getPlayer());
+        perkService.getShopGUI().removePerkItems(event.getPlayer());
     }
 
     @EventHandler
@@ -113,7 +113,7 @@ public class PerkListener implements Listener {
             return;
         }
 
-        perkService.getShopUI().openShopInventory(event.getPlayer());
+        perkService.getShopGUI().openShopInventory(event.getPlayer());
     }
 
     @EventHandler

@@ -213,7 +213,7 @@ public class LoadoutManager {
         }
 
         plugin.getPerkRegistry().selectRoundPerks();
-        plugin.getPerkShopUI().refreshAllPlayersWithShopItems();
+        plugin.getPerkShopGUI().refreshAllPlayersWithShopItems();
         return Bukkit.getOnlinePlayers().size();
     }
 

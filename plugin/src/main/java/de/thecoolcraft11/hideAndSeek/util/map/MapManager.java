@@ -163,11 +163,13 @@ public class MapManager {
         String iconName = mapData.getIcon().trim();
         Material iconMaterial = resolveIconMaterial(iconName);
         if (iconMaterial == null) {
-            plugin.getLogger().warning("Invalid icon material for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.name());
+            plugin.getLogger().warning(
+                    "Invalid icon material for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.name());
             return safeFallback;
         }
         if (iconMaterial.isAir()) {
-            plugin.getLogger().warning("Map icon material cannot be air for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.name());
+            plugin.getLogger().warning(
+                    "Map icon material cannot be air for map '" + mapName + "': " + iconName + ". Falling back to " + safeFallback.name());
             return safeFallback;
         }
         return iconMaterial;

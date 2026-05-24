@@ -444,7 +444,7 @@ public class PlayerHitListener implements Listener {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         PlayerStateResetUtil.resetPlayerCompletely(player, false);
                         SeekerItems.giveItemsWithLoadout(player, plugin);
-                        plugin.getPerkShopUI().refreshForPlayer(player);
+                        plugin.getPerkShopGUI().refreshForPlayer(player);
                         player.sendMessage(Component.text("You were transformed! You're now a seeker!", NamedTextColor.GREEN));
                         plugin.getAntiCheatVisibilityListener().refreshSoon();
                     }, 3L);
@@ -463,7 +463,7 @@ public class PlayerHitListener implements Listener {
 
 
                     HiderItems.giveItems(player, plugin, false);
-                    plugin.getPerkShopUI().refreshForPlayer(player);
+                    plugin.getPerkShopGUI().refreshForPlayer(player);
 
                     player.sendMessage(Component.text("You respawned! Keep hiding!", NamedTextColor.GREEN));
                     plugin.getAntiCheatVisibilityListener().refreshSoon();
@@ -572,7 +572,7 @@ public class PlayerHitListener implements Listener {
 
 
             SeekerItems.giveItemsWithLoadout(hider, plugin);
-            plugin.getPerkShopUI().refreshForPlayer(hider);
+            plugin.getPerkShopGUI().refreshForPlayer(hider);
 
 
             hider.addPotionEffect(new org.bukkit.potion.PotionEffect(

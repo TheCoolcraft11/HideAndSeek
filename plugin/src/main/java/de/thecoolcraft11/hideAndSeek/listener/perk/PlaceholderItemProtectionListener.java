@@ -1,6 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.listener.perk;
 
-import de.thecoolcraft11.hideAndSeek.perk.PerkShopUI;
+import de.thecoolcraft11.hideAndSeek.gui.PerkShopGUI;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -11,16 +11,16 @@ import org.bukkit.inventory.ItemStack;
 
 public class PlaceholderItemProtectionListener implements Listener {
 
-    private final PerkShopUI perkShopUI;
+    private final PerkShopGUI perkShopGUI;
 
-    public PlaceholderItemProtectionListener(PerkShopUI perkShopUI) {
-        this.perkShopUI = perkShopUI;
+    public PlaceholderItemProtectionListener(PerkShopGUI perkShopGUI) {
+        this.perkShopGUI = perkShopGUI;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         ItemStack item = event.getItemDrop().getItemStack();
-        if (perkShopUI.isProtectedShopLight(item)) {
+        if (perkShopGUI.isProtectedShopLight(item)) {
             event.setCancelled(true);
         }
     }
@@ -30,10 +30,10 @@ public class PlaceholderItemProtectionListener implements Listener {
         ItemStack cursor = event.getCursor();
         ItemStack current = event.getCurrentItem();
 
-        if (perkShopUI.isProtectedShopLight(cursor)) {
+        if (perkShopGUI.isProtectedShopLight(cursor)) {
             event.setCancelled(true);
         }
-        if (perkShopUI.isProtectedShopLight(current)) {
+        if (perkShopGUI.isProtectedShopLight(current)) {
             event.setCancelled(true);
         }
     }
@@ -41,12 +41,12 @@ public class PlaceholderItemProtectionListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
         ItemStack cursor = event.getCursor();
-        if (perkShopUI.isProtectedShopLight(cursor)) {
+        if (perkShopGUI.isProtectedShopLight(cursor)) {
             event.setCancelled(true);
         }
 
         for (ItemStack item : event.getNewItems().values()) {
-            if (perkShopUI.isProtectedShopLight(item)) {
+            if (perkShopGUI.isProtectedShopLight(item)) {
                 event.setCancelled(true);
                 break;
             }

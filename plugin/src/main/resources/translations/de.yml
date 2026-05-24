@@ -846,6 +846,22 @@ gui:
     hp_label: "KP: "
     role_hider: "Verstecker"
     role_seeker: "Sucher"
+  perks:
+    shop:
+      title: "<gold>Perk Shop"
+      locked_suffix: " <dark_gray>[LOCKED]"
+      owned_by: "<yellow>Owned by: {owner}"
+      sold_out: "<dark_red>Sold out (global limit reached)"
+      already_purchased: "<dark_green>Already purchased"
+      finite_seeker: "<aqua>Finite seeker perk"
+      owners_limit: "<gray>Owners: {buyers}/{limit}"
+      owners_unlimited: "<gray>Owners: {buyers}/unlimited"
+      rebuyable: "<aqua>Rebuyable with cooldown"
+      cooldown: "Cooldown: {seconds}s"
+      cost: "Cost: {cost} pts"
+      balance: "Balance: {balance} pts"
+      click_to_purchase: "<aqua>Click to purchase"
+      not_enough_points: "<dark_red>Not enough points"
 util:
   adrenaline_rush:
     hider:

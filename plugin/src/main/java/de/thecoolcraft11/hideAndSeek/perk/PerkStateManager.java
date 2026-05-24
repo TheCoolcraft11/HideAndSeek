@@ -104,9 +104,9 @@ public class PerkStateManager {
         }
 
         if (isFinitePerk) {
-            plugin.getPerkShopUI().refreshAllPlayersWithShopItems();
+            plugin.getPerkShopGUI().refreshAllPlayersWithShopItems();
         } else {
-            plugin.getPerkShopUI().refreshForPlayer(player);
+            plugin.getPerkShopGUI().refreshForPlayer(player);
         }
         var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
         if (statsService != null) {
@@ -169,9 +169,9 @@ public class PerkStateManager {
         }
 
         if (isFinitePerk) {
-            plugin.getPerkShopUI().refreshAllPlayersWithShopItems();
+            plugin.getPerkShopGUI().refreshAllPlayersWithShopItems();
         } else {
-            plugin.getPerkShopUI().refreshForPlayer(player);
+            plugin.getPerkShopGUI().refreshForPlayer(player);
         }
         var statsService = de.thecoolcraft11.hideAndSeek.playerdata.PlayerStatsService.getActive();
         if (statsService != null) {
@@ -267,7 +267,7 @@ public class PerkStateManager {
         }
 
         if (player != null && player.isOnline()) {
-            plugin.getPerkShopUI().refreshForPlayer(player);
+            plugin.getPerkShopGUI().refreshForPlayer(player);
         }
 
         return refundedPoints;

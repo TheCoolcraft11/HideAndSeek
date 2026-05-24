@@ -1,6 +1,7 @@
 package de.thecoolcraft11.hideAndSeek.perk;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.PerkShopGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -9,14 +10,14 @@ public class PerkService {
     private final HideAndSeek plugin;
     private final PerkRegistry registry;
     private final PerkStateManager stateManager;
-    private final PerkShopUI shopUI;
+    private final PerkShopGUI shopUI;
     private final VendingMachineManager vendingMachineManager;
 
     public PerkService(HideAndSeek plugin) {
         this.plugin = plugin;
         this.registry = new PerkRegistry(plugin);
         this.stateManager = new PerkStateManager(plugin);
-        this.shopUI = new PerkShopUI(plugin);
+        this.shopUI = new PerkShopGUI(plugin);
         this.vendingMachineManager = new VendingMachineManager(plugin);
     }
 
@@ -70,7 +71,7 @@ public class PerkService {
         return stateManager;
     }
 
-    public PerkShopUI getShopUI() {
+    public PerkShopGUI getShopGUI() {
         return shopUI;
     }
 

@@ -24,7 +24,6 @@ import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsLoader;
 import de.thecoolcraft11.hideAndSeek.perk.PerkRegistry;
 import de.thecoolcraft11.hideAndSeek.perk.PerkService;
-import de.thecoolcraft11.hideAndSeek.perk.PerkShopUI;
 import de.thecoolcraft11.hideAndSeek.perk.PerkStateManager;
 import de.thecoolcraft11.hideAndSeek.phase.EndedPhase;
 import de.thecoolcraft11.hideAndSeek.phase.HidingPhase;
@@ -189,7 +188,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(new SetPhaseReadinessGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerSpectateListener(), this);
         Bukkit.getPluginManager().registerEvents(new TrapMovementListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PlaceholderItemProtectionListener(perkService.getShopUI()), this);
+        Bukkit.getPluginManager().registerEvents(new PlaceholderItemProtectionListener(perkService.getShopGUI()), this);
         Bukkit.getPluginManager().registerEvents(new PerkListener(this, perkService), this);
         Bukkit.getPluginManager().registerEvents(new PlayerTeamListener(this), this);
         Bukkit.getPluginManager().registerEvents(adrenalineRushListener, this);
@@ -492,8 +491,8 @@ public final class HideAndSeek extends MinigameFramework {
         return perkService.getStateManager();
     }
 
-    public PerkShopUI getPerkShopUI() {
-        return perkService.getShopUI();
+    public PerkShopGUI getPerkShopGUI() {
+        return perkService.getShopGUI();
     }
 
     public UnstuckManager getUnstuckManager() {
