@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -301,6 +302,7 @@ public class PerkShopUI {
     }
 
     private PerkShopMode getShopModeForPlayer(Player player) {
+        if (player.getGameMode() == GameMode.SPECTATOR) return null;
         if (HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
             return plugin.getSettingRegistry().get("perks.hider-shop-mode", PerkShopMode.INVENTORY);
         }

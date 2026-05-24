@@ -78,4 +78,11 @@ public interface NmsAdapter {
     void injectDialogFilter(UUID playerUUID, Plugin plugin,
                             BiFunction<String, OfflinePlayer, Boolean> permissionChecker);
 
+    void injectSpectatorInventoryHandler(Player player,
+                                         java.util.function.IntConsumer onSlotClick);
+
+    void removeSpectatorInventoryHandler(Player player);
+
+
+
 }
