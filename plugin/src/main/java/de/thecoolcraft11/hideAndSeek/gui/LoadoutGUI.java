@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
@@ -173,12 +175,12 @@ public class LoadoutGUI {
         }
 
 
-        InventoryItem slotPrefsButton = new InventoryItem(createUtilityItem(Material.HOPPER,
+        InventoryItem slotPrefsButton = new InventoryItem(createUtilityItem(GUIItems.L_SLOT_PREFS,
                 plugin.tr(player, "gui.loadout.slotprefs.title"),
                 List.of(
                         plugin.tr(player, "gui.loadout.slotprefs.hint1").decoration(TextDecoration.ITALIC, false),
                         plugin.tr(player, "gui.loadout.slotprefs.hint2").decoration(TextDecoration.ITALIC, false)
-                )));
+                ), new ItemStack(Material.HOPPER)));
         slotPrefsButton.setClickHandler((p, item, event, s) -> {
             SlotPreferencesGUI gui = new SlotPreferencesGUI(loadoutManager, plugin);
             gui.open(p, hiderView);
@@ -291,7 +293,7 @@ public class LoadoutGUI {
             inv.setItem(guiSlot, presetItem);
         }
 
-        InventoryItem roleToggle = new InventoryItem(createUtilityItem(Material.COMPASS,
+        InventoryItem roleToggle = new InventoryItem(createUtilityItem(GUIItems.L_PRESET_INFO,
                 plugin.tr(player, "gui.loadout.presets.editing_all"),
                 List.of(
                         plugin.tr(player, "gui.loadout.presets.hint_both_roles").decoration(TextDecoration.ITALIC,
@@ -299,7 +301,7 @@ public class LoadoutGUI {
                         plugin.tr(player, "gui.loadout.presets.hint_shift_save").decoration(TextDecoration.ITALIC,
                                 false),
                         plugin.tr(player, "gui.loadout.presets.hint_actions").decoration(TextDecoration.ITALIC, false)
-                )));
+                ), new ItemStack(Material.COMPASS)));
         roleToggle.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
         roleToggle.setAllowTakeout(false);
         roleToggle.setAllowInsert(false);
@@ -460,7 +462,7 @@ public class LoadoutGUI {
 
 
     private ItemStack createInfoItem(Player player, int usedSlots, int maxSlots, int usedTokens, int maxTokens) {
-        ItemStack item = new ItemStack(Material.BOOK);
+        ItemStack item = item(GUIItems.L_INFO, new ItemStack(Material.BOOK));
         ItemMeta meta = item.getItemMeta();
         meta.displayName(plugin.tr(player, "gui.loadout.info.title").decoration(TextDecoration.ITALIC, false));
         meta.lore(Arrays.asList(
@@ -491,10 +493,11 @@ public class LoadoutGUI {
         Component titleComp = plugin.tr(player, "gui.loadout.tabs." + key);
         if (active) titleComp = titleComp.append(plugin.tr(player, "gui.loadout.tabs.selected"));
 
-        ItemStack stack = createUtilityItem(material,
+        ItemStack stack = createUtilityItem(GUIItems.L_TAB_BASE + key,
                 titleComp,
                 List.of(plugin.tr(player, "gui.loadout.tabs.click_to_switch").decoration(TextDecoration.ITALIC,
-                        false)));
+                        false)),
+                new ItemStack(material));
 
         if (active) {
             ItemMeta meta = stack.getItemMeta();
@@ -529,8 +532,9 @@ public class LoadoutGUI {
             lore.add(plugin.tr(player, "gui.loadout.restricted.pick_preset").decoration(TextDecoration.ITALIC, false));
         }
         lore.add(plugin.tr(player, "gui.loadout.restricted.note").decoration(TextDecoration.ITALIC, false));
-        return createUtilityItem(Material.BOOK,
-                plugin.tr(player, "gui.loadout.restricted.title", Map.of("role", role.name())), lore);
+        return createUtilityItem(GUIItems.L_RESTRICTED_ITEM_INFO,
+                plugin.tr(player, "gui.loadout.restricted.title", Map.of("role", role.name())), lore,
+                new ItemStack(Material.BOOK));
     }
 
     private void renderAdminPresetChoices(FrameworkInventory inv, Player player, LoadoutRole role) {
@@ -547,18 +551,21 @@ public class LoadoutGUI {
 
             ItemStack stack;
             if (preset.getItems().isEmpty()) {
-                stack = createUtilityItem(Material.GRAY_STAINED_GLASS_PANE,
+                stack = createUtilityItem(GUIItems.L_ADMIN_PRESET_EMPTY,
                         plugin.tr(player, "gui.loadout.presets.slot_empty", Map.of("slot", String.valueOf(slot))),
                         List.of(plugin.tr(player, "gui.loadout.presets.empty_hint").decoration(TextDecoration.ITALIC,
-                                false)));
+                                false)),
+                        new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
             } else if (!enabled) {
-                stack = createUtilityItem(Material.BARRIER,
+                stack = createUtilityItem(GUIItems.L_ADMIN_PRESET_DISABLED,
                         plugin.tr(player, "gui.loadout.presets.slot_disabled", Map.of("slot", String.valueOf(slot))),
                         List.of(plugin.tr(player, "gui.loadout.presets.disabled_hint").decoration(TextDecoration.ITALIC,
-                                false)));
+                                false)),
+                        new ItemStack(Material.BARRIER));
             } else {
                 LoadoutItemType preview = preset.getItems().stream().findFirst().orElse(null);
-                stack = preview == null ? new ItemStack(Material.CHEST) : getPreviewItemStack(preview);
+                stack = preview == null ? item(GUIItems.L_ADMIN_PRESET_FALLBACK,
+                        new ItemStack(Material.CHEST)) : getPreviewItemStack(preview);
                 ItemMeta meta = stack.getItemMeta();
                 if (meta != null) {
                     Component titleComp = plugin.tr(player,
@@ -611,18 +618,19 @@ public class LoadoutGUI {
     }
 
     private ItemStack createPresetInfoItem(Player player, int totalCount) {
-        return createUtilityItem(Material.WRITABLE_BOOK, plugin.tr(player, "gui.loadout.presets.info.title"),
+        return createUtilityItem(GUIItems.L_PRESET_TITLE, plugin.tr(player, "gui.loadout.presets.info.title"),
                 List.of(
                         plugin.tr(player, "gui.loadout.presets.info.slots").decoration(TextDecoration.ITALIC, false),
                         plugin.tr(player, "gui.loadout.presets.info.current_items",
                                 Map.of("count", String.valueOf(totalCount))).decoration(TextDecoration.ITALIC, false),
                         plugin.tr(player, "gui.loadout.presets.info.validate").decoration(TextDecoration.ITALIC, false)
-                ));
+                ),
+                new ItemStack(Material.WRITABLE_BOOK));
     }
 
     private ItemStack createPresetItem(Player player, int presetSlot, boolean hasPreset, LoadoutManager.PresetLoadResult analysis) {
         if (!hasPreset) {
-            return createUtilityItem(Material.GRAY_STAINED_GLASS_PANE,
+            return createUtilityItem(GUIItems.L_PRESET_EMPTY,
                     plugin.tr(player, "gui.loadout.presets.slot_empty", Map.of("slot", String.valueOf(presetSlot))),
                     List.of(
                             plugin.tr(player, "gui.loadout.presets.hint_shift_save").decoration(TextDecoration.ITALIC,
@@ -631,12 +639,14 @@ public class LoadoutGUI {
                                     false),
                             plugin.tr(player, "gui.loadout.presets.hint_right_delete").decoration(TextDecoration.ITALIC,
                                     false)
-                    ));
+                    ),
+                    new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
         }
 
         PlayerLoadout.Preset preset = loadoutManager.getPreset(player.getUniqueId(), presetSlot);
         LoadoutItemType preview = preset.hiderItems.stream().findFirst().orElse(preset.seekerItems.stream().findFirst().orElse(null));
-        ItemStack item = preview == null ? new ItemStack(Material.CHEST) : getPreviewItemStack(preview);
+        ItemStack item = preview == null ? item(GUIItems.L_PRESET_FALLBACK,
+                new ItemStack(Material.CHEST)) : getPreviewItemStack(preview);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
@@ -691,8 +701,8 @@ public class LoadoutGUI {
     }
 
 
-    private ItemStack createUtilityItem(Material material, Component title, List<Component> lore) {
-        ItemStack item = new ItemStack(material);
+    private ItemStack createUtilityItem(String key, Component title, List<Component> lore, ItemStack fallback) {
+        ItemStack item = plugin.getGuiItemRegistry().getOrDefault(GUINames.LOADOUT, key, fallback).clone();
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
@@ -828,11 +838,11 @@ public class LoadoutGUI {
         }
 
         if (item == null) {
-            return new ItemStack(Material.BARRIER);
+            return item(GUIItems.L_NO_PREVIEW, new ItemStack(Material.BARRIER));
         }
 
         ItemStack stack = item.createItem(plugin);
-        return stack == null ? new ItemStack(Material.BARRIER) : stack.clone();
+        return stack == null ? item(GUIItems.L_NO_PREVIEW, new ItemStack(Material.BARRIER)) : stack.clone();
     }
 
     private String resolveRuntimeItemId(LoadoutItemType type) {
@@ -853,5 +863,9 @@ public class LoadoutGUI {
             result.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1).toLowerCase());
         }
         return result.toString();
+    }
+
+    private ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.LOADOUT, key, fallback);
     }
 }

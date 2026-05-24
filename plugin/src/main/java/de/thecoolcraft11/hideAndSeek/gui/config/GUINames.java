@@ -8,4 +8,6 @@ public class GUINames {
     public static final String SPECTATOR_TELEPORT = "spectator_teleport";
     public static final String READY = "ready";
     public static final String MAP = "map";
+    public static final String LOADOUT = "loadout";
+    public static final String SLOT_PREFERENCES = "slot_preferences";
 }

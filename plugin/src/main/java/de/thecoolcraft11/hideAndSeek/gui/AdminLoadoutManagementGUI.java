@@ -141,7 +141,8 @@ public class AdminLoadoutManagementGUI {
                                     Map.of("value", inFilter ? "YES" : "NO")),
                             plugin.tr(admin, "gui.admin.loadout.item.mode", Map.of("mode", mode.name())),
                             plugin.tr(admin, "gui.admin.loadout.item.status",
-                                    Map.of("status", allowed ? "ALLOWED" : "BLOCKED")),
+                                    Map.of("status", allowed ? "ALLOWED" : "BLOCKED", "color",
+                                            allowed ? "green" : "red")),
                             plugin.tr(admin, "gui.admin.loadout.item.click_toggle")
                     ));
 
@@ -183,7 +184,7 @@ public class AdminLoadoutManagementGUI {
                     List.of(
                             plugin.tr(admin, "gui.admin.perks.role", Map.of("role", role.name())),
                             plugin.tr(admin, "gui.admin.perks.status",
-                                    Map.of("status", disabled ? "DISABLED" : "ENABLED")),
+                                    Map.of("state", disabled ? "DISABLED" : "ENABLED")),
                             perk.getDescription(),
                             plugin.tr(admin, "gui.admin.perks.click_toggle")
                     ));

@@ -41,6 +41,22 @@ public class GUIItems {
 
     public static final String MAP_RANDOM = "random";
 
+    public static final String L_SLOT_PREFS = "slot_prefs";
+    public static final String L_PRESET_TITLE = "preset_title";
+    public static final String L_PRESET_INFO = "preset_info";
+    public static final String L_PRESET_EMPTY = "preset_empty";
+    public static final String L_PRESET_FALLBACK = "presets_fallback";
+    public static final String L_TAB_BASE = "tab_";
+    public static final String L_TAB_HIDER = L_TAB_BASE + "hider";
+    public static final String L_TAB_SEEKER = L_TAB_BASE + "seeker";
+    public static final String L_TAB_PRESETS = L_TAB_BASE + "presets";
+    public static final String L_RESTRICTED_ITEM_INFO = "restricted_item_info";
+    public static final String L_ADMIN_PRESET_EMPTY = "admin_preset_empty";
+    public static final String L_ADMIN_PRESET_DISABLED = "admin_preset_disabled";
+    public static final String L_ADMIN_PRESET_FALLBACK = "admin_preset_fallback";
+    public static final String L_INFO = "info";
+    public static final String L_NO_PREVIEW = "no_preview";
+
     public static void registerAll(GuiItemRegistry registry) {
         registry.registerDefault(GUINames.SKIN, SKIN_COIN, new ItemStack(Material.GOLD_NUGGET));
         registry.registerDefault(GUINames.SKIN, KEY_BACK, new ItemStack(Material.ARROW));
@@ -77,6 +93,22 @@ public class GUIItems {
 
         registry.registerDefault(GUINames.MAP, KEY_FALLBACK, new ItemStack(Material.GRASS_BLOCK));
         registry.registerDefault(GUINames.MAP, MAP_RANDOM, new ItemStack(Material.COMPASS));
+
+        registry.registerDefault(GUINames.LOADOUT, L_SLOT_PREFS, new ItemStack(Material.HOPPER));
+        registry.registerDefault(GUINames.LOADOUT, L_PRESET_TITLE, new ItemStack(Material.WRITABLE_BOOK));
+        registry.registerDefault(GUINames.LOADOUT, L_PRESET_EMPTY, new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.LOADOUT, L_PRESET_INFO, new ItemStack(Material.COMPASS));
+        registry.registerDefault(GUINames.LOADOUT, L_PRESET_FALLBACK, new ItemStack(Material.CHEST));
+        registry.registerDefault(GUINames.LOADOUT, L_TAB_HIDER, new ItemStack(Material.BLUE_CONCRETE));
+        registry.registerDefault(GUINames.LOADOUT, L_TAB_SEEKER, new ItemStack(Material.RED_CONCRETE));
+        registry.registerDefault(GUINames.LOADOUT, L_TAB_PRESETS, new ItemStack(Material.COMPASS));
+        registry.registerDefault(GUINames.LOADOUT, L_RESTRICTED_ITEM_INFO, new ItemStack(Material.BOOK));
+        registry.registerDefault(GUINames.LOADOUT, L_ADMIN_PRESET_EMPTY,
+                new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.LOADOUT, L_ADMIN_PRESET_DISABLED, new ItemStack(Material.BARRIER));
+        registry.registerDefault(GUINames.LOADOUT, L_ADMIN_PRESET_FALLBACK, new ItemStack(Material.CHEST));
+        registry.registerDefault(GUINames.LOADOUT, L_INFO, new ItemStack(Material.BOOK));
+        registry.registerDefault(GUINames.LOADOUT, L_NO_PREVIEW, new ItemStack(Material.BARRIER));
     }
 
 
