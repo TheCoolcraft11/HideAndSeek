@@ -462,7 +462,7 @@ public class LoadoutGUI {
 
 
     private ItemStack createInfoItem(Player player, int usedSlots, int maxSlots, int usedTokens, int maxTokens) {
-        ItemStack item = item(GUIItems.L_INFO, new ItemStack(Material.BOOK));
+        ItemStack item = item(GUIItems.KEY_INFO, new ItemStack(Material.BOOK));
         ItemMeta meta = item.getItemMeta();
         meta.displayName(plugin.tr(player, "gui.loadout.info.title").decoration(TextDecoration.ITALIC, false));
         meta.lore(Arrays.asList(

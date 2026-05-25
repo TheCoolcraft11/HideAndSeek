@@ -359,7 +359,7 @@ public class VoteGUI {
     }
 
     private ItemStack createGamemodeItem(Player player, GameModeEnum mode, boolean selected, long votes) {
-        ItemStack item = item("gamemode_" + mode.name().toLowerCase(Locale.ROOT), switch (mode) {
+        ItemStack item = item(GUIItems.VOTE_MODE_BASE + mode.name().toLowerCase(Locale.ROOT), switch (mode) {
             case NORMAL -> new ItemStack(Material.IRON_SWORD);
             case SMALL -> new ItemStack(Material.IRON_NUGGET);
             case BLOCK -> new ItemStack(Material.COBBLESTONE);

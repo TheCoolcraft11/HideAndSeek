@@ -19,21 +19,11 @@ public final class ItemSkinSelectionService {
 
     private static final Gson GSON = new Gson();
 
-    /*
-     * Plugin-local cache only.
-     * This data is NOT shared with other plugins.
-     */
     private static final Map<UUID, Map<String, String>> PLAYER_VARIANTS = new ConcurrentHashMap<>();
     private static final Map<UUID, Set<String>> PLAYER_UNLOCKS = new ConcurrentHashMap<>();
 
-    /*
-     * Static metadata cache.
-     */
     private static final Map<String, SkinMeta> SKIN_META = new ConcurrentHashMap<>();
 
-    /*
-     * Prevent concurrent load/save races per player.
-     */
     private static final Map<UUID, Object> PLAYER_LOCKS = new ConcurrentHashMap<>();
 
     private static PlayerDataStore dataStore;
@@ -49,11 +39,6 @@ public final class ItemSkinSelectionService {
         saveAll(plugin);
     }
 
-    /*
-     * =========================================================================
-     * Variant Metadata
-     * =========================================================================
-     */
 
     public static void registerVariantMetadata(String itemId, String variantId, ItemRarity rarity) {
         SKIN_META.put(
@@ -80,11 +65,6 @@ public final class ItemSkinSelectionService {
         };
     }
 
-    /*
-     * =========================================================================
-     * Coins
-     * =========================================================================
-     */
 
     public static CompletableFuture<Integer> getCoins(UUID playerId) {
         return dataStore.getCoins(playerId)
@@ -151,11 +131,6 @@ public final class ItemSkinSelectionService {
                 });
     }
 
-    /*
-     * =========================================================================
-     * Selection
-     * =========================================================================
-     */
 
     public static void setSelectedVariant(UUID playerId, String logicalItemId, String variantId) {
         if (variantId == null || variantId.isBlank()) {
@@ -202,11 +177,6 @@ public final class ItemSkinSelectionService {
         return selected != null && selected.equals(variantId);
     }
 
-    /*
-     * =========================================================================
-     * Unlocks
-     * =========================================================================
-     */
 
     public static boolean isUnlocked(UUID playerId, String logicalItemId, String variantId) {
         Set<String> unlocks = PLAYER_UNLOCKS.get(playerId);
@@ -261,11 +231,6 @@ public final class ItemSkinSelectionService {
                 });
     }
 
-    /*
-     * =========================================================================
-     * Variant Application
-     * =========================================================================
-     */
 
     public static void applySelectedVariants(Player player, HideAndSeek plugin) {
         Map<String, String> variants = PLAYER_VARIANTS.get(player.getUniqueId());
@@ -298,11 +263,6 @@ public final class ItemSkinSelectionService {
         }
     }
 
-    /*
-     * =========================================================================
-     * Persistence
-     * =========================================================================
-     */
 
     public static void loadPlayer(HideAndSeek plugin, UUID playerId) {
         ensureStore(plugin);
@@ -391,12 +351,6 @@ public final class ItemSkinSelectionService {
         }
     }
 
-    /*
-     * =========================================================================
-     * JSON
-     * =========================================================================
-     */
-
     private static String toSkinsJson(UUID playerId) {
         Map<String, String> selected =
                 PLAYER_VARIANTS.getOrDefault(playerId, Map.of());
@@ -482,11 +436,6 @@ public final class ItemSkinSelectionService {
         }
     }
 
-    /*
-     * =========================================================================
-     * Utility
-     * =========================================================================
-     */
 
     private static String metaKey(String logicalItemId, String variantId) {
         return normalizeLogicalItemId(logicalItemId) + "|" + variantId;
@@ -520,11 +469,6 @@ public final class ItemSkinSelectionService {
         return itemId;
     }
 
-    /*
-     * =========================================================================
-     * Internal Models
-     * =========================================================================
-     */
 
     private record SkinMeta(ItemRarity rarity) {
     }
