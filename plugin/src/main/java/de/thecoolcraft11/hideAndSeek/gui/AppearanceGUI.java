@@ -4,11 +4,11 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.block.BlockAppearanceConfig;
 import de.thecoolcraft11.hideAndSeek.block.BlockListParser;
 import de.thecoolcraft11.hideAndSeek.block.BlockStateFilter;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -96,7 +96,8 @@ public class AppearanceGUI {
 
 
         if (hasVariants && hasStates) {
-            ItemStack spacer = createSeparatorItem();
+            ItemStack spacer = item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem());
+
             for (int i = 0; i < 9; i++) {
                 allItems.add(new InventoryItem(spacer));
             }
@@ -153,7 +154,7 @@ public class AppearanceGUI {
             if (i > 0) {
                 int finalI = i;
                 InventoryItem prevBtn = new InventoryItem(
-                        createNavArrow(plugin.trText(player, "gui.appearance.footer.previous")));
+                        createNavArrow(plugin.tr(player, "gui.appearance.footer.previous"), true));
                 prevBtn.setClickHandler((p, item, event, slot) -> {
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.8f, 1.0f);
                     plugin.getInventoryFramework().openInventory(p, inventories.get(finalI - 1));
@@ -166,7 +167,7 @@ public class AppearanceGUI {
             if (i < inventories.size() - 1) {
                 int finalI1 = i;
                 InventoryItem nextBtn = new InventoryItem(
-                        createNavArrow(plugin.trText(player, "gui.appearance.footer.next")));
+                        createNavArrow(plugin.tr(player, "gui.appearance.footer.next"), false));
                 nextBtn.setClickHandler((p, item, event, slot) -> {
                     p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.8f, 1.0f);
                     plugin.getInventoryFramework().openInventory(p, inventories.get(finalI1 + 1));
@@ -358,7 +359,7 @@ public class AppearanceGUI {
     }
 
     private void addFooter(Player player, FrameworkInventory inv) {
-        ItemStack sep = createSeparatorItem();
+        ItemStack sep = item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem());
         for (int i = 45; i < 54; i++) inv.setItem(i, new InventoryItem(sep));
         inv.setItem(49, new InventoryItem(createConfirmItem(player)).onClick((p, t) -> p.closeInventory()));
     }
@@ -413,24 +414,26 @@ public class AppearanceGUI {
     }
 
     private ItemStack getDynamicStateIcon(String state, String val) {
-        return switch (state) {
-            case "facing", "rotation" -> new ItemStack(Material.COMPASS);
-            case "axis" -> new ItemStack(Material.STICK);
-            case "waterlogged" -> new ItemStack(Material.WATER_BUCKET);
-            case "lit", "powered" -> new ItemStack("true".equals(val) ? Material.REDSTONE_TORCH : Material.LEVER);
-            case "open" -> new ItemStack(Material.OAK_DOOR);
-            case "half", "type" -> new ItemStack(Material.SMOOTH_STONE_SLAB);
-            case "shape" -> new ItemStack(Material.OAK_STAIRS);
-            case "age", "level", "bites", "honey_level" -> new ItemStack(Material.EXPERIENCE_BOTTLE);
-            case "candles" -> new ItemStack(Material.CANDLE);
-            case "snowy" -> new ItemStack(Material.SNOWBALL);
-            case "hinge" -> new ItemStack(Material.TRIPWIRE_HOOK);
-            default -> new ItemStack(Material.REPEATER);
-        };
+        return item("state_" + state.toLowerCase() + "_" + val.toLowerCase(),
+                item("state_" + state.toLowerCase(), switch (state) {
+                    case "facing", "rotation" -> new ItemStack(Material.COMPASS);
+                    case "axis" -> new ItemStack(Material.STICK);
+                    case "waterlogged" -> new ItemStack(Material.WATER_BUCKET);
+                    case "lit", "powered" ->
+                            new ItemStack("true".equals(val) ? Material.REDSTONE_TORCH : Material.LEVER);
+                    case "open" -> new ItemStack(Material.OAK_DOOR);
+                    case "half", "type" -> new ItemStack(Material.SMOOTH_STONE_SLAB);
+                    case "shape" -> new ItemStack(Material.OAK_STAIRS);
+                    case "age", "level", "bites", "honey_level" -> new ItemStack(Material.EXPERIENCE_BOTTLE);
+                    case "candles" -> new ItemStack(Material.CANDLE);
+                    case "snowy" -> new ItemStack(Material.SNOWBALL);
+                    case "hinge" -> new ItemStack(Material.TRIPWIRE_HOOK);
+                    default -> item("state_default", new ItemStack(Material.REPEATER));
+                }));
     }
 
     private ItemStack createSectionHeaderItem(String text) {
-        ItemStack item = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+        ItemStack item = item(GUIItems.A_SECTION_HEADER, new ItemStack(Material.LIME_STAINED_GLASS_PANE));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(Component.text(text, NamedTextColor.GOLD, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
@@ -439,20 +442,9 @@ public class AppearanceGUI {
         return item;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    private ItemStack createSeparatorItem() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.displayName(Component.text(" "));
-            item.setItemMeta(meta);
-            item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
-        }
-        return item;
-    }
 
     private ItemStack createConfirmItem(Player player) {
-        ItemStack item = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+        ItemStack item = item(GUIItems.KEY_CONFIRM, new ItemStack(Material.GREEN_STAINED_GLASS_PANE));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(
@@ -462,11 +454,12 @@ public class AppearanceGUI {
         return item;
     }
 
-    private ItemStack createNavArrow(String name) {
-        ItemStack item = new ItemStack(Material.ARROW);
+    private ItemStack createNavArrow(Component name, boolean previous) {
+        ItemStack item = item(previous ? GUIItems.KEY_PREVIOUS : GUIItems.KEY_NEXT,
+                new ItemStack(previous ? Material.ARROW : Material.SPECTRAL_ARROW));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+            meta.displayName(name.decoration(TextDecoration.ITALIC, false));
             item.setItemMeta(meta);
         }
         return item;
@@ -474,5 +467,9 @@ public class AppearanceGUI {
 
     private String formatName(String name) {
         return Arrays.stream(name.toLowerCase().split("_")).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1)).collect(Collectors.joining(" "));
+    }
+
+    private ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.APPEARANCE, key, fallback);
     }
 }

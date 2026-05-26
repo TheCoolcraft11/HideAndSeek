@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
@@ -86,7 +88,8 @@ public class AdminLoadoutManagementGUI {
                 clickable(createInfoItem(admin, role, mode, filterItems.size()), (p, i, e, s) -> e.setCancelled(true)));
 
         inv.setItem(1, clickable(
-                createUtility(Material.LECTERN, plugin.tr(admin, "gui.admin.loadout.mode", Map.of("mode", mode.name())),
+                createUtility(GUIItems.ADMIN_MODE_TOGGLE,
+                        plugin.tr(admin, "gui.admin.loadout.mode", Map.of("mode", mode.name())),
                         List.of(plugin.tr(admin, "gui.admin.loadout.mode.hint"))), (p, i, e, s) -> {
             LoadoutFilterMode next = mode == LoadoutFilterMode.BLACKLIST ? LoadoutFilterMode.WHITELIST : LoadoutFilterMode.BLACKLIST;
             loadoutManager.setFilterMode(role, next);
@@ -100,7 +103,8 @@ public class AdminLoadoutManagementGUI {
         }));
 
         inv.setItem(2,
-                clickable(createUtility(Material.BARRIER, plugin.tr(admin, "gui.admin.loadout.clear_entries.title"),
+                clickable(createUtility(GUIItems.ADMIN_CLEAR_ENTRIES,
+                        plugin.tr(admin, "gui.admin.loadout.clear_entries.title"),
                         List.of(plugin.tr(admin, "gui.admin.loadout.clear_entries.hint"))), (p, i, e, s) -> {
             loadoutManager.clearRoleFilter(role);
             int affected = loadoutManager.enforcePoliciesAndNotify();
@@ -110,7 +114,7 @@ public class AdminLoadoutManagementGUI {
             e.setCancelled(true);
         }));
 
-        inv.setItem(3, clickable(createUtility(Material.TNT,
+        inv.setItem(3, clickable(createUtility(GUIItems.ADMIN_RESET_ALL,
                 plugin.tr(admin, "gui.admin.loadout.reset_all.title", Map.of("role", role.name())),
                 List.of(plugin.tr(admin, "gui.admin.loadout.reset_all.hint"))), (p, i, e, s) -> {
             int changed = loadoutManager.resetAllLoadouts(role);
@@ -158,10 +162,11 @@ public class AdminLoadoutManagementGUI {
     }
 
     private void fillPerkTab(Player admin, FrameworkInventory inv) {
-        inv.setItem(0, clickable(createUtility(Material.BEACON, plugin.tr(admin, "gui.admin.perks.title"),
+        inv.setItem(0, clickable(createUtility(GUIItems.ADMIN_PERKS_TITLE, plugin.tr(admin, "gui.admin.perks.title"),
                 List.of(plugin.tr(admin, "gui.admin.perks.hint"))), (p, i, e, s) -> e.setCancelled(true)));
 
-        inv.setItem(1, clickable(createUtility(Material.CLOCK, plugin.tr(admin, "gui.admin.perks.refresh.title"),
+        inv.setItem(1,
+                clickable(createUtility(GUIItems.ADMIN_PERKS_REFRESH, plugin.tr(admin, "gui.admin.perks.refresh.title"),
                 List.of(plugin.tr(admin, "gui.admin.perks.refresh.hint"))), (p, i, e, s) -> {
             loadoutManager.enforcePoliciesAndNotify();
             p.sendMessage(plugin.tr(p, "gui.admin.perks.refresh.done"));
@@ -204,13 +209,14 @@ public class AdminLoadoutManagementGUI {
         UUID selectedTargetId = selectedTargetByAdmin.get(admin.getUniqueId());
         Player selectedTarget = selectedTargetId == null ? null : Bukkit.getPlayer(selectedTargetId);
 
-        inv.setItem(0, clickable(createUtility(Material.PLAYER_HEAD, plugin.tr(admin, "gui.admin.players.title"),
+        inv.setItem(0,
+                clickable(createUtility(GUIItems.ADMIN_PLAYERS_TITLE, plugin.tr(admin, "gui.admin.players.title"),
                 List.of(plugin.tr(admin, "gui.admin.players.left_click"),
                         plugin.tr(admin, "gui.admin.players.right_click"))), (p, i, e, s) -> e.setCancelled(true)));
 
         inv.setItem(36, clickable(
                 createActionButton(admin, plugin.tr(admin, "gui.admin.players.toggle_hider"), selectedTarget,
-                        Material.IRON_DOOR, LoadoutRole.HIDER), (p, i, e, s) -> {
+                        GUIItems.ADMIN_PLAYERS_TOGGLE_HIDER, LoadoutRole.HIDER), (p, i, e, s) -> {
             if (selectedTarget == null) {
                 e.setCancelled(true);
                 return;
@@ -226,7 +232,7 @@ public class AdminLoadoutManagementGUI {
 
         inv.setItem(37, clickable(
                 createActionButton(admin, plugin.tr(admin, "gui.admin.players.toggle_seeker"), selectedTarget,
-                        Material.IRON_DOOR, LoadoutRole.SEEKER), (p, i, e, s) -> {
+                        GUIItems.ADMIN_PLAYERS_TOGGLE_SEEKER, LoadoutRole.SEEKER), (p, i, e, s) -> {
             if (selectedTarget == null) {
                 e.setCancelled(true);
                 return;
@@ -242,7 +248,7 @@ public class AdminLoadoutManagementGUI {
 
         inv.setItem(38, clickable(
                 createActionButton(admin, plugin.tr(admin, "gui.admin.players.reset_selected_hider"), selectedTarget,
-                        Material.REDSTONE, null), (p, i, e, s) -> {
+                        GUIItems.ADMIN_PLAYERS_RESET_HIDER, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 loadoutManager.resetPlayerLoadout(selectedTarget.getUniqueId(), LoadoutRole.HIDER);
                 loadoutManager.refreshRoleInventory(selectedTarget);
@@ -255,7 +261,7 @@ public class AdminLoadoutManagementGUI {
 
         inv.setItem(39, clickable(
                 createActionButton(admin, plugin.tr(admin, "gui.admin.players.reset_selected_seeker"), selectedTarget,
-                        Material.REDSTONE, null), (p, i, e, s) -> {
+                        GUIItems.ADMIN_PLAYERS_RESET_SEEKER, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 loadoutManager.resetPlayerLoadout(selectedTarget.getUniqueId(), LoadoutRole.SEEKER);
                 loadoutManager.refreshRoleInventory(selectedTarget);
@@ -268,7 +274,7 @@ public class AdminLoadoutManagementGUI {
 
         inv.setItem(40, clickable(
                 createActionButton(admin, plugin.tr(admin, "gui.admin.players.reset_selected_all"), selectedTarget,
-                        Material.TNT, null), (p, i, e, s) -> {
+                        GUIItems.ADMIN_PLAYERS_RESET_ALL, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 loadoutManager.resetPlayerLoadout(selectedTarget.getUniqueId());
                 loadoutManager.refreshRoleInventory(selectedTarget);
@@ -280,7 +286,7 @@ public class AdminLoadoutManagementGUI {
 
         inv.setItem(41, clickable(
                 createActionButton(admin, plugin.tr(admin, "gui.admin.players.edit_selected_hider"), selectedTarget,
-                        Material.CHEST, null), (p, i, e, s) -> {
+                        GUIItems.ADMIN_PLAYERS_EDIT_HIDER, null), (p, i, e, s) -> {
             plugin.getLogger().info("Test1");
             if (selectedTarget != null) {
                 plugin.getLogger().info("Test2");
@@ -294,7 +300,7 @@ public class AdminLoadoutManagementGUI {
 
         inv.setItem(42, clickable(
                 createActionButton(admin, plugin.tr(admin, "gui.admin.players.edit_selected_seeker"), selectedTarget,
-                        Material.CHEST, null), (p, i, e, s) -> {
+                        GUIItems.ADMIN_PLAYERS_EDIT_SEEKER, null), (p, i, e, s) -> {
             if (selectedTarget != null) {
                 openPlayerEditor(p, selectedTarget, LoadoutRole.SEEKER);
             } else {
@@ -305,7 +311,8 @@ public class AdminLoadoutManagementGUI {
         }));
 
         inv.setItem(43,
-                clickable(createUtility(Material.LAVA_BUCKET, plugin.tr(admin, "gui.admin.players.reset_everyone_all"),
+                clickable(createUtility(GUIItems.ADMIN_PLAYERS_RESET_EVERYONE,
+                        plugin.tr(admin, "gui.admin.players.reset_everyone_all"),
                         List.of(plugin.tr(admin, "gui.admin.players.bulk_reset_hint"))), (p, i, e, s) -> {
             int h = loadoutManager.resetAllLoadouts(LoadoutRole.HIDER);
             int sk = loadoutManager.resetAllLoadouts(LoadoutRole.SEEKER);
@@ -356,20 +363,21 @@ public class AdminLoadoutManagementGUI {
         PlayerLoadout loadout = loadoutManager.getLoadout(target.getUniqueId());
         Set<LoadoutItemType> selectedItems = role == LoadoutRole.HIDER ? loadout.getHiderItems() : loadout.getSeekerItems();
 
-        inv.setItem(0, clickable(createUtility(Material.ARROW, plugin.tr(admin, "gui.admin.editor.back"),
+        inv.setItem(0, clickable(createUtility(GUIItems.ADMIN_EDITOR_BACK, plugin.tr(admin, "gui.admin.editor.back"),
                 List.of(plugin.tr(admin, "gui.admin.editor.back_hint"))), (p, i, e, s) -> {
             openTab(p, Tab.PLAYERS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(1, clickable(createUtility(Material.COMPASS, plugin.tr(admin, "gui.admin.editor.switch_role"),
+        inv.setItem(1, clickable(
+                createUtility(GUIItems.ADMIN_EDITOR_SWITCH_ROLE, plugin.tr(admin, "gui.admin.editor.switch_role"),
                 List.of(plugin.tr(admin, "gui.admin.editor.current", Map.of("role", role.name())))), (p, i, e, s) -> {
             openPlayerEditor(p, target, role == LoadoutRole.HIDER ? LoadoutRole.SEEKER : LoadoutRole.HIDER);
             e.setCancelled(true);
         }));
 
         inv.setItem(4, clickable(
-                createUtility(Material.BOOK,
+                createUtility(GUIItems.ADMIN_EDITOR_SUMMARY,
                         plugin.tr(admin, "gui.admin.editor.summary", Map.of("player", target.getName())),
                         List.of(
                                 plugin.tr(admin, "gui.admin.editor.role", Map.of("role", role.name())),
@@ -444,11 +452,13 @@ public class AdminLoadoutManagementGUI {
         boolean restricted = loadoutManager.isRoleRestrictedToAdminPresets(role);
         int forcedSlot = loadoutManager.getForcedRolePresetSlot(role);
 
-        inv.setItem(0, clickable(createUtility(Material.BOOKSHELF, plugin.tr(admin, "gui.admin.presets.title"),
+        inv.setItem(0,
+                clickable(createUtility(GUIItems.ADMIN_PRESETS_TITLE, plugin.tr(admin, "gui.admin.presets.title"),
                 List.of(plugin.tr(admin, "gui.admin.presets.hint"))), (p, i, e, s) -> e.setCancelled(true)));
 
         inv.setItem(1, clickable(
-                createUtility(Material.COMPASS, plugin.tr(admin, "gui.admin.presets.role", Map.of("role", role.name())),
+                createUtility(GUIItems.ADMIN_PRESETS_ROLE,
+                        plugin.tr(admin, "gui.admin.presets.role", Map.of("role", role.name())),
                         List.of(plugin.tr(admin, "gui.admin.presets.click_to_switch"))), (p, i, e, s) -> {
             LoadoutRole next = role == LoadoutRole.HIDER ? LoadoutRole.SEEKER : LoadoutRole.HIDER;
             presetRoleByAdmin.put(p.getUniqueId(), next);
@@ -456,7 +466,8 @@ public class AdminLoadoutManagementGUI {
             e.setCancelled(true);
         }));
 
-        inv.setItem(2, clickable(createUtility(restricted ? Material.REDSTONE_BLOCK : Material.LIME_CONCRETE,
+        inv.setItem(2, clickable(
+                createUtility(restricted ? GUIItems.ADMIN_PRESETS_RESTRICT_ON : GUIItems.ADMIN_PRESETS_RESTRICT_OFF,
                 plugin.tr(admin, "gui.admin.presets.restrict_players", Map.of("state", restricted ? "ON" : "OFF")),
                 List.of(plugin.tr(admin, "gui.admin.presets.restrict_players.hint"))), (p, i, e, s) -> {
             loadoutManager.setRoleRestrictedToAdminPresets(role, !restricted);
@@ -468,7 +479,8 @@ public class AdminLoadoutManagementGUI {
             e.setCancelled(true);
         }));
 
-        inv.setItem(3, clickable(createUtility(forcedSlot > 0 ? Material.RED_BED : Material.GRAY_BED,
+        inv.setItem(3, clickable(
+                createUtility(forcedSlot > 0 ? GUIItems.ADMIN_PRESETS_FORCED_ON : GUIItems.ADMIN_PRESETS_FORCED_OFF,
                 plugin.tr(admin, "gui.admin.presets.forced_display",
                         Map.of("slot", forcedSlot > 0 ? String.valueOf(forcedSlot) : "NONE")),
                 List.of(plugin.tr(admin, "gui.admin.presets.forced.hint1"),
@@ -515,8 +527,9 @@ public class AdminLoadoutManagementGUI {
 
             LoadoutItemType preview = preset.getItems().stream().findFirst().orElse(null);
             ItemStack stack = preview == null
-                    ? createUtility(Material.CHEST,
-                    plugin.tr(admin, "gui.admin.presets.slot_title", Map.of("slot", String.valueOf(slot))), lore)
+                    ? createUtility(GUIItems.ADMIN_PRESET_ITEM_FALLBACK,
+                    plugin.tr(admin, "gui.admin.presets.slot_title", Map.of("slot", String.valueOf(slot))),
+                    new ArrayList<>())
                     : getPreviewItemStack(preview);
             ItemMeta meta = stack.getItemMeta();
             if (meta != null) {
@@ -588,20 +601,21 @@ public class AdminLoadoutManagementGUI {
 
         AdminRolePreset preset = loadoutManager.getAdminPreset(role, presetSlot);
 
-        inv.setItem(0, clickable(createUtility(Material.ARROW, plugin.tr(admin, "gui.admin.editor.back"),
+        inv.setItem(0, clickable(createUtility(GUIItems.ADMIN_EDITOR_BACK, plugin.tr(admin, "gui.admin.editor.back"),
                 List.of(plugin.tr(admin, "gui.admin.editor.back_hint"))), (p, i, e, s) -> {
             openTab(p, Tab.PRESETS);
             e.setCancelled(true);
         }));
 
-        inv.setItem(1, clickable(createUtility(Material.COMPASS, plugin.tr(admin, "gui.admin.editor.switch_role"),
+        inv.setItem(1, clickable(
+                createUtility(GUIItems.ADMIN_EDITOR_SWITCH_ROLE, plugin.tr(admin, "gui.admin.editor.switch_role"),
                 List.of(plugin.tr(admin, "gui.admin.editor.current", Map.of("role", role.name())))), (p, i, e, s) -> {
             openPresetEditor(p, role == LoadoutRole.HIDER ? LoadoutRole.SEEKER : LoadoutRole.HIDER, presetSlot);
             e.setCancelled(true);
         }));
 
         inv.setItem(4, clickable(
-                createUtility(Material.BOOK,
+                createUtility(GUIItems.ADMIN_EDITOR_SUMMARY,
                         plugin.tr(admin, "gui.admin.editor.summary", Map.of("slot", String.valueOf(presetSlot))),
                         List.of(
                                 plugin.tr(admin, "gui.admin.editor.items",
@@ -660,7 +674,7 @@ public class AdminLoadoutManagementGUI {
         }
 
         while (shown < 5) {
-            ItemStack filler = createUtility(Material.GRAY_STAINED_GLASS_PANE,
+            ItemStack filler = createUtility(GUIItems.ADMIN_PRESETS_EMPTY_PREVIEW,
                     plugin.tr(admin, "gui.admin.presets.empty_preview"),
                     List.of(plugin.tr(admin, "gui.admin.presets.no_item")));
             inv.setItem(slot++, clickable(filler, (p, i, e, s) -> e.setCancelled(true)));
@@ -669,19 +683,20 @@ public class AdminLoadoutManagementGUI {
     }
 
     private void setTabButtons(Player admin, FrameworkInventory inv, Tab activeTab) {
-        inv.setItem(45, tabButton(admin, activeTab, Tab.HIDER, Material.BLUE_CONCRETE,
+        inv.setItem(45, tabButton(admin, activeTab, Tab.HIDER, GUIItems.ADMIN_TAB_HIDER,
                 plugin.tr(admin, "gui.admin.tabs.hider")));
-        inv.setItem(46, tabButton(admin, activeTab, Tab.SEEKER, Material.RED_CONCRETE,
+        inv.setItem(46, tabButton(admin, activeTab, Tab.SEEKER, GUIItems.ADMIN_TAB_SEEKER,
                 plugin.tr(admin, "gui.admin.tabs.seeker")));
-        inv.setItem(47, tabButton(admin, activeTab, Tab.PERKS, Material.AMETHYST_SHARD,
+        inv.setItem(47, tabButton(admin, activeTab, Tab.PERKS, GUIItems.ADMIN_TAB_PERKS,
                 plugin.tr(admin, "gui.admin.tabs.perks")));
-        inv.setItem(48, tabButton(admin, activeTab, Tab.PLAYERS, Material.PLAYER_HEAD,
+        inv.setItem(48, tabButton(admin, activeTab, Tab.PLAYERS, GUIItems.ADMIN_TAB_PLAYERS,
                 plugin.tr(admin, "gui.admin.tabs.players")));
-        inv.setItem(49, tabButton(admin, activeTab, Tab.PRESETS, Material.BOOKSHELF,
+        inv.setItem(49, tabButton(admin, activeTab, Tab.PRESETS, GUIItems.ADMIN_TAB_PRESETS,
                 plugin.tr(admin, "gui.admin.tabs.presets")));
 
         boolean globalLocked = loadoutManager.isGlobalLoadoutLocked();
-        inv.setItem(50, clickable(createUtility(globalLocked ? Material.BARRIER : Material.LIME_CONCRETE,
+        inv.setItem(50, clickable(createUtility(
+                globalLocked ? GUIItems.ADMIN_GLOBAL_LOCK_ON : GUIItems.ADMIN_GLOBAL_LOCK_OFF,
                 plugin.tr(admin, "gui.admin.global_lock.title", Map.of("state", globalLocked ? "ON" : "OFF")),
                 List.of(plugin.tr(admin, "gui.admin.global_lock.hint"))), (p, i, e, s) -> {
             loadoutManager.setGlobalLoadoutLocked(!globalLocked);
@@ -692,7 +707,8 @@ public class AdminLoadoutManagementGUI {
             e.setCancelled(true);
         }));
 
-        inv.setItem(52, clickable(createUtility(Material.CLOCK, plugin.tr(admin, "gui.admin.apply_changes.title"),
+        inv.setItem(52, clickable(createUtility(GUIItems.ADMIN_APPLY_CHANGES,
+                plugin.tr(admin, "gui.admin.apply_changes.title"),
                 List.of(plugin.tr(admin, "gui.admin.apply_changes.hint"))), (p, i, e, s) -> {
             int affected = loadoutManager.enforcePoliciesAndNotify();
             p.sendMessage(plugin.tr(p, "gui.admin.apply_changes.done", Map.of("count", String.valueOf(affected))));
@@ -700,16 +716,17 @@ public class AdminLoadoutManagementGUI {
             e.setCancelled(true);
         }));
 
-        inv.setItem(53, clickable(createUtility(Material.BARRIER, plugin.tr(admin, "gui.admin.close"), List.of()),
+        inv.setItem(53, clickable(createUtility(GUIItems.ADMIN_CLOSE,
+                        plugin.tr(admin, "gui.admin.close"), List.of()),
                 (p, i, e, s) -> {
             p.closeInventory();
             e.setCancelled(true);
         }));
     }
 
-    private InventoryItem tabButton(Player admin, Tab activeTab, Tab tab, Material material, Component name) {
+    private InventoryItem tabButton(Player admin, Tab activeTab, Tab tab, String key, Component name) {
         boolean active = activeTab == tab;
-        ItemStack stack = createUtility(material, name,
+        ItemStack stack = createUtility(key, name,
                 List.of(plugin.tr(admin, active ? "gui.admin.tabs.current" : "gui.admin.tabs.click_to_switch")));
 
         if (active) {
@@ -727,7 +744,7 @@ public class AdminLoadoutManagementGUI {
     }
 
     private ItemStack createInfoItem(Player viewer, LoadoutRole role, LoadoutFilterMode mode, int entries) {
-        return createUtility(Material.BOOK,
+        return createUtility(GUIItems.ADMIN_INFO,
                 plugin.tr(viewer, "gui.admin.loadout.info.title", Map.of("role", role.name())),
                 List.of(
                         plugin.tr(viewer, "gui.admin.loadout.info.mode", Map.of("mode", mode.name())),
@@ -763,11 +780,11 @@ public class AdminLoadoutManagementGUI {
         return item;
     }
 
-    private ItemStack createActionButton(Player viewer, Component title, Player target, Material material, LoadoutRole role) {
+    private ItemStack createActionButton(Player viewer, Component title, Player target, String key, LoadoutRole role) {
         List<Component> lore = new ArrayList<>();
         lore.add(target == null ? plugin.tr(viewer, "gui.admin.players.select_first") : plugin.tr(viewer,
                 "gui.admin.players.target", Map.of("player", target.getName())));
-        ItemStack item = createUtility(material, title, lore);
+        ItemStack item = createUtility(key, title, lore);
         if (target != null && role != null) {
             boolean lockActive = loadoutManager.isRoleLocked(target.getUniqueId(), role);
             lore.add(plugin.tr(viewer, "gui.admin.players.status",
@@ -851,14 +868,18 @@ public class AdminLoadoutManagementGUI {
         return type.getItemId();
     }
 
-    private ItemStack createUtility(Material material, Component title, List<Component> lore) {
-        ItemStack item = new ItemStack(material);
+    private ItemStack createUtility(String key, Component title, List<Component> lore) {
+        ItemStack item = item(key, new ItemStack(Material.DIRT));
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
         meta.displayName(title.decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false));
         meta.lore(lore.stream().map(line -> line.decoration(TextDecoration.ITALIC, false)).toList());
         item.setItemMeta(meta);
         return item;
+    }
+
+    private ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.ADMIN_LOADOUT, key, fallback);
     }
 
     private InventoryItem clickable(ItemStack item, InventoryClickHandler clickHandler) {

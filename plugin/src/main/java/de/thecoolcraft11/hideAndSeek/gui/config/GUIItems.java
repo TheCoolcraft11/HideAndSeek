@@ -23,6 +23,7 @@ public class GUIItems {
     public static final String KEY_READY = "ready";
     public static final String KEY_NOT_READY = "not_ready";
     public static final String KEY_INFO = "info";
+    public static final String KEY_CONFIRM = "confirm";
 
     public static final String SKIN_COIN = "coin";
 
@@ -75,6 +76,71 @@ public class GUIItems {
     public static final String SP_ITEM_HEALING = SP_ITEM_TYPE_BASE + ItemType.HEALING.name().toLowerCase();
     public static final String SP_ITEM_SUPPORT = SP_ITEM_TYPE_BASE + ItemType.SUPPORT.name().toLowerCase();
     public static final String SP_ITEM_INFORMATION = SP_ITEM_TYPE_BASE + ItemType.INFORMATION.name().toLowerCase();
+
+    public static final String A_STATE_BASE = "state_";
+    public static final String A_STATE_FACING = A_STATE_BASE + "facing";
+    public static final String A_STATE_ROTATION = A_STATE_BASE + "rotation";
+    public static final String A_STATE_AXIS = A_STATE_BASE + "axis";
+    public static final String A_STATE_WATERLOGGED = A_STATE_BASE + "waterlogged";
+    public static final String A_STATE_LIT = A_STATE_BASE + "lit";
+    public static final String A_STATE_POWERED = A_STATE_BASE + "powered";
+    public static final String A_STATE_OPEN = A_STATE_BASE + "open";
+    public static final String A_STATE_HALF = A_STATE_BASE + "half";
+    public static final String A_STATE_TYPE = A_STATE_BASE + "type";
+    public static final String A_STATE_SHAPE = A_STATE_BASE + "shape";
+    public static final String A_STATE_AGE = A_STATE_BASE + "age";
+    public static final String A_STATE_LEVEL = A_STATE_BASE + "level";
+    public static final String A_STATE_BITES = A_STATE_BASE + "bites";
+    public static final String A_STATE_HONEY_LEVEL = A_STATE_BASE + "honey_level";
+    public static final String A_STATE_CANDLES = A_STATE_BASE + "candles";
+    public static final String A_STATE_SNOWY = A_STATE_BASE + "snowy";
+    public static final String A_STATE_HINGE = A_STATE_BASE + "hinge";
+    public static final String A_STATE_DEFAULT = A_STATE_BASE + "default";
+    public static final String A_SECTION_HEADER = "section_header";
+
+    public static final String ADMIN_MODE_TOGGLE = "admin_mode_toggle";
+    public static final String ADMIN_CLEAR_ENTRIES = "admin_clear_entries";
+    public static final String ADMIN_RESET_ALL = "admin_reset_all";
+    public static final String ADMIN_GLOBAL_LOCK_ON = "admin_global_lock_on";
+    public static final String ADMIN_GLOBAL_LOCK_OFF = "admin_global_lock_off";
+    public static final String ADMIN_APPLY_CHANGES = "admin_apply_changes";
+    public static final String ADMIN_CLOSE = "admin_close";
+    public static final String ADMIN_TAB_HIDER = "admin_tab_hider";
+    public static final String ADMIN_TAB_SEEKER = "admin_tab_seeker";
+    public static final String ADMIN_TAB_PERKS = "admin_tab_perks";
+    public static final String ADMIN_TAB_PLAYERS = "admin_tab_players";
+    public static final String ADMIN_TAB_PRESETS = "admin_tab_presets";
+    public static final String ADMIN_PERKS_TITLE = "admin_perks_title";
+    public static final String ADMIN_PERKS_REFRESH = "admin_perks_refresh";
+    public static final String ADMIN_PLAYERS_TITLE = "admin_players_title";
+    public static final String ADMIN_PLAYERS_TOGGLE_HIDER = "admin_players_toggle_hider";
+    public static final String ADMIN_PLAYERS_TOGGLE_SEEKER = "admin_players_toggle_seeker";
+    public static final String ADMIN_PLAYERS_RESET_HIDER = "admin_players_reset_hider";
+    public static final String ADMIN_PLAYERS_RESET_SEEKER = "admin_players_reset_seeker";
+    public static final String ADMIN_PLAYERS_RESET_ALL = "admin_players_reset_all";
+    public static final String ADMIN_PLAYERS_EDIT_HIDER = "admin_players_edit_hider";
+    public static final String ADMIN_PLAYERS_EDIT_SEEKER = "admin_players_edit_seeker";
+    public static final String ADMIN_PLAYERS_RESET_EVERYONE = "admin_players_reset_everyone";
+    public static final String ADMIN_EDITOR_BACK = "admin_editor_back";
+    public static final String ADMIN_EDITOR_SWITCH_ROLE = "admin_editor_switch_role";
+    public static final String ADMIN_EDITOR_SUMMARY = "admin_editor_summary";
+    public static final String ADMIN_PRESETS_TITLE = "admin_presets_title";
+    public static final String ADMIN_PRESETS_ROLE = "admin_presets_role";
+    public static final String ADMIN_PRESETS_RESTRICT_ON = "admin_presets_restrict_on";
+    public static final String ADMIN_PRESETS_RESTRICT_OFF = "admin_presets_restrict_off";
+    public static final String ADMIN_PRESETS_FORCED_ON = "admin_presets_forced_on";
+    public static final String ADMIN_PRESETS_FORCED_OFF = "admin_presets_forced_off";
+    public static final String ADMIN_PRESETS_EMPTY_PREVIEW = "admin_presets_empty_preview";
+    public static final String ADMIN_INFO = "admin_info";
+    public static final String ADMIN_PRESET_ITEM_FALLBACK = "admin_preset_item_fallback";
+
+    public static final String STATS_CLOSE = "stats_close";
+    public static final String STATS_BORDER = "stats_border";
+    public static final String STATS_TAB_OVERVIEW = "stats_tab_overview";
+    public static final String STATS_TAB_COMBAT = "stats_tab_combat";
+    public static final String STATS_TAB_ITEMS = "stats_tab_items";
+    public static final String STATS_TAB_MAPS = "stats_tab_maps";
+    public static final String STATS_TAB_PERKS = "stats_tab_perks";
 
     public static void registerAll(GuiItemRegistry registry) {
         registry.registerDefault(GUINames.SKIN, SKIN_COIN, new ItemStack(Material.GOLD_NUGGET));
@@ -148,6 +214,82 @@ public class GUIItems {
         registry.registerDefault(GUINames.SLOT_PREFERENCES, SP_ITEM_INFORMATION,
                 new ItemStack(Material.YELLOW_CONCRETE));
         registry.registerDefault(GUINames.SLOT_PREFERENCES, SP_ITEM_SUPPORT, new ItemStack(Material.ORANGE_CONCRETE));
+
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_FACING, new ItemStack(Material.COMPASS));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_ROTATION, new ItemStack(Material.COMPASS));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_AXIS, new ItemStack(Material.STICK));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_WATERLOGGED, new ItemStack(Material.WATER_BUCKET));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_LIT, new ItemStack(Material.REDSTONE_TORCH));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_POWERED, new ItemStack(Material.REDSTONE_TORCH));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_OPEN, new ItemStack(Material.OAK_DOOR));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_HALF, new ItemStack(Material.SMOOTH_STONE_SLAB));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_TYPE, new ItemStack(Material.SMOOTH_STONE_SLAB));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_SHAPE, new ItemStack(Material.OAK_STAIRS));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_AGE, new ItemStack(Material.WHEAT_SEEDS));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_LEVEL, new ItemStack(Material.EXPERIENCE_BOTTLE));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_BITES, new ItemStack(Material.CAKE));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_HONEY_LEVEL, new ItemStack(Material.HONEY_BOTTLE));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_CANDLES, new ItemStack(Material.CANDLE));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_SNOWY, new ItemStack(Material.SNOWBALL));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_HINGE, new ItemStack(Material.TRIPWIRE_HOOK));
+        registry.registerDefault(GUINames.APPEARANCE, A_STATE_DEFAULT, new ItemStack(Material.REPEATER));
+        registry.registerDefault(GUINames.APPEARANCE, A_SECTION_HEADER,
+                new ItemStack(Material.LIME_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.APPEARANCE, KEY_SEPERATOR, createSeparatorItem());
+        registry.registerDefault(GUINames.APPEARANCE, KEY_SEPERATOR, createSeparatorItem());
+        registry.registerDefault(GUINames.APPEARANCE, KEY_CONFIRM, new ItemStack(Material.GREEN_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.APPEARANCE, KEY_PREVIOUS, new ItemStack(Material.ARROW));
+        registry.registerDefault(GUINames.APPEARANCE, KEY_NEXT, new ItemStack(Material.ARROW));
+
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_MODE_TOGGLE, new ItemStack(Material.LECTERN));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_CLEAR_ENTRIES, new ItemStack(Material.BARRIER));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_RESET_ALL, new ItemStack(Material.TNT));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_GLOBAL_LOCK_ON, new ItemStack(Material.BARRIER));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_GLOBAL_LOCK_OFF, new ItemStack(Material.LIME_CONCRETE));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_APPLY_CHANGES, new ItemStack(Material.CLOCK));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_CLOSE, new ItemStack(Material.BARRIER));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_HIDER, new ItemStack(Material.BLUE_CONCRETE));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_SEEKER, new ItemStack(Material.RED_CONCRETE));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_PERKS, new ItemStack(Material.AMETHYST_SHARD));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_PLAYERS, new ItemStack(Material.PLAYER_HEAD));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_PRESETS, new ItemStack(Material.BOOKSHELF));
+
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PERKS_TITLE, new ItemStack(Material.BEACON));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PERKS_REFRESH, new ItemStack(Material.CLOCK));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_TITLE, new ItemStack(Material.PLAYER_HEAD));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_TOGGLE_HIDER, new ItemStack(Material.IRON_DOOR));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_TOGGLE_SEEKER,
+                new ItemStack(Material.IRON_DOOR));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_RESET_HIDER, new ItemStack(Material.REDSTONE));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_RESET_SEEKER, new ItemStack(Material.REDSTONE));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_RESET_ALL, new ItemStack(Material.TNT));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_EDIT_HIDER, new ItemStack(Material.CHEST));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_EDIT_SEEKER, new ItemStack(Material.CHEST));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PLAYERS_RESET_EVERYONE,
+                new ItemStack(Material.LAVA_BUCKET));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_EDITOR_BACK, new ItemStack(Material.ARROW));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_EDITOR_SWITCH_ROLE, new ItemStack(Material.COMPASS));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_EDITOR_SUMMARY, new ItemStack(Material.BOOK));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESETS_TITLE, new ItemStack(Material.BOOKSHELF));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESETS_ROLE, new ItemStack(Material.COMPASS));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESETS_RESTRICT_ON,
+                new ItemStack(Material.REDSTONE_BLOCK));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESETS_RESTRICT_OFF,
+                new ItemStack(Material.LIME_CONCRETE));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESETS_FORCED_ON, new ItemStack(Material.RED_BED));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESETS_FORCED_OFF, new ItemStack(Material.GRAY_BED));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESETS_EMPTY_PREVIEW,
+                new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_INFO, new ItemStack(Material.BOOK));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_PRESET_ITEM_FALLBACK, new ItemStack(Material.CHEST));
+
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_CLOSE, new ItemStack(Material.BARRIER));
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_BORDER, createSeparatorItem());
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_OVERVIEW, new ItemStack(Material.BOOK));
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_COMBAT, new ItemStack(Material.IRON_SWORD));
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_ITEMS, new ItemStack(Material.BLAZE_POWDER));
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_MAPS, new ItemStack(Material.MAP));
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_PERKS, new ItemStack(Material.LIGHT));
     }
 
 
