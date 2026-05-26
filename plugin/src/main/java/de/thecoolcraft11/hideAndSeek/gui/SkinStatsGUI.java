@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.model.SkinData;
 import de.thecoolcraft11.hideAndSeek.util.skin.SkinManager;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
@@ -170,9 +172,10 @@ public class SkinStatsGUI {
             List<String> players
     ) {
 
-        Material icon = skin.icon() != null
+        ItemStack icon = skin.icon() != null
                 ? skin.icon()
-                : Material.PLAYER_HEAD;
+                : plugin.getGuiItemRegistry().getOrDefault(GUINames.SKIN_STATS, GUIItems.KEY_FALLBACK, new ItemStack(
+                Material.PLAYER_HEAD));
 
         ItemStack item = new ItemStack(icon);
 

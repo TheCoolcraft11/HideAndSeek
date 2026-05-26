@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
 import de.thecoolcraft11.hideAndSeek.items.effects.death.DeathMessageManager;
@@ -93,20 +95,11 @@ public class SkinGUI {
                 inventory.setItem(slot++, skinItem);
             }
 
-            InventoryItem backItem = new InventoryItem(createBackHint(player));
-            backItem.setClickHandler((p, item, event, s) -> {
-                p.closeInventory();
-                event.setCancelled(true);
-            });
-            backItem.setAllowTakeout(false);
-            backItem.setAllowInsert(false);
-            inventory.setItem(49, backItem);
-
             InventoryItem coinsItem = new InventoryItem(createCoinsHint(player, coins));
             coinsItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
             coinsItem.setAllowTakeout(false);
             coinsItem.setAllowInsert(false);
-            inventory.setItem(50, coinsItem);
+            inventory.setItem(49, coinsItem);
 
             plugin.getInventoryFramework().openInventory(player, inventory);
         });
@@ -295,7 +288,7 @@ public class SkinGUI {
     }
 
     private void addVariantUtilityButtons(Player player, FrameworkInventory inventory, String logicalItemId, int coins) {
-        InventoryItem backBtn = new InventoryItem(createUtility(Material.ARROW,
+        InventoryItem backBtn = new InventoryItem(createUtility(GUIItems.KEY_BACK,
                 plugin.tr(player, "gui.skin.buttons.back"),
                 List.of(plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false))));
         backBtn.setClickHandler((p, item, event, s) -> {
@@ -307,7 +300,7 @@ public class SkinGUI {
         backBtn.setAllowInsert(false);
         inventory.setItem(45, backBtn);
 
-        InventoryItem clearBtn = new InventoryItem(createUtility(Material.BARRIER,
+        InventoryItem clearBtn = new InventoryItem(createUtility(GUIItems.KEY_CLEAR,
                 plugin.tr(player, "gui.skin.buttons.clear_selection"),
                 List.of(plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC,
                         false))));
@@ -694,16 +687,9 @@ public class SkinGUI {
         return stack;
     }
 
-    private ItemStack createBackHint(Player player) {
-        return createUtility(Material.BOOK, plugin.tr(player, "gui.skin.buttons.skin_selection"),
-                List.of(
-                        plugin.tr(player, "gui.skin.item.return_to_list").decoration(TextDecoration.ITALIC, false),
-                        plugin.tr(player, "gui.skin.item.remove_saved_skin").decoration(TextDecoration.ITALIC, false)
-                ));
-    }
 
     private ItemStack createCoinsHint(Player player, int coins) {
-        return createUtility(Material.GOLD_NUGGET, plugin.tr(player, "gui.skin.buttons.coins", Map.of("coins", coins)),
+        return createUtility(GUIItems.SKIN_COIN, plugin.tr(player, "gui.skin.buttons.coins", Map.of("coins", coins)),
                 List.of(plugin.tr(player, "gui.skin.item.earned_coins_hint").decoration(TextDecoration.ITALIC, false)));
     }
 
@@ -718,8 +704,9 @@ public class SkinGUI {
         };
     }
 
-    private ItemStack createUtility(Material material, Component title, List<Component> lore) {
-        ItemStack item = new ItemStack(material);
+
+    private ItemStack createUtility(String itemName, Component title, List<Component> lore) {
+        ItemStack item = plugin.getGuiItemRegistry().get(GUINames.SKIN, itemName);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(title.decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false));

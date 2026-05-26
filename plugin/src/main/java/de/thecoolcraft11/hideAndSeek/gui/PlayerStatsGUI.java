@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.items.HiderItems;
 import de.thecoolcraft11.hideAndSeek.items.SeekerItems;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
@@ -75,7 +77,7 @@ public class PlayerStatsGUI {
         buildTabs(inv, viewer, target, page);
 
         InventoryItem closeBtn = new InventoryItem(
-                utility(Material.BARRIER, plugin.tr(viewer, "gui.stats.close"), List.of()));
+                utility(GUIItems.STATS_CLOSE, plugin.tr(viewer, "gui.stats.close"), List.of()));
         closeBtn.setClickHandler((p, item, event, slot) -> {
             p.closeInventory();
             event.setCancelled(true);
@@ -232,7 +234,7 @@ public class PlayerStatsGUI {
                            Player viewer,
                            PlayerStatsService.PlayerStatsRecord stats) {
         if (stats.items.isEmpty()) {
-            InventoryItem empty = new InventoryItem(utility(Material.GRAY_STAINED_GLASS_PANE,
+            InventoryItem empty = new InventoryItem(utility(GUIItems.STATS_BORDER,
                     plugin.tr(viewer, "gui.stats.items.no_data"),
                     List.of(plugin.tr(viewer, "gui.stats.items.no_tracked"))));
             empty.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
@@ -289,7 +291,7 @@ public class PlayerStatsGUI {
                           Player viewer,
                           PlayerStatsService.PlayerStatsRecord stats) {
         if (stats.mapsPlayed.isEmpty()) {
-            InventoryItem empty = new InventoryItem(utility(Material.GRAY_STAINED_GLASS_PANE,
+            InventoryItem empty = new InventoryItem(utility(GUIItems.STATS_BORDER,
                     plugin.tr(viewer, "gui.stats.maps.no_data"),
                     List.of(plugin.tr(viewer, "gui.stats.maps.no_tracked"))));
             empty.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
@@ -313,9 +315,9 @@ public class PlayerStatsGUI {
             long games = entry.getValue();
             double pct = totalGames == 0 ? 0.0 : (double) games / totalGames * 100.0;
 
-            Material icon = plugin.getMapManager() != null
-                    ? plugin.getMapManager().getMapIconMaterial(mapName, Material.GRASS_BLOCK)
-                    : Material.GRASS_BLOCK;
+            ItemStack icon = plugin.getMapManager() != null
+                    ? plugin.getMapManager().getMapIcon(mapName, new ItemStack(Material.GRASS_BLOCK))
+                    : new ItemStack(Material.GRASS_BLOCK);
             String prettyName = plugin.getMapManager() != null ? plugin.getMapManager().getMapData(
                     mapName).getDisplayName() : mapName;
 
@@ -361,23 +363,23 @@ public class PlayerStatsGUI {
 
     private void buildTabs(FrameworkInventory inv, Player viewer, Player target, StatsPage active) {
 
-        inv.setItem(45, tab(viewer, target, active, StatsPage.OVERVIEW, Material.BOOK));
-        inv.setItem(46, tab(viewer, target, active, StatsPage.COMBAT, Material.IRON_SWORD));
-        inv.setItem(47, tab(viewer, target, active, StatsPage.ITEMS, Material.BLAZE_POWDER));
-        inv.setItem(48, tab(viewer, target, active, StatsPage.MAPS, Material.MAP));
-        inv.setItem(49, tab(viewer, target, active, StatsPage.PERKS, Material.LIGHT));
+        inv.setItem(45, tab(viewer, target, active, StatsPage.OVERVIEW, GUIItems.STATS_TAB_OVERVIEW));
+        inv.setItem(46, tab(viewer, target, active, StatsPage.COMBAT, GUIItems.STATS_TAB_COMBAT));
+        inv.setItem(47, tab(viewer, target, active, StatsPage.ITEMS, GUIItems.STATS_TAB_ITEMS));
+        inv.setItem(48, tab(viewer, target, active, StatsPage.MAPS, GUIItems.STATS_TAB_MAPS));
+        inv.setItem(49, tab(viewer, target, active, StatsPage.PERKS, GUIItems.STATS_TAB_PERKS));
     }
 
 
     private InventoryItem tab(Player viewer, Player target, StatsPage active,
-                              StatsPage page, Material icon) {
+                              StatsPage page, String key) {
         boolean isActive = active == page;
         Component label = plugin.tr(viewer, page.tabKey());
         if (isActive) {
             label = label.append(plugin.tr(viewer, "gui.stats.tabs.selected_suffix"));
         }
 
-        ItemStack stack = utility(icon,
+        ItemStack stack = utility(key,
                 label,
                 List.of(plugin.tr(viewer, isActive ? "gui.stats.tabs.current" : "gui.stats.tabs.click_to_open")));
 
@@ -427,7 +429,7 @@ public class PlayerStatsGUI {
 
     @SuppressWarnings("UnstableApiUsage")
     private void fillBorder(FrameworkInventory inv) {
-        ItemStack pane = utility(Material.GRAY_STAINED_GLASS_PANE, Component.empty(), List.of());
+        ItemStack pane = item(GUIItems.STATS_BORDER, new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
         pane.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
         InventoryItem border = new InventoryItem(pane);
         border.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
@@ -460,9 +462,22 @@ public class PlayerStatsGUI {
         return new InventoryItem(item);
     }
 
+    private InventoryItem stat(ItemStack item, Component name, List<Component> lore) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.displayName(name.decoration(TextDecoration.ITALIC, false));
+            meta.lore(lore.stream()
+                    .map(c -> c.decoration(TextDecoration.ITALIC, false))
+                    .toList());
+            item.setItemMeta(meta);
+        }
 
-    private ItemStack utility(Material material, Component name, List<Component> lore) {
-        ItemStack item = new ItemStack(material);
+        return new InventoryItem(item);
+    }
+
+
+    private ItemStack utility(String key, Component name, List<Component> lore) {
+        ItemStack item = item(key, new ItemStack(Material.DIRT));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(name.decoration(TextDecoration.ITALIC, false));
@@ -472,6 +487,10 @@ public class PlayerStatsGUI {
             item.setItemMeta(meta);
         }
         return item;
+    }
+
+    private ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.PLAYER_STATS, key, fallback);
     }
 
     private String formatDuration(Player viewer, long seconds) {

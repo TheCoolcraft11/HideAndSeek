@@ -1,6 +1,10 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -37,9 +41,10 @@ public final class SpectatorTeleportGUI {
     private static final String PDC_KEY = "spec_gui_action";
     private static final String ACT_PREV = "prev";
     private static final String ACT_NEXT = "next";
-    private static final String ACT_SEP = "sep";
     private static final String ACT_IND = "indicator";
     private static final String ACT_TP = "tp:";
+
+    private static final HideAndSeek plugin = (HideAndSeek) HideAndSeek.getActiveInstance();
 
 
     private static final Map<UUID, Integer> pages = new HashMap<>();
@@ -192,7 +197,7 @@ public final class SpectatorTeleportGUI {
 
 
         for (int slot = ROW2_START; slot <= ROW2_END; slot++) {
-            spectator.getInventory().setItem(slot, buildSeparator(plugin));
+            spectator.getInventory().setItem(slot, item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem()));
         }
 
 
@@ -203,7 +208,8 @@ public final class SpectatorTeleportGUI {
                                 plugin.tr(spectator, "gui.spectator.previous_page"),
                                 ACT_PREV,
                                 plugin.tr(spectator, "gui.spectator.page_info",
-                                        Map.of("current", page, "total", maxPage + 1))));
+                                        Map.of("current", page, "total", maxPage + 1)),
+                                true));
             }
 
             spectator.getInventory().setItem(ROW2_INDICATOR,
@@ -215,7 +221,8 @@ public final class SpectatorTeleportGUI {
                                 plugin.tr(spectator, "gui.spectator.next_page"),
                                 ACT_NEXT,
                                 plugin.tr(spectator, "gui.spectator.page_info",
-                                        Map.of("current", page + 2, "total", maxPage + 1))));
+                                        Map.of("current", page + 2, "total", maxPage + 1)),
+                                false));
             }
         }
 
@@ -231,7 +238,7 @@ public final class SpectatorTeleportGUI {
 
 
     private static ItemStack buildHead(HideAndSeek plugin, Player spectator, Player target, boolean isHider) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+        ItemStack skull = item(GUIItems.ST_TARGET, new ItemStack(Material.PLAYER_HEAD));
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
 
         meta.setOwningPlayer(target);
@@ -273,18 +280,11 @@ public final class SpectatorTeleportGUI {
         return skull;
     }
 
-    private static ItemStack buildSeparator(HideAndSeek plugin) {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.empty());
-        tag(plugin, meta, ACT_SEP);
-        item.setItemMeta(meta);
-        return item;
-    }
 
     private static ItemStack buildNav(HideAndSeek plugin,
-                                      Component name, String action, Component hint) {
-        ItemStack item = new ItemStack(Material.ARROW);
+                                      Component name, String action, Component hint, boolean previous) {
+        ItemStack item = item(previous ? GUIItems.KEY_PREVIOUS : GUIItems.KEY_NEXT,
+                new ItemStack(Material.ARROW));
         ItemMeta meta = item.getItemMeta();
         meta.displayName(name.colorIfAbsent(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         meta.lore(List.of(
@@ -296,8 +296,9 @@ public final class SpectatorTeleportGUI {
         return item;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private static ItemStack buildIndicator(HideAndSeek plugin, Player spectator, int currentPage, int totalPages) {
-        ItemStack item = new ItemStack(Material.BOOK);
+        ItemStack item = item(GUIItems.ST_INDICATOR, new ItemStack(Material.BOOK));
         ItemMeta meta = item.getItemMeta();
         meta.displayName(
                 plugin.tr(spectator, "gui.spectator.page_info",
@@ -313,6 +314,8 @@ public final class SpectatorTeleportGUI {
         ));
         tag(plugin, meta, ACT_IND);
         item.setItemMeta(meta);
+        item.setData(DataComponentTypes.CUSTOM_MODEL_DATA,
+                CustomModelData.customModelData().addFloat(currentPage).addFloat(totalPages).build());
         return item;
     }
 
@@ -396,5 +399,9 @@ public final class SpectatorTeleportGUI {
             Bukkit.getScheduler().cancelTask(refreshTaskId);
             refreshTaskId = -1;
         }
+    }
+
+    private static ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.SPECTATOR_TELEPORT, key, fallback);
     }
 }

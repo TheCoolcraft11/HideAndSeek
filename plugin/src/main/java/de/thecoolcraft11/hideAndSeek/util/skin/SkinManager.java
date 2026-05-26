@@ -11,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.*;
@@ -56,12 +57,13 @@ public class SkinManager {
                 plugin.getLogger().warning("Skin '" + key + "' has no signature, skipping.");
                 continue;
             }
-
-            Material icon = Material.matchMaterial(iconName.toUpperCase(Locale.ROOT));
-            if (icon == null) {
+            ItemStack icon;
+            try {
+                icon = Bukkit.getItemFactory().createItemStack(iconName);
+            } catch (IllegalArgumentException e) {
                 plugin.getLogger().warning(
-                        "Skin '" + key + "' has invalid icon '" + iconName + "', defaulting to PLAYER_HEAD.");
-                icon = Material.PLAYER_HEAD;
+                        "Skin '" + key + "' has invalid icon '" + iconName + "', defaulting to PLAYER_HEAD. (" + e.getMessage() + ")");
+                icon = new ItemStack(Material.PLAYER_HEAD);
             }
 
             skinRegistry.put(key, new SkinData(key, name, icon, value, signature));

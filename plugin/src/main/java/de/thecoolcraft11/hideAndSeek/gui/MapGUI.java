@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
@@ -176,7 +178,7 @@ public class MapGUI {
 
 
     private ItemStack createMapMenuItem(boolean highlight, Player player) {
-        ItemStack item = new ItemStack(Material.COMPASS);
+        ItemStack item = item(GUIItems.MAP_RANDOM, new ItemStack(Material.COMPASS));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
 
@@ -199,7 +201,8 @@ public class MapGUI {
     private ItemStack createMapItemWithData(String mapName, MapData mapData, boolean isCurrentMap,
                                             boolean voteDisabled, boolean canManageMapVoting, Player player) {
 
-        ItemStack item = new ItemStack(plugin.getMapManager().getMapIconMaterial(mapName, Material.GRASS_BLOCK));
+        ItemStack item = new ItemStack(plugin.getMapManager().getMapIcon(mapName,
+                item(GUIItems.KEY_FALLBACK, new ItemStack(Material.GRASS_BLOCK))));
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
@@ -352,5 +355,9 @@ public class MapGUI {
         }
 
         return item;
+    }
+
+    private ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.READY, key, fallback);
     }
 }

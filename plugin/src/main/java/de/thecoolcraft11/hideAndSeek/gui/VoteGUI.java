@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
 import de.thecoolcraft11.hideAndSeek.vote.PreferredRole;
@@ -8,8 +10,6 @@ import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -138,7 +138,7 @@ public class VoteGUI {
         int gamemodeRows = getRows(GameModeEnum.values().length);
         int gamemodeEndSlot = gamemodeRows * 9;
         while (slot < gamemodeEndSlot) {
-            InventoryItem fillerItem = new InventoryItem(createSeparatorItem());
+            InventoryItem fillerItem = new InventoryItem(item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem()));
             fillerItem.setClickHandler((p, item, event, s) -> event.setCancelled(true));
             fillerItem.setAllowTakeout(false);
             fillerItem.setAllowInsert(false);
@@ -152,7 +152,7 @@ public class VoteGUI {
     private void fillSeparatorRow(FrameworkInventory inventory, int row) {
         int rowStart = row * 9;
         for (int i = 0; i < 9; i++) {
-            InventoryItem sepItem = new InventoryItem(createSeparatorItem());
+            InventoryItem sepItem = new InventoryItem(item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem()));
             sepItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             sepItem.setAllowTakeout(false);
             sepItem.setAllowInsert(false);
@@ -242,7 +242,7 @@ public class VoteGUI {
     private void fillReadinessRow(FrameworkInventory inventory, Player player, int row, VoteManager voteManager) {
         int rowStart = row * 9;
         for (int i = 0; i < 9; i++) {
-            InventoryItem sepItem = new InventoryItem(createSeparatorItem());
+            InventoryItem sepItem = new InventoryItem(item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem()));
             sepItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             sepItem.setAllowTakeout(false);
             sepItem.setAllowInsert(false);
@@ -287,7 +287,7 @@ public class VoteGUI {
     ) {
         int rowStart = row * 9;
         for (int i = 0; i < 9; i++) {
-            InventoryItem sepItem = new InventoryItem(createSeparatorItem());
+            InventoryItem sepItem = new InventoryItem(item(GUIItems.KEY_SEPERATOR, GUIItems.createSeparatorItem()));
             sepItem.setClickHandler((p, item, event, slot) -> event.setCancelled(true));
             sepItem.setAllowTakeout(false);
             sepItem.setAllowInsert(false);
@@ -359,13 +359,12 @@ public class VoteGUI {
     }
 
     private ItemStack createGamemodeItem(Player player, GameModeEnum mode, boolean selected, long votes) {
-        Material icon = switch (mode) {
-            case NORMAL -> Material.IRON_SWORD;
-            case SMALL -> Material.IRON_NUGGET;
-            case BLOCK -> Material.COBBLESTONE;
-            case SKIN -> Material.PLAYER_HEAD;
-        };
-        ItemStack item = new ItemStack(icon);
+        ItemStack item = item(GUIItems.VOTE_MODE_BASE + mode.name().toLowerCase(Locale.ROOT), switch (mode) {
+            case NORMAL -> new ItemStack(Material.IRON_SWORD);
+            case SMALL -> new ItemStack(Material.IRON_NUGGET);
+            case BLOCK -> new ItemStack(Material.COBBLESTONE);
+            case SKIN -> new ItemStack(Material.PLAYER_HEAD);
+        });
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
@@ -388,23 +387,16 @@ public class VoteGUI {
         return item;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    private ItemStack createSeparatorItem() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.displayName(Component.text(" "));
-            item.setItemMeta(meta);
-            item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
-        }
-        return item;
+
+    private ItemStack item(String key, ItemStack itemStack) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.VOTE, key, itemStack);
     }
 
     private ItemStack createMapItem(Player player, String mapName, MapData mapData, boolean selected, long votes, boolean lockedNoGamemode) {
-        Material icon = lockedNoGamemode
-                ? Material.DIRT_PATH
-                : plugin.getMapManager().getMapIconMaterial(mapName, Material.GRASS_BLOCK);
-        ItemStack item = new ItemStack(icon);
+        ItemStack item = lockedNoGamemode
+                ? item(GUIItems.VOTE_MAP_LOCKED, new ItemStack(Material.DIRT_PATH))
+                : plugin.getMapManager().getMapIcon(mapName,
+                item(GUIItems.VOTE_MAP_DEFAULT, new ItemStack(Material.GRASS_BLOCK)));
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
@@ -465,8 +457,8 @@ public class VoteGUI {
     }
 
     private ItemStack createRolePreferenceItem(Player player, PreferredRole role, boolean selected, long votes) {
-        Material icon = role == PreferredRole.HIDER ? Material.LIME_WOOL : Material.RED_WOOL;
-        ItemStack item = new ItemStack(icon);
+        ItemStack item = role == PreferredRole.HIDER ? item(GUIItems.VOTE_ROLE_HIDER,
+                new ItemStack(Material.LIME_WOOL)) : item(GUIItems.VOTE_ROLE_SEEKER, new ItemStack(Material.RED_WOOL));
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
@@ -507,7 +499,7 @@ public class VoteGUI {
     }
 
     private ItemStack createNoMapsItem(Player player) {
-        ItemStack item = new ItemStack(Material.BARRIER);
+        ItemStack item = item(GUIItems.VOTE_NO_MAP, new ItemStack(Material.BARRIER));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(plugin.tr(player, "gui.vote.item.no_maps_available")
@@ -520,7 +512,7 @@ public class VoteGUI {
     }
 
     private ItemStack createSelfHeadItem(Player player, boolean ready) {
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        ItemStack item = item(GUIItems.VOTE_SELF, new ItemStack(Material.PLAYER_HEAD));
         ItemMeta rawMeta = item.getItemMeta();
         if (!(rawMeta instanceof SkullMeta meta)) {
             return item;
@@ -542,7 +534,9 @@ public class VoteGUI {
     }
 
     private ItemStack createReadyToggleItem(Player player, boolean ready, boolean voteComplete) {
-        Material material = ready ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
+        Material material = ready ? item(GUIItems.KEY_READY,
+                new ItemStack(Material.LIME_STAINED_GLASS_PANE)).getType() : item(GUIItems.KEY_NOT_READY,
+                new ItemStack(Material.RED_STAINED_GLASS_PANE)).getType();
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
@@ -563,5 +557,4 @@ public class VoteGUI {
         applySelectionGlow(item, ready);
         return item;
     }
-
 }

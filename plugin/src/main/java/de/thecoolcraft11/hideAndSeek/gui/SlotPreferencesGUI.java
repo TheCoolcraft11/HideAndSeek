@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
 import de.thecoolcraft11.hideAndSeek.loadout.PlayerLoadout;
 import de.thecoolcraft11.hideAndSeek.model.ItemType;
@@ -133,10 +135,11 @@ public class SlotPreferencesGUI {
 
 
         InventoryItem clearAllButton = new InventoryItem(
-                createUtilityItem(Material.BARRIER, plugin.trText(player, "gui.slotprefs.clear_all.title"),
+                createUtilityItem(GUIItems.KEY_CLEAR, plugin.trText(player, "gui.slotprefs.clear_all.title"),
                         NamedTextColor.RED,
                         List.of(plugin.tr(player, "gui.slotprefs.clear_all.hint").decoration(TextDecoration.ITALIC,
-                                false))));
+                                false))
+                        , new ItemStack(Material.BARRIER)));
         clearAllButton.setClickHandler((p, item, event, slot) -> {
             if (isHider) {
                 loadout.clearHiderSlotPreferences();
@@ -155,10 +158,11 @@ public class SlotPreferencesGUI {
 
 
         InventoryItem backButton = new InventoryItem(
-                createUtilityItem(Material.ARROW, plugin.trText(player, "gui.slotprefs.back_to_loadout"),
+                createUtilityItem(GUIItems.SP_BACK_LOADOUT, plugin.trText(player, "gui.slotprefs.back_to_loadout"),
                         NamedTextColor.YELLOW,
                         List.of(plugin.tr(player, "gui.slotprefs.back_to_loadout.hint").decoration(
-                                TextDecoration.ITALIC, false))));
+                                TextDecoration.ITALIC, false)),
+                        new ItemStack(Material.ARROW)));
         backButton.setClickHandler((p, item, event, slot) -> {
             LoadoutGUI gui = new LoadoutGUI(loadoutManager, plugin);
             gui.open(p);
@@ -235,10 +239,12 @@ public class SlotPreferencesGUI {
 
 
         InventoryItem backButton = new InventoryItem(
-                createUtilityItem(Material.ARROW, plugin.trText(player, "gui.slotprefs.back_to_preferences.title"),
+                createUtilityItem(GUIItems.SP_BACK_PREFS,
+                        plugin.trText(player, "gui.slotprefs.back_to_preferences.title"),
                         NamedTextColor.YELLOW,
                         List.of(plugin.tr(player, "gui.slotprefs.back_to_preferences.hint").decoration(
-                        TextDecoration.ITALIC, false))));
+                                TextDecoration.ITALIC, false)),
+                        new ItemStack(Material.ARROW)));
         backButton.setClickHandler((p, item, event, s) -> {
             open(p, isHider);
             event.setCancelled(true);
@@ -251,7 +257,7 @@ public class SlotPreferencesGUI {
     }
 
     private ItemStack createInfoItem(Player player, int maxItems) {
-        ItemStack item = new ItemStack(Material.BOOK);
+        ItemStack item = item(GUIItems.KEY_INFO, new ItemStack(Material.BOOK));
         ItemMeta meta = item.getItemMeta();
         meta.displayName(plugin.tr(player, "gui.slotprefs.info.title").color(NamedTextColor.AQUA)
                 .decoration(TextDecoration.BOLD, true)
@@ -281,9 +287,9 @@ public class SlotPreferencesGUI {
     }
 
     private ItemStack createPrimarySlotItem(Player player, int slot, SlotPreference preference) {
-        Material material = preference == null ? Material.LIGHT_BLUE_STAINED_GLASS_PANE : getColorForItemType(
+        ItemStack item = preference == null ? item(GUIItems.SP_PRIMARY_SLOT,
+                new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE)) : getColorForItemType(
                 preference.primary());
-        ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
 
         String title = plugin.trText(player, "gui.slotprefs.slot.primary.title",
@@ -319,10 +325,11 @@ public class SlotPreferencesGUI {
 
     private ItemStack createFallbackSlotItem(Player player, int slot, SlotPreference preference) {
         boolean hasPreference = preference != null;
-        Material material = !hasPreference ? Material.LIGHT_GRAY_STAINED_GLASS_PANE :
+        ItemStack item = !hasPreference ? item(GUIItems.SP_FALLBACK_SLOT_DISABLED,
+                new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) :
                 (preference.hasFallback() ? getColorForItemType(
-                        preference.fallback()) : Material.GRAY_STAINED_GLASS_PANE);
-        ItemStack item = new ItemStack(material);
+                        preference.fallback()) : item(GUIItems.SP_FALLBACK_SLOT,
+                        new ItemStack(Material.GRAY_STAINED_GLASS_PANE)));
         ItemMeta meta = item.getItemMeta();
 
         String title = plugin.trText(player, "gui.slotprefs.slot.fallback.title",
@@ -365,8 +372,7 @@ public class SlotPreferencesGUI {
     }
 
     private ItemStack createItemTypeItem(Player player, ItemType itemType) {
-        Material material = getColorForItemType(itemType);
-        ItemStack item = new ItemStack(material);
+        ItemStack item = getColorForItemType(itemType);
         ItemMeta meta = item.getItemMeta();
 
         NamedTextColor color = getColorForItemTypeText(itemType);
@@ -384,8 +390,8 @@ public class SlotPreferencesGUI {
         return item;
     }
 
-    private ItemStack createUtilityItem(Material material, String title, NamedTextColor color, List<Component> lore) {
-        ItemStack item = new ItemStack(material);
+    private ItemStack createUtilityItem(String key, String title, NamedTextColor color, List<Component> lore, ItemStack fallback) {
+        ItemStack item = item(key, fallback);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
@@ -396,17 +402,17 @@ public class SlotPreferencesGUI {
         return item;
     }
 
-    private Material getColorForItemType(ItemType itemType) {
-        return switch (itemType) {
-            case MOBILITY -> Material.BLUE_CONCRETE;
-            case UTILITY -> Material.CYAN_CONCRETE;
-            case OFFENSE -> Material.RED_CONCRETE;
-            case TRAP -> Material.PURPLE_CONCRETE;
-            case DEFENSE -> Material.GREEN_CONCRETE;
-            case HEALING -> Material.LIME_CONCRETE;
-            case INFORMATION -> Material.YELLOW_CONCRETE;
-            case SUPPORT -> Material.ORANGE_CONCRETE;
-        };
+    private ItemStack getColorForItemType(ItemType itemType) {
+        return item(GUIItems.SP_ITEM_TYPE_BASE + itemType.name().toLowerCase(), switch (itemType) {
+            case MOBILITY -> new ItemStack(Material.BLUE_CONCRETE);
+            case UTILITY -> new ItemStack(Material.CYAN_CONCRETE);
+            case OFFENSE -> new ItemStack(Material.RED_CONCRETE);
+            case TRAP -> new ItemStack(Material.PURPLE_CONCRETE);
+            case DEFENSE -> new ItemStack(Material.GREEN_CONCRETE);
+            case HEALING -> new ItemStack(Material.LIME_CONCRETE);
+            case INFORMATION -> new ItemStack(Material.YELLOW_CONCRETE);
+            case SUPPORT -> new ItemStack(Material.ORANGE_CONCRETE);
+        });
     }
 
     private NamedTextColor getColorForItemTypeText(ItemType itemType) {
@@ -428,6 +434,10 @@ public class SlotPreferencesGUI {
             result.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1).toLowerCase());
         }
         return result.toString();
+    }
+
+    private ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.SLOT_PREFERENCES, key, fallback);
     }
 }
 

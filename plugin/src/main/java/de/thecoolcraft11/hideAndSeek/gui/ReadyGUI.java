@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
@@ -98,7 +100,7 @@ public class ReadyGUI {
 
 
     private ItemStack createPlayerHeadItem(Player player, boolean ready) {
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        ItemStack item = item(GUIItems.R_PLAYER, new ItemStack(Material.PLAYER_HEAD));
         ItemMeta rawMeta = item.getItemMeta();
 
         if (!(rawMeta instanceof SkullMeta meta)) {
@@ -128,8 +130,8 @@ public class ReadyGUI {
 
     private ItemStack createStatusPane(boolean ready, UUID playerId, Player player) {
         ItemStack item = new ItemStack(
-                ready ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE
-        );
+                ready ? item(GUIItems.KEY_READY, new ItemStack(Material.LIME_STAINED_GLASS_PANE))
+                        : item(GUIItems.KEY_NOT_READY, new ItemStack(Material.RED_STAINED_GLASS_PANE)));
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
@@ -150,7 +152,7 @@ public class ReadyGUI {
     }
 
     private ItemStack createOverflowInfo(int hiddenPlayers, Player player) {
-        ItemStack item = new ItemStack(Material.BOOK);
+        ItemStack item = item(GUIItems.R_OVERFLOW, new ItemStack(Material.BOOK));
         ItemMeta meta = item.getItemMeta();
 
         if (meta == null) return item;
@@ -164,5 +166,9 @@ public class ReadyGUI {
 
         item.setItemMeta(meta);
         return item;
+    }
+
+    private ItemStack item(String key, ItemStack fallback) {
+        return plugin.getGuiItemRegistry().getOrDefault(GUINames.READY, key, fallback);
     }
 }
