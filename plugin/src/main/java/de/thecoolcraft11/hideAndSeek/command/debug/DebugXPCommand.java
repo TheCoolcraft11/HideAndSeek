@@ -2,11 +2,12 @@ package de.thecoolcraft11.hideAndSeek.command.debug;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class DebugXPCommand implements DebugSubcommand {
@@ -23,8 +24,8 @@ public class DebugXPCommand implements DebugSubcommand {
             return true;
         }
 
-        final Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) {
+        final OfflinePlayer target = Bukkit.getOfflinePlayerIfCached(args[0]);
+        if (target == null || target.getName() == null) {
             sender.sendMessage(
                     plugin.tr(sender, "command.debug.xp.player_not_found", java.util.Map.of("player", args[0])));
             return true;
@@ -50,16 +51,17 @@ public class DebugXPCommand implements DebugSubcommand {
             var dataStore = plugin.getPlayerDataStore();
             final long finalAmount = amount;
             dataStore.getXp(targetId).thenAccept(currentXp -> {
-                long newXp = currentXp;
-                switch (action) {
-                    case "set" -> newXp = finalAmount;
-                    case "give" -> newXp = currentXp + finalAmount;
-                    case "remove" -> newXp = Math.max(0, currentXp - finalAmount);
-                }
-                final long resultXp = newXp;
-                dataStore.setXp(targetId, newXp).thenRun(() ->
-                        sender.sendMessage(plugin.tr(sender, "command.debug.xp.success",
-                                java.util.Map.of("player", targetName, "amount", resultXp)))
+                long delta = switch (action) {
+                    case "set" -> finalAmount - currentXp;
+                    case "give" -> finalAmount;
+                    case "remove" -> -finalAmount;
+                    default -> 0;
+                };
+
+                dataStore.addXp(targetId, delta).thenRun(() ->
+                        sender.sendMessage(plugin.tr(sender,
+                                "command.debug.xp.success",
+                                java.util.Map.of("player", targetName, "amount", currentXp + delta)))
                 );
             });
             return true;
@@ -72,7 +74,7 @@ public class DebugXPCommand implements DebugSubcommand {
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> players = Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+            List<String> players = Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).toList();
             return DebugSubcommand.filterByPrefix(players, args[0]);
         }
         if (args.length == 2) {

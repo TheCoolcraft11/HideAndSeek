@@ -4,11 +4,12 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.minigameframework.progression.BoosterAPI;
 import de.thecoolcraft11.minigameframework.progression.PlayerBooster;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -29,8 +30,8 @@ public class DebugBoosterCommand implements DebugSubcommand {
             return true;
         }
 
-        final Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) {
+        final OfflinePlayer target = Bukkit.getOfflinePlayerIfCached(args[0]);
+        if (target == null || target.getName() == null) {
             sender.sendMessage(plugin.tr(sender, "command.debug.booster.player_not_found", Map.of("player", args[0])));
             return true;
         }
@@ -130,7 +131,7 @@ public class DebugBoosterCommand implements DebugSubcommand {
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> players = Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+            List<String> players = Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).toList();
             return DebugSubcommand.filterByPrefix(players, args[0]);
         }
         if (args.length == 2) {
