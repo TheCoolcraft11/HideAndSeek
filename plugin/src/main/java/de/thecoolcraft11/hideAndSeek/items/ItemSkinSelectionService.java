@@ -80,10 +80,7 @@ public final class ItemSkinSelectionService {
             return CompletableFuture.completedFuture(null);
         }
 
-        return dataStore.getCoins(playerId)
-                .thenCompose(currentCoins ->
-                        dataStore.setCoins(playerId, currentCoins + amount)
-                )
+        return dataStore.addCoins(playerId, amount)
                 .thenAccept(ignored -> {
                     PlayerStatsService statsService = PlayerStatsService.getActive();
 
@@ -105,15 +102,11 @@ public final class ItemSkinSelectionService {
             int amount,
             boolean force
     ) {
-        if (amount <= 0 && !force) {
+        if (amount == 0 && !force) {
             return CompletableFuture.completedFuture(null);
         }
 
-        return dataStore.getCoins(playerId)
-                .thenCompose(currentCoins -> {
-                    long updated = Math.max(0L, currentCoins + amount);
-                    return dataStore.setCoins(playerId, updated);
-                })
+        return dataStore.addCoins(playerId, amount)
                 .thenAccept(ignored -> {
                     if (amount > 0) {
                         PlayerStatsService statsService = PlayerStatsService.getActive();

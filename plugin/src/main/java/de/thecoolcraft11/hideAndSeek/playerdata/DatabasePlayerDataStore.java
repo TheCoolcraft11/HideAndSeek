@@ -36,6 +36,11 @@ public final class DatabasePlayerDataStore implements PlayerDataStore {
     }
 
     @Override
+    public CompletableFuture<Void> addCoins(UUID uuid, long amount) {
+        return GlobalStatsAPI.addStat(uuid, GlobalStatType.COINS, amount).thenApply(ignored -> null);
+    }
+
+    @Override
     public CompletableFuture<Long> getXp(UUID uuid) {
         return GlobalStatsAPI.getStat(uuid, GlobalStatType.XP).thenApply(v -> v == null ? 0L : Math.max(0L, v));
     }
@@ -43,6 +48,11 @@ public final class DatabasePlayerDataStore implements PlayerDataStore {
     @Override
     public CompletableFuture<Void> setXp(UUID uuid, long value) {
         return GlobalStatsAPI.setStat(uuid, GlobalStatType.XP, Math.max(0L, value));
+    }
+
+    @Override
+    public CompletableFuture<Void> addXp(UUID uuid, long amount) {
+        return GlobalStatsAPI.addStat(uuid, GlobalStatType.XP, amount).thenApply(ignored -> null);
     }
 
     @Override

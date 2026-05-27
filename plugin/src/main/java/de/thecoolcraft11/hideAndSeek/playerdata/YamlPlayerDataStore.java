@@ -82,6 +82,14 @@ public final class YamlPlayerDataStore implements PlayerDataStore {
     }
 
     @Override
+    public synchronized CompletableFuture<Void> addCoins(UUID uuid, long amount) {
+        long current = getGlobalLong(uuid, COINS_KEY);
+        setGlobalLong(uuid, COINS_KEY, current + amount);
+        saveSkin();
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
     public synchronized CompletableFuture<Long> getXp(UUID uuid) {
         return CompletableFuture.completedFuture(getGlobalLong(uuid, XP_KEY));
     }
@@ -89,6 +97,14 @@ public final class YamlPlayerDataStore implements PlayerDataStore {
     @Override
     public synchronized CompletableFuture<Void> setXp(UUID uuid, long value) {
         setGlobalLong(uuid, XP_KEY, Math.max(0L, value));
+        saveSkin();
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public synchronized CompletableFuture<Void> addXp(UUID uuid, long amount) {
+        long current = getGlobalLong(uuid, XP_KEY);
+        setGlobalLong(uuid, XP_KEY, current + amount);
         saveSkin();
         return CompletableFuture.completedFuture(null);
     }

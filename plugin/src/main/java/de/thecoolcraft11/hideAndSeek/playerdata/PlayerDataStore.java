@@ -10,9 +10,13 @@ public interface PlayerDataStore {
 
     CompletableFuture<Void> setCoins(UUID uuid, long value);
 
+    CompletableFuture<Void> addCoins(UUID uuid, long amount);
+
     CompletableFuture<Long> getXp(UUID uuid);
 
     CompletableFuture<Void> setXp(UUID uuid, long value);
+
+    CompletableFuture<Void> addXp(UUID uuid, long amount);
 
     default CompletableFuture<Long> getWins(UUID uuid) {
         return CompletableFuture.completedFuture(0L);
