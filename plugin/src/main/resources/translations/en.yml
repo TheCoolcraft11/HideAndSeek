@@ -396,6 +396,16 @@ gui:
       status: "<gray>Status: {state}</gray>"
       click_to_toggle: "<gray>Click to toggle</gray>"
       voting_not_complete: "<yellow>Voting is not complete yet.</yellow>"
+  main_menu:
+    loadout:
+      name: "<aqua><bold>Loadout Selector</bold></aqua>"
+      lore: "<gray>Click to choose your loadout</gray>"
+    map:
+      name: "<aqua><bold>Map Selector</bold></aqua>"
+      lore: "<gray>Click to open map selection</gray>"
+    skin:
+      name: "<aqua><bold>Skin Selector</bold></aqua>"
+      lore: "<gray>Click to choose item skins</gray>"
       can_still_ready: "<gray>You can still ready manually.</gray>"
       no_maps_available: "<red>No maps available :(</red>"
       no_maps_description: "<gray>There are no maps configured for this mode.</gray>"

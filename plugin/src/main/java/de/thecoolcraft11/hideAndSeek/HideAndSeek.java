@@ -3,6 +3,7 @@ package de.thecoolcraft11.hideAndSeek;
 import de.thecoolcraft11.hideAndSeek.command.*;
 import de.thecoolcraft11.hideAndSeek.gui.*;
 import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.items.*;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
@@ -393,7 +394,9 @@ public final class HideAndSeek extends MinigameFramework {
     }
 
     private void registerLoadoutMenu() {
-        ItemStack loadoutItem = createMapMenuItem(Material.CHEST, "Kit Selector", "Click to choose your loadout");
+        ItemStack loadoutItem = getGuiItemRegistry().getOrDefault(GUINames.MAIN_MENU, GUIItems.MAIN_MENU_LOADOUT,
+                new ItemStack(Material.CHEST));
+        applyMainMenuText(loadoutItem, "gui.main_menu.loadout.name", "gui.main_menu.loadout.lore");
         getCustomMenuItemRegistry().register(
                 "loadout_menu",
                 19,
@@ -406,7 +409,9 @@ public final class HideAndSeek extends MinigameFramework {
     }
 
     private void registerMapSelectionMenu() {
-        ItemStack mapSelectorItem = createMapMenuItem(Material.MAP, "Map Selector", "Click to open map selection");
+        ItemStack mapSelectorItem = getGuiItemRegistry().getOrDefault(GUINames.MAIN_MENU,
+                GUIItems.MAIN_MENU_MAP_SELECTION, new ItemStack(Material.MAP));
+        applyMainMenuText(mapSelectorItem, "gui.main_menu.map.name", "gui.main_menu.map.lore");
         getCustomMenuItemRegistry().register(
                 "map_selection_menu",
                 18,
@@ -419,7 +424,9 @@ public final class HideAndSeek extends MinigameFramework {
     }
 
     private void registerSkinMenu() {
-        ItemStack skinItem = createMapMenuItem(Material.ARMOR_STAND, "Skin Selector", "Click to choose item skins");
+        ItemStack skinItem = getGuiItemRegistry().getOrDefault(GUINames.MAIN_MENU, GUIItems.MAIN_MENU_SKIN_SELECTION,
+                new ItemStack(Material.ARMOR_STAND));
+        applyMainMenuText(skinItem, "gui.main_menu.skin.name", "gui.main_menu.skin.lore");
         getCustomMenuItemRegistry().register(
                 "skin_selection_menu",
                 20,
@@ -431,27 +438,16 @@ public final class HideAndSeek extends MinigameFramework {
         );
     }
 
-    private ItemStack createMapMenuItem(org.bukkit.Material material, String name, String description) {
-        ItemStack item = new ItemStack(material);
+    private void applyMainMenuText(ItemStack item, String nameKey, String loreKey) {
         org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            net.kyori.adventure.text.format.NamedTextColor nameColor =
-                    net.kyori.adventure.text.format.NamedTextColor.AQUA;
-
-            meta.displayName(net.kyori.adventure.text.Component.text(name, nameColor,
-                            net.kyori.adventure.text.format.TextDecoration.BOLD)
-                    .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
-
-            java.util.List<net.kyori.adventure.text.Component> lore = new java.util.ArrayList<>();
-            lore.add(net.kyori.adventure.text.Component.text(description,
-                            net.kyori.adventure.text.format.NamedTextColor.GRAY)
-                    .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
-
-            meta.lore(lore);
-            item.setItemMeta(meta);
+        if (meta == null) {
+            return;
         }
-        return item;
+        meta.displayName(tr(getServer().getConsoleSender(), nameKey));
+        meta.lore(java.util.List.of(tr(getServer().getConsoleSender(), loreKey)));
+        item.setItemMeta(meta);
     }
+
 
     public NmsAdapter getNmsAdapter() {
         return nmsAdapter;

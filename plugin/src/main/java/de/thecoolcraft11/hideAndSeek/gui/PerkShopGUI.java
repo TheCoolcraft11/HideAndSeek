@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.gui;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
+import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.perk.PerkShopMode;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkDefinition;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
@@ -133,7 +135,8 @@ public class PerkShopGUI {
             int buyers = plugin.getPerkStateManager().getFiniteBuyerCount(perk.getId());
             boolean soldOutGlobally = finiteLimit > 0 && buyers >= finiteLimit && !purchasedByPlayer;
 
-            ItemStack sold = new ItemStack(Material.LIGHT);
+            ItemStack sold = plugin.getGuiItemRegistry().getOrDefault(GUINames.PERKS, GUIItems.PERKS_KEY_SOLD,
+                    new ItemStack(Material.LIGHT));
 
             if (sold.getItemMeta() instanceof BlockDataMeta blockDataMeta) {
                 int level = soldOutGlobally ? 0 : 15;
@@ -308,6 +311,7 @@ public class PerkShopGUI {
     }
 
     private PerkShopMode getShopModeForPlayer(Player player) {
+        if (plugin.getStateManager().isPhase("lobby")) return null;
         if (player.getGameMode() == GameMode.SPECTATOR) return null;
         if (HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
             return plugin.getSettingRegistry().get("perks.hider-shop-mode", PerkShopMode.INVENTORY);
@@ -342,22 +346,16 @@ public class PerkShopGUI {
         return false;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private ItemStack buildPlaceholderItem() {
-        ItemStack lightBlock = new ItemStack(Material.LIGHT);
-        lightBlock.unsetData(DataComponentTypes.BLOCK_DATA);
+        ItemStack lightBlock = plugin.getGuiItemRegistry().getOrDefault(GUINames.PERKS, GUIItems.PERKS_KEY_LIGHT,
+                new ItemStack(Material.LIGHT));
         markProtectedShopLight(lightBlock);
-
-        lightBlock.setData(
-                DataComponentTypes.TOOLTIP_DISPLAY,
-                io.papermc.paper.datacomponent.item.TooltipDisplay.tooltipDisplay().hideTooltip(true).build()
-        );
 
         return lightBlock;
     }
 
     public boolean isProtectedShopLight(ItemStack item) {
-        if (item == null || !item.hasItemMeta() || item.getType() != Material.LIGHT) {
+        if (item == null || !item.hasItemMeta()) {
             return false;
         }
         return item.getItemMeta().getPersistentDataContainer()

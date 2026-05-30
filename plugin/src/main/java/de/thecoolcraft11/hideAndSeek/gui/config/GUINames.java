@@ -9,8 +9,10 @@ public class GUINames {
     public static final String READY = "ready";
     public static final String MAP = "map";
     public static final String LOADOUT = "loadout";
+    public static final String MAIN_MENU = "main_menu";
     public static final String SLOT_PREFERENCES = "slot_preferences";
     public static final String APPEARANCE = "appearance";
     public static final String ADMIN_LOADOUT = "admin_loadout";
     public static final String PLAYER_STATS = "player_stats";
+    public static final String PERKS = "perks";
 }

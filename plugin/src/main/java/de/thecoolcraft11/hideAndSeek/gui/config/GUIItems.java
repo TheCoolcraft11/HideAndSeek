@@ -6,9 +6,13 @@ import de.thecoolcraft11.minigameframework.gui.config.GuiItemRegistry;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 
 import java.util.Locale;
 
@@ -26,6 +30,14 @@ public class GUIItems {
     public static final String KEY_CONFIRM = "confirm";
 
     public static final String SKIN_COIN = "coin";
+
+    public static final String MAIN_MENU_LOADOUT = "loadout_menu";
+    public static final String MAIN_MENU_MAP_SELECTION = "map_selection_menu";
+    public static final String MAIN_MENU_SKIN_SELECTION = "skin_selection_menu";
+
+    public static final String PERKS_KEY_LIGHT = "light";
+    public static final String PERKS_KEY_SOLD = "sold";
+    public static final String PERKS_KEY_PLACEHOLDER = "placeholder";
 
     public static final String VOTE_MODE_BASE = "gamemode_";
     public static final String VOTE_MODE_NORMAL = VOTE_MODE_BASE + GameModeEnum.NORMAL.name().toLowerCase(Locale.ROOT);
@@ -290,6 +302,38 @@ public class GUIItems {
         registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_ITEMS, new ItemStack(Material.BLAZE_POWDER));
         registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_MAPS, new ItemStack(Material.MAP));
         registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_PERKS, new ItemStack(Material.LIGHT));
+
+        registry.registerDefault(GUINames.MAIN_MENU, MAIN_MENU_LOADOUT, new ItemStack(Material.CHEST));
+        registry.registerDefault(GUINames.MAIN_MENU, MAIN_MENU_MAP_SELECTION, new ItemStack(Material.MAP));
+        registry.registerDefault(GUINames.MAIN_MENU, MAIN_MENU_SKIN_SELECTION, new ItemStack(Material.ARMOR_STAND));
+
+        // Perk shop defaults - prepare items with tooltip/block-data flags and protected marker
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("HideAndSeek");
+        registry.registerDefault(GUINames.PERKS, PERKS_KEY_LIGHT, createPerkLightItem(plugin, false, false));
+        registry.registerDefault(GUINames.PERKS, PERKS_KEY_SOLD, createPerkLightItem(plugin, false, true));
+        registry.registerDefault(GUINames.PERKS, PERKS_KEY_PLACEHOLDER, createPerkLightItem(plugin, true, false));
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static ItemStack createPerkLightItem(Plugin plugin, boolean removeBlockData, boolean hideBlockDataInTooltip) {
+        NamespacedKey lightKey = new NamespacedKey(plugin, "perk_shop_light");
+        ItemStack item = new ItemStack(Material.LIGHT);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.displayName(Component.text(" "));
+            meta.getPersistentDataContainer().set(lightKey, PersistentDataType.BOOLEAN, true);
+            item.setItemMeta(meta);
+        }
+        if (removeBlockData) {
+            item.unsetData(DataComponentTypes.BLOCK_DATA);
+        }
+        if (hideBlockDataInTooltip) {
+            item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                    TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.BLOCK_DATA).build());
+        } else {
+            item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
+        }
+        return item;
     }
 
 

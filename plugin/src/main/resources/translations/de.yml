@@ -396,6 +396,16 @@ gui:
       status: "<gray>Status: {state}</gray>"
       click_to_toggle: "<gray>Klicken zum Umschalten</gray>"
       voting_not_complete: "<yellow>Abstimmung noch nicht fertig.</yellow>"
+  main_menu:
+    loadout:
+      name: "<aqua><bold>Loadout-Auswahl</bold></aqua>"
+      lore: "<gray>Klicken, um dein Loadout auszuwählen</gray>"
+    map:
+      name: "<aqua><bold>Karten-Auswahl</bold></aqua>"
+      lore: "<gray>Klicken, um die Kartenauswahl zu öffnen</gray>"
+    skin:
+      name: "<aqua><bold>Skin-Auswahl</bold></aqua>"
+      lore: "<gray>Klicken, um Item-Skins auszuwählen</gray>"
       can_still_ready: "<gray>Du kannst dich noch manuell bereitmelden.</gray>"
       no_maps_available: "<red>Keine Karten verfügbar :(</red>"
       no_maps_description: "<gray>Keine Karten für diesen Modus konfiguriert.</gray>"
