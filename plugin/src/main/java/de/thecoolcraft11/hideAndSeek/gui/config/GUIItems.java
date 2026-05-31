@@ -1,5 +1,6 @@
 package de.thecoolcraft11.hideAndSeek.gui.config;
 
+import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import de.thecoolcraft11.hideAndSeek.model.ItemType;
 import de.thecoolcraft11.minigameframework.gui.config.GuiItemRegistry;
@@ -154,7 +155,7 @@ public class GUIItems {
     public static final String STATS_TAB_MAPS = "stats_tab_maps";
     public static final String STATS_TAB_PERKS = "stats_tab_perks";
 
-    public static void registerAll(GuiItemRegistry registry) {
+    public static void registerAll(GuiItemRegistry registry, HideAndSeek plugin) {
         registry.registerDefault(GUINames.SKIN, SKIN_COIN, new ItemStack(Material.GOLD_NUGGET));
         registry.registerDefault(GUINames.SKIN, KEY_BACK, new ItemStack(Material.ARROW));
         registry.registerDefault(GUINames.SKIN, KEY_CLEAR, new ItemStack(Material.BARRIER));
@@ -301,14 +302,12 @@ public class GUIItems {
         registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_COMBAT, new ItemStack(Material.IRON_SWORD));
         registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_ITEMS, new ItemStack(Material.BLAZE_POWDER));
         registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_MAPS, new ItemStack(Material.MAP));
-        registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_PERKS, new ItemStack(Material.LIGHT));
+        registry.registerDefault(GUINames.PLAYER_STATS, STATS_TAB_PERKS, createPerkLightItem(plugin, false, true));
 
         registry.registerDefault(GUINames.MAIN_MENU, MAIN_MENU_LOADOUT, new ItemStack(Material.CHEST));
         registry.registerDefault(GUINames.MAIN_MENU, MAIN_MENU_MAP_SELECTION, new ItemStack(Material.MAP));
         registry.registerDefault(GUINames.MAIN_MENU, MAIN_MENU_SKIN_SELECTION, new ItemStack(Material.ARMOR_STAND));
 
-        // Perk shop defaults - prepare items with tooltip/block-data flags and protected marker
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("HideAndSeek");
         registry.registerDefault(GUINames.PERKS, PERKS_KEY_LIGHT, createPerkLightItem(plugin, false, false));
         registry.registerDefault(GUINames.PERKS, PERKS_KEY_SOLD, createPerkLightItem(plugin, false, true));
         registry.registerDefault(GUINames.PERKS, PERKS_KEY_PLACEHOLDER, createPerkLightItem(plugin, true, false));
