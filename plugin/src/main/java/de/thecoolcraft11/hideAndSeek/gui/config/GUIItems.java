@@ -7,7 +7,6 @@ import de.thecoolcraft11.minigameframework.gui.config.GuiItemRegistry;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -263,7 +262,7 @@ public class GUIItems {
         registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_CLOSE, new ItemStack(Material.BARRIER));
         registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_HIDER, new ItemStack(Material.BLUE_CONCRETE));
         registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_SEEKER, new ItemStack(Material.RED_CONCRETE));
-        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_PERKS, new ItemStack(Material.AMETHYST_SHARD));
+        registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_PERKS, createPerkLightItem(plugin, false, true));
         registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_PLAYERS, new ItemStack(Material.PLAYER_HEAD));
         registry.registerDefault(GUINames.ADMIN_LOADOUT, ADMIN_TAB_PRESETS, new ItemStack(Material.BOOKSHELF));
 

@@ -468,12 +468,12 @@ public class AdminLoadoutManagementGUI {
 
         inv.setItem(2, clickable(
                 createUtility(restricted ? GUIItems.ADMIN_PRESETS_RESTRICT_ON : GUIItems.ADMIN_PRESETS_RESTRICT_OFF,
-                plugin.tr(admin, "gui.admin.presets.restrict_players", Map.of("state", restricted ? "ON" : "OFF")),
-                List.of(plugin.tr(admin, "gui.admin.presets.restrict_players.hint"))), (p, i, e, s) -> {
+                plugin.tr(admin, "gui.admin.presets.restrict_players", Map.of("state", plugin.trText(admin, "common.state" + (restricted ? "enabled" : "disabled")))),
+                List.of(plugin.tr(admin, "gui.admin.presets.restrict_players_hint"))), (p, i, e, s) -> {
             loadoutManager.setRoleRestrictedToAdminPresets(role, !restricted);
             int affected = loadoutManager.enforcePoliciesAndNotify();
             p.sendMessage(plugin.tr(p, "gui.admin.presets.restrict_toggled",
-                    Map.of("role", role.name().toLowerCase(), "state", !restricted ? "OFF" : "ON", "count",
+                    Map.of("role", role.name().toLowerCase(), "state", plugin.trText(admin, "common.state" + (restricted ? "enabled" : "disabled")), "count",
                             String.valueOf(affected))));
             openTab(p, Tab.PRESETS);
             e.setCancelled(true);

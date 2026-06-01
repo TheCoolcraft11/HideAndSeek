@@ -655,7 +655,7 @@ gui:
       drop_delete: "<red>Drop key: delete preset</red>"
       click_to_switch: "<gray>Click to switch role</gray>"
       restrict_players: "Restrict Players: {state}"
-      restrict_players.hint: "<gray>When ON, players can only use admin presets</gray>"
+      restrict_players_hint: "<gray>When ON, players can only use admin presets</gray>"
       forced_display: "Forced Preset: {slot}"
       forced.hint1: "<gray>Shift+Left on preset = assign forced</gray>"
       forced.hint2: "<gray>Click here to clear forced preset</gray>"

@@ -655,7 +655,7 @@ gui:
       drop_delete: "<red>Drop-Taste: Preset löschen</red>"
       click_to_switch: "<gray>Klicken zum Rollenwechsel</gray>"
       restrict_players: "Spieler beschränken: {state}"
-      restrict_players.hint: "<gray>Wenn AN, können Spieler nur Admin-Presets nutzen</gray>"
+      restrict_players_hint: "<gray>Wenn AN, können Spieler nur Admin-Presets nutzen</gray>"
       forced_display: "Erzwungenes Preset: {slot}"
       forced.hint1: "<gray>Shift+Links auf Preset = Erzwungen zuweisen</gray>"
       forced.hint2: "<gray>Hier klicken, um erzwungenes Preset zu leeren</gray>"
