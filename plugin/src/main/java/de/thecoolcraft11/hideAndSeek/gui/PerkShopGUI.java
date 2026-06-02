@@ -347,7 +347,7 @@ public class PerkShopGUI {
     }
 
     private ItemStack buildPlaceholderItem() {
-        ItemStack lightBlock = plugin.getGuiItemRegistry().getOrDefault(GUINames.PERKS, GUIItems.PERKS_KEY_LIGHT,
+        ItemStack lightBlock = plugin.getGuiItemRegistry().getOrDefault(GUINames.PERKS, GUIItems.PERKS_KEY_PLACEHOLDER,
                 new ItemStack(Material.LIGHT));
         markProtectedShopLight(lightBlock);
 
