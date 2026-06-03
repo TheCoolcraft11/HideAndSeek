@@ -4,5 +4,17 @@
     "pack_format": 94,
     "min_format": 88,
     "max_format": 101
+  },
+  "filter": {
+    "block": [
+      {
+        "namespace": "minecraft",
+        "path": "advancement/*"
+      },
+      {
+        "namespace": "minecraft",
+        "path": "recipe/*"
+      }
+    ]
   }
 }
