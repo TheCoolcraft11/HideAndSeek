@@ -17,6 +17,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,7 +47,7 @@ public class ChainPullItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         return "Pull the hider in front of you to your position.";
     }
 
@@ -56,7 +57,11 @@ public class ChainPullItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> chainPull(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> chainPull(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.chain_pull.name")
+                .withLoreKey("item.chain_pull.lore")
+                .withNameKey("item.chain_pull.name")
+                .withLoreKey("item.chain_pull.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(chainCooldown * 20)
@@ -114,7 +119,8 @@ public class ChainPullItem implements GameItem {
         int pullTicks = 8;
 
         if (shadowTendril) {
-            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2, 0.02);
+            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2,
+                    0.02);
             seeker.playSound(seeker.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.35f, 1.5f);
         }
 
@@ -149,12 +155,16 @@ public class ChainPullItem implements GameItem {
                                 false
                         ));
                         if (energyLasso) {
-                            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.8f, 1.3f);
+                            finalTarget.getWorld().playSound(finalTarget.getLocation(),
+                                    Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.8f, 1.3f);
                         } else if (shadowTendril) {
-                            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 0.6f, 1.5f);
+                            finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.ENTITY_WITHER_AMBIENT,
+                                    0.6f, 1.5f);
                         }
-                        seeker.sendMessage(Component.text("Pulled " + finalTarget.getName() + "!", NamedTextColor.GREEN));
-                        finalTarget.sendMessage(Component.text("You've been pulled by a chain!", NamedTextColor.DARK_GRAY));
+                        seeker.sendMessage(
+                                Component.text("Pulled " + finalTarget.getName() + "!", NamedTextColor.GREEN));
+                        finalTarget.sendMessage(
+                                Component.text("You've been pulled by a chain!", NamedTextColor.DARK_GRAY));
                         cancel();
                         return;
                     }
@@ -261,7 +271,8 @@ public class ChainPullItem implements GameItem {
         int maxAttempts = 10;
         for (int i = 0; i < maxAttempts; i++) {
             block = world.getBlockAt(checkLoc);
-            if (!block.getType().isSolid() && (i == 0 || world.getBlockAt(checkLoc.clone().add(0, -1, 0)).getType().isSolid())) {
+            if (!block.getType().isSolid() && (i == 0 || world.getBlockAt(
+                    checkLoc.clone().add(0, -1, 0)).getType().isSolid())) {
                 return checkLoc;
             }
             checkLoc.add(0, 1, 0);

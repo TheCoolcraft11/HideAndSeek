@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -44,8 +45,10 @@ public class GhostEssenceItem implements GameItem {
                     .decoration(TextDecoration.ITALIC, false));
 
             List<Component> lore = new java.util.ArrayList<>(List.of(
-                    Component.text("Pass through walls for " + duration + " seconds", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("You cannot descend while ghostly!", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)
+                    Component.text("Pass through walls for " + duration + " seconds", NamedTextColor.GRAY).decoration(
+                            TextDecoration.ITALIC, false),
+                    Component.text("You cannot descend while ghostly!", NamedTextColor.RED).decoration(
+                            TextDecoration.ITALIC, false)
             ));
 
             if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
@@ -60,9 +63,10 @@ public class GhostEssenceItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.ghost-essence.max-duration", 1.5f);
-        return String.format("Become ghostly to phase through blocks for %.1fs.", duration.floatValue());
+        return plugin.trText(player, "item.ghost_essence.description",
+                java.util.Map.of("duration", String.format("%.1f", duration.floatValue())));
     }
 
     @Override
@@ -75,7 +79,9 @@ public class GhostEssenceItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, ctx -> useGhostEssence(ctx.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, ctx -> useGhostEssence(ctx.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.ghost_essence.name")
+                .withLoreKey("item.ghost_essence.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(cooldown * 20)
@@ -108,7 +114,8 @@ public class GhostEssenceItem implements GameItem {
     private static void spawnGhostAuraBurst(Player player, Location loc, boolean spectral, boolean digital, boolean activation) {
         if (spectral) {
             player.getWorld().spawnParticle(Particle.SOUL, loc, activation ? 20 : 16, 0.35, 0.45, 0.35, 0.03);
-            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, activation ? 16 : 12, 0.28, 0.38, 0.28, 0.015);
+            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, activation ? 16 : 12, 0.28, 0.38, 0.28,
+                    0.015);
             player.getWorld().spawnParticle(Particle.TRIAL_OMEN, loc, activation ? 6 : 4, 0.25, 0.3, 0.25, 0.01);
         } else if (digital) {
             player.getWorld().spawnParticle(Particle.END_ROD, loc, activation ? 18 : 14, 0.28, 0.38, 0.28, 0.02);
@@ -155,7 +162,8 @@ public class GhostEssenceItem implements GameItem {
     private void useGhostEssence(Player player, HideAndSeek plugin) {
 
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.", NamedTextColor.RED));
+            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.",
+                    NamedTextColor.RED));
             return;
         }
 
@@ -185,14 +193,17 @@ public class GhostEssenceItem implements GameItem {
         final Vector boostVector = new Vector(rawDir.getX(), Math.max(0, rawDir.getY()), rawDir.getZ())
                 .normalize().multiply(boostPower);
 
-        player.sendMessage(Component.text("You are now a Ghost! Phasing enabled for " + maxDurationSeconds + "s.", NamedTextColor.AQUA));
+        player.sendMessage(Component.text("You are now a Ghost! Phasing enabled for " + maxDurationSeconds + "s.",
+                NamedTextColor.AQUA));
         player.playSound(player.getLocation(), Sound.ENTITY_GHAST_WARN, 1f, 1.2f);
         if (spectral) {
-            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, startLoc.clone().add(0, 1, 0), 22, 0.35, 0.5, 0.35, 0.01);
+            player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, startLoc.clone().add(0, 1, 0), 22, 0.35, 0.5,
+                    0.35, 0.01);
             player.playSound(startLoc, Sound.PARTICLE_SOUL_ESCAPE, 0.7f, 0.9f);
         } else if (digital) {
             player.getWorld().spawnParticle(Particle.END_ROD, startLoc.clone().add(0, 1, 0), 18, 0.3, 0.45, 0.3, 0.03);
-            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, startLoc.clone().add(0, 1, 0), 16, 0.28, 0.4, 0.28, 0.02);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, startLoc.clone().add(0, 1, 0), 16, 0.28, 0.4, 0.28,
+                    0.02);
             player.playSound(startLoc, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.65f, 1.5f);
         }
         spawnGhostAuraBurst(player, startLoc.clone().add(0, 1, 0), spectral, digital, true);
@@ -364,7 +375,8 @@ public class GhostEssenceItem implements GameItem {
             player.playSound(endLoc, Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 0.45f, 0.8f);
         } else if (digital) {
             player.getWorld().spawnParticle(Particle.END_ROD, endLoc.clone().add(0, 1, 0), 22, 0.3, 0.45, 0.3, 0.02);
-            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, endLoc.clone().add(0, 1, 0), 18, 0.28, 0.4, 0.28, 0.03);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, endLoc.clone().add(0, 1, 0), 18, 0.28, 0.4, 0.28,
+                    0.03);
             player.playSound(endLoc, Sound.BLOCK_BEACON_ACTIVATE, 0.5f, 1.5f);
         }
         spawnGhostAuraBurst(player, endLoc.clone().add(0, 1, 0), spectral, digital, false);

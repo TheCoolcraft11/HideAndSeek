@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 public class InkFaceItem implements GameItem {
     public static final String ID = "has_hider_ink_face";
@@ -44,8 +45,8 @@ public class InkFaceItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Hidden helmet used for ink-blindness effects.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.ink_face.description");
     }
 
     @Override
@@ -64,4 +65,3 @@ public class InkFaceItem implements GameItem {
         player.getInventory().setHelmet(plugin.getCustomItemManager().getIdentifiedItemStack(ID, player));
     }
 }
-

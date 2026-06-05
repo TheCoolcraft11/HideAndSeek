@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class CrowbarItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         return "Breaks Blocks of the map to help you reach small seekers.";
     }
 
@@ -68,7 +69,11 @@ public class CrowbarItem implements GameItem {
     public void register(HideAndSeek plugin) {
         int crowBarCooldown = plugin.getSettingRegistry().get("seeker-items.crowbar.cooldown", 30);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.crowbar.name")
+                .withLoreKey("item.crowbar.lore")
+                .withNameKey("item.crowbar.name")
+                .withLoreKey("item.crowbar.lore")
                 .withAction(ItemActionType.LEFT_CLICK_BLOCK, context -> breakBlock(plugin, context))
                 .withAction(ItemActionType.SHIFT_LEFT_CLICK_BLOCK, context -> breakBlock(plugin, context))
                 .withDropPrevention(true)

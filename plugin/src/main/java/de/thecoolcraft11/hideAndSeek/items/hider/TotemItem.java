@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -64,7 +65,8 @@ public class TotemItem implements GameItem {
 
 
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
-        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                duration);
         totemXpTasks.put(player.getUniqueId(), xpTask);
 
         new BukkitRunnable() {
@@ -113,9 +115,10 @@ public class TotemItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.totem.effect-duration", 5);
-        return String.format("Activate a one-time revive window for %ds.", duration.intValue());
+        return plugin.trText(player, "item.totem.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override
@@ -124,14 +127,17 @@ public class TotemItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> activateTotem(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> activateTotem(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.totem.name")
+                .withLoreKey("item.totem.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withMaxPlayerUses(totemUses)
                 .allowOffHand(false)
                 .allowArmor(false)
                 .cancelDefaultAction(true)
-                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(Component.text("You've already used your totem!", NamedTextColor.RED)))
+                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(
+                        Component.text("You've already used your totem!", NamedTextColor.RED)))
                 .build());
     }
 
@@ -162,7 +168,8 @@ public class TotemItem implements GameItem {
         boolean lifeCoin = ItemSkinSelectionService.isSelected(player, ID, "skin_extra_life_coin");
 
         player.playEffect(org.bukkit.EntityEffect.PROTECTED_FROM_DEATH);
-        player.setHealth(Math.max(1.0, Objects.requireNonNull(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue()));
+        player.setHealth(Math.max(1.0,
+                Objects.requireNonNull(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue()));
         player.setFoodLevel(20);
 
         org.bukkit.Location roundSpawn = HideAndSeek.getDataController().getRoundSpawnPoint();

@@ -19,6 +19,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -47,15 +48,16 @@ public class SpeedBoostItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.speed-boost.duration", 5);
         Object boostTypeObj = plugin.getSettingRegistry().get("hider-items.speed-boost.type");
         String boostMode = (boostTypeObj instanceof Enum) ? boostTypeObj.toString() : "SPEED_EFFECT";
 
         if ("VELOCITY_BOOST".equals(boostMode)) {
-            return "Launch yourself forward with a velocity boost.";
+            return plugin.trText(player, "item.speed_boost.description.velocity_boost");
         } else {
-            return String.format("Gain speed effect for %ds to move faster.", duration.intValue());
+            return plugin.trText(player, "item.speed_boost.description.speed_effect",
+                    java.util.Map.of("duration", String.valueOf(duration.intValue())));
         }
     }
 
@@ -68,12 +70,16 @@ public class SpeedBoostItem implements GameItem {
             plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createSpeedBoostItem(level), levelId)
                     .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> speedBoost(context.getPlayer(), plugin))
                     .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> speedBoost(context.getPlayer(), plugin))
-                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> speedBoost(context.getPlayer(), plugin))
-                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> speedBoost(context.getPlayer(), plugin))
+                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR,
+                            context -> speedBoost(context.getPlayer(), plugin))
+                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                            context -> speedBoost(context.getPlayer(), plugin))
                     .withVanillaCooldown(speedBoostCooldown * 20)
                     .withCustomCooldown(speedBoostCooldown * 1000L)
                     .withVanillaCooldownDisplay(true)
-                    .withDescription(getDescription(plugin))
+                    .withDescription(getDescription(plugin, null))
+                    .withNameKey("item.speed_boost.name", Map.of("level", level + 1))
+                    .withLoreKey("item.speed_boost.lore", Map.of("level", level + 1))
                     .withDropPrevention(true)
                     .withCraftPrevention(true)
                     .allowOffHand(false)
@@ -142,7 +148,8 @@ public class SpeedBoostItem implements GameItem {
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.8f, 1.3f);
             } else if (sugarRush) {
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_BURP, 0.6f, 1.8f);
-                player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 10, 0.2, 0.25, 0.2, 0.03);
+                player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 10, 0.2,
+                        0.25, 0.2, 0.03);
             }
 
             new BukkitRunnable() {
@@ -186,7 +193,8 @@ public class SpeedBoostItem implements GameItem {
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_BREEZE_SHOOT, 0.8f, 1.2f);
             } else if (sugarRush) {
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_GENERIC_DRINK, 0.7f, 1.4f);
-                player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 10, 0.2, 0.25, 0.2, 0.03);
+                player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 10, 0.2,
+                        0.25, 0.2, 0.03);
             }
 
             new BukkitRunnable() {
@@ -204,12 +212,15 @@ public class SpeedBoostItem implements GameItem {
 
                     if (ticks % 4 == 0) {
                         if (rocketBoots) {
-                            player.getWorld().spawnParticle(Particle.FLAME, loc.add(0.5, 0.1, 0.5), 2, 0.15, 0.05, 0.15, 0.01);
+                            player.getWorld().spawnParticle(Particle.FLAME, loc.add(0.5, 0.1, 0.5), 2, 0.15, 0.05, 0.15,
+                                    0.01);
                         } else if (sugarRush) {
-                            player.getWorld().spawnParticle(Particle.CHERRY_LEAVES, loc.add(0.5, 0.1, 0.5), 2, 0.15, 0.05, 0.15, 0.02);
+                            player.getWorld().spawnParticle(Particle.CHERRY_LEAVES, loc.add(0.5, 0.1, 0.5), 2, 0.15,
+                                    0.05, 0.15, 0.02);
                             player.getWorld().spawnParticle(Particle.END_ROD, loc, 1, 0.03, 0.03, 0.03, 0.0);
                         } else {
-                            player.getWorld().spawnParticle(Particle.CLOUD, loc.add(0.5, 0.1, 0.5), 1, 0.15, 0.05, 0.15, 0.02);
+                            player.getWorld().spawnParticle(Particle.CLOUD, loc.add(0.5, 0.1, 0.5), 1, 0.15, 0.05, 0.15,
+                                    0.02);
                         }
                     }
 
@@ -232,7 +243,8 @@ public class SpeedBoostItem implements GameItem {
 
                 String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
                 if (selectedVariant != null) {
-                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId, selectedVariant);
+                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId,
+                            selectedVariant);
                     if (variant != null && variant.getItemStack() != null) {
                         upgradedItem = variant.getItemStack().clone();
                     }

@@ -196,7 +196,8 @@ public class LoadoutGUI {
     }
 
     private void openPresetsView(Player player) {
-        FrameworkInventory inv = new de.thecoolcraft11.minigameframework.inventory.InventoryBuilder(plugin.getInventoryFramework())
+        FrameworkInventory inv = new de.thecoolcraft11.minigameframework.inventory.InventoryBuilder(
+                plugin.getInventoryFramework())
                 .id("loadout_presets_" + player.getUniqueId() + "_combined")
                 .title(plugin.trText(player, "gui.loadout.presets.title"))
                 .rows(6)
@@ -218,7 +219,8 @@ public class LoadoutGUI {
         for (int presetSlot = 1; presetSlot <= PlayerLoadout.MAX_PRESETS; presetSlot++) {
             int guiSlot = presetSlots[presetSlot - 1];
             boolean hasPreset = loadoutManager.hasPreset(player.getUniqueId(), presetSlot);
-            LoadoutManager.PresetLoadResult analysis = loadoutManager.analyzePresetLoad(player.getUniqueId(), presetSlot);
+            LoadoutManager.PresetLoadResult analysis = loadoutManager.analyzePresetLoad(player.getUniqueId(),
+                    presetSlot);
 
             InventoryItem presetItem = new InventoryItem(createPresetItem(player, presetSlot, hasPreset, analysis));
             int finalPresetSlot = presetSlot;
@@ -251,7 +253,8 @@ public class LoadoutGUI {
 
                 if (event.getClick().isRightClick()) {
                     boolean removed = loadoutManager.deletePreset(p.getUniqueId(), finalPresetSlot);
-                    p.playSound(p.getLocation(), removed ? Sound.ENTITY_ITEM_BREAK : Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    p.playSound(p.getLocation(), removed ? Sound.ENTITY_ITEM_BREAK : Sound.ENTITY_VILLAGER_NO, 1.0f,
+                            1.0f);
                     p.sendMessage(
                             plugin.tr(p, removed ? "gui.loadout.presets.deleted" : "gui.loadout.presets.already_empty",
                                     Map.of("slot", String.valueOf(finalPresetSlot))));
@@ -284,7 +287,8 @@ public class LoadoutGUI {
                     )));
                 }
 
-                p.playSound(p.getLocation(), result.isFullyApplied() ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                p.playSound(p.getLocation(),
+                        result.isFullyApplied() ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                 openPresetsView(p);
                 event.setCancelled(true);
             });
@@ -607,7 +611,8 @@ public class LoadoutGUI {
                     return;
                 }
                 boolean changed = loadoutManager.applyAdminPresetToPlayer(p.getUniqueId(), role, targetSlot);
-                p.playSound(p.getLocation(), changed ? Sound.ENTITY_EXPERIENCE_ORB_PICKUP : Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+                p.playSound(p.getLocation(), changed ? Sound.ENTITY_EXPERIENCE_ORB_PICKUP : Sound.UI_BUTTON_CLICK, 1.0f,
+                        1.0f);
                 openView(p, role == LoadoutRole.HIDER);
                 event.setCancelled(true);
             });
@@ -644,7 +649,8 @@ public class LoadoutGUI {
         }
 
         PlayerLoadout.Preset preset = loadoutManager.getPreset(player.getUniqueId(), presetSlot);
-        LoadoutItemType preview = preset.hiderItems.stream().findFirst().orElse(preset.seekerItems.stream().findFirst().orElse(null));
+        LoadoutItemType preview = preset.hiderItems.stream().findFirst().orElse(
+                preset.seekerItems.stream().findFirst().orElse(null));
         ItemStack item = preview == null ? item(GUIItems.L_PRESET_FALLBACK,
                 new ItemStack(Material.CHEST)) : getPreviewItemStack(preview);
         ItemMeta meta = item.getItemMeta();
@@ -779,7 +785,8 @@ public class LoadoutGUI {
         meta.lore(lore);
         item.setItemMeta(meta);
         CustomModelDataUtil.setCustomModelData(item, resolveRuntimeItemId(type), null);
-        item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
         return item;
     }
 
@@ -809,10 +816,10 @@ public class LoadoutGUI {
         meta.lore(lore);
 
 
-
         item.setItemMeta(meta);
         CustomModelDataUtil.setCustomModelData(item, resolveRuntimeItemId(type), null);
-        item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
         return item;
     }
 
@@ -822,7 +829,8 @@ public class LoadoutGUI {
             item = HiderItems.getItem(type.getItemId());
         }
 
-        return (item != null) ? item.getDescription(plugin) : plugin.trText(player, "gui.loadout.item.no_description");
+        return (item != null) ? item.getDescription(plugin, player) : plugin.trText(player,
+                "gui.loadout.item.no_description");
     }
 
     private enum GuiTab {

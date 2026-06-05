@@ -23,6 +23,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -63,7 +64,8 @@ public class InkSplashItem implements GameItem {
         BukkitTask prevSeekerTask = inkSplashSeekerXpTasks.remove(seeker.getUniqueId());
         XpProgressHelper.SavedXp seekerSavedXp = XpProgressHelper.saveXp(seeker);
         XpProgressHelper.stopAndClear(seeker, prevSeekerTask);
-        BukkitTask seekerXpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask seekerXpTask = XpProgressHelper.start(plugin, seeker, duration * 20L,
+                XpProgressHelper.Mode.COUNTDOWN, duration);
         inkSplashSeekerXpTasks.put(seeker.getUniqueId(), seekerXpTask);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             BukkitTask t = inkSplashSeekerXpTasks.remove(seeker.getUniqueId());
@@ -71,7 +73,8 @@ public class InkSplashItem implements GameItem {
         }, duration * 20L);
 
         if (paintBalloon) {
-            seeker.getWorld().spawnParticle(Particle.ENTITY_EFFECT, seeker.getLocation().add(0, 1, 0), 20, 0.45, 0.35, 0.45, 1.0);
+            seeker.getWorld().spawnParticle(Particle.ENTITY_EFFECT, seeker.getLocation().add(0, 1, 0), 20, 0.45, 0.35,
+                    0.45, 1.0);
             seeker.playSound(seeker.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 0.55f, 1.35f);
         } else if (mudBall) {
             seeker.getWorld().spawnParticle(Particle.BLOCK, seeker.getLocation().add(0, 1, 0), 20, 0.4, 0.35, 0.4,
@@ -112,7 +115,8 @@ public class InkSplashItem implements GameItem {
             BukkitTask prevXpTask = inkSplashXpTasks.remove(hider.getUniqueId());
             XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(hider);
             XpProgressHelper.stopAndClear(hider, prevXpTask);
-            BukkitTask xpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+            BukkitTask xpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                    duration);
             inkSplashXpTasks.put(hider.getUniqueId(), xpTask);
 
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -128,18 +132,23 @@ public class InkSplashItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("seeker-items.ink-splash.duration", 7);
         Number radius = plugin.getSettingRegistry().get("seeker-items.ink-splash.radius", 25);
         int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Splash hiders within %d blocks with ink for %ds, grants %d points per hit.", radius.intValue(), duration.intValue(), points);
+        return String.format("Splash hiders within %d blocks with ink for %ds, grants %d points per hit.",
+                radius.intValue(), duration.intValue(), points);
     }
 
     @Override
     public void register(HideAndSeek plugin) {
         int inkCooldown = plugin.getSettingRegistry().get("seeker-items.ink-splash.cooldown", 20);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.ink_splash.name")
+                .withLoreKey("item.ink_splash.lore")
+                .withNameKey("item.ink_splash.name")
+                .withLoreKey("item.ink_splash.lore")
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> spawnInkSplash(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> spawnInkSplash(context, plugin))
                 .withDropPrevention(true)

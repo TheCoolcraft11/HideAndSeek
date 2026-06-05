@@ -18,6 +18,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -52,8 +53,8 @@ public class BlockSwapItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Swap disguise blocks with the nearest other hider.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.block_swap.description");
     }
 
     @Override
@@ -62,7 +63,9 @@ public class BlockSwapItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> blockSwap(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> blockSwap(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.block_swap.name")
+                .withLoreKey("item.block_swap.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(blockSwapCooldown * 20)
@@ -189,28 +192,40 @@ public class BlockSwapItem implements GameItem {
 
             if (magicMirror) {
                 player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
-                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
+                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation(), 18, 0.3, 0.3, 0.3,
+                        0.04);
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
-                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f,
+                        1.4f);
             } else if (quantumLink) {
                 player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation(), 20, 0.3, 0.3, 0.3, 0.05);
-                finalTarget.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, finalTarget.getLocation(), 20, 0.3, 0.3, 0.3, 0.05);
-                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
-                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                finalTarget.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, finalTarget.getLocation(), 20, 0.3, 0.3,
+                        0.3, 0.05);
+                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25,
+                        0.08);
+                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25,
+                        0.4, 0.25, 0.08);
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
-                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f,
+                        1.2f);
             } else {
-                player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05, 1);
-                finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3, 0.3, 0.05, 1);
-                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
-                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05,
+                        1);
+                finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3,
+                        0.3, 0.05, 1);
+                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25,
+                        0.08);
+                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25,
+                        0.4, 0.25, 0.08);
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
                 finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
             }
 
             if (quantumLink) {
-                player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2, 0.02);
-                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2, 0.02);
+                player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2,
+                        0.02);
+                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation().add(0, 1, 0), 8, 0.2,
+                        0.25, 0.2, 0.02);
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
                 finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
             }
@@ -218,8 +233,10 @@ public class BlockSwapItem implements GameItem {
             HiderItemUtil.updateAppearanceItem(player, plugin);
             HiderItemUtil.updateAppearanceItem(finalTarget, plugin);
 
-            player.sendMessage(Component.text("Swapped blocks with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
-            finalTarget.sendMessage(Component.text("Swapped blocks with " + player.getName() + "!", NamedTextColor.GREEN));
+            player.sendMessage(
+                    Component.text("Swapped blocks with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
+            finalTarget.sendMessage(
+                    Component.text("Swapped blocks with " + player.getName() + "!", NamedTextColor.GREEN));
         }, 2L);
     }
 

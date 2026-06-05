@@ -2,8 +2,8 @@ package de.thecoolcraft11.hideAndSeek.items.seeker;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
-import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
+import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
@@ -24,6 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -61,7 +62,7 @@ public class CageTrapItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("seeker-items.cage-trap.paralyze-duration", 5);
         return String.format("Place a hidden trap that cages and immobilizes a hider for %ds.", duration.intValue());
     }
@@ -71,7 +72,11 @@ public class CageTrapItem implements GameItem {
         int cageCooldown = plugin.getSettingRegistry().get("seeker-items.cage-trap.cooldown", 20);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeCageTrap(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.cage_trap.name")
+                .withLoreKey("item.cage_trap.lore")
+                .withNameKey("item.cage_trap.name")
+                .withLoreKey("item.cage_trap.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(cageCooldown * 20)
@@ -108,7 +113,8 @@ public class CageTrapItem implements GameItem {
                     new Vector3f(1.2f, 1.2f, 1.2f),
                     new AxisAngle4f(0, 0, 0, 0)
             ));
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "cage_trap_indicator"), PersistentDataType.BOOLEAN, true);
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "cage_trap_indicator"),
+                    PersistentDataType.BOOLEAN, true);
         });
 
         ItemDisplay trapIndicator2 = indicatorLoc.getWorld().spawn(indicatorLoc, ItemDisplay.class, display -> {
@@ -122,7 +128,8 @@ public class CageTrapItem implements GameItem {
                     new Quaternionf(0, 0, 0, 1)
             ));
 
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "cage_trap_indicator"), PersistentDataType.BOOLEAN, true);
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "cage_trap_indicator"),
+                    PersistentDataType.BOOLEAN, true);
         });
 
         ItemDisplay trapIndicator3 = indicatorLoc.getWorld().spawn(indicatorLoc, ItemDisplay.class, display -> {
@@ -136,7 +143,8 @@ public class CageTrapItem implements GameItem {
                     new Vector3f(1.2f, 1.2f, 1.2f),
                     new AxisAngle4f(0, 0, 0, 0)
             ));
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "cage_trap_indicator"), PersistentDataType.BOOLEAN, true);
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "cage_trap_indicator"),
+                    PersistentDataType.BOOLEAN, true);
 
         });
 
@@ -200,7 +208,8 @@ public class CageTrapItem implements GameItem {
                     if (laserGrid || iceBlockSkin) {
                         HideAndSeek.getDataController().getSeekers().forEach(seekerUUID -> {
                             Player seeker1 = Bukkit.getPlayer(seekerUUID);
-                            if (seeker1 != null && seeker1.isOnline() && seeker1.getWorld().equals(location.getWorld())) {
+                            if (seeker1 != null && seeker1.isOnline() && seeker1.getWorld().equals(
+                                    location.getWorld())) {
                                 seeker1.spawnParticle(Particle.SMOKE, location, 10, 0.2, 0.1, 0.2, 0.02);
                             }
                         });
@@ -244,7 +253,9 @@ public class CageTrapItem implements GameItem {
         }.runTaskTimer(plugin, 0L, 5L);
 
         String durationMsg = trapDuration == -1 ? "until round ends" : trapDuration + " seconds";
-        context.getPlayer().sendMessage(Component.text("Cage trap placed! (Ready in " + setupTime + "s, lasts " + durationMsg + ")", NamedTextColor.GREEN));
+        context.getPlayer().sendMessage(
+                Component.text("Cage trap placed! (Ready in " + setupTime + "s, lasts " + durationMsg + ")",
+                        NamedTextColor.GREEN));
     }
 
     private static void triggerCageTrap(Player hider, Player seeker, HideAndSeek plugin, int paralyzeDuration) {
@@ -258,11 +269,13 @@ public class CageTrapItem implements GameItem {
             HideAndSeek.getDataController().getSeekers().forEach(seekerUUID -> {
                 Player seeker1 = Bukkit.getPlayer(seekerUUID);
                 if (seeker1 != null && seeker1.isOnline() && seeker1.getWorld().equals(hiderLoc.getWorld())) {
-                    seeker1.spawnParticle(Particle.ELECTRIC_SPARK, hiderLoc.clone().add(0, 1, 0), 14, 0.3, 0.35, 0.3, 0.03);
+                    seeker1.spawnParticle(Particle.ELECTRIC_SPARK, hiderLoc.clone().add(0, 1, 0), 14, 0.3, 0.35, 0.3,
+                            0.03);
                 }
             });
 
-            hiderLoc.getWorld().spawnParticle(Particle.WAX_ON, hiderLoc.clone().add(0, 1, 0), 12, 0.28, 0.32, 0.28, 0.01);
+            hiderLoc.getWorld().spawnParticle(Particle.WAX_ON, hiderLoc.clone().add(0, 1, 0), 12, 0.28, 0.32, 0.28,
+                    0.01);
             hiderLoc.getWorld().playSound(hiderLoc, Sound.BLOCK_BEACON_DEACTIVATE, 0.45f, 0.85f);
         }
 
@@ -335,7 +348,8 @@ public class CageTrapItem implements GameItem {
         trappedPlayers.add(hider.getUniqueId());
         hider.setVelocity(new Vector(0, 0, 0));
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> trappedPlayers.remove(hider.getUniqueId()), paralyzeDuration * 20L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> trappedPlayers.remove(hider.getUniqueId()),
+                paralyzeDuration * 20L);
 
 
         hider.sendMessage(Component.text("You've been trapped by a cage!", NamedTextColor.DARK_RED));

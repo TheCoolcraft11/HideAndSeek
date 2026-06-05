@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -46,8 +47,8 @@ public class SkinSelectorItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Open the skin picker to choose your disguise skin.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.skin_selector.description");
     }
 
     @Override
@@ -64,7 +65,9 @@ public class SkinSelectorItem implements GameItem {
                                 ctx -> open(ctx.getPlayer(), gui))
                         .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
                                 ctx -> open(ctx.getPlayer(), gui))
-                        .withDescription(getDescription(plugin))
+                        .withDescription(getDescription(plugin, null))
+                        .withNameKey("item.skin_selector.name")
+                        .withLoreKey("item.skin_selector.lore")
                         .withDropPrevention(true)
                         .withCraftPrevention(true)
                         .allowOffHand(false)

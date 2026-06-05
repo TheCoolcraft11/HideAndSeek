@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -47,8 +48,8 @@ public class KnockbackStickItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Smack seekers to launch them away.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.knockback_stick.description");
     }
 
     @Override
@@ -59,7 +60,9 @@ public class KnockbackStickItem implements GameItem {
             String levelId = ID + "_" + level;
             plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createKnockbackStickItem(level), levelId)
                     .withAction(ItemActionType.LEFT_CLICK_ENTITY, KnockbackStickItem::knockbackHit)
-                    .withDescription(getDescription(plugin))
+                    .withDescription(getDescription(plugin, null))
+                    .withNameKey("item.knockback_stick.name", Map.of("level", level + 1))
+                    .withLoreKey("item.knockback_stick.lore", Map.of("level", level + 1))
                     .withDropPrevention(true)
                     .withCraftPrevention(true)
                     .withVanillaCooldown(knockbackCooldown * 20)
@@ -85,6 +88,8 @@ public class KnockbackStickItem implements GameItem {
                     .decoration(TextDecoration.ITALIC, false));
             meta.lore(List.of(
                     Component.text("Left click to knock seekers away", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.text("Level: " + (level + 1), NamedTextColor.GOLD)
                             .decoration(TextDecoration.ITALIC, false)
             ));
             meta.addEnchant(Enchantment.KNOCKBACK, Math.clamp(level, 1, 5), true);
@@ -133,7 +138,8 @@ public class KnockbackStickItem implements GameItem {
 
                 String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
                 if (selectedVariant != null) {
-                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId, selectedVariant);
+                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId,
+                            selectedVariant);
                     if (variant != null && variant.getItemStack() != null) {
                         upgradedItem = variant.getItemStack().clone();
                     }

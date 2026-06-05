@@ -944,3 +944,86 @@ phase:
     coins_header: "<gold><bold>Coins:</bold></gold>"
     coins_gained: "<gray>  Gained: <gold>+{amount}</gold></gray>"
     coins_balance: "<gray>  Total: <gold>{amount}</gold></gray>"
+item:
+  appearance:
+    name: "<light_purple><b>Appearance Editor</b></light_purple>"
+    lore: "<gray>Right click to customize your appearance</gray>"
+    description: "Open the appearance editor for your current disguise."
+  big_firecracker:
+    name: "<red><b>Big Firecracker</b></red>"
+    lore: "<gray>Right click to place a big firecracker</gray>"
+    description: "Place a large firecracker that explodes, granting {points} points."
+  block_selector:
+    name: "<light_purple><b>Block Selector</b></light_purple>"
+    lore: "<gray>Right click to choose your block</gray>"
+    description: "Open the block picker to choose your disguise block."
+  block_swap:
+    name: "<dark_purple><b>Block Swap</b></dark_purple>"
+    lore: "<gray>Right click to swap blocks with another hider</gray>"
+    description: "Swap disguise blocks with the nearest other hider."
+  explosion:
+    name: "<red><b>Firecracker</b></red>"
+    lore: "<gray>Right click to place a firecracker that will explode</gray>"
+    description: "Place a firecracker that pops, granting {points} points."
+  firework_rocket:
+    name: "<gold><b>Firework Rocket</b></gold>"
+    lore: "<gray>Right click to place a firework battery that will launch fireworks</gray>"
+    description: "Launch a high-altitude firework taunt, granting {points} points."
+  ghost_essence:
+    name: "<aqua><b>Ghostly Essence</b></aqua>"
+    lore: "<gray>Pass through walls while active\nYou cannot descend while ghostly!</gray>"
+    description: "Become ghostly to phase through blocks for {duration}s."
+  invisibility_cloak:
+    name: "<dark_purple><b>Invisibility Cloak</b></dark_purple>"
+    lore: "<gray>Right click to become invisible</gray>"
+    description: "Turn invisible for {duration}s."
+  ink_face:
+    description: "Hidden helmet used for ink-blindness effects."
+  knockback_stick:
+    name: "<dark_red><b>Knockback Stick <gold>(Level {level}</gold>)</b></dark_red>"
+    lore: "<gray>Left click to knock seekers away!\n<gold>Level: {level}</gold></gray>"
+    description: "Smack seekers to launch them away."
+  medkit:
+    name: "<green><b>Medkit</b></green>"
+    lore: "<gray>Hold right click to channel heal</gray>\n<dark_gray>Release early to cancel</dark_gray>"
+    description: "Hold block for {channel_time}s, then release to heal yourself fully."
+  random_block:
+    name: "<light_purple><b>Random Block <gray>({uses} / {maxUses})</gray></b></light_purple>"
+    lore: "<gray>Right click to randomize your block</gray>"
+    description: "Reroll your disguise block from the map's allowed blocks."
+  remote_gateway:
+    name: "<dark_purple><b>Remote Gateway</b></dark_purple>"
+    lore: "<gray>Right click to place your gateway anchors\nTwo anchors form a teleport pair</gray>"
+    description:
+      permanent: "Place paired gateways that teleport between anchors until the round ends."
+      timed: "Place paired gateways that teleport between anchors for {duration} seconds."
+  skin_selector:
+    name: "<light_purple><b>Skin Selector</b></light_purple>"
+    lore: "<gray>Right-click to choose your disguise skin</gray>"
+    description: "Open the skin picker to choose your disguise skin."
+  slowness_ball:
+    name: "<aqua><b>Slowness Ball</b></aqua>"
+    lore: "<gray>Right click to throw at seekers</gray>"
+    description: "Throw an ice ball that slows seekers for {duration}s."
+  smoke_bomb:
+    name: "<dark_gray><b>Smoke Bomb</b></dark_gray>"
+    lore: "<gray>Right click to throw\nCreates a smoke cloud for cover</gray>"
+    description: "Throw a smoke bomb that creates cover for {duration}s."
+  sound:
+    name: "<aqua><b>Cat Sound</b></aqua>"
+    lore: "<gray>Right click to play a sound</gray>"
+    description: "Play a loud cat taunt for all players, grants {points} points."
+  speed_boost:
+    name: "<yellow><b>Speed Boost <gold>(Level {level})</gold></b></yellow>"
+    lore: "<gray>Right click for a speed boost}\n<gold>Level: {level}</gold></gray>"
+    description:
+      velocity_boost: "Launch yourself forward with a velocity boost."
+      speed_effect: "Gain speed effect for {duration}s to move faster."
+  totem:
+    name: "<light_purple><b>Totem of Undying</b></light_purple>"
+    lore: "<gray>Right click to activate revive mode</gray>"
+    description: "Activate a one-time revive window for {duration}s."
+  tracker_crossbow:
+    name: "<aqua><b>Tracker Crossbow</b></aqua>"
+    lore: "<gray>Hit to upgrade speed & knockback</gray>"
+    description: "Hit seekers with arrows to upgrade items, grants {points} points per hit."

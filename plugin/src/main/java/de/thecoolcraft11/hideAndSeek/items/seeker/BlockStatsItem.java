@@ -9,8 +9,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class BlockStatsItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         return "Open the block statistics menu.";
     }
 
@@ -49,7 +51,11 @@ public class BlockStatsItem implements GameItem {
     public void register(HideAndSeek plugin) {
         BlockStatsGUI gui = new BlockStatsGUI(plugin);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.block_stats.name")
+                .withLoreKey("item.block_stats.lore")
+                .withNameKey("item.block_stats.name")
+                .withLoreKey("item.block_stats.lore")
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> gui.open(context.getPlayer()))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> gui.open(context.getPlayer()))
                 .withDropPrevention(true)

@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -45,19 +46,25 @@ public class AppearanceItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Open the appearance editor for your current disguise.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.appearance.description");
     }
 
     @Override
     public void register(HideAndSeek plugin) {
         AppearanceGUI appearanceGUI = new AppearanceGUI(plugin, plugin.getBlockSelectorGUI());
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_AIR,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.appearance.name")
+                .withLoreKey("item.appearance.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

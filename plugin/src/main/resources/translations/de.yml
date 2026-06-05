@@ -944,3 +944,86 @@ phase:
     coins_header: "<gold><bold>Münzen:</bold></gold>"
     coins_gained: "<gray>  Erhalten: <gold>+{amount}</gold></gray>"
     coins_balance: "<gray>  Gesamt: <gold>{amount}</gold></gray>"
+item:
+  appearance:
+    name: "<light_purple><b>Aussehen-Editor</b></light_purple>"
+    lore: "<gray>Rechtsklick, um dein Aussehen anzupassen</gray>"
+    description: "Öffne den Aussehen-Editor für deine aktuelle Verkleidung."
+  big_firecracker:
+    name: "<red><b>Großer Feuerknaller</b></red>"
+    lore: "<gray>Rechtsklick, um einen großen Feuerknaller zu platzieren</gray>"
+    description: "Platziere einen großen Feuerknaller, der explodiert und {points} Punkte gewährt."
+  block_selector:
+    name: "<light_purple><b>Blockauswahl</b></light_purple>"
+    lore: "<gray>Rechtsklick, um deinen Block zu wählen</gray>"
+    description: "Öffne die Blockauswahl, um deinen Verkleidungsblock zu wählen."
+  block_swap:
+    name: "<dark_purple><b>Blocktausch</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Blöcke mit einem anderen Verstecker zu tauschen</gray>"
+    description: "Tausche Verkleidungsblöcke mit dem nächstgelegenen anderen Verstecker."
+  explosion:
+    name: "<red><b>Feuerknaller</b></red>"
+    lore: "<gray>Rechtsklick, um einen Feuerknaller zu platzieren, der explodiert</gray>"
+    description: "Platziere einen Feuerknaller, der knallt und {points} Punkte gewährt."
+  firework_rocket:
+    name: "<gold><b>Feuerwerksrakete</b></gold>"
+    lore: "<gray>Rechtsklick, um eine Feuerwerksbatterie zu platzieren, die Feuerwerke startet</gray>"
+    description: "Starte ein hoch fliegendes Feuerwerk zur Provokation und erhalte {points} Punkte."
+  ghost_essence:
+    name: "<aqua><b>Geisteressenz</b></aqua>"
+    lore: "<gray>Gehe durch Wände, solange der Effekt aktiv ist\nDu kannst als Geist nicht nach unten!</gray>"
+    description: "Werde geisterhaft und gehe für {duration}s durch Blöcke."
+  invisibility_cloak:
+    name: "<dark_purple><b>Unsichtbarkeitsumhang</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um unsichtbar zu werden</gray>"
+    description: "Werde für {duration}s unsichtbar."
+  ink_face:
+    description: "Versteckter Helm für Tinten-Blindheitseffekte."
+  knockback_stick:
+    name: "<dark_red><b>Rückstoß-Stick <gold>(Level {level}</gold>)</b></dark_red>"
+    lore: "<gray>Linksklick, um Sucher wegzustoßen!\n<gold>Level: {level}</gold></gray>"
+    description: "Schlage Sucher, um sie wegzuschleudern."
+  medkit:
+    name: "<green><b>Medkit</b></green>"
+    lore: "<gray>Halte Rechtsklick, um Heilung zu kanalisieren</gray>\n<dark_gray>Loslassen zum Abbrechen</dark_gray>"
+    description: "Halte Blocken für {channel_time}s und lass dann los, um dich vollständig zu heilen."
+  random_block:
+    name: "<light_purple><b>Zufallsblock <gray>({uses} / {maxUses})</gray></b></light_purple>"
+    lore: "<gray>Rechtsklick, um deinen Block zufällig neu zu wählen</gray>"
+    description: "Würfle deinen Verkleidungsblock aus den erlaubten Blöcken der Karte neu."
+  remote_gateway:
+    name: "<dark_purple><b>Remote-Gateway</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Gateway-Anker zu platzieren\nZwei Anker bilden ein Teleport-Paar</gray>"
+    description:
+      permanent: "Platziere gekoppelte Gateways, die bis zum Rundenende zwischen Ankern teleportieren."
+      timed: "Platziere gekoppelte Gateways, die für {duration} Sekunden zwischen Ankern teleportieren."
+  skin_selector:
+    name: "<light_purple><b>Skin-Auswahl</b></light_purple>"
+    lore: "<gray>Rechtsklick, um deinen Verkleidungs-Skin zu wählen</gray>"
+    description: "Öffne die Skin-Auswahl, um deinen Verkleidungs-Skin zu wählen."
+  slowness_ball:
+    name: "<aqua><b>Verlangsamungsball</b></aqua>"
+    lore: "<gray>Rechtsklick, um auf Sucher zu werfen</gray>"
+    description: "Wirf einen Eisball, der Sucher für {duration}s verlangsamt."
+  smoke_bomb:
+    name: "<dark_gray><b>Rauchbombe</b></dark_gray>"
+    lore: "<gray>Rechtsklick zum Werfen\nErzeugt eine Rauchwolke zur Deckung</gray>"
+    description: "Wirf eine Rauchbombe, die für {duration}s Deckung erzeugt."
+  sound:
+    name: "<aqua><b>Katzengeräusch</b></aqua>"
+    lore: "<gray>Rechtsklick, um einen Sound abzuspielen</gray>"
+    description: "Spiele eine laute Katzen-Provokation für alle Spieler ab und erhalte {points} Punkte."
+  speed_boost:
+    name: "<yellow><b>Temposchub <gold>(Level {level})</gold></b></yellow>"
+    lore: "<gray>Rechtsklick für einen Temposchub}\n<gold>Level: {level}</gold></gray>"
+    description:
+      velocity_boost: "Katapultiere dich mit einem Geschwindigkeitsstoß nach vorn."
+      speed_effect: "Erhalte für {duration}s einen Geschwindigkeitseffekt, um dich schneller zu bewegen."
+  totem:
+    name: "<light_purple><b>Totem der Unsterblichkeit</b></light_purple>"
+    lore: "<gray>Rechtsklick, um den Wiederbelebungsmodus zu aktivieren</gray>"
+    description: "Aktiviere ein einmaliges Wiederbelebungsfenster für {duration}s."
+  tracker_crossbow:
+    name: "<aqua><b>Tracker-Armbrust</b></aqua>"
+    lore: "<gray>Treffer verbessern Tempo & Rückstoß</gray>"
+    description: "Triff Sucher mit Pfeilen, um Items zu verbessern, und erhalte {points} Punkte pro Treffer."

@@ -14,6 +14,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -36,7 +37,7 @@ public class TrackerCrossbowItem implements GameItem {
             meta.displayName(Component.text("Tracker Crossbow", NamedTextColor.AQUA, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));
             meta.lore(List.of(
-                    Component.text("Hit seekers to upgrade speed", NamedTextColor.GRAY)
+                    Component.text("Hit seekers to upgrade speed & knockback", NamedTextColor.GRAY)
                             .decoration(TextDecoration.ITALIC, false)
             ));
             meta.setUnbreakable(true);
@@ -47,9 +48,10 @@ public class TrackerCrossbowItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int points = plugin.getPointService().getInt("points.hider.sharpshooter.amount", 20);
-        return String.format("Hit seekers with arrows to upgrade items, grants %d points per hit.", points);
+        return plugin.trText(player, "item.tracker_crossbow.description",
+                java.util.Map.of("points", String.valueOf(points)));
     }
 
     @Override
@@ -58,7 +60,9 @@ public class TrackerCrossbowItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.SHOOT, context -> {
                 })
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.crossbow.name")
+                .withLoreKey("item.crossbow.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(crossbowCooldown * 20)
@@ -80,16 +84,21 @@ public class TrackerCrossbowItem implements GameItem {
             return;
         }
 
-        int hitPoints = plugin.getPointService().award(hider.getUniqueId(), de.thecoolcraft11.hideAndSeek.util.points.PointAction.HIDER_SHARPSHOOTER);
+        int hitPoints = plugin.getPointService().award(hider.getUniqueId(),
+                de.thecoolcraft11.hideAndSeek.util.points.PointAction.HIDER_SHARPSHOOTER);
         hider.sendMessage(Component.text("Crossbow hit! +" + hitPoints + " points", NamedTextColor.GOLD));
 
         if (ItemSkinSelectionService.isSelected(hider, ID, "skin_paintball_gun")) {
-            hider.getWorld().spawnParticle(Particle.ENTITY_EFFECT, hider.getLocation().add(0, 1.1, 0), 14, 0.4, 0.3, 0.4, 1.0);
-            hider.getWorld().spawnParticle(Particle.ITEM_SLIME, hider.getLocation().add(0, 1.0, 0), 6, 0.25, 0.25, 0.25, 0.01);
+            hider.getWorld().spawnParticle(Particle.ENTITY_EFFECT, hider.getLocation().add(0, 1.1, 0), 14, 0.4, 0.3,
+                    0.4, 1.0);
+            hider.getWorld().spawnParticle(Particle.ITEM_SLIME, hider.getLocation().add(0, 1.0, 0), 6, 0.25, 0.25, 0.25,
+                    0.01);
             hider.playSound(hider.getLocation(), Sound.ENTITY_SLIME_SQUISH_SMALL, 0.55f, 1.5f);
         } else if (ItemSkinSelectionService.isSelected(hider, ID, "skin_laser_tag")) {
-            hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 12, 0.3, 0.3, 0.3, 0.03);
-            hider.getWorld().spawnParticle(Particle.END_ROD, hider.getLocation().add(0, 1.0, 0), 6, 0.15, 0.2, 0.15, 0.01);
+            hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 12, 0.3, 0.3,
+                    0.3, 0.03);
+            hider.getWorld().spawnParticle(Particle.END_ROD, hider.getLocation().add(0, 1.0, 0), 6, 0.15, 0.2, 0.15,
+                    0.01);
             hider.playSound(hider.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.45f, 1.8f);
         }
 
@@ -110,7 +119,8 @@ public class TrackerCrossbowItem implements GameItem {
         var hiderItems = loadout.getHiderItems();
 
         boolean hasSpeedBoost = hiderItems.contains(de.thecoolcraft11.hideAndSeek.model.LoadoutItemType.SPEED_BOOST);
-        boolean hasKnockbackStick = hiderItems.contains(de.thecoolcraft11.hideAndSeek.model.LoadoutItemType.KNOCKBACK_STICK);
+        boolean hasKnockbackStick = hiderItems.contains(
+                de.thecoolcraft11.hideAndSeek.model.LoadoutItemType.KNOCKBACK_STICK);
 
         if (hasSpeedBoost) {
             SpeedBoostItem.upgradeSpeedItem(player, plugin);
@@ -121,7 +131,8 @@ public class TrackerCrossbowItem implements GameItem {
         }
 
         if (!hasSpeedBoost && !hasKnockbackStick) {
-            player.sendMessage(Component.text("You don't have Speed Boost or Knockback Stick selected!", NamedTextColor.YELLOW));
+            player.sendMessage(
+                    Component.text("You don't have Speed Boost or Knockback Stick selected!", NamedTextColor.YELLOW));
         }
     }
 }

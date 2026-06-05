@@ -23,6 +23,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -47,7 +48,7 @@ public class FireworkRocketItem implements GameItem {
         );
         display.setBlock(Bukkit.createBlockData(Material.STRIPPED_BAMBOO_BLOCK));
         display.setTransformation(new Transformation(
-                new Vector3f(0.25f, 0, 0.25f),
+                        new Vector3f(0.25f, 0, 0.25f),
                         new Quaternionf(),
                         new Vector3f(0.5f, 0.75f, 0.5f),
                         new Quaternionf()
@@ -180,9 +181,10 @@ public class FireworkRocketItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int points = plugin.getPointService().getInt("points.hider.taunt.large", 75);
-        return String.format("Launch a high-altitude firework taunt, granting %d points.", points);
+        return plugin.trText(player, "item.firework_rocket.description",
+                java.util.Map.of("points", String.valueOf(points)));
     }
 
     private static void detonate(Firework firework, double volume, boolean spaceShuttle, boolean signalFlare) {
@@ -228,7 +230,8 @@ public class FireworkRocketItem implements GameItem {
             meta.displayName(Component.text("Firework Rocket", NamedTextColor.GOLD, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));
             meta.lore(List.of(
-                    Component.text("Right click to launch a firework", NamedTextColor.GRAY)
+                    Component.text("Right click to place a firework battery that will launch fireworks</gray>",
+                                    NamedTextColor.GRAY)
                             .decoration(TextDecoration.ITALIC, false)
             ));
             item.setItemMeta(meta);
@@ -253,7 +256,9 @@ public class FireworkRocketItem implements GameItem {
                         .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
                                 context -> launchFirework(context.getPlayer(),
                                         resolveLaunchLocation(context), plugin))
-                        .withDescription(getDescription(plugin))
+                        .withDescription(getDescription(plugin, null))
+                        .withNameKey("item.firework_rocket.name")
+                        .withLoreKey("item.firework_rocket.lore")
                         .withDropPrevention(true)
                         .withCraftPrevention(true)
                         .withVanillaCooldown(fireworkCooldown * 20)

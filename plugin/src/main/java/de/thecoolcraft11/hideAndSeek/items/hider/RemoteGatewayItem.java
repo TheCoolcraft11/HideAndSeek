@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
@@ -75,12 +76,14 @@ public class RemoteGatewayItem implements GameItem {
         ItemStateManager.GatewayData pending = ItemStateManager.pendingGatewayByOwner.remove(ownerId);
         if (pending == null) {
             ItemStateManager.pendingGatewayByOwner.put(ownerId, placed);
-            player.sendMessage(Component.text("Gateway anchor A placed. Place another anchor to link.", NamedTextColor.GREEN));
+            player.sendMessage(
+                    Component.text("Gateway anchor A placed. Place another anchor to link.", NamedTextColor.GREEN));
             location.getWorld().playSound(location, Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 0.6f, 1.15f);
             return;
         }
 
-        ItemStateManager.GatewayPairData pair = new ItemStateManager.GatewayPairData(pending, placed, System.currentTimeMillis());
+        ItemStateManager.GatewayPairData pair = new ItemStateManager.GatewayPairData(pending, placed,
+                System.currentTimeMillis());
         ItemStateManager.hiderGatewayPairs.computeIfAbsent(ownerId, ignored -> new LinkedList<>()).add(pair);
 
         int maxPairs = Math.max(1, plugin.getSettingRegistry().get("hider-items.remote-gateway.max-pairs", 1));
@@ -96,7 +99,8 @@ public class RemoteGatewayItem implements GameItem {
 
     private static ItemStateManager.GatewayData spawnGatewayDisplay(HideAndSeek plugin, Location center, String skinVariant) {
         List<Display> displays = spawnGatewayVisuals(plugin, center, skinVariant);
-        return new ItemStateManager.GatewayData(center.clone(), displays, skinVariant, System.currentTimeMillis(), ConcurrentHashMap.newKeySet());
+        return new ItemStateManager.GatewayData(center.clone(), displays, skinVariant, System.currentTimeMillis(),
+                ConcurrentHashMap.newKeySet());
     }
 
     private static void ensureGatewayTask(HideAndSeek plugin) {
@@ -112,7 +116,8 @@ public class RemoteGatewayItem implements GameItem {
         int durationSeconds = plugin.getSettingRegistry().get("hider-items.remote-gateway.duration-seconds", 120);
         long maxAgeMs = durationSeconds == -1 ? Long.MAX_VALUE : Math.max(1, durationSeconds) * 1000L;
         boolean seekerCanUse = plugin.getSettingRegistry().get("hider-items.remote-gateway.seeker-can-use", false);
-        double travelCooldownSeconds = plugin.getSettingRegistry().get("hider-items.remote-gateway.travel-cooldown-seconds", DEFAULT_TRAVEL_COOLDOWN_SECONDS);
+        double travelCooldownSeconds = plugin.getSettingRegistry().get(
+                "hider-items.remote-gateway.travel-cooldown-seconds", DEFAULT_TRAVEL_COOLDOWN_SECONDS);
         long travelCooldownMs = Math.max(0L, Math.round(travelCooldownSeconds * 1000.0));
         double standSeconds = plugin.getSettingRegistry().get("hider-items.remote-gateway.portal-stand-seconds", 0.0);
         long standMs = Math.max(0L, Math.round(standSeconds * 1000.0));
@@ -168,8 +173,10 @@ public class RemoteGatewayItem implements GameItem {
         tickGatewayParticle(pair.first(), skinVariant);
         tickGatewayParticle(pair.second(), skinVariant);
 
-        tryTeleport(plugin, pair.first(), pair.second(), seekerCanUse, nowMs, travelCooldownMs, standMs, playersInsidePortalThisTick, skinVariant);
-        tryTeleport(plugin, pair.second(), pair.first(), seekerCanUse, nowMs, travelCooldownMs, standMs, playersInsidePortalThisTick, skinVariant);
+        tryTeleport(plugin, pair.first(), pair.second(), seekerCanUse, nowMs, travelCooldownMs, standMs,
+                playersInsidePortalThisTick, skinVariant);
+        tryTeleport(plugin, pair.second(), pair.first(), seekerCanUse, nowMs, travelCooldownMs, standMs,
+                playersInsidePortalThisTick, skinVariant);
     }
 
     private static void tryTeleport(HideAndSeek plugin, ItemStateManager.GatewayData source, ItemStateManager.GatewayData target, boolean seekerCanUse, long nowMs, long travelCooldownMs, long standMs, Set<UUID> playersInsidePortalThisTick, String skinVariant) {
@@ -185,7 +192,8 @@ public class RemoteGatewayItem implements GameItem {
             }
 
             Location feet = player.getLocation();
-            double horizontalDistSq = Math.pow(feet.getX() - sourceCenter.getX(), 2) + Math.pow(feet.getZ() - sourceCenter.getZ(), 2);
+            double horizontalDistSq = Math.pow(feet.getX() - sourceCenter.getX(), 2) + Math.pow(
+                    feet.getZ() - sourceCenter.getZ(), 2);
             double verticalDist = Math.abs(feet.getY() - sourceCenter.getY());
             if (horizontalDistSq > (1.05 * 1.05) || verticalDist > 1.75) {
                 continue;
@@ -202,7 +210,8 @@ public class RemoteGatewayItem implements GameItem {
             }
             long channelStartedAt = channelStartedAtByPlayer.getOrDefault(playerId, nowMs);
             if (nowMs - channelStartedAt < standMs) {
-                playChargingEffects(sourceCenter, target.center(), nowMs - channelStartedAt, standMs, skinVariant, plugin);
+                playChargingEffects(sourceCenter, target.center(), nowMs - channelStartedAt, standMs, skinVariant,
+                        plugin);
                 continue;
             }
 
@@ -263,9 +272,11 @@ public class RemoteGatewayItem implements GameItem {
         }
 
         Color color = skinColor(skinVariant);
-        gateway.center().getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, gateway.center().clone().add(0, 0.6, 0), 4, 0.18, 0.22, 0.18, 0.0,
+        gateway.center().getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION,
+                gateway.center().clone().add(0, 0.6, 0), 4, 0.18, 0.22, 0.18, 0.0,
                 new Particle.DustTransition(color, lighter(color), 1.2f));
-        gateway.center().getWorld().spawnParticle(Particle.PORTAL, gateway.center().clone().add(0, 0.5, 0), 3, 0.18, 0.25, 0.18, 0.01);
+        gateway.center().getWorld().spawnParticle(Particle.PORTAL, gateway.center().clone().add(0, 0.5, 0), 3, 0.18,
+                0.25, 0.18, 0.01);
     }
 
     private static void animateGatewayVisuals(ItemStateManager.GatewayData gateway, long nowMs) {
@@ -385,7 +396,8 @@ public class RemoteGatewayItem implements GameItem {
             float x = (float) (Math.cos(angle) * warpedRadius);
             float z = (float) (Math.sin(angle) * warpedRadius);
             float y = (float) (0.16 + ring * 0.16 + Math.sin(angle * 3.0 + elapsed * 2.0) * 0.08);
-            float scale = (float) (0.11 + (VOID_LATTICE_RINGS - ring) * 0.01 + Math.sin(elapsed * 3.3 + inRing * 0.5) * 0.01);
+            float scale = (float) (0.11 + (VOID_LATTICE_RINGS - ring) * 0.01 + Math.sin(
+                    elapsed * 3.3 + inRing * 0.5) * 0.01);
 
             display.setTransformation(new Transformation(
                     new Vector3f(x, y, z),
@@ -488,21 +500,30 @@ public class RemoteGatewayItem implements GameItem {
             return displays;
         }
 
-        Material ringMaterial = (SKIN_DEMATERIALIZER.equals(skinVariant)) ? Material.LIGHT_BLUE_STAINED_GLASS : Material.PURPLE_STAINED_GLASS;
+        Material ringMaterial = (SKIN_DEMATERIALIZER.equals(
+                skinVariant)) ? Material.LIGHT_BLUE_STAINED_GLASS : Material.PURPLE_STAINED_GLASS;
 
         Material coreMaterial = (SKIN_DEMATERIALIZER.equals(skinVariant)) ? Material.SEA_LANTERN : Material.OBSIDIAN;
 
         Material accentMaterial = (SKIN_DEMATERIALIZER.equals(skinVariant)) ? Material.GLASS : Material.AMETHYST_BLOCK;
 
-        displays.add(spawnBlockDisplay(plugin, center, ringMaterial, new Vector3f(-0.52f, -0.02f, -0.52f), new Vector3f(1.04f, 1.96f, 1.04f)));
-        displays.add(spawnBlockDisplay(plugin, center.clone().add(0, 0.28, 0), coreMaterial, new Vector3f(-0.18f, -0.18f, -0.18f), new Vector3f(0.36f, 0.36f, 0.36f)));
-        displays.add(spawnBlockDisplay(plugin, center.clone().add(0, 0.88, 0), accentMaterial, new Vector3f(-0.10f, -0.10f, -0.10f), new Vector3f(0.20f, 0.20f, 0.20f)));
+        displays.add(spawnBlockDisplay(plugin, center, ringMaterial, new Vector3f(-0.52f, -0.02f, -0.52f),
+                new Vector3f(1.04f, 1.96f, 1.04f)));
+        displays.add(spawnBlockDisplay(plugin, center.clone().add(0, 0.28, 0), coreMaterial,
+                new Vector3f(-0.18f, -0.18f, -0.18f), new Vector3f(0.36f, 0.36f, 0.36f)));
+        displays.add(spawnBlockDisplay(plugin, center.clone().add(0, 0.88, 0), accentMaterial,
+                new Vector3f(-0.10f, -0.10f, -0.10f), new Vector3f(0.20f, 0.20f, 0.20f)));
 
         if (SKIN_DEMATERIALIZER.equals(skinVariant)) {
-            displays.add(spawnBlockDisplay(plugin, center.clone().add(0.26, 0.52, 0.0), Material.SEA_LANTERN, new Vector3f(-0.08f, -0.08f, -0.08f), new Vector3f(0.16f, 0.16f, 0.16f)));
-            displays.add(spawnBlockDisplay(plugin, center.clone().add(-0.24, 0.96, 0.0), Material.GLASS, new Vector3f(-0.07f, -0.07f, -0.07f), new Vector3f(0.14f, 0.14f, 0.14f)));
-            displays.add(spawnBlockDisplay(plugin, center.clone().add(0.0, 1.18, 0.24), Material.AMETHYST_BLOCK, new Vector3f(-0.09f, -0.09f, -0.09f), new Vector3f(0.18f, 0.18f, 0.18f)));
-            displays.add(spawnBlockDisplay(plugin, center.clone().add(0.0, 1.42, -0.22), Material.LIGHT_BLUE_STAINED_GLASS, new Vector3f(-0.06f, -0.06f, -0.06f), new Vector3f(0.12f, 0.12f, 0.12f)));
+            displays.add(spawnBlockDisplay(plugin, center.clone().add(0.26, 0.52, 0.0), Material.SEA_LANTERN,
+                    new Vector3f(-0.08f, -0.08f, -0.08f), new Vector3f(0.16f, 0.16f, 0.16f)));
+            displays.add(spawnBlockDisplay(plugin, center.clone().add(-0.24, 0.96, 0.0), Material.GLASS,
+                    new Vector3f(-0.07f, -0.07f, -0.07f), new Vector3f(0.14f, 0.14f, 0.14f)));
+            displays.add(spawnBlockDisplay(plugin, center.clone().add(0.0, 1.18, 0.24), Material.AMETHYST_BLOCK,
+                    new Vector3f(-0.09f, -0.09f, -0.09f), new Vector3f(0.18f, 0.18f, 0.18f)));
+            displays.add(
+                    spawnBlockDisplay(plugin, center.clone().add(0.0, 1.42, -0.22), Material.LIGHT_BLUE_STAINED_GLASS,
+                            new Vector3f(-0.06f, -0.06f, -0.06f), new Vector3f(0.12f, 0.12f, 0.12f)));
         }
 
         for (Display display : displays) {
@@ -537,14 +558,18 @@ public class RemoteGatewayItem implements GameItem {
                     return;
                 }
 
-                spawnTrail(world, sourceCenter.clone().add(0, 0.72, 0), targetCenter.clone().add(0, 0.72, 0), darker(darker(color)), trailDuration * 2, particleCount);
-                spawnTrail(world, targetCenter.clone().add(0, 0.72, 0), sourceCenter.clone().add(0, 0.72, 0), lighter(lighter(color)), trailDuration * 2 - 2, particleCount);
+                spawnTrail(world, sourceCenter.clone().add(0, 0.72, 0), targetCenter.clone().add(0, 0.72, 0),
+                        darker(darker(color)), trailDuration * 2, particleCount);
+                spawnTrail(world, targetCenter.clone().add(0, 0.72, 0), sourceCenter.clone().add(0, 0.72, 0),
+                        lighter(lighter(color)), trailDuration * 2 - 2, particleCount);
                 ticks++;
             }
         }.runTaskTimer(plugin, 0L, 2L);
 
-        world.spawnParticle(Particle.PORTAL, sourceCenter.clone().add(0, 0.7, 0), particleCount, spread, 0.15 + (progress * 0.1), spread, 0.08 + (progress * 0.06));
-        world.spawnParticle(Particle.DUST_COLOR_TRANSITION, targetCenter.clone().add(0, 0.7, 0), particleCount / 2, spread * 0.8, 0.12 + (progress * 0.08), spread * 0.8, 0.0,
+        world.spawnParticle(Particle.PORTAL, sourceCenter.clone().add(0, 0.7, 0), particleCount, spread,
+                0.15 + (progress * 0.1), spread, 0.08 + (progress * 0.06));
+        world.spawnParticle(Particle.DUST_COLOR_TRANSITION, targetCenter.clone().add(0, 0.7, 0), particleCount / 2,
+                spread * 0.8, 0.12 + (progress * 0.08), spread * 0.8, 0.0,
                 new Particle.DustTransition(darker(color), lighter(color), 1.0f));
 
     }
@@ -575,19 +600,26 @@ public class RemoteGatewayItem implements GameItem {
                 }
 
                 int perTickCount = 2 + Math.round(clampedProgress * 4.0f);
-                spawnTrail(world, sourceCenter.clone().add(0, 0.8, 0), targetCenter.clone().add(0, 0.8, 0), color, longTrailDuration, perTickCount);
-                spawnTrail(world, targetCenter.clone().add(0, 0.8, 0), sourceCenter.clone().add(0, 0.8, 0), lighter(color), shortTrailDuration, perTickCount);
-                spawnTrail(world, sourceCenter.clone().add(0, 0.95, 0), targetCenter.clone().add(0, 0.95, 0), lighter(color), shortTrailDuration + 4, perTickCount);
-                spawnTrail(world, sourceCenter.clone().add(0, 0.62, 0), targetCenter.clone().add(0, 0.62, 0), color, shortTrailDuration + 4, perTickCount);
+                spawnTrail(world, sourceCenter.clone().add(0, 0.8, 0), targetCenter.clone().add(0, 0.8, 0), color,
+                        longTrailDuration, perTickCount);
+                spawnTrail(world, targetCenter.clone().add(0, 0.8, 0), sourceCenter.clone().add(0, 0.8, 0),
+                        lighter(color), shortTrailDuration, perTickCount);
+                spawnTrail(world, sourceCenter.clone().add(0, 0.95, 0), targetCenter.clone().add(0, 0.95, 0),
+                        lighter(color), shortTrailDuration + 4, perTickCount);
+                spawnTrail(world, sourceCenter.clone().add(0, 0.62, 0), targetCenter.clone().add(0, 0.62, 0), color,
+                        shortTrailDuration + 4, perTickCount);
                 ticks++;
             }
         }.runTaskTimer(plugin, 0L, 2L);
-        world.spawnParticle(Particle.PORTAL, sourceCenter.clone().add(0, 0.7, 0), portalBurst, spread, 0.24 + (clampedProgress * 0.22), spread, 0.18 + (clampedProgress * 0.12));
-        world.spawnParticle(Particle.PORTAL, targetCenter.clone().add(0, 0.7, 0), portalBurst, spread, 0.24 + (clampedProgress * 0.22), spread, 0.18 + (clampedProgress * 0.12));
+        world.spawnParticle(Particle.PORTAL, sourceCenter.clone().add(0, 0.7, 0), portalBurst, spread,
+                0.24 + (clampedProgress * 0.22), spread, 0.18 + (clampedProgress * 0.12));
+        world.spawnParticle(Particle.PORTAL, targetCenter.clone().add(0, 0.7, 0), portalBurst, spread,
+                0.24 + (clampedProgress * 0.22), spread, 0.18 + (clampedProgress * 0.12));
     }
 
     private static void spawnTrail(World world, Location from, Location to, Color color, int duration, int count) {
-        world.spawnParticle(Particle.TRAIL, from, count, 0.25, 0.5, 0.25, new Particle.Trail(to, color, Math.max(1, duration)));
+        world.spawnParticle(Particle.TRAIL, from, count, 0.25, 0.5, 0.25,
+                new Particle.Trail(to, color, Math.max(1, duration)));
     }
 
     private static int voidLatticeSegmentsForRing(int ring) {
@@ -637,7 +669,8 @@ public class RemoteGatewayItem implements GameItem {
                     new AxisAngle4f(0, 0, 0, 0)
             ));
             display.setPersistent(true);
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "remote_gateway"), org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "remote_gateway"),
+                    org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
         });
     }
 
@@ -654,7 +687,8 @@ public class RemoteGatewayItem implements GameItem {
                     new AxisAngle4f(0, 0, 0, 0)
             ));
             display.setPersistent(true);
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "remote_gateway"), org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "remote_gateway"),
+                    org.bukkit.persistence.PersistentDataType.BOOLEAN, true);
         });
     }
 
@@ -776,12 +810,13 @@ public class RemoteGatewayItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int duration = plugin.getSettingRegistry().get("hider-items.remote-gateway.duration-seconds", 120);
         if (duration == -1) {
-            return "Place paired gateways that teleport between anchors until the round ends.";
+            return plugin.trText(player, "item.remote_gateway.description.permanent");
         }
-        return "Place paired gateways that teleport between anchors for " + duration + " seconds.";
+        return plugin.trText(player, "item.remote_gateway.description.timed",
+                java.util.Map.of("duration", String.valueOf(duration)));
     }
 
     @Override
@@ -791,7 +826,9 @@ public class RemoteGatewayItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> placeGateway(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeGateway(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.remote_gateway.name")
+                .withLoreKey("item.remote_gateway.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(cooldown * 20)
@@ -815,7 +852,6 @@ public class RemoteGatewayItem implements GameItem {
         );
     }
 }
-
 
 
 

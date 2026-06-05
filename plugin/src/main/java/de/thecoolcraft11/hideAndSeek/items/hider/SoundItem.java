@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -48,21 +49,26 @@ public class SoundItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int points = plugin.getPointService().getInt("points.hider.taunt.small", 25);
-        return String.format("Play a loud cat taunt for all players, grants %d points.", points);
+        return plugin.trText(player, "item.sound.description",
+                java.util.Map.of("points", String.valueOf(points)));
     }
 
     @Override
     public void register(HideAndSeek plugin) {
         int soundCooldown = plugin.getSettingRegistry().get("hider-items.sound.cooldown", 4);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                        context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
                 .withVanillaCooldown(soundCooldown * 20)
                 .withCustomCooldown(soundCooldown * 1000L)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.sound.name")
+                .withLoreKey("item.sound.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)
@@ -90,9 +96,12 @@ public class SoundItem implements GameItem {
             accentParticle = Particle.HAPPY_VILLAGER;
         }
 
-        double volumeMultiplier = plugin.getSettingRegistry().get("hider-items.sound.variants." + variantKey + ".volume-multiplier", 1.0);
-        double pitchMultiplier = plugin.getSettingRegistry().get("hider-items.sound.variants." + variantKey + ".pitch-multiplier", 1.0);
-        double particleMultiplier = plugin.getSettingRegistry().get("hider-items.sound.variants." + variantKey + ".particle-multiplier", 1.0);
+        double volumeMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.sound.variants." + variantKey + ".volume-multiplier", 1.0);
+        double pitchMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.sound.variants." + variantKey + ".pitch-multiplier", 1.0);
+        double particleMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.sound.variants." + variantKey + ".particle-multiplier", 1.0);
 
         double volume = Math.max(0.05, baseVolume * volumeMultiplier);
         double pitch = Math.max(0.1, basePitch * pitchMultiplier);

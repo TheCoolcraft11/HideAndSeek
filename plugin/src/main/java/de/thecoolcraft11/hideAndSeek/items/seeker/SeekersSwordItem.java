@@ -32,6 +32,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -67,14 +68,15 @@ public class SeekersSwordItem implements GameItem {
             meta.setUnbreakable(true);
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
             sword.setItemMeta(meta);
-            sword.setData(DataComponentTypes.BLOCKS_ATTACKS, BlocksAttacks.blocksAttacks().addDamageReduction(DamageReduction.damageReduction().base(0).factor(0).horizontalBlockingAngle(0.1f).build()).build());
+            sword.setData(DataComponentTypes.BLOCKS_ATTACKS, BlocksAttacks.blocksAttacks().addDamageReduction(
+                    DamageReduction.damageReduction().base(0).factor(0).horizontalBlockingAngle(0.1f).build()).build());
         }
 
         return sword;
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         return "Main weapon: hold block to charge and throw your sword.";
     }
 
@@ -91,6 +93,9 @@ public class SeekersSwordItem implements GameItem {
                 .cancelAttackOnCooldown(false)
                 .withAction(ItemActionType.BLOCK_START, context -> startSwordCharge(context, plugin))
                 .withAction(ItemActionType.BLOCK_RELEASE, context -> releaseSwordCharge(context, plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.sword.name")
+                .withLoreKey("item.sword.lore")
                 .build());
     }
 
@@ -106,7 +111,8 @@ public class SeekersSwordItem implements GameItem {
 
     private void releaseSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
         Player seeker = context.getPlayer();
-        int maxChargeSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
+        int maxChargeSeconds = Math.max(1,
+                plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
         long maxChargeMs = maxChargeSeconds * 1000L;
 
         long measuredHoldMs = Math.max(0L, context.getHoldDurationMs());
@@ -288,7 +294,8 @@ public class SeekersSwordItem implements GameItem {
     private void startSwordCharge(ItemInteractionContext context, HideAndSeek plugin) {
         context.skipCooldown();
         Player seeker = context.getPlayer();
-        int maxChargeSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
+        int maxChargeSeconds = Math.max(1,
+                plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-charge-seconds", 5));
         long maxChargeMs = maxChargeSeconds * 1000L;
         double minSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.min-speed", 0.8);
         double maxSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-speed", 2.4);
@@ -302,7 +309,8 @@ public class SeekersSwordItem implements GameItem {
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
         swordChargeXp.put(seeker.getUniqueId(), savedXp);
 
-        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, maxChargeSeconds * 20L, XpProgressHelper.Mode.COUNTUP, 10);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, maxChargeSeconds * 20L,
+                XpProgressHelper.Mode.COUNTUP, 10);
         swordChargeXpTasks.put(seeker.getUniqueId(), xpTask);
 
         BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
@@ -351,8 +359,10 @@ public class SeekersSwordItem implements GameItem {
         double minSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.min-speed", 0.8);
         double maxSpeed = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-speed", 2.4);
         double gravity = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.gravity", 0.035);
-        int maxFlightSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-flight-seconds", 6));
-        int stuckSeconds = Math.max(1, plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.stuck-seconds", 12));
+        int maxFlightSeconds = Math.max(1,
+                plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.max-flight-seconds", 6));
+        int stuckSeconds = Math.max(1,
+                plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.stuck-seconds", 12));
         double hitbox = plugin.getSettingRegistry().get("seeker-items.seeker-sword-throw.hitbox", 0.4);
         boolean autoAim = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), AutoAimPerk.ID);
         boolean bounce = plugin.getPerkStateManager().hasPurchased(seeker.getUniqueId(), SwordBouncePerk.ID);
@@ -388,7 +398,8 @@ public class SeekersSwordItem implements GameItem {
             ));
         });
 
-        seeker.getWorld().playSound(seeker.getLocation(), Sound.ITEM_TRIDENT_THROW, 1.0f, (float) (0.8 + chargeRatio * 0.5));
+        seeker.getWorld().playSound(seeker.getLocation(), Sound.ITEM_TRIDENT_THROW, 1.0f,
+                (float) (0.8 + chargeRatio * 0.5));
         if (energyBlade) {
             seeker.getWorld().playSound(seeker.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.55f, 1.5f);
         } else if (banHammer) {
@@ -437,18 +448,24 @@ public class SeekersSwordItem implements GameItem {
                 if (hitEntity instanceof Player target) {
                     double damage = getThrownSwordDamage(seeker) * Math.pow(bounceDamageMultiplier, bounceHits[0]);
                     target.damage(damage, seeker);
-                    target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 10, 0.25, 0.4, 0.25, 0.02);
+                    target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 10, 0.25, 0.4,
+                            0.25, 0.02);
                     target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
                     seeker.playSound(seeker.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.1f);
                     if (energyBlade) {
-                        target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
-                        target.getWorld().playSound(target.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.45f, 1.5f);
+                        target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 10, 0.2,
+                                0.3, 0.2, 0.02);
+                        target.getWorld().playSound(target.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.45f,
+                                1.5f);
                     } else if (banHammer) {
-                        target.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, target.getLocation().add(0, 1, 0), 6, 0.2, 0.2, 0.2, 0.01);
+                        target.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, target.getLocation().add(0, 1, 0), 6,
+                                0.2, 0.2, 0.2, 0.01);
                         target.getWorld().playSound(target.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 0.8f);
                     } else if (giantSpatula) {
-                        target.getWorld().spawnParticle(Particle.CLOUD, target.getLocation().add(0, 1, 0), 10, 0.22, 0.3, 0.22, 0.02);
-                        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.45f, 1.25f);
+                        target.getWorld().spawnParticle(Particle.CLOUD, target.getLocation().add(0, 1, 0), 10, 0.22,
+                                0.3, 0.22, 0.02);
+                        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.45f,
+                                1.25f);
                     }
 
                     if (bounce && remainingBounces[0] > 0) {
@@ -483,7 +500,8 @@ public class SeekersSwordItem implements GameItem {
                 if (blockTrace != null) {
                     Block hitBlock = blockTrace.getHitBlock();
                     if (hitBlock != null) {
-                        boolean gazeKill = plugin.getSettingRegistry().get("game.seekers.kill-mode").equals("GAZE_KILL");
+                        boolean gazeKill = plugin.getSettingRegistry().get("game.seekers.kill-mode").equals(
+                                "GAZE_KILL");
                         plugin.getBlockModeListener().damageHiddenPlayer(seeker, hitBlock, gazeKill);
                     }
 
@@ -521,14 +539,16 @@ public class SeekersSwordItem implements GameItem {
                     swordDisplay.setInterpolationDuration(3);
                     world.playSound(impact, Sound.ITEM_TRIDENT_HIT_GROUND, 1.0f, 0.9f);
                     if (energyBlade) {
-                        world.spawnParticle(Particle.ELECTRIC_SPARK, impact.clone().add(0, 0.2, 0), 14, 0.18, 0.18, 0.18, 0.03);
+                        world.spawnParticle(Particle.ELECTRIC_SPARK, impact.clone().add(0, 0.2, 0), 14, 0.18, 0.18,
+                                0.18, 0.03);
                         world.playSound(impact, Sound.BLOCK_BEACON_ACTIVATE, 0.45f, 1.45f);
                     } else if (banHammer) {
                         world.spawnParticle(Particle.BLOCK, impact.clone().add(0, 0.2, 0), 14, 0.2, 0.2, 0.2,
                                 Material.IRON_BLOCK.createBlockData());
                         world.playSound(impact, Sound.BLOCK_ANVIL_BREAK, 0.4f, 0.85f);
                     } else if (giantSpatula) {
-                        world.spawnParticle(Particle.BUBBLE_POP, impact.clone().add(0, 0.2, 0), 14, 0.2, 0.2, 0.2, 0.04);
+                        world.spawnParticle(Particle.BUBBLE_POP, impact.clone().add(0, 0.2, 0), 14, 0.2, 0.2, 0.2,
+                                0.04);
                         world.playSound(impact, Sound.ITEM_BUCKET_EMPTY, 0.35f, 1.4f);
                     }
 

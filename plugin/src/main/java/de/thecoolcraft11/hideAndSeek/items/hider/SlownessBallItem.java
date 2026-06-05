@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -44,9 +45,10 @@ public class SlownessBallItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.slowness-ball.duration", 6);
-        return String.format("Throw an ice ball that slows seekers for %ds.", duration.intValue());
+        return plugin.trText(player, "item.slowness_ball.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override
@@ -55,7 +57,9 @@ public class SlownessBallItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> throwSlownessBall(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> throwSlownessBall(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.slowness_ball.name")
+                .withLoreKey("item.slowness_ball.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(slownessBallCooldown * 20)
@@ -87,13 +91,18 @@ public class SlownessBallItem implements GameItem {
         org.bukkit.entity.Snowball snowball = player.launchProjectile(org.bukkit.entity.Snowball.class);
         snowball.setItem(new ItemStack(stickyHoney ? Material.HONEY_BOTTLE : tarBall ? Material.COAL : Material.ICE));
         snowball.setVelocity(snowball.getVelocity().multiply(1.5));
-        snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball"), PersistentDataType.BOOLEAN, true);
-        snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_duration"), PersistentDataType.INTEGER, duration);
-        snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_amplifier"), PersistentDataType.INTEGER, amplifier);
+        snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball"),
+                PersistentDataType.BOOLEAN, true);
+        snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_duration"),
+                PersistentDataType.INTEGER, duration);
+        snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_amplifier"),
+                PersistentDataType.INTEGER, amplifier);
         if (stickyHoney) {
-            snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_skin"), PersistentDataType.STRING, "sticky_honey");
+            snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_skin"),
+                    PersistentDataType.STRING, "sticky_honey");
         } else if (tarBall) {
-            snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_skin"), PersistentDataType.STRING, "tar_ball");
+            snowball.getPersistentDataContainer().set(new NamespacedKey(plugin, "slowness_ball_skin"),
+                    PersistentDataType.STRING, "tar_ball");
         }
 
         if (tarBall) {
@@ -111,13 +120,15 @@ public class SlownessBallItem implements GameItem {
                 }
 
                 if (stickyHoney) {
-                    snowball.getWorld().spawnParticle(Particle.DRIPPING_HONEY, snowball.getLocation(), 3, 0.1, 0.1, 0.1, 0.01);
+                    snowball.getWorld().spawnParticle(Particle.DRIPPING_HONEY, snowball.getLocation(), 3, 0.1, 0.1, 0.1,
+                            0.01);
                 } else if (tarBall) {
                     snowball.getWorld().spawnParticle(Particle.ASH, snowball.getLocation(), 3, 0.1, 0.1, 0.1, 0.02);
                     snowball.getWorld().spawnParticle(Particle.DUST, snowball.getLocation(), 2, 0.08, 0.08, 0.08,
                             new Particle.DustOptions(org.bukkit.Color.fromRGB(60, 60, 60), 1.0f));
                 } else {
-                    snowball.getWorld().spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 3, 0.1, 0.1, 0.1, 0.05);
+                    snowball.getWorld().spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 3, 0.1, 0.1, 0.1,
+                            0.05);
                 }
             }
         }.runTaskTimer(plugin, 1L, 2L);

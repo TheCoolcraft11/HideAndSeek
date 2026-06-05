@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -42,19 +43,25 @@ public class BlockSelectorItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Open the block picker to choose your disguise block.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.block_selector.description");
     }
 
     @Override
     public void register(HideAndSeek plugin) {
         BlockSelectorGUI blockSelectorGUI = plugin.getBlockSelectorGUI();
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
-                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_AIR,
+                        context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR,
+                        context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                        context -> openBlockSelectorUnhidden(context.getPlayer(), blockSelectorGUI))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.block_selector.name")
+                .withLoreKey("item.block_selector.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)
@@ -68,4 +75,3 @@ public class BlockSelectorItem implements GameItem {
         blockSelectorGUI.open(player);
     }
 }
-

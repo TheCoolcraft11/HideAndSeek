@@ -9,9 +9,11 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 public class SeekersMaskItem implements GameItem {
     public static final String ID = "has_seeker_mask";
@@ -43,7 +45,7 @@ public class SeekersMaskItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         return "Bound seeker helmet item.";
     }
 
@@ -56,6 +58,9 @@ public class SeekersMaskItem implements GameItem {
                 .allowArmor(true)
                 .withInventoryMovePrevention(true)
                 .cancelDefaultAction(false)
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.mask.name")
+                .withLoreKey("item.mask.lore")
                 .build());
     }
 }

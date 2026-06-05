@@ -9,8 +9,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class SkinStatsItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         return "View which skin each hider is currently disguised as.";
     }
 
@@ -51,7 +53,11 @@ public class SkinStatsItem implements GameItem {
 
         plugin.getCustomItemManager().registerItem(
                 new CustomItemBuilder(createItem(plugin), getId())
-                        .withDescription(getDescription(plugin))
+                        .withDescription(getDescription(plugin, null))
+                        .withNameKey("item.skin_stats.name")
+                        .withLoreKey("item.skin_stats.lore")
+                        .withNameKey("item.skin_stats.name")
+                        .withLoreKey("item.skin_stats.lore")
                         .withAction(ItemActionType.RIGHT_CLICK_AIR,
                                 ctx -> gui.open(ctx.getPlayer()))
                         .withAction(ItemActionType.RIGHT_CLICK_BLOCK,

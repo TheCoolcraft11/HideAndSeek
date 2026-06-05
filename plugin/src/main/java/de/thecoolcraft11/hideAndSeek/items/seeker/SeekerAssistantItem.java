@@ -17,6 +17,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ public class SeekerAssistantItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         return "Summons a hunter assistant that tracks and shoots at visible hiders.";
     }
 
@@ -85,7 +86,11 @@ public class SeekerAssistantItem implements GameItem {
                 new CustomItemBuilder(createItem(plugin), getId())
                         .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> handleUse(context.getPlayer(), plugin))
                         .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> handleUse(context.getPlayer(), plugin))
-                        .withDescription(getDescription(plugin))
+                        .withDescription(getDescription(plugin, null))
+                        .withNameKey("item.assistant.name")
+                        .withLoreKey("item.assistant.lore")
+                        .withNameKey("item.assistant.name")
+                        .withLoreKey("item.assistant.lore")
                         .withDropPrevention(true)
                         .withCraftPrevention(true)
                         .withVanillaCooldown(cooldownSeconds * 20)
@@ -100,18 +105,21 @@ public class SeekerAssistantItem implements GameItem {
 
     private void handleUse(Player player, HideAndSeek plugin) {
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.", NamedTextColor.RED));
+            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.",
+                    NamedTextColor.RED));
             return;
         }
 
         if (!"seeking".equalsIgnoreCase(plugin.getStateManager().getCurrentPhaseId())) {
-            player.sendMessage(Component.text("The Seeker's Assistant can only be summoned during seeking.", NamedTextColor.RED));
+            player.sendMessage(
+                    Component.text("The Seeker's Assistant can only be summoned during seeking.", NamedTextColor.RED));
             return;
         }
 
         UUID seekerId = player.getUniqueId();
         ItemStateManager.pruneInvalidAssistants(seekerId);
-        List<UUID> active = ItemStateManager.activeAssistants.computeIfAbsent(seekerId, ignored -> new CopyOnWriteArrayList<>());
+        List<UUID> active = ItemStateManager.activeAssistants.computeIfAbsent(seekerId,
+                ignored -> new CopyOnWriteArrayList<>());
         int max = plugin.getSettingRegistry().get("seeker-items.assistant.max-per-seeker", 2);
         if (active.size() >= max) {
             player.sendMessage(Component.text("You already have " + max + " assistants active!", NamedTextColor.RED));

@@ -21,6 +21,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -99,10 +100,12 @@ public class InvisibilityCloakItem implements GameItem {
         player.getWorld().spawnParticle(Particle.GLOW, loc, 15, 0.4, 0.4, 0.4, 0.1);
         player.playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 1.0f, 1.5f);
         if (cardboard) {
-            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3, Material.OAK_PLANKS.createBlockData());
+            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3,
+                    Material.OAK_PLANKS.createBlockData());
             player.playSound(player.getLocation(), Sound.BLOCK_WOOD_PLACE, 0.55f, 0.9f);
         } else if (camo) {
-            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3, Material.OAK_LEAVES.createBlockData());
+            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3,
+                    Material.OAK_LEAVES.createBlockData());
             player.playSound(player.getLocation(), Sound.BLOCK_AZALEA_LEAVES_FALL, 0.45f, 1.1f);
         }
 
@@ -111,7 +114,8 @@ public class InvisibilityCloakItem implements GameItem {
         XpProgressHelper.stopAndClear(player, prevXpTask);
 
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
-        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                duration);
         invisibilityCloakXpTasks.put(player.getUniqueId(), xpTask);
 
         new BukkitRunnable() {
@@ -154,9 +158,10 @@ public class InvisibilityCloakItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.duration", 8);
-        return String.format("Turn invisible for %ds.", duration.intValue());
+        return plugin.trText(player, "item.invisibility_cloak.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override
@@ -168,9 +173,13 @@ public class InvisibilityCloakItem implements GameItem {
     public void register(HideAndSeek plugin) {
         int invisibilityCloakCooldown = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.cooldown", 20);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> useInvisibilityCloak(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> useInvisibilityCloak(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_AIR,
+                        context -> useInvisibilityCloak(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> useInvisibilityCloak(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.invisibility_cloak.name")
+                .withLoreKey("item.invisibility_cloak.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(invisibilityCloakCooldown * 20)

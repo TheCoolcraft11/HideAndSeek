@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -100,7 +101,8 @@ public class CurseSpellItem implements GameItem {
         BukkitTask prevTask = curseSpellSeekerXpTasks.remove(seeker.getUniqueId());
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
         XpProgressHelper.stopAndClear(seeker, prevTask);
-        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                duration);
         curseSpellSeekerXpTasks.put(seeker.getUniqueId(), xpTask);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -131,8 +133,10 @@ public class CurseSpellItem implements GameItem {
                 nearestSeeker = candidate;
             }
         }
-        boolean voodoo = nearestSeeker != null && ItemSkinSelectionService.isSelected(nearestSeeker, ID, "skin_voodoo_magic");
-        boolean toxic = nearestSeeker != null && ItemSkinSelectionService.isSelected(nearestSeeker, ID, "skin_toxic_tome");
+        boolean voodoo = nearestSeeker != null && ItemSkinSelectionService.isSelected(nearestSeeker, ID,
+                "skin_voodoo_magic");
+        boolean toxic = nearestSeeker != null && ItemSkinSelectionService.isSelected(nearestSeeker, ID,
+                "skin_toxic_tome");
         final Player auraSeeker = nearestSeeker;
         long until = System.currentTimeMillis() + (duration * 1000L);
         hiderCursedUntil.put(hider.getUniqueId(), until);
@@ -159,7 +163,9 @@ public class CurseSpellItem implements GameItem {
             if (scale != null) {
                 scale.setBaseValue(1.0);
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    if (HideAndSeek.getDataController().getHiders().contains(hider.getUniqueId()) && HideAndSeek.getActiveInstance().getStateManager().isPhase("hiding")) {
+                    if (HideAndSeek.getDataController().getHiders().contains(
+                            hider.getUniqueId()) && HideAndSeek.getActiveInstance().getStateManager().isPhase(
+                            "hiding")) {
                         scale.setBaseValue(smallSize);
                     }
                 }, shrinkDelay * 20L);
@@ -168,8 +174,10 @@ public class CurseSpellItem implements GameItem {
 
         hider.sendMessage(Component.text("You have been cursed!", NamedTextColor.DARK_PURPLE));
         if (voodoo) {
-            hider.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, hider.getLocation().add(0, 1, 0), 12, 0.25, 0.3, 0.25, 0.02);
-            hider.getWorld().spawnParticle(Particle.TRIAL_OMEN, hider.getLocation().add(0, 1, 0), 4, 0.2, 0.25, 0.2, 0.01);
+            hider.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, hider.getLocation().add(0, 1, 0), 12, 0.25, 0.3,
+                    0.25, 0.02);
+            hider.getWorld().spawnParticle(Particle.TRIAL_OMEN, hider.getLocation().add(0, 1, 0), 4, 0.2, 0.25, 0.2,
+                    0.01);
             hider.playSound(hider.getLocation(), Sound.ENTITY_ALLAY_HURT, 0.45f, 0.7f);
         } else if (toxic) {
             hider.getWorld().spawnParticle(Particle.SNEEZE, hider.getLocation().add(0, 1, 0), 16, 0.3, 0.35, 0.3, 0.05);
@@ -180,7 +188,8 @@ public class CurseSpellItem implements GameItem {
         BukkitTask prevXpTask = hiderCursedXpTasks.remove(hider.getUniqueId());
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(hider);
         XpProgressHelper.stopAndClear(hider, prevXpTask);
-        BukkitTask xpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                duration);
         hiderCursedXpTasks.put(hider.getUniqueId(), xpTask);
 
         new BukkitRunnable() {
@@ -217,7 +226,7 @@ public class CurseSpellItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("seeker-items.curse-spell.active-duration", 10);
         return String.format("Empower your blade for %ds to curse hiders on hit.", duration.intValue());
     }
@@ -251,8 +260,13 @@ public class CurseSpellItem implements GameItem {
         int curseCooldown = plugin.getSettingRegistry().get("seeker-items.curse-spell.cooldown", 30);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> activateCurseSpell(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> activateCurseSpell(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> activateCurseSpell(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.curse_spell.name")
+                .withLoreKey("item.curse_spell.lore")
+                .withNameKey("item.curse_spell.name")
+                .withLoreKey("item.curse_spell.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(curseCooldown * 20)

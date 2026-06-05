@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -55,7 +56,9 @@ public class MedkitItem implements GameItem {
             item.setData(
                     DataComponentTypes.BLOCKS_ATTACKS,
                     BlocksAttacks.blocksAttacks()
-                            .addDamageReduction(DamageReduction.damageReduction().base(0).factor(0).horizontalBlockingAngle(0.1f).build())
+                            .addDamageReduction(
+                                    DamageReduction.damageReduction().base(0).factor(0).horizontalBlockingAngle(
+                                            0.1f).build())
                             .build()
             );
         }
@@ -80,7 +83,8 @@ public class MedkitItem implements GameItem {
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
         medkitChannelXp.put(player.getUniqueId(), savedXp);
 
-        BukkitTask xpTask = XpProgressHelper.start(plugin, player, totalTicks, XpProgressHelper.Mode.COUNTDOWN, channelTime);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, totalTicks, XpProgressHelper.Mode.COUNTDOWN,
+                channelTime);
         medkitChannelTasks.put(player.getUniqueId(), xpTask);
 
 
@@ -121,9 +125,10 @@ public class MedkitItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number channelTime = plugin.getSettingRegistry().get("hider-items.medkit.channel-time", 5);
-        return String.format("Hold block for %ds, then release to heal yourself fully.", channelTime.intValue());
+        return plugin.trText(player, "item.medkit.description",
+                java.util.Map.of("channel_time", String.valueOf(channelTime.intValue())));
     }
 
     @Override
@@ -140,7 +145,9 @@ public class MedkitItem implements GameItem {
                 .withCustomCooldown(medkitCooldown * 1000L)
                 .withVanillaCooldown(medkitCooldown * 20)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.medkit.name")
+                .withLoreKey("item.medkit.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)
@@ -166,7 +173,8 @@ public class MedkitItem implements GameItem {
         if (holdDurationMs < requiredMs) {
             long remainingMs = requiredMs - holdDurationMs;
             double remainingSeconds = Math.ceil(remainingMs / 100.0) / 10.0;
-            player.sendMessage(Component.text("Medkit canceled. Hold for " + remainingSeconds + "s longer.", NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Medkit canceled. Hold for " + remainingSeconds + "s longer.",
+                    NamedTextColor.YELLOW));
             context.skipCooldown();
             return;
         }
@@ -174,20 +182,25 @@ public class MedkitItem implements GameItem {
         double healAmount = plugin.getSettingRegistry().get("hider-items.medkit.heal-amount", 20.0);
         boolean bandageRoll = ItemSkinSelectionService.isSelected(player, ID, "skin_bandage_roll");
         boolean magicPotion = ItemSkinSelectionService.isSelected(player, ID, "skin_magic_potion");
-        double maxHealth = Objects.requireNonNull(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue();
+        double maxHealth = Objects.requireNonNull(
+                player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue();
         double newHealth = Math.min(maxHealth, player.getHealth() + healAmount);
         player.setHealth(newHealth);
         player.sendMessage(Component.text("Healed!", NamedTextColor.GREEN));
-        player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation().add(0, 1, 0), 10, 0.3, 0.4, 0.3, 0.1);
+        player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation().add(0, 1, 0), 10, 0.3, 0.4, 0.3,
+                0.1);
         player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 0.3f, 1.5f);
         if (bandageRoll) {
-            player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0, 1, 0), 12, 0.25, 0.3, 0.25, 0.02);
+            player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0, 1, 0), 12, 0.25, 0.3, 0.25,
+                    0.02);
             player.getWorld().spawnParticle(Particle.BLOCK, player.getLocation().add(0, 1, 0), 6, 0.2, 0.25, 0.2,
                     Material.WHITE_WOOL.createBlockData());
             player.playSound(player.getLocation(), Sound.ITEM_HONEY_BOTTLE_DRINK, 0.45f, 1.3f);
         } else if (magicPotion) {
-            player.getWorld().spawnParticle(Particle.WITCH, player.getLocation().add(0, 1, 0), 14, 0.3, 0.35, 0.3, 0.03);
-            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 10, 0.28, 0.32, 0.28, 0.02);
+            player.getWorld().spawnParticle(Particle.WITCH, player.getLocation().add(0, 1, 0), 14, 0.3, 0.35, 0.3,
+                    0.03);
+            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 10, 0.28, 0.32, 0.28,
+                    0.02);
             player.playSound(player.getLocation(), Sound.ENTITY_WITCH_DRINK, 0.45f, 1.2f);
         }
     }
