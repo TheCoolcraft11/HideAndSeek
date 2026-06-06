@@ -23,6 +23,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.ghostEssenceXpTasks;
@@ -162,8 +163,7 @@ public class GhostEssenceItem implements GameItem {
     private void useGhostEssence(Player player, HideAndSeek plugin) {
 
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.",
-                    NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.ghost_essence.messages.nms_unavailable"));
             return;
         }
 
@@ -193,8 +193,8 @@ public class GhostEssenceItem implements GameItem {
         final Vector boostVector = new Vector(rawDir.getX(), Math.max(0, rawDir.getY()), rawDir.getZ())
                 .normalize().multiply(boostPower);
 
-        player.sendMessage(Component.text("You are now a Ghost! Phasing enabled for " + maxDurationSeconds + "s.",
-                NamedTextColor.AQUA));
+        player.sendMessage(plugin.trText(player, "item.ghost_essence.messages.activated",
+                Map.of("duration", String.valueOf(maxDurationSeconds))));
         player.playSound(player.getLocation(), Sound.ENTITY_GHAST_WARN, 1f, 1.2f);
         if (spectral) {
             player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, startLoc.clone().add(0, 1, 0), 22, 0.35, 0.5,
@@ -362,10 +362,11 @@ public class GhostEssenceItem implements GameItem {
 
         if (isCheating) {
             player.teleport(startLoc);
-            player.sendMessage(Component.text(reason, NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.ghost_essence.messages.error",
+                    Map.of("reason", reason)));
             player.playSound(startLoc, Sound.ENTITY_GHAST_HURT, 1f, 1f);
         } else {
-            player.sendMessage(Component.text("You have successfully materialized!", NamedTextColor.GREEN));
+            player.sendMessage(plugin.trText(player, "item.ghost_essence.messages.materialized"));
             player.playSound(adjustedLoc, Sound.ENTITY_GHAST_DEATH, 1f, 1f);
         }
 

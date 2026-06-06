@@ -69,7 +69,7 @@ public class MedkitItem implements GameItem {
         Player player = context.getPlayer();
         context.skipCooldown();
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.medkit.messages.only_hiders"));
             return;
         }
 
@@ -165,7 +165,7 @@ public class MedkitItem implements GameItem {
         clearMedkitCharge(player);
 
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.medkit.messages.only_hiders"));
             context.skipCooldown();
             return;
         }
@@ -173,8 +173,8 @@ public class MedkitItem implements GameItem {
         if (holdDurationMs < requiredMs) {
             long remainingMs = requiredMs - holdDurationMs;
             double remainingSeconds = Math.ceil(remainingMs / 100.0) / 10.0;
-            player.sendMessage(Component.text("Medkit canceled. Hold for " + remainingSeconds + "s longer.",
-                    NamedTextColor.YELLOW));
+            player.sendMessage(plugin.trText(player, "item.medkit.messages.canceled",
+                    java.util.Map.of("remaining", String.format("%.1f", remainingSeconds))));
             context.skipCooldown();
             return;
         }
@@ -186,7 +186,7 @@ public class MedkitItem implements GameItem {
                 player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue();
         double newHealth = Math.min(maxHealth, player.getHealth() + healAmount);
         player.setHealth(newHealth);
-        player.sendMessage(Component.text("Healed!", NamedTextColor.GREEN));
+        player.sendMessage(plugin.trText(player, "item.medkit.messages.healed"));
         player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation().add(0, 1, 0), 10, 0.3, 0.4, 0.3,
                 0.1);
         player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 0.3f, 1.5f);

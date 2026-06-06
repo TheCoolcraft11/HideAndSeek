@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ExplosionItem implements GameItem {
@@ -130,11 +131,7 @@ public class ExplosionItem implements GameItem {
         int burstParticles = Math.max(1, (int) Math.round(baseBurstParticles * burstMultiplier));
 
         hider.sendMessage(
-                Component.text("You used a taunt!", NamedTextColor.GREEN)
-        );
-        hider.sendMessage(
-                Component.text("+" + tauntPoints + " points", NamedTextColor.GOLD)
-        );
+                plugin.tr(hider, "items.explosion.messages.placed", Map.of("points", String.valueOf(tauntPoints))));
 
         int smokeTaskId = Bukkit.getScheduler().runTaskTimer(
                 plugin,

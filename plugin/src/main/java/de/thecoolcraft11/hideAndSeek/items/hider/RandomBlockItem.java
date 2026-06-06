@@ -105,13 +105,13 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.only_hiders"));
             context.skipCooldown();
             return;
         }
         if (isHiderCursed(player.getUniqueId())) {
             player.sendMessage(
-                    Component.text("You are cursed and cannot change blocks right now!", NamedTextColor.RED));
+                    plugin.trText(player, "item.random_block.messages.cursed_blocks"));
             context.skipCooldown();
             return;
         }
@@ -131,18 +131,18 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.only_hiders"));
             return;
         }
         if (isHiderCursed(player.getUniqueId())) {
             player.sendMessage(
-                    Component.text("You are cursed and cannot change blocks right now!", NamedTextColor.RED));
+                    plugin.trText(player, "item.random_block.messages.cursed_blocks"));
             return;
         }
 
         if (HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
             player.sendMessage(
-                    Component.text("You cant transform into a new block while being hidden!", NamedTextColor.RED));
+                    plugin.trText(player, "item.random_block.messages.hidden_cannot_transform"));
             return;
         }
 
@@ -150,13 +150,13 @@ public class RandomBlockItem implements GameItem {
 
         String currentMap = HideAndSeek.getDataController().getCurrentMapName();
         if (currentMap == null || currentMap.isEmpty()) {
-            player.sendMessage(Component.text("No active map found.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_active_map"));
             return;
         }
 
         List<String> allowedBlocks = plugin.getMapManager().getAllowedBlocksForMap(currentMap);
         if (allowedBlocks.isEmpty()) {
-            player.sendMessage(Component.text("No allowed blocks configured for this map.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_allowed_blocks"));
             return;
         }
 
@@ -170,7 +170,8 @@ public class RandomBlockItem implements GameItem {
         BlockAppearanceConfig config = BlockAppearanceConfig.parse(chosenPattern);
 
         if (config == null) {
-            player.sendMessage(Component.text("Invalid block pattern in config: " + chosenPattern, NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.invalid_block_pattern",
+                    java.util.Map.of("pattern", chosenPattern)));
             return;
         }
 
@@ -180,16 +181,16 @@ public class RandomBlockItem implements GameItem {
             try {
                 chosenMaterial = Material.valueOf(config.getDefaultVariant());
             } catch (IllegalArgumentException e) {
-                player.sendMessage(Component.text("Invalid default variant in config: " + config.getDefaultVariant(),
-                        NamedTextColor.RED));
+                player.sendMessage(plugin.trText(player, "item.random_block.messages.invalid_variant",
+                        java.util.Map.of("variant", config.getDefaultVariant())));
                 return;
             }
         } else {
             try {
                 chosenMaterial = Material.valueOf(config.getBaseBlockType());
             } catch (IllegalArgumentException e) {
-                player.sendMessage(Component.text("Invalid block type in config: " + config.getBaseBlockType(),
-                        NamedTextColor.RED));
+                player.sendMessage(plugin.trText(player, "item.random_block.messages.invalid_block_type",
+                        java.util.Map.of("type", config.getBaseBlockType())));
                 return;
             }
         }
@@ -231,8 +232,8 @@ public class RandomBlockItem implements GameItem {
 
         HiderItemUtil.updateAppearanceItem(player, plugin);
 
-        player.sendMessage(Component.text("Transformed into ", NamedTextColor.GREEN)
-                .append(Component.text(HiderItemUtil.formatName(chosenMaterial.name()), NamedTextColor.GOLD)));
+        player.sendMessage(plugin.trText(player, "item.random_block.messages.transformed_block",
+                java.util.Map.of("block", HiderItemUtil.formatName(chosenMaterial.name()))));
     }
 
     public static void randomizeSkin(Player player, HideAndSeek plugin) {
@@ -240,24 +241,24 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.only_hiders"));
             return;
         }
         if (isHiderCursed(player.getUniqueId())) {
-            player.sendMessage(Component.text("You are cursed and cannot change skins right now!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.cursed_skins"));
             return;
         }
 
 
         String currentMap = HideAndSeek.getDataController().getCurrentMapName();
         if (currentMap == null || currentMap.isEmpty()) {
-            player.sendMessage(Component.text("No active map found.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_active_map"));
             return;
         }
 
         List<String> allowedBlocks = plugin.getMapManager().getAllowedSkinsForMap(currentMap);
         if (allowedBlocks.isEmpty()) {
-            player.sendMessage(Component.text("No allowed skins configured for this map.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_allowed_skins"));
             return;
         }
 
@@ -296,8 +297,8 @@ public class RandomBlockItem implements GameItem {
 
         HiderItemUtil.updateAppearanceItem(player, plugin);
 
-        player.sendMessage(Component.text("Transformed into ", NamedTextColor.GREEN)
-                .append(Component.text(HiderItemUtil.formatName(chosenSkin.name()), NamedTextColor.GOLD)));
+        player.sendMessage(plugin.trText(player, "item.random_block.messages.transformed_skin",
+                java.util.Map.of("skin", HiderItemUtil.formatName(chosenSkin.name()))));
     }
 
     public static void randomizeBlockFor(Player player, HideAndSeek plugin, boolean forceUnhide) {

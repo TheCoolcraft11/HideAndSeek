@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -86,12 +87,12 @@ public class BlockSwapItem implements GameItem {
         Player player = context.getPlayer();
         if ("BLOCK".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
             if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-                player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.only_hiders"));
                 context.skipCooldown();
                 return;
             }
             if (isHiderCursed(player.getUniqueId())) {
-                player.sendMessage(Component.text("You are cursed and cannot swap blocks!", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.block.cursed"));
                 context.skipCooldown();
                 return;
             }
@@ -99,20 +100,19 @@ public class BlockSwapItem implements GameItem {
             blockSwap(player, plugin);
         } else if ("SKIN".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
             if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-                player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.only_hiders"));
                 context.skipCooldown();
                 return;
             }
             if (isHiderCursed(player.getUniqueId())) {
-                player.sendMessage(Component.text("You are cursed and cannot swap skins!", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.skin.cursed"));
                 context.skipCooldown();
                 return;
             }
 
             skinSwap(player, plugin);
         } else {
-            player.sendMessage(
-                    Component.text("Block swap is only available in BLOCK or SKIN mode.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.unavailable"));
             context.skipCooldown();
         }
     }
@@ -138,7 +138,7 @@ public class BlockSwapItem implements GameItem {
         }
 
         if (target == null) {
-            player.sendMessage(Component.text("No hider nearby to swap with!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.no_hider"));
             return;
         }
 
@@ -150,7 +150,7 @@ public class BlockSwapItem implements GameItem {
         BlockData targetData = HideAndSeek.getDataController().getChosenBlockData(finalTarget.getUniqueId());
 
         if (playerMat == null || targetMat == null || playerData == null || targetData == null) {
-            player.sendMessage(Component.text("Swap failed (missing block data)", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.block.missing_data"));
             return;
         }
 
@@ -233,10 +233,10 @@ public class BlockSwapItem implements GameItem {
             HiderItemUtil.updateAppearanceItem(player, plugin);
             HiderItemUtil.updateAppearanceItem(finalTarget, plugin);
 
-            player.sendMessage(
-                    Component.text("Swapped blocks with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
-            finalTarget.sendMessage(
-                    Component.text("Swapped blocks with " + player.getName() + "!", NamedTextColor.GREEN));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.block.successful_swap",
+                    Map.of("player", finalTarget.getName())));
+            finalTarget.sendMessage(plugin.tr(player, "item.block_swap.messages.block.successful_swap",
+                    Map.of("player", player.getName())));
         }, 2L);
     }
 
@@ -261,7 +261,7 @@ public class BlockSwapItem implements GameItem {
         }
 
         if (target == null) {
-            player.sendMessage(Component.text("No hider nearby to swap with!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.no_hider"));
             return;
         }
 
@@ -318,7 +318,9 @@ public class BlockSwapItem implements GameItem {
         HiderItemUtil.updateAppearanceItem(player, plugin);
         HiderItemUtil.updateAppearanceItem(finalTarget, plugin);
 
-        player.sendMessage(Component.text("Swapped skins with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
-        finalTarget.sendMessage(Component.text("Swapped skins with " + player.getName() + "!", NamedTextColor.GREEN));
+        player.sendMessage(plugin.tr(player, "item.block_swap.messages.skin.successful_swap",
+                Map.of("player", finalTarget.getName())));
+        finalTarget.sendMessage(
+                plugin.tr(player, "item.block_swap.messages.skin.successful_swap", Map.of("player", player.getName())));
     }
 }

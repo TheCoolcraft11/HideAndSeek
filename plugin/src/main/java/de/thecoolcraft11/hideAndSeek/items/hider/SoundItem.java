@@ -108,8 +108,9 @@ public class SoundItem implements GameItem {
         int noteParticles = Math.max(1, (int) Math.round(baseNoteParticles * particleMultiplier));
         int accentParticles = Math.max(1, (int) Math.round(baseAccentParticles * particleMultiplier));
 
-        hider.sendMessage(Component.text("You used a taunt!", NamedTextColor.GREEN));
-        hider.sendMessage(Component.text("+" + tauntPoints + " points", NamedTextColor.GOLD));
+        hider.sendMessage(plugin.trText(hider, "item.sound.messages.taunt_used"));
+        hider.sendMessage(plugin.trText(hider, "item.sound.messages.points_earned",
+                java.util.Map.of("points", String.valueOf(tauntPoints))));
 
         Location particleLoc = location.clone().add(0.5, 1.0, 0.5);
         hider.getWorld().spawnParticle(Particle.NOTE, particleLoc, noteParticles, 0.3, 0.3, 0.3, 1.0);

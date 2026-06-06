@@ -50,7 +50,7 @@ public class TotemItem implements GameItem {
 
     private static void activateTotem(Player player, HideAndSeek plugin) {
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.totem.messages.only_hiders"));
             return;
         }
 
@@ -61,7 +61,8 @@ public class TotemItem implements GameItem {
         totemActiveUntil.put(player.getUniqueId(), expiresAt);
 
         player.getInventory().removeItem(new ItemStack(Material.TOTEM_OF_UNDYING, 1));
-        player.sendMessage(Component.text("Revive mode activated for " + duration + " seconds!", NamedTextColor.GOLD));
+        player.sendMessage(plugin.trText(player, "item.totem.messages.activated",
+                java.util.Map.of("duration", String.valueOf(duration))));
 
 
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
@@ -159,7 +160,7 @@ public class TotemItem implements GameItem {
         if (xpTask != null) xpTask.cancel();
     }
 
-    public static void reviveWithTotem(Player player) {
+    public static void reviveWithTotem(Player player, HideAndSeek plugin) {
         if (player == null) {
             return;
         }
@@ -190,6 +191,6 @@ public class TotemItem implements GameItem {
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.65f, 1.4f);
         }
 
-        player.sendMessage(Component.text("You were revived!", NamedTextColor.GOLD));
+        player.sendMessage(plugin.trText(player, "item.totem.messages.revived"));
     }
 }

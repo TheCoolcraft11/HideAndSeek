@@ -28,6 +28,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -67,8 +68,8 @@ public class FireworkRocketItem implements GameItem {
         boolean spaceShuttle = ItemSkinSelectionService.isSelected(player, ID, "skin_space_shuttle");
         boolean signalFlare = ItemSkinSelectionService.isSelected(player, ID, "skin_signal_flare");
 
-        player.sendMessage(Component.text("Firework sequence started! +" + points + " points",
-                NamedTextColor.GOLD));
+        player.sendMessage(
+                plugin.tr(player, "items.firework_rocket.messages.placed", Map.of("points", String.valueOf(points))));
 
         var nms = plugin.getNmsAdapter();
         boolean useNoClip = nms != null && nms.isAvailable();

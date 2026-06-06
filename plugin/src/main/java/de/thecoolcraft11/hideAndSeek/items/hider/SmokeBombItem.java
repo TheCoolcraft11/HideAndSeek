@@ -76,7 +76,7 @@ public class SmokeBombItem implements GameItem {
     private static void throwSmokeBomb(ItemInteractionContext context, HideAndSeek plugin) {
         Player player = context.getPlayer();
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.smoke_bomb.messages.only_hiders"));
             return;
         }
 

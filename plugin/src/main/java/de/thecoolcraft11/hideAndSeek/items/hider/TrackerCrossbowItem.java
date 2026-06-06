@@ -86,7 +86,8 @@ public class TrackerCrossbowItem implements GameItem {
 
         int hitPoints = plugin.getPointService().award(hider.getUniqueId(),
                 de.thecoolcraft11.hideAndSeek.util.points.PointAction.HIDER_SHARPSHOOTER);
-        hider.sendMessage(Component.text("Crossbow hit! +" + hitPoints + " points", NamedTextColor.GOLD));
+        hider.sendMessage(plugin.trText(hider, "item.tracker_crossbow.messages.hit",
+                java.util.Map.of("points", String.valueOf(hitPoints))));
 
         if (ItemSkinSelectionService.isSelected(hider, ID, "skin_paintball_gun")) {
             hider.getWorld().spawnParticle(Particle.ENTITY_EFFECT, hider.getLocation().add(0, 1.1, 0), 14, 0.4, 0.3,
@@ -110,7 +111,8 @@ public class TrackerCrossbowItem implements GameItem {
             trackerHits.put(hider.getUniqueId(), 0);
             upgradeLoadoutItems(hider, plugin);
         } else {
-            hider.sendMessage(Component.text("Hit seeker! " + hits + "/" + hitsPerUpgrade, NamedTextColor.GREEN));
+            hider.sendMessage(plugin.trText(hider, "item.tracker_crossbow.messages.hit_progress",
+                    java.util.Map.of("current", String.valueOf(hits), "required", String.valueOf(hitsPerUpgrade))));
         }
     }
 

@@ -44,7 +44,7 @@ public class RemoteGatewayItem implements GameItem {
     private static void placeGateway(ItemInteractionContext context, HideAndSeek plugin) {
         Player player = context.getPlayer();
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.remote_gateway.messages.only_hiders"));
             context.skipCooldown();
             return;
         }
@@ -52,7 +52,7 @@ public class RemoteGatewayItem implements GameItem {
         ensureGatewayTask(plugin);
 
         if (context.getLocation() == null) {
-            player.sendMessage(Component.text("Aim at a block to place a gateway anchor.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.remote_gateway.messages.aim_at_block"));
             context.skipCooldown();
             return;
         }
@@ -64,7 +64,7 @@ public class RemoteGatewayItem implements GameItem {
         }
 
         if (!location.getBlock().getType().isAir() || !location.clone().add(0, 1, 0).getBlock().getType().isAir()) {
-            player.sendMessage(Component.text("Need clear space to place gateway.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.remote_gateway.messages.need_clear_space"));
             context.skipCooldown();
             return;
         }
@@ -77,7 +77,7 @@ public class RemoteGatewayItem implements GameItem {
         if (pending == null) {
             ItemStateManager.pendingGatewayByOwner.put(ownerId, placed);
             player.sendMessage(
-                    Component.text("Gateway anchor A placed. Place another anchor to link.", NamedTextColor.GREEN));
+                    plugin.trText(player, "item.remote_gateway.messages.anchor_placed"));
             location.getWorld().playSound(location, Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 0.6f, 1.15f);
             return;
         }
@@ -92,7 +92,7 @@ public class RemoteGatewayItem implements GameItem {
             removePair(pairs.removeFirst());
         }
 
-        player.sendMessage(Component.text("Gateway linked.", NamedTextColor.AQUA));
+        player.sendMessage(plugin.trText(player, "item.remote_gateway.messages.gateway_linked"));
         location.getWorld().spawnParticle(Particle.PORTAL, location.clone().add(0, 0.5, 0), 40, 0.22, 0.6, 0.22, 0.04);
         location.getWorld().playSound(location, Sound.BLOCK_PORTAL_TRIGGER, 0.7f, 1.0f);
     }

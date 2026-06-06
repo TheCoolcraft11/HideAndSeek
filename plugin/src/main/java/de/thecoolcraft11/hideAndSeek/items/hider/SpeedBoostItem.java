@@ -142,8 +142,8 @@ public class SpeedBoostItem implements GameItem {
 
             Vector direction = player.getLocation().getDirection().normalize().multiply(boostPower);
             player.setVelocity(player.getVelocity().add(direction));
-            player.sendMessage(Component.text("Velocity boost activated! ", NamedTextColor.YELLOW)
-                    .append(Component.text("(Level " + (amplifier + 1) + ")", NamedTextColor.GOLD)));
+            player.sendMessage(plugin.trText(player, "item.speed_boost.messages.velocity_activated",
+                    java.util.Map.of("level", String.valueOf(amplifier + 1))));
             if (rocketBoots) {
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.8f, 1.3f);
             } else if (sugarRush) {
@@ -187,8 +187,8 @@ public class SpeedBoostItem implements GameItem {
                     true,
                     true
             ));
-            player.sendMessage(Component.text("Speed boost activated! ", NamedTextColor.YELLOW)
-                    .append(Component.text("(Level " + (amplifier + 1) + ")", NamedTextColor.GOLD)));
+            player.sendMessage(plugin.trText(player, "item.speed_boost.messages.speed_activated",
+                    java.util.Map.of("level", String.valueOf(amplifier + 1))));
             if (rocketBoots) {
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_BREEZE_SHOOT, 0.8f, 1.2f);
             } else if (sugarRush) {
@@ -258,7 +258,9 @@ public class SpeedBoostItem implements GameItem {
 
         removeSpeedItems(player);
         player.getInventory().addItem(upgradedItem);
-        player.sendMessage(Component.text("Upgraded to Level " + (level + 1) + "!", NamedTextColor.GOLD));
+        if (plugin == null) return;
+        player.sendMessage(plugin.trText(player, "item.speed_boost.messages.upgraded",
+                java.util.Map.of("level", String.valueOf(level + 1))));
     }
 
     public static int getSpeedLevel(UUID playerId) {

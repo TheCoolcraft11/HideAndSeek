@@ -56,7 +56,7 @@ public class InvisibilityCloakItem implements GameItem {
 
     private static void useInvisibilityCloak(Player player, HideAndSeek plugin) {
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.invisibility_cloak.messages.only_hiders"));
             return;
         }
 
@@ -93,7 +93,7 @@ public class InvisibilityCloakItem implements GameItem {
             ));
         }
 
-        player.sendMessage(Component.text("You are now invisible!", NamedTextColor.AQUA));
+        player.sendMessage(plugin.trText(player, "item.invisibility_cloak.messages.activated"));
 
         Location loc = player.getLocation().add(0, 1, 0);
         player.getWorld().spawnParticle(Particle.POOF, loc, 30, 0.5, 0.5, 0.5, 0.15);

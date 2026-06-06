@@ -953,6 +953,8 @@ item:
     name: "<red><b>Big Firecracker</b></red>"
     lore: "<gray>Right click to place a big firecracker</gray>"
     description: "Place a large firecracker that explodes, granting {points} points."
+    messages:
+      placed: "<gold>Big Firecracker placed! +{points} points!</gold>"
   block_selector:
     name: "<light_purple><b>Block Selector</b></light_purple>"
     lore: "<gray>Right click to choose your block</gray>"
@@ -961,42 +963,90 @@ item:
     name: "<dark_purple><b>Block Swap</b></dark_purple>"
     lore: "<gray>Right click to swap blocks with another hider</gray>"
     description: "Swap disguise blocks with the nearest other hider."
+    messages:
+      only_hiders: "<red>Only hiders can use this item!</red>"
+      unavailable: "<red>BLOCK swap is only available in BLOCK or SKIN mode!</red>"
+      no_hider: "<red>No hider nearby to swap with!</red>"
+      block:
+        cursed: "<red>You are cursed and cannot swap blocks!</red>"
+        successful_swap: "<green>Swapped blocks with {player}!</green>"
+        missing_data: "<red>Swap failed (Missing Block Data)</red>"
+      skin:
+        cursed: "<red>You are cursed and cannot swap skins!</red>"
+        successful_swap: "<green>Swapped skins with {player}!</green>"
   explosion:
     name: "<red><b>Firecracker</b></red>"
     lore: "<gray>Right click to place a firecracker that will explode</gray>"
     description: "Place a firecracker that pops, granting {points} points."
+    messages:
+      placed: "<gold>Firecracker placed! +{points} points</gold>"
   firework_rocket:
     name: "<gold><b>Firework Rocket</b></gold>"
     lore: "<gray>Right click to place a firework battery that will launch fireworks</gray>"
     description: "Launch a high-altitude firework taunt, granting {points} points."
+    messages:
+      placed: "<gold>Firework sequence started! +{points} points</gold>"
   ghost_essence:
     name: "<aqua><b>Ghostly Essence</b></aqua>"
     lore: "<gray>Pass through walls while active\nYou cannot descend while ghostly!</gray>"
     description: "Become ghostly to phase through blocks for {duration}s."
+    messages:
+      nms_unavailable: "<red>The Seeker's Assistant is not available on this server version.</red>"
+      activated: "<aqua>You are now a Ghost! Phasing enabled for {duration}s.</aqua>"
+      materialized: "<green>You have successfully materialized!</green>"
+      error: "<red>{reason}</red>"
   invisibility_cloak:
     name: "<dark_purple><b>Invisibility Cloak</b></dark_purple>"
     lore: "<gray>Right click to become invisible</gray>"
     description: "Turn invisible for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      activated: "<aqua>You are now invisible!</aqua>"
   ink_face:
     description: "Hidden helmet used for ink-blindness effects."
   knockback_stick:
     name: "<dark_red><b>Knockback Stick <gold>(Level {level}</gold>)</b></dark_red>"
     lore: "<gray>Left click to knock seekers away!\n<gold>Level: {level}</gold></gray>"
     description: "Smack seekers to launch them away."
+    messages:
+      upgraded: "<gold>Upgraded to Level {level}!</gold>"
   medkit:
     name: "<green><b>Medkit</b></green>"
     lore: "<gray>Hold right click to channel heal</gray>\n<dark_gray>Release early to cancel</dark_gray>"
     description: "Hold block for {channel_time}s, then release to heal yourself fully."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      canceled: "<yellow>Medkit canceled. Hold for {remaining}s longer.</yellow>"
+      healed: "<green>Healed!</green>"
   random_block:
     name: "<light_purple><b>Random Block <gray>({uses} / {maxUses})</gray></b></light_purple>"
     lore: "<gray>Right click to randomize your block</gray>"
     description: "Reroll your disguise block from the map's allowed blocks."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      cursed_blocks: "<red>You are cursed and cannot change blocks right now!</red>"
+      cursed_skins: "<red>You are cursed and cannot change skins right now!</red>"
+      hidden_cannot_transform: "<red>You can't transform into a new block while being hidden!</red>"
+      no_active_map: "<red>No active map found.</red>"
+      no_allowed_blocks: "<red>No allowed blocks configured for this map.</red>"
+      no_allowed_skins: "<red>No allowed skins configured for this map.</red>"
+      invalid_block_pattern: "<red>Invalid block pattern in config: {pattern}</red>"
+      invalid_variant: "<red>Invalid default variant in config: {variant}</red>"
+      invalid_block_type: "<red>Invalid block type in config: {type}</red>"
+      transformed_block: "<green>Transformed into <gold>{block}</gold></green>"
+      transformed_skin: "<green>Transformed into <gold>{skin}</gold></green>"
   remote_gateway:
     name: "<dark_purple><b>Remote Gateway</b></dark_purple>"
     lore: "<gray>Right click to place your gateway anchors\nTwo anchors form a teleport pair</gray>"
     description:
       permanent: "Place paired gateways that teleport between anchors until the round ends."
       timed: "Place paired gateways that teleport between anchors for {duration} seconds."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      aim_at_block: "<red>Aim at a block to place a gateway anchor.</red>"
+      need_clear_space: "<red>Need clear space to place gateway.</red>"
+      anchor_placed: "<green>Gateway anchor A placed. Place another anchor to link.</green>"
+      gateway_linked: "<aqua>Gateway linked.</aqua>"
   skin_selector:
     name: "<light_purple><b>Skin Selector</b></light_purple>"
     lore: "<gray>Right-click to choose your disguise skin</gray>"
@@ -1005,25 +1055,43 @@ item:
     name: "<aqua><b>Slowness Ball</b></aqua>"
     lore: "<gray>Right click to throw at seekers</gray>"
     description: "Throw an ice ball that slows seekers for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
   smoke_bomb:
     name: "<dark_gray><b>Smoke Bomb</b></dark_gray>"
     lore: "<gray>Right click to throw\nCreates a smoke cloud for cover</gray>"
     description: "Throw a smoke bomb that creates cover for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
   sound:
     name: "<aqua><b>Cat Sound</b></aqua>"
     lore: "<gray>Right click to play a sound</gray>"
     description: "Play a loud cat taunt for all players, grants {points} points."
+    messages:
+      taunt_used: "<green>You used a taunt!</green>"
+      points_earned: "<gold>+{points} points</gold>"
   speed_boost:
     name: "<yellow><b>Speed Boost <gold>(Level {level})</gold></b></yellow>"
     lore: "<gray>Right click for a speed boost}\n<gold>Level: {level}</gold></gray>"
     description:
       velocity_boost: "Launch yourself forward with a velocity boost."
       speed_effect: "Gain speed effect for {duration}s to move faster."
+    messages:
+      velocity_activated: "<yellow>Velocity boost activated! <gold>(Level {level})</gold></yellow>"
+      speed_activated: "<yellow>Speed boost activated! <gold>(Level {level})</gold></yellow>"
+      upgraded: "<gold>Upgraded to Level {level}!</gold>"
   totem:
     name: "<light_purple><b>Totem of Undying</b></light_purple>"
     lore: "<gray>Right click to activate revive mode</gray>"
     description: "Activate a one-time revive window for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      activated: "<gold>Revive mode activated for {duration} seconds!</gold>"
+      revived: "<gold>You were revived!</gold>"
   tracker_crossbow:
     name: "<aqua><b>Tracker Crossbow</b></aqua>"
     lore: "<gray>Hit to upgrade speed & knockback</gray>"
     description: "Hit seekers with arrows to upgrade items, grants {points} points per hit."
+    messages:
+      hit: "<gold>Crossbow hit! +{points} points</gold>"
+      hit_progress: "<green>Hit seeker! {current}/{required}</green>"

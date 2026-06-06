@@ -23,6 +23,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class BigFirecrackerItem implements GameItem {
@@ -136,7 +137,8 @@ public class BigFirecrackerItem implements GameItem {
         int mainParticles = Math.max(1, (int) Math.round(baseMainParticles * mainParticleMultiplier));
         int miniParticles = Math.max(1, (int) Math.round(baseMiniParticles * miniParticleMultiplier));
 
-        hider.sendMessage(Component.text("Big Firecracker placed! +" + tauntPoints + " points", NamedTextColor.GOLD));
+        hider.sendMessage(plugin.tr(hider, "items.big_firecracker.messages.placed",
+                Map.of("points", String.valueOf(tauntPoints))));
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             block.setType(Material.AIR);

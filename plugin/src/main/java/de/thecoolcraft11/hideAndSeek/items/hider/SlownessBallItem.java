@@ -79,7 +79,7 @@ public class SlownessBallItem implements GameItem {
     private static void throwSlownessBall(ItemInteractionContext context, HideAndSeek plugin) {
         Player player = context.getPlayer();
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.slowness_ball.messages.only_hiders"));
             return;
         }
 

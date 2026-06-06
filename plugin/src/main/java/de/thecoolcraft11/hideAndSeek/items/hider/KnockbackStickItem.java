@@ -153,7 +153,9 @@ public class KnockbackStickItem implements GameItem {
 
         removeKnockbackItems(player);
         player.getInventory().addItem(upgradedItem);
-        player.sendMessage(Component.text("Upgraded to Level " + level + "!", NamedTextColor.GOLD));
+        if (plugin == null) return;
+        player.sendMessage(plugin.trText(player, "item.knockback_stick.messages.upgraded",
+                java.util.Map.of("level", String.valueOf(level))));
     }
 
     public static int getKnockbackLevel(UUID playerId) {

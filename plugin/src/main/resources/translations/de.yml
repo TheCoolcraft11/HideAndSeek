@@ -953,6 +953,8 @@ item:
     name: "<red><b>Großer Feuerknaller</b></red>"
     lore: "<gray>Rechtsklick, um einen großen Feuerknaller zu platzieren</gray>"
     description: "Platziere einen großen Feuerknaller, der explodiert und {points} Punkte gewährt."
+    messages:
+      placed: "<gold>Großer Feuerknaller platziert! +{points} Punkte!</gold>"
   block_selector:
     name: "<light_purple><b>Blockauswahl</b></light_purple>"
     lore: "<gray>Rechtsklick, um deinen Block zu wählen</gray>"
@@ -961,42 +963,90 @@ item:
     name: "<dark_purple><b>Blocktausch</b></dark_purple>"
     lore: "<gray>Rechtsklick, um Blöcke mit einem anderen Verstecker zu tauschen</gray>"
     description: "Tausche Verkleidungsblöcke mit dem nächstgelegenen anderen Verstecker."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen!</red>"
+      unavailable: "<red>BLOCK Tausch ist nur im BLOCK- oder SKIN-Modus verfügbar!</red>"
+      no_hider: "<red>Kein Verstecker in der Nähe zum Tauschen!</red>"
+      block:
+        cursed: "<red>Du bist verflucht und kannst keine Blöcke tauschen!</red>"
+        successful_swap: "<green>Blöcke mit {player} getauscht!</green>"
+        missing_data: "<red>Tausch fehlgeschlagen (Fehlende Block-Daten)</red>"
+      skin:
+        cursed: "<red>Du bist verflucht und kannst keine Skins tauschen!</red>"
+        successful_swap: "<green>Skins mit {player} getauscht!</green>"
   explosion:
     name: "<red><b>Feuerknaller</b></red>"
     lore: "<gray>Rechtsklick, um einen Feuerknaller zu platzieren, der explodiert</gray>"
     description: "Platziere einen Feuerknaller, der knallt und {points} Punkte gewährt."
+    messages:
+      placed: "<gold>Feuerknaller platziert! +{points} Punkte</gold>"
   firework_rocket:
     name: "<gold><b>Feuerwerksrakete</b></gold>"
     lore: "<gray>Rechtsklick, um eine Feuerwerksbatterie zu platzieren, die Feuerwerke startet</gray>"
     description: "Starte ein hoch fliegendes Feuerwerk zur Provokation und erhalte {points} Punkte."
+    messages:
+      placed: "<gold>Feuerwerk gestartet! +{points} Punkte</gold>"
   ghost_essence:
     name: "<aqua><b>Geisteressenz</b></aqua>"
     lore: "<gray>Gehe durch Wände, solange der Effekt aktiv ist\nDu kannst als Geist nicht nach unten!</gray>"
     description: "Werde geisterhaft und gehe für {duration}s durch Blöcke."
+    messages:
+      nms_unavailable: "<red>Der Seeker's Assistant ist auf dieser Server-Version nicht verfügbar.</red>"
+      activated: "<aqua>Du bist jetzt ein Geist! Phasing für {duration}s aktiviert.</aqua>"
+      materialized: "<green>Du bist erfolgreich materialisiert!</green>"
+      error: "<red>{reason}</red>"
   invisibility_cloak:
     name: "<dark_purple><b>Unsichtbarkeitsumhang</b></dark_purple>"
     lore: "<gray>Rechtsklick, um unsichtbar zu werden</gray>"
     description: "Werde für {duration}s unsichtbar."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      activated: "<aqua>Du bist jetzt unsichtbar!</aqua>"
   ink_face:
     description: "Versteckter Helm für Tinten-Blindheitseffekte."
   knockback_stick:
     name: "<dark_red><b>Rückstoß-Stick <gold>(Level {level}</gold>)</b></dark_red>"
     lore: "<gray>Linksklick, um Sucher wegzustoßen!\n<gold>Level: {level}</gold></gray>"
     description: "Schlage Sucher, um sie wegzuschleudern."
+    messages:
+      upgraded: "<gold>Verbessert auf Level {level}!</gold>"
   medkit:
     name: "<green><b>Medkit</b></green>"
     lore: "<gray>Halte Rechtsklick, um Heilung zu kanalisieren</gray>\n<dark_gray>Loslassen zum Abbrechen</dark_gray>"
     description: "Halte Blocken für {channel_time}s und lass dann los, um dich vollständig zu heilen."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      canceled: "<yellow>Medkit abgebrochen. Halte noch {remaining}s länger fest.</yellow>"
+      healed: "<green>Geheilt!</green>"
   random_block:
     name: "<light_purple><b>Zufallsblock <gray>({uses} / {maxUses})</gray></b></light_purple>"
     lore: "<gray>Rechtsklick, um deinen Block zufällig neu zu wählen</gray>"
     description: "Würfle deinen Verkleidungsblock aus den erlaubten Blöcken der Karte neu."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      cursed_blocks: "<red>Du bist verflucht und kannst jetzt keine Blöcke ändern!</red>"
+      cursed_skins: "<red>Du bist verflucht und kannst jetzt keine Skins ändern!</red>"
+      hidden_cannot_transform: "<red>Du kannst dich nicht in einen neuen Block verwandeln, während du versteckt bist!</red>"
+      no_active_map: "<red>Keine aktive Karte gefunden.</red>"
+      no_allowed_blocks: "<red>Keine erlaubten Blöcke für diese Karte konfiguriert.</red>"
+      no_allowed_skins: "<red>Keine erlaubten Skins für diese Karte konfiguriert.</red>"
+      invalid_block_pattern: "<red>Ungültiges Block-Muster in der Konfiguration: {pattern}</red>"
+      invalid_variant: "<red>Ungültige Standard-Variante in der Konfiguration: {variant}</red>"
+      invalid_block_type: "<red>Ungültiger Block-Typ in der Konfiguration: {type}</red>"
+      transformed_block: "<green>Verwandelt in <gold>{block}</gold></green>"
+      transformed_skin: "<green>Verwandelt in <gold>{skin}</gold></green>"
   remote_gateway:
     name: "<dark_purple><b>Remote-Gateway</b></dark_purple>"
     lore: "<gray>Rechtsklick, um Gateway-Anker zu platzieren\nZwei Anker bilden ein Teleport-Paar</gray>"
     description:
       permanent: "Platziere gekoppelte Gateways, die bis zum Rundenende zwischen Ankern teleportieren."
       timed: "Platziere gekoppelte Gateways, die für {duration} Sekunden zwischen Ankern teleportieren."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      aim_at_block: "<red>Ziele auf einen Block, um einen Gateway-Anker zu platzieren.</red>"
+      need_clear_space: "<red>Es wird freier Platz benötigt, um das Gateway zu platzieren.</red>"
+      anchor_placed: "<green>Gateway-Anker A platziert. Platziere einen weiteren Anker zum Verbinden.</green>"
+      gateway_linked: "<aqua>Gateway verbunden.</aqua>"
   skin_selector:
     name: "<light_purple><b>Skin-Auswahl</b></light_purple>"
     lore: "<gray>Rechtsklick, um deinen Verkleidungs-Skin zu wählen</gray>"
@@ -1005,25 +1055,43 @@ item:
     name: "<aqua><b>Verlangsamungsball</b></aqua>"
     lore: "<gray>Rechtsklick, um auf Sucher zu werfen</gray>"
     description: "Wirf einen Eisball, der Sucher für {duration}s verlangsamt."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
   smoke_bomb:
     name: "<dark_gray><b>Rauchbombe</b></dark_gray>"
     lore: "<gray>Rechtsklick zum Werfen\nErzeugt eine Rauchwolke zur Deckung</gray>"
     description: "Wirf eine Rauchbombe, die für {duration}s Deckung erzeugt."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
   sound:
     name: "<aqua><b>Katzengeräusch</b></aqua>"
     lore: "<gray>Rechtsklick, um einen Sound abzuspielen</gray>"
     description: "Spiele eine laute Katzen-Provokation für alle Spieler ab und erhalte {points} Punkte."
+    messages:
+      taunt_used: "<green>Du hast eine Provokation benutzt!</green>"
+      points_earned: "<gold>+{points} Punkte</gold>"
   speed_boost:
     name: "<yellow><b>Temposchub <gold>(Level {level})</gold></b></yellow>"
     lore: "<gray>Rechtsklick für einen Temposchub}\n<gold>Level: {level}</gold></gray>"
     description:
       velocity_boost: "Katapultiere dich mit einem Geschwindigkeitsstoß nach vorn."
       speed_effect: "Erhalte für {duration}s einen Geschwindigkeitseffekt, um dich schneller zu bewegen."
+    messages:
+      velocity_activated: "<yellow>Geschwindigkeitsstoß aktiviert! <gold>(Level {level})</gold></yellow>"
+      speed_activated: "<yellow>Temposchub aktiviert! <gold>(Level {level})</gold></yellow>"
+      upgraded: "<gold>Verbessert auf Level {level}!</gold>"
   totem:
     name: "<light_purple><b>Totem der Unsterblichkeit</b></light_purple>"
     lore: "<gray>Rechtsklick, um den Wiederbelebungsmodus zu aktivieren</gray>"
     description: "Aktiviere ein einmaliges Wiederbelebungsfenster für {duration}s."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      activated: "<gold>Wiederbelebungsmodus für {duration} Sekunden aktiviert!</gold>"
+      revived: "<gold>Du wurdest wiederbelebt!</gold>"
   tracker_crossbow:
     name: "<aqua><b>Tracker-Armbrust</b></aqua>"
     lore: "<gray>Treffer verbessern Tempo & Rückstoß</gray>"
     description: "Triff Sucher mit Pfeilen, um Items zu verbessern, und erhalte {points} Punkte pro Treffer."
+    messages:
+      hit: "<gold>Armbrust getroffen! +{points} Punkte</gold>"
+      hit_progress: "<green>Sucher getroffen! {current}/{required}</green>"
