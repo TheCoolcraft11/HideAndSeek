@@ -1090,7 +1090,7 @@ item:
       only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
       activated: "<gold>Wiederbelebungsmodus für {duration} Sekunden aktiviert!</gold>"
       revived: "<gold>Du wurdest wiederbelebt!</gold>"
-  tracker_crossbow:
+  crossbow:
     name: "<aqua><b>Tracker-Armbrust</b></aqua>"
     lore: "<gray>Treffer verbessern Tempo & Rückstoß</gray>"
     description: "Triff Sucher mit Pfeilen, um Items zu verbessern, und erhalte {points} Punkte pro Treffer."

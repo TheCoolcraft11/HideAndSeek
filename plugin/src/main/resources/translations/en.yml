@@ -1090,7 +1090,7 @@ item:
       only_hiders: "<red>Only hiders can use this item.</red>"
       activated: "<gold>Revive mode activated for {duration} seconds!</gold>"
       revived: "<gold>You were revived!</gold>"
-  tracker_crossbow:
+  crossbow:
     name: "<aqua><b>Tracker Crossbow</b></aqua>"
     lore: "<gray>Hit to upgrade speed & knockback</gray>"
     description: "Hit seekers with arrows to upgrade items, grants {points} points per hit."

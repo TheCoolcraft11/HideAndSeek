@@ -32,15 +32,52 @@ public class TrackerCrossbowItem implements GameItem {
         return ID;
     }
 
+    public static void onTrackerHit(Player hider, HideAndSeek plugin) {
+        if (hider == null) {
+            return;
+        }
+
+        int hitPoints = plugin.getPointService().award(hider.getUniqueId(),
+                de.thecoolcraft11.hideAndSeek.util.points.PointAction.HIDER_SHARPSHOOTER);
+        hider.sendMessage(plugin.trText(hider, "item.crossbow.messages.hit",
+                java.util.Map.of("points", String.valueOf(hitPoints))));
+
+        if (ItemSkinSelectionService.isSelected(hider, ID, "skin_paintball_gun")) {
+            hider.getWorld().spawnParticle(Particle.ENTITY_EFFECT, hider.getLocation().add(0, 1.1, 0), 14, 0.4, 0.3,
+                    0.4, 1.0);
+            hider.getWorld().spawnParticle(Particle.ITEM_SLIME, hider.getLocation().add(0, 1.0, 0), 6, 0.25, 0.25, 0.25,
+                    0.01);
+            hider.playSound(hider.getLocation(), Sound.ENTITY_SLIME_SQUISH_SMALL, 0.55f, 1.5f);
+        } else if (ItemSkinSelectionService.isSelected(hider, ID, "skin_laser_tag")) {
+            hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 12, 0.3, 0.3,
+                    0.3, 0.03);
+            hider.getWorld().spawnParticle(Particle.END_ROD, hider.getLocation().add(0, 1.0, 0), 6, 0.15, 0.2, 0.15,
+                    0.01);
+            hider.playSound(hider.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.45f, 1.8f);
+        }
+
+        int hits = trackerHits.getOrDefault(hider.getUniqueId(), 0) + 1;
+        trackerHits.put(hider.getUniqueId(), hits);
+
+        int hitsPerUpgrade = plugin.getSettingRegistry().get("hider-items.crossbow.hits-per-upgrade", 3);
+        if (hits >= hitsPerUpgrade) {
+            trackerHits.put(hider.getUniqueId(), 0);
+            upgradeLoadoutItems(hider, plugin);
+        } else {
+            hider.sendMessage(plugin.trText(hider, "item.crossbow.messages.hit_progress",
+                    java.util.Map.of("current", String.valueOf(hits), "required", String.valueOf(hitsPerUpgrade))));
+        }
+    }
+
     @Override
     public ItemStack createItem(HideAndSeek plugin) {
         ItemStack item = new ItemStack(Material.CROSSBOW);
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.tracker_crossbow.name"))
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.crossbow.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            String loreStr = plugin.trText(null, "item.tracker_crossbow.lore");
+            String loreStr = plugin.trText(null, "item.crossbow.lore");
             java.util.List<Component> lore = new java.util.ArrayList<>();
             for (String line : loreStr.split("\n")) {
                 lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
@@ -51,13 +88,6 @@ public class TrackerCrossbowItem implements GameItem {
         }
 
         return item;
-    }
-
-    @Override
-    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        int points = plugin.getPointService().getInt("points.hider.sharpshooter.amount", 20);
-        return plugin.trText(player, "item.tracker_crossbow.description",
-                java.util.Map.of("points", String.valueOf(points)));
     }
 
     @Override
@@ -85,41 +115,11 @@ public class TrackerCrossbowItem implements GameItem {
         return Set.of("hider-items.crossbow.cooldown");
     }
 
-    public static void onTrackerHit(Player hider, HideAndSeek plugin) {
-        if (hider == null) {
-            return;
-        }
-
-        int hitPoints = plugin.getPointService().award(hider.getUniqueId(),
-                de.thecoolcraft11.hideAndSeek.util.points.PointAction.HIDER_SHARPSHOOTER);
-        hider.sendMessage(plugin.trText(hider, "item.tracker_crossbow.messages.hit",
-                java.util.Map.of("points", String.valueOf(hitPoints))));
-
-        if (ItemSkinSelectionService.isSelected(hider, ID, "skin_paintball_gun")) {
-            hider.getWorld().spawnParticle(Particle.ENTITY_EFFECT, hider.getLocation().add(0, 1.1, 0), 14, 0.4, 0.3,
-                    0.4, 1.0);
-            hider.getWorld().spawnParticle(Particle.ITEM_SLIME, hider.getLocation().add(0, 1.0, 0), 6, 0.25, 0.25, 0.25,
-                    0.01);
-            hider.playSound(hider.getLocation(), Sound.ENTITY_SLIME_SQUISH_SMALL, 0.55f, 1.5f);
-        } else if (ItemSkinSelectionService.isSelected(hider, ID, "skin_laser_tag")) {
-            hider.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 12, 0.3, 0.3,
-                    0.3, 0.03);
-            hider.getWorld().spawnParticle(Particle.END_ROD, hider.getLocation().add(0, 1.0, 0), 6, 0.15, 0.2, 0.15,
-                    0.01);
-            hider.playSound(hider.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.45f, 1.8f);
-        }
-
-        int hits = trackerHits.getOrDefault(hider.getUniqueId(), 0) + 1;
-        trackerHits.put(hider.getUniqueId(), hits);
-
-        int hitsPerUpgrade = plugin.getSettingRegistry().get("hider-items.crossbow.hits-per-upgrade", 3);
-        if (hits >= hitsPerUpgrade) {
-            trackerHits.put(hider.getUniqueId(), 0);
-            upgradeLoadoutItems(hider, plugin);
-        } else {
-            hider.sendMessage(plugin.trText(hider, "item.tracker_crossbow.messages.hit_progress",
-                    java.util.Map.of("current", String.valueOf(hits), "required", String.valueOf(hitsPerUpgrade))));
-        }
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        int points = plugin.getPointService().getInt("points.hider.sharpshooter.amount", 20);
+        return plugin.trText(player, "item.crossbow.description",
+                java.util.Map.of("points", String.valueOf(points)));
     }
 
     private static void upgradeLoadoutItems(Player player, HideAndSeek plugin) {

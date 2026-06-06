@@ -157,7 +157,7 @@ public class KnockbackStickItem implements GameItem {
     }
 
     public static int getKnockbackLevel(UUID playerId) {
-        return knockbackLevels.getOrDefault(playerId, 1);
+        return knockbackLevels.getOrDefault(playerId, 0);
     }
 
     private static void removeKnockbackItems(Player player) {
