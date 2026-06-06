@@ -65,13 +65,12 @@ public class CameraItem implements GameItem {
         Player player = context.getPlayer();
 
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            player.sendMessage(
-                    Component.text("The Camera is not available on this server version.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.nms_unavailable"));
             return;
         }
 
         if (!clickedBlock.getType().isSolid()) {
-            player.sendMessage(Component.text("Cannot place camera - need solid block!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.need_solid_block"));
             context.skipCooldown();
             return;
         }
@@ -88,14 +87,14 @@ public class CameraItem implements GameItem {
         }
 
         if (clickedFace == BlockFace.DOWN) {
-            player.sendMessage(Component.text("Cannot place camera on ceiling!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.no_ceiling"));
             context.skipCooldown();
             return;
         }
 
         Block torchBlock = clickedBlock.getRelative(clickedFace);
         if (!torchBlock.getType().isAir()) {
-            player.sendMessage(Component.text("Cannot place camera here - space is occupied!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.space_occupied"));
             context.skipCooldown();
             return;
         }
@@ -132,8 +131,8 @@ public class CameraItem implements GameItem {
             }
         }
 
-        player.sendMessage(
-                Component.text("Camera placed! (" + cameras.size() + "/" + maxCameras + ")", NamedTextColor.GREEN));
+        player.sendMessage(plugin.trText(player, "item.camera.messages.placed",
+                java.util.Map.of("count", String.valueOf(cameras.size()), "maxCameras", String.valueOf(maxCameras))));
     }
 
     private static void placeTorchBase(Block torchBlock, BlockFace clickedFace) {
@@ -258,7 +257,7 @@ public class CameraItem implements GameItem {
     public static boolean startCameraSession(Player seeker, HideAndSeek plugin, int preferredIndex) {
         LinkedList<ItemStateManager.PlacedCamera> cameras = getPlacedCameras(seeker.getUniqueId());
         if (cameras.isEmpty()) {
-            seeker.sendMessage(Component.text("You have no cameras placed.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.camera.messages.no_cameras"));
             return false;
         }
 
@@ -284,7 +283,7 @@ public class CameraItem implements GameItem {
         LinkedList<ItemStateManager.PlacedCamera> cameras = getPlacedCameras(seeker.getUniqueId());
         if (cameras.isEmpty()) {
             stopCameraSession(seeker, plugin, true);
-            seeker.sendMessage(Component.text("All your cameras are gone.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.camera.messages.all_cameras_gone"));
             return false;
         }
 
@@ -314,8 +313,7 @@ public class CameraItem implements GameItem {
 
         if (entityId == Integer.MIN_VALUE) {
             stopCameraSession(seeker, plugin, true);
-            seeker.sendMessage(Component.text("Your client does not support camera mode on this server build.",
-                    NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.camera.messages.client_unsupported"));
             return false;
         }
 
@@ -661,7 +659,8 @@ public class CameraItem implements GameItem {
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int maxCameras = plugin.getSettingRegistry().get("seeker-items.camera.max-placed", 5);
-        return String.format("Place up to %d cameras and spectate through them.", maxCameras);
+        return plugin.trText(player, "item.camera.description",
+                java.util.Map.of("maxCameras", String.valueOf(maxCameras)));
     }
 
     @Override

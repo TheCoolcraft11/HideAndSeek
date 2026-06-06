@@ -160,7 +160,7 @@ public class LightningFreezeItem implements GameItem {
             }, duration * 20L);
         }
 
-        seeker.sendMessage(Component.text("All hiders frozen!", NamedTextColor.AQUA));
+        seeker.sendMessage(plugin.trText(seeker, "item.lightning_freeze.messages.all_frozen"));
         if (frostWand) {
             seeker.getWorld().spawnParticle(Particle.SNOWFLAKE, seeker.getLocation().add(0, 1.0, 0), 24, 0.5, 0.5, 0.5,
                     0.03);
@@ -193,9 +193,8 @@ public class LightningFreezeItem implements GameItem {
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("seeker-items.lightning-freeze.duration", 5);
-        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Call lightning that freezes all hiders for %ds, grants %d points per hider.",
-                duration.intValue(), points);
+        return plugin.trText(player, "item.lightning_freeze.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override

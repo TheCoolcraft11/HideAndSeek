@@ -44,7 +44,7 @@ public class BlockStatsItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        return "Open the block statistics menu.";
+        return plugin.trText(player, "item.block_stats.description");
     }
 
     @Override

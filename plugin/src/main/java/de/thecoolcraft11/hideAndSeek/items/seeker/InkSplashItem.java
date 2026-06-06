@@ -109,7 +109,7 @@ public class InkSplashItem implements GameItem {
                 hider.playSound(hider.getLocation(), Sound.BLOCK_MUD_PLACE, 0.4f, 0.8f);
             }
             hider.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duration * 20, 255, false, false));
-            hider.sendMessage(Component.text("You've been hit with ink!", NamedTextColor.DARK_AQUA));
+            hider.sendMessage(plugin.trText(hider, "item.ink_splash.messages.hit"));
 
 
             BukkitTask prevXpTask = inkSplashXpTasks.remove(hider.getUniqueId());
@@ -134,10 +134,8 @@ public class InkSplashItem implements GameItem {
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("seeker-items.ink-splash.duration", 7);
-        Number radius = plugin.getSettingRegistry().get("seeker-items.ink-splash.radius", 25);
-        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Splash hiders within %d blocks with ink for %ds, grants %d points per hit.",
-                radius.intValue(), duration.intValue(), points);
+        return plugin.trText(player, "item.ink_splash.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override

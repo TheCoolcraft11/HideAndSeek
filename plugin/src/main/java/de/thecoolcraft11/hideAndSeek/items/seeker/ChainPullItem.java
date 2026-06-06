@@ -46,32 +46,6 @@ public class ChainPullItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        return "Pull the hider in front of you to your position.";
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int chainCooldown = plugin.getSettingRegistry().get("seeker-items.chain-pull.cooldown", 12);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> chainPull(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> chainPull(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin, null))
-                .withNameKey("item.chain_pull.name")
-                .withLoreKey("item.chain_pull.lore")
-                .withNameKey("item.chain_pull.name")
-                .withLoreKey("item.chain_pull.lore")
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(chainCooldown * 20)
-                .withCustomCooldown(chainCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .build());
-    }
-
     private static void chainPull(Player seeker, HideAndSeek plugin) {
         double range = plugin.getSettingRegistry().get("seeker-items.chain-pull.range", 30.0);
         double power = plugin.getSettingRegistry().get("seeker-items.chain-pull.pull-power", 2.0);
@@ -99,7 +73,7 @@ public class ChainPullItem implements GameItem {
         }
 
         if (target == null) {
-            seeker.sendMessage(Component.text("No hider in range.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.chain_pull.messages.no_target"));
             return;
         }
 
@@ -162,9 +136,10 @@ public class ChainPullItem implements GameItem {
                                     0.6f, 1.5f);
                         }
                         seeker.sendMessage(
-                                Component.text("Pulled " + finalTarget.getName() + "!", NamedTextColor.GREEN));
+                                plugin.trText(seeker, "item.chain_pull.messages.pulled",
+                                        java.util.Map.of("target", finalTarget.getName())));
                         finalTarget.sendMessage(
-                                Component.text("You've been pulled by a chain!", NamedTextColor.DARK_GRAY));
+                                plugin.trText(finalTarget, "item.chain_pull.messages.pulled_by_chain"));
                         cancel();
                         return;
                     }
@@ -178,6 +153,32 @@ public class ChainPullItem implements GameItem {
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int chainCooldown = plugin.getSettingRegistry().get("seeker-items.chain-pull.cooldown", 12);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> chainPull(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> chainPull(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.chain_pull.name")
+                .withLoreKey("item.chain_pull.lore")
+                .withNameKey("item.chain_pull.name")
+                .withLoreKey("item.chain_pull.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(chainCooldown * 20)
+                .withCustomCooldown(chainCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .build());
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.chain_pull.description");
     }
 
     private static void drawChainParticles(Player seeker, Player hider, boolean energyLasso, boolean shadowTendril) {

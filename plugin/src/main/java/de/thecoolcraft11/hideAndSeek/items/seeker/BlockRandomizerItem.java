@@ -47,11 +47,6 @@ public class BlockRandomizerItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        return "Force all hiders to reroll their disguise blocks.";
-    }
-
     private static void randomizeAll(Player seeker, HideAndSeek plugin) {
         var gameModeResult = plugin.getSettingService().getSetting("game.mode");
         Object gameModeObj = gameModeResult.isSuccess() ? gameModeResult.getValue() : null;
@@ -60,8 +55,7 @@ public class BlockRandomizerItem implements GameItem {
         } else if (gameModeObj != null && gameModeObj.toString().equals("SKIN")) {
             randomizeSkins(seeker, plugin);
         } else {
-            seeker.sendMessage(
-                    Component.text("Block Randomizer is only available in BLOCK or SKIN mode.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.block_randomizer.messages.wrong_mode"));
         }
 
 
@@ -102,7 +96,8 @@ public class BlockRandomizerItem implements GameItem {
             }
             count++;
         }
-        seeker.sendMessage(Component.text("Blocks randomized! (" + count + " hiders)", NamedTextColor.GREEN));
+        seeker.sendMessage(plugin.trText(seeker, "item.block_randomizer.messages.blocks_randomized",
+                java.util.Map.of("count", String.valueOf(count))));
     }
 
     private static void randomizeSkins(Player seeker, HideAndSeek plugin) {
@@ -140,7 +135,13 @@ public class BlockRandomizerItem implements GameItem {
             }
             count++;
         }
-        seeker.sendMessage(Component.text("Blocks randomized! (" + count + " hiders)", NamedTextColor.GREEN));
+        seeker.sendMessage(plugin.trText(seeker, "item.block_randomizer.messages.blocks_randomized",
+                java.util.Map.of("count", String.valueOf(count))));
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.block_randomizer.description");
     }
 
     @Override
@@ -150,8 +151,6 @@ public class BlockRandomizerItem implements GameItem {
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeAll(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeAll(context.getPlayer(), plugin))
                 .withDescription(getDescription(plugin, null))
-                .withNameKey("item.block_randomizer.name")
-                .withLoreKey("item.block_randomizer.lore")
                 .withNameKey("item.block_randomizer.name")
                 .withLoreKey("item.block_randomizer.lore")
                 .withDropPrevention(true)

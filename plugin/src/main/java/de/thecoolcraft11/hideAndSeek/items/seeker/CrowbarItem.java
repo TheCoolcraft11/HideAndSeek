@@ -62,7 +62,7 @@ public class CrowbarItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        return "Breaks Blocks of the map to help you reach small seekers.";
+        return plugin.trText(player, "item.crowbar.description");
     }
 
     @Override

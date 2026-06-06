@@ -51,7 +51,7 @@ public class GrapplingHookItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        return "Reel your hook to launch yourself toward the cast point.";
+        return plugin.trText(player, "item.grappling_hook.description");
     }
 
 

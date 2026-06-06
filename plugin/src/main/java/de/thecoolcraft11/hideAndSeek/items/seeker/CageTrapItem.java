@@ -61,33 +61,6 @@ public class CageTrapItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        Number duration = plugin.getSettingRegistry().get("seeker-items.cage-trap.paralyze-duration", 5);
-        return String.format("Place a hidden trap that cages and immobilizes a hider for %ds.", duration.intValue());
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int cageCooldown = plugin.getSettingRegistry().get("seeker-items.cage-trap.cooldown", 20);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeCageTrap(context, plugin))
-                .withDescription(getDescription(plugin, null))
-                .withNameKey("item.cage_trap.name")
-                .withLoreKey("item.cage_trap.lore")
-                .withNameKey("item.cage_trap.name")
-                .withLoreKey("item.cage_trap.lore")
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(cageCooldown * 20)
-                .withCustomCooldown(cageCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-    }
-
     private static void placeCageTrap(ItemInteractionContext context, HideAndSeek plugin) {
         Location location = context.getLocation().clone().add(0.5, 1, 0.5);
         ItemStateManager.cageTrapLocations.put(location.getBlock().getLocation(), context.getPlayer().getUniqueId());
@@ -253,9 +226,29 @@ public class CageTrapItem implements GameItem {
         }.runTaskTimer(plugin, 0L, 5L);
 
         String durationMsg = trapDuration == -1 ? "until round ends" : trapDuration + " seconds";
-        context.getPlayer().sendMessage(
-                Component.text("Cage trap placed! (Ready in " + setupTime + "s, lasts " + durationMsg + ")",
-                        NamedTextColor.GREEN));
+        context.getPlayer().sendMessage(plugin.trText(context.getPlayer(), "item.cage_trap.messages.placed",
+                java.util.Map.of("setupTime", String.valueOf(setupTime), "durationMsg", durationMsg)));
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int cageCooldown = plugin.getSettingRegistry().get("seeker-items.cage-trap.cooldown", 20);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeCageTrap(context, plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.cage_trap.name")
+                .withLoreKey("item.cage_trap.lore")
+                .withNameKey("item.cage_trap.name")
+                .withLoreKey("item.cage_trap.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(cageCooldown * 20)
+                .withCustomCooldown(cageCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
     }
 
     private static void triggerCageTrap(Player hider, Player seeker, HideAndSeek plugin, int paralyzeDuration) {
@@ -352,9 +345,16 @@ public class CageTrapItem implements GameItem {
                 paralyzeDuration * 20L);
 
 
-        hider.sendMessage(Component.text("You've been trapped by a cage!", NamedTextColor.DARK_RED));
+        hider.sendMessage(plugin.trText(hider, "item.cage_trap.messages.triggered"));
         hider.playSound(hiderLoc, Sound.BLOCK_IRON_DOOR_CLOSE, 1.0f, 0.8f);
         hider.playSound(hiderLoc, Sound.BLOCK_CHAIN_PLACE, 1.0f, 1.2f);
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.cage-trap.paralyze-duration", 5);
+        return plugin.trText(player, "item.cage_trap.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     private static ItemStack getCageBarItem(Player seeker) {

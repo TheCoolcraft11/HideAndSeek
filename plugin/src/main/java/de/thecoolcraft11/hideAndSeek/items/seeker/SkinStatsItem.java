@@ -44,7 +44,7 @@ public class SkinStatsItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        return "View which skin each hider is currently disguised as.";
+        return plugin.trText(player, "item.skin_stats.description");
     }
 
     @Override

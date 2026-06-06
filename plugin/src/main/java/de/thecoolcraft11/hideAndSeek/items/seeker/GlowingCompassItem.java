@@ -51,38 +51,6 @@ public class GlowingCompassItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        Number duration = plugin.getSettingRegistry().get("seeker-items.glowing-compass.duration", 10);
-        Number range = plugin.getSettingRegistry().get("seeker-items.glowing-compass.range", 50);
-        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Reveal nearest hider within %d blocks with glow for %ds, grants %d points.",
-                range.intValue(), duration.intValue(), points);
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int glowCooldown = plugin.getSettingRegistry().get("seeker-items.glowing-compass.cooldown", 25);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> glowHider(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> glowHider(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin, null))
-                .withNameKey("item.glowing_compass.name")
-                .withLoreKey("item.glowing_compass.lore")
-                .withNameKey("item.glowing_compass.name")
-                .withLoreKey("item.glowing_compass.lore")
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(glowCooldown * 20)
-                .withCustomCooldown(glowCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-
-    }
-
     private static void glowHider(Player seeker, HideAndSeek plugin) {
         double range = plugin.getSettingRegistry().get("seeker-items.glowing-compass.range", 50.0);
         int duration = plugin.getSettingRegistry().get("seeker-items.glowing-compass.duration", 10);
@@ -109,7 +77,8 @@ public class GlowingCompassItem implements GameItem {
             applyGlowEffect(nearest, duration, plugin);
             plugin.getPointService().award(seeker.getUniqueId(), PointAction.SEEKER_UTILITY_SUCCESS);
             plugin.getPointService().markUtilitySpotted(nearest.getUniqueId());
-            seeker.sendMessage(Component.text(nearest.getName() + " is now glowing!", NamedTextColor.GOLD));
+            seeker.sendMessage(plugin.trText(seeker, "item.glowing_compass.messages.hider_glowing",
+                    java.util.Map.of("nearest", nearest.getName())));
             if (tacticalTablet) {
                 seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1, 0), 12, 0.3,
                         0.3, 0.3, 0.03);
@@ -131,8 +100,41 @@ public class GlowingCompassItem implements GameItem {
             }
             spawnScanTrail(seeker, nearest, tacticalTablet, oracleEye, dowsingRod);
         } else {
-            seeker.sendMessage(Component.text("No hiders found nearby!", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.glowing_compass.messages.no_hiders"));
         }
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int glowCooldown = plugin.getSettingRegistry().get("seeker-items.glowing-compass.cooldown", 25);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> glowHider(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> glowHider(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.glowing_compass.name")
+                .withLoreKey("item.glowing_compass.lore")
+                .withNameKey("item.glowing_compass.name")
+                .withLoreKey("item.glowing_compass.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(glowCooldown * 20)
+                .withCustomCooldown(glowCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
+
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.glowing-compass.duration", 10);
+        Number range = plugin.getSettingRegistry().get("seeker-items.glowing-compass.range", 50);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return plugin.trText(player, "item.glowing_compass.description",
+                java.util.Map.of("range", String.valueOf(range.intValue()), "duration",
+                        String.valueOf(duration.intValue()), "points", String.valueOf(points)));
     }
 
     private static void applyGlowEffect(Player hider, int duration, HideAndSeek plugin) {

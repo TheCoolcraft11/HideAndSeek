@@ -1095,3 +1095,117 @@ item:
     messages:
       hit: "<gold>Armbrust getroffen! +{points} Punkte</gold>"
       hit_progress: "<green>Sucher getroffen! {current}/{required}</green>"
+  assistant:
+    name: "<red><b>Seeker's Assistant</b></red>"
+    lore: "<gray>Rufe einen jagenden Assistenten, um Verstecker aufzuspüren.\nMaximal 2 gleichzeitig aktiv.\n\n<gold><b>LEGENDÄR</b></gold></gray>"
+    description: "Beschwört einen Jäger-Assistenten, der sichtbare Verstecker aufspürt und beschießt."
+    messages:
+      nms_unavailable: "<red>Der Seeker's Assistant ist auf dieser Server-Version nicht verfügbar.</red>"
+      seeking_only: "<red>Der Seeker's Assistant kann nur während der Suchphase beschworen werden.</red>"
+      max_active: "<red>Du hast bereits {max} Assistenten aktiv!</red>"
+      summon_failed: "<red>Assistent konnte nicht beschworen werden.</red>"
+      summoned: "<red>Assistent beschworen! </red><gray>({lifetime}s Lebenszeit)</gray>"
+  block_randomizer:
+    name: "<red><b>Block-Randomisierer</b></red>"
+    lore: "<gray>Rechtsklick, um alle Blöcke zu randomisieren</gray>"
+    description: "Zwinge alle Verstecker, ihre Verkleidungsblöcke neu zu würfeln."
+    messages:
+      wrong_mode: "<red>Block-Randomisierer ist nur im BLOCK- oder SKIN-Modus verfügbar.</red>"
+      blocks_randomized: "<green>Blöcke randomisiert! ({count} Verstecker)</green>"
+  block_stats:
+    name: "<aqua><b>Block-Statistiken</b></aqua>"
+    lore: "<gray>Rechtsklick, um Block-Statistiken anzuzeigen</gray>"
+    description: "Öffne das Block-Statistiken-Menü."
+  cage_trap:
+    name: "<gray><b>Käfigfalle</b></gray>"
+    lore: "<gray>Rechtsklick, um eine Falle zu platzieren</gray>"
+    description: "Platziere eine versteckte Falle, die einen Verstecker für {duration}s einsperrt und bewegungsunfähig macht."
+    messages:
+      placed: "<green>Käfigfalle platziert! (Bereit in {setupTime}s, hält {durationMsg})</green>"
+      triggered: "<dark_red>Du wurdest von einer Käfigfalle gefangen!</dark_red>"
+  camera:
+    name: "<dark_aqua><b>Kamera</b></dark_aqua>"
+    lore: "<gray>Shift + Rechtsklick auf Block zum Platzieren\nRechtsklick zum Ansehen deiner Kameras\nWechsle Kameras mit LMT und Sichtmodi mit RMT\nModi: Normal, Nachtsicht, Terminal (Leuchten)\nSchleichen zum Beenden</gray>"
+    description: "Platziere bis zu {maxCameras} Kameras und beobachte durch sie."
+    messages:
+      nms_unavailable: "<red>Die Kamera ist auf dieser Server-Version nicht verfügbar.</red>"
+      need_solid_block: "<red>Kann Kamera nicht platzieren - fester Block erforderlich!</red>"
+      no_ceiling: "<red>Kann Kamera nicht an der Decke platzieren!</red>"
+      space_occupied: "<red>Kann Kamera hier nicht platzieren - Platz belegt!</red>"
+      placed: "<green>Kamera platziert! ({count}/{maxCameras})</green>"
+      no_cameras: "<red>Du hast keine Kameras platziert.</red>"
+      all_cameras_gone: "<red>Alle deine Kameras sind weg.</red>"
+      client_unsupported: "<red>Dein Client unterstützt den Kameramodus auf dieser Server-Version nicht.</red>"
+  chain_pull:
+    name: "<dark_gray><b>Kettenzug</b></dark_gray>"
+    lore: "<gray>Rechtsklick, um Verstecker zu ziehen</gray>"
+    description: "Ziehe den Verstecker vor dir zu deiner Position."
+    messages:
+      no_target: "<red>Kein Verstecker in Reichweite.</red>"
+      pulled: "<green>{target} gezogen!</green>"
+      pulled_by_chain: "<dark_gray>Du wurdest von einer Kette gezogen!</dark_gray>"
+  crowbar:
+    name: "<aqua><b>Brechstange</b></aqua>"
+    lore: "<gray>Linksklick, um Blöcke zu zerstören</gray>"
+    description: "Zerstört Kartenblöcke, um kleine Verstecker zu erreichen."
+  curse_spell:
+    name: "<dark_purple><b>Fluchzauber</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Verstecker zu verfluchen</gray>"
+    description: "Verbessere deine Nahkampfangriffe gegen Verstecker für kurze Zeit."
+    messages:
+      activated: "<dark_purple>Fluchzauber aktiviert! ({duration}s)</dark_purple>"
+      cursed: "<dark_purple>Du wurdest verflucht!</dark_purple>"
+  glowing_compass:
+    name: "<gold><b>Leuchtkompass</b></gold>"
+    lore: "<gray>Rechtsklick, um den nächsten Verstecker leuchten zu lassen</gray>"
+    description: "Zeige den nächsten Verstecker innerhalb von {range} Blöcken für {duration}s mit Leuchten, gewährt {points} Punkte."
+    messages:
+      hider_glowing: "<gold>{nearest} leuchtet jetzt!</gold>"
+      no_hiders: "<red>Keine Verstecker in der Nähe gefunden!</red>"
+  grappling_hook:
+    name: "<aqua><b>Enterhaken</b></aqua>"
+    lore: "<gray>Rechtsklick, um dich nach vorne zu katapultieren</gray>"
+    description: "Wirf deinen Haken aus, um dich zum Zielort zu katapultieren."
+  ink_splash:
+    name: "<dark_aqua><b>Tintenspritzer</b></dark_aqua>"
+    lore: "<gray>Rechtsklick, um Verstecker zu blenden</gray>"
+    description: "Blende Verstecker vorübergehend mit Tinte für {duration}s."
+    messages:
+      hit: "<dark_aqua>Du wurdest mit Tinte getroffen!</dark_aqua>"
+  lightning_freeze:
+    name: "<yellow><b>Blitzfrost</b></yellow>"
+    lore: "<gray>Rechtsklick, um alle Verstecker einzufrieren</gray>"
+    description: "Friert alle Verstecker für {duration}s mit Langsamkeit ein."
+    messages:
+      all_frozen: "<aqua>Alle Verstecker eingefroren!</aqua>"
+  mask:
+    name: "<gray><b>Suchermaske</b></gray>"
+    description: "Gebundener Sucher-Helm."
+  phantom_viewer:
+    name: "<dark_purple><b>Phantom-Betrachter</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Phantom-Schnappschüsse zu machen</gray>"
+    description: "Mache einen Phantom-Schnappschuss, der die Sicht eines Versteckers zeigt."
+    messages:
+      seeker_only: "<red>Nur Sucher können dieses Item benutzen.</red>"
+      no_target: "<red>Kein gültiges Verstecker-Ziel gefunden.</red>"
+      capture_failed: "<red>Phantom-Schnappschuss konnte nicht gemacht werden.</red>"
+      capturing: "<yellow>Phantom-Schnappschuss wird erstellt...</yellow>"
+      captured_player: "<green>PhantomViewer hat {target}s Perspektive erfasst.</green>"
+      captured_anonymous: "<green>PhantomViewer hat eine Phantom-Perspektive erfasst.</green>"
+  proximity_sensor:
+    name: "<dark_red><b>Näherungssensor</b></dark_red>"
+    lore: "<gray>Rechtsklick, um einen Sensor zu platzieren</gray>"
+    description: "Platziere einen Sensor, der Verstecker innerhalb von {range} Blöcken aufdeckt, gewährt {points} pro Erkennung."
+    messages:
+      need_solid_block: "<red>Kann Sensor nicht platzieren - fester Block erforderlich!</red>"
+      space_occupied: "<red>Kann Sensor hier nicht platzieren - Platz belegt!</red>"
+      no_ceiling: "<red>Kann Sensor nicht an der Decke platzieren!</red>"
+      placed: "<green>Näherungssensor platziert! ({duration})</green>"
+  skin_stats:
+    name: "<aqua><b>Skin-Statistiken</b></aqua>"
+    lore: "<gray>Rechtsklick, um Verstecker-Skins anzuzeigen</gray>"
+    description: "Zeige, welchen Skin jeder Verstecker derzeit als Verkleidung trägt."
+  sword:
+    name: "<red><b>Sucherklinge</b></red>"
+    lore: "<gray>Jage die Verstecker!</gray>"
+    description: "Hauptwaffe: Halte Blocken zum Aufladen und wirf dein Schwert."

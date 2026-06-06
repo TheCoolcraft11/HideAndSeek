@@ -63,35 +63,6 @@ public class ProximitySensorItem implements GameItem {
         return item;
     }
 
-    @Override
-    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        Number range = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.range", 8.0);
-        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Place a sensor revealing hiders within %.0f blocks, grants %d points per detection.",
-                range.doubleValue(), points);
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int proximityCooldown = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.cooldown", 20);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeProximitySensor(context, plugin))
-                .withDescription(getDescription(plugin, null))
-                .withNameKey("item.proximity_sensor.name")
-                .withLoreKey("item.proximity_sensor.lore")
-                .withNameKey("item.proximity_sensor.name")
-                .withLoreKey("item.proximity_sensor.lore")
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(proximityCooldown * 20)
-                .withCustomCooldown(proximityCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-    }
-
     private static void placeProximitySensor(ItemInteractionContext context, HideAndSeek plugin) {
         double range = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.range", 8.0);
         int sensorDuration = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.duration", 60);
@@ -104,7 +75,7 @@ public class ProximitySensorItem implements GameItem {
 
 
         if (!clickedBlock.getType().isSolid()) {
-            player.sendMessage(Component.text("Cannot place sensor - need solid block!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.proximity_sensor.messages.need_solid_block"));
             context.skipCooldown();
             return;
         }
@@ -126,7 +97,7 @@ public class ProximitySensorItem implements GameItem {
 
 
         if (!torchBlock.getType().isAir()) {
-            player.sendMessage(Component.text("Cannot place sensor here - space is occupied!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.proximity_sensor.messages.space_occupied"));
             context.skipCooldown();
             return;
         }
@@ -137,7 +108,7 @@ public class ProximitySensorItem implements GameItem {
 
         if (clickedFace == BlockFace.DOWN) {
 
-            player.sendMessage(Component.text("Cannot place sensor on ceiling!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.proximity_sensor.messages.no_ceiling"));
             context.skipCooldown();
             return;
         } else if (clickedFace == BlockFace.UP) {
@@ -385,7 +356,37 @@ public class ProximitySensorItem implements GameItem {
 
         String durationMsg = sensorDuration == -1 ? "until round ends" : sensorDuration + " seconds";
         context.getPlayer().sendMessage(
-                Component.text("Proximity sensor placed! (" + durationMsg + ")", NamedTextColor.GREEN));
+                plugin.trText(context.getPlayer(), "item.proximity_sensor.messages.placed",
+                        java.util.Map.of("duration", durationMsg)));
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int proximityCooldown = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.cooldown", 20);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeProximitySensor(context, plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.proximity_sensor.name")
+                .withLoreKey("item.proximity_sensor.lore")
+                .withNameKey("item.proximity_sensor.name")
+                .withLoreKey("item.proximity_sensor.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(proximityCooldown * 20)
+                .withCustomCooldown(proximityCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        Number range = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.range", 8.0);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return plugin.trText(player, "item.proximity_sensor.description",
+                java.util.Map.of("range", String.valueOf(range.intValue()), "points", String.valueOf(points)));
     }
 
 

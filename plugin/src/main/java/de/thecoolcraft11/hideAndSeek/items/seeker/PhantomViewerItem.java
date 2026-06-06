@@ -43,7 +43,7 @@ public class PhantomViewerItem implements GameItem {
     private static void use(ItemInteractionContext context, HideAndSeek plugin) {
         Player seeker = context.getPlayer();
         if (!HideAndSeek.getDataController().getSeekers().contains(seeker.getUniqueId())) {
-            seeker.sendMessage(Component.text("Only seekers can use this item.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.seeker_only"));
             context.skipCooldown();
             return;
         }
@@ -59,19 +59,19 @@ public class PhantomViewerItem implements GameItem {
 
         Player target = pickTargetHider(seeker, targetRandom);
         if (target == null) {
-            seeker.sendMessage(Component.text("No valid hider target found.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.no_target"));
             context.skipCooldown();
             return;
         }
 
         SnapshotContext snapshotContext = captureSnapshotContext(target, rayDistance);
         if (snapshotContext == null) {
-            seeker.sendMessage(Component.text("Could not capture phantom snapshot right now.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.capture_failed"));
             context.skipCooldown();
             return;
         }
 
-        seeker.sendMessage(Component.text("Capturing phantom snapshot...", NamedTextColor.YELLOW));
+        seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.capturing"));
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Color[] pixels = renderSnapshotPixels(snapshotContext);
@@ -347,11 +347,10 @@ public class PhantomViewerItem implements GameItem {
                         Math.max(1, mapDurationSeconds) * 20L);
 
                 if (showPlayerName) {
-                    seeker.sendMessage(Component.text("PhantomViewer captured " + target.getName() + "'s perspective.",
-                            NamedTextColor.GREEN));
+                    seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_player",
+                            java.util.Map.of("target", target.getName())));
                 } else {
-                    seeker.sendMessage(
-                            Component.text("PhantomViewer captured a phantom perspective.", NamedTextColor.GREEN));
+                    seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_anonymous"));
                 }
                 return;
             }
@@ -372,10 +371,10 @@ public class PhantomViewerItem implements GameItem {
         seeker.getInventory().addItem(mapItem);
 
         if (showPlayerName) {
-            seeker.sendMessage(Component.text("PhantomViewer captured " + target.getName() + "'s perspective.",
-                    NamedTextColor.GREEN));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_player",
+                    java.util.Map.of("target", target.getName())));
         } else {
-            seeker.sendMessage(Component.text("PhantomViewer captured a phantom perspective.", NamedTextColor.GREEN));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_anonymous"));
         }
 
         ItemStateManager.phantomViewerMapExpiry.put(seeker.getUniqueId(), expiryAt);
@@ -516,8 +515,7 @@ public class PhantomViewerItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        int rayDistance = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.ray-distance", 24);
-        return "Capture a rough map snapshot from a hider perspective (" + rayDistance + " blocks).";
+        return plugin.trText(player, "item.phantom_viewer.description");
     }
 
     @Override

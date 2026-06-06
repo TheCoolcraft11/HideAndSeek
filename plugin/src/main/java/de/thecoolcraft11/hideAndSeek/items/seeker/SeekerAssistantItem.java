@@ -71,7 +71,7 @@ public class SeekerAssistantItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        return "Summons a hunter assistant that tracks and shoots at visible hiders.";
+        return plugin.trText(player, "item.assistant.description");
     }
 
     @Override
@@ -105,14 +105,12 @@ public class SeekerAssistantItem implements GameItem {
 
     private void handleUse(Player player, HideAndSeek plugin) {
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            player.sendMessage(Component.text("The Seeker's Assistant is not available on this server version.",
-                    NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.assistant.messages.nms_unavailable"));
             return;
         }
 
         if (!"seeking".equalsIgnoreCase(plugin.getStateManager().getCurrentPhaseId())) {
-            player.sendMessage(
-                    Component.text("The Seeker's Assistant can only be summoned during seeking.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.assistant.messages.seeking_only"));
             return;
         }
 
@@ -122,7 +120,8 @@ public class SeekerAssistantItem implements GameItem {
                 ignored -> new CopyOnWriteArrayList<>());
         int max = plugin.getSettingRegistry().get("seeker-items.assistant.max-per-seeker", 2);
         if (active.size() >= max) {
-            player.sendMessage(Component.text("You already have " + max + " assistants active!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.assistant.messages.max_active",
+                    java.util.Map.of("max", String.valueOf(max))));
             return;
         }
 
@@ -130,7 +129,7 @@ public class SeekerAssistantItem implements GameItem {
         String selectedSkin = resolveSelectedSkin(player);
         Entity assistant = plugin.getNmsAdapter().spawnSeekerAssistant(plugin, player, spawn, selectedSkin);
         if (assistant == null) {
-            player.sendMessage(Component.text("Failed to summon assistant.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.assistant.messages.summon_failed"));
             return;
         }
         if (selectedSkin != null) {

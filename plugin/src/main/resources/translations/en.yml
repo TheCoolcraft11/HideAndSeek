@@ -1095,3 +1095,117 @@ item:
     messages:
       hit: "<gold>Crossbow hit! +{points} points</gold>"
       hit_progress: "<green>Hit seeker! {current}/{required}</green>"
+  assistant:
+    name: "<red><b>Seeker's Assistant</b></red>"
+    lore: "<gray>Summon a hunting assistant to track down hiders.\nMax 2 active at the same time.\n\n<gold><b>LEGENDARY</b></gold></gray>"
+    description: "Summons a hunter assistant that tracks and shoots at visible hiders."
+    messages:
+      nms_unavailable: "<red>The Seeker's Assistant is not available on this server version.</red>"
+      seeking_only: "<red>The Seeker's Assistant can only be summoned during seeking.</red>"
+      max_active: "<red>You already have {max} assistants active!</red>"
+      summon_failed: "<red>Failed to summon assistant.</red>"
+      summoned: "<red>Assistant summoned! </red><gray>({lifetime}s lifetime)</gray>"
+  block_randomizer:
+    name: "<red><b>Block Randomizer</b></red>"
+    lore: "<gray>Right click to randomize all blocks</gray>"
+    description: "Force all hiders to reroll their disguise blocks."
+    messages:
+      wrong_mode: "<red>Block Randomizer is only available in BLOCK or SKIN mode.</red>"
+      blocks_randomized: "<green>Blocks randomized! ({count} hiders)</green>"
+  block_stats:
+    name: "<aqua><b>Block Statistics</b></aqua>"
+    lore: "<gray>Right click to view block stats</gray>"
+    description: "Open the block statistics menu."
+  cage_trap:
+    name: "<gray><b>Cage Trap</b></gray>"
+    lore: "<gray>Right click to place a trap</gray>"
+    description: "Place a hidden trap that cages and immobilizes a hider for {duration}s."
+    messages:
+      placed: "<green>Cage trap placed! (Ready in {setupTime}s, lasts {durationMsg})</green>"
+      triggered: "<dark_red>You've been trapped by a cage!</dark_red>"
+  camera:
+    name: "<dark_aqua><b>Camera</b></dark_aqua>"
+    lore: "<gray>Shift + right click block to place\nRight click to watch your cameras\nCycle through cameras with LMB and vision modes with RMB\nModes: Normal, Night Vision, Terminal Vision (glow)\nSneak to stop watching your cameras</gray>"
+    description: "Place up to {maxCameras} cameras and spectate through them."
+    messages:
+      nms_unavailable: "<red>The Camera is not available on this server version.</red>"
+      need_solid_block: "<red>Cannot place camera - need solid block!</red>"
+      no_ceiling: "<red>Cannot place camera on ceiling!</red>"
+      space_occupied: "<red>Cannot place camera here - space is occupied!</red>"
+      placed: "<green>Camera placed! ({count}/{maxCameras})</green>"
+      no_cameras: "<red>You have no cameras placed.</red>"
+      all_cameras_gone: "<red>All your cameras are gone.</red>"
+      client_unsupported: "<red>Your client does not support camera mode on this server build.</red>"
+  chain_pull:
+    name: "<dark_gray><b>Chain Pull</b></dark_gray>"
+    lore: "<gray>Right click to pull hiders</gray>"
+    description: "Pull the hider in front of you to your position."
+    messages:
+      no_target: "<red>No hider in range.</red>"
+      pulled: "<green>Pulled {target}!</green>"
+      pulled_by_chain: "<dark_gray>You've been pulled by a chain!</dark_gray>"
+  crowbar:
+    name: "<aqua><b>Crowbar</b></aqua>"
+    lore: "<gray>Left Click to destroy some blocks</gray>"
+    description: "Breaks Blocks of the map to help you reach small seekers."
+  curse_spell:
+    name: "<dark_purple><b>Curse Spell</b></dark_purple>"
+    lore: "<gray>Right click to curse hiders</gray>"
+    description: "Enhance your melee attacks against hiders for a limited time."
+    messages:
+      activated: "<dark_purple>Curse spell activated! ({duration}s)</dark_purple>"
+      cursed: "<dark_purple>You have been cursed!</dark_purple>"
+  glowing_compass:
+    name: "<gold><b>Glowing Compass</b></gold>"
+    lore: "<gray>Right click to glow the nearest hider</gray>"
+    description: "Reveal nearest hider within {range} blocks with glow for {duration}s, grants {points} points."
+    messages:
+      hider_glowing: "<gold>{nearest} is now glowing!</gold>"
+      no_hiders: "<red>No hiders found nearby!</red>"
+  grappling_hook:
+    name: "<aqua><b>Grappling Hook</b></aqua>"
+    lore: "<gray>Right click to launch yourself forward\ntoward where you're looking</gray>"
+    description: "Reel your hook to launch yourself toward the cast point."
+  ink_splash:
+    name: "<dark_aqua><b>Ink Splash</b></dark_aqua>"
+    lore: "<gray>Right click to blind hiders</gray>"
+    description: "Temporarily blind hiders with ink, reducing visibility for {duration}s."
+    messages:
+      hit: "<dark_aqua>You've been hit with ink!</dark_aqua>"
+  lightning_freeze:
+    name: "<yellow><b>Lightning Freeze</b></yellow>"
+    lore: "<gray>Right click to freeze all hiders</gray>"
+    description: "Freeze all hiders in place with slowness effect for {duration}s."
+    messages:
+      all_frozen: "<aqua>All hiders frozen!</aqua>"
+  mask:
+    name: "<gray><b>Seekers Mask</b></gray>"
+    description: "Bound seeker helmet item."
+  phantom_viewer:
+    name: "<dark_purple><b>Phantom Viewer</b></dark_purple>"
+    lore: "<gray>Right click to capture phantom snapshots</gray>"
+    description: "Capture a phantom snapshot showing a hider's view."
+    messages:
+      seeker_only: "<red>Only seekers can use this item.</red>"
+      no_target: "<red>No valid hider target found.</red>"
+      capture_failed: "<red>Could not capture phantom snapshot right now.</red>"
+      capturing: "<yellow>Capturing phantom snapshot...</yellow>"
+      captured_player: "<green>PhantomViewer captured {target}'s perspective.</green>"
+      captured_anonymous: "<green>PhantomViewer captured a phantom perspective.</green>"
+  proximity_sensor:
+    name: "<dark_red><b>Proximity Sensor</b></dark_red>"
+    lore: "<gray>Right click to place a sensor</gray>"
+    description: "Place a sensor revealing hiders within {range} blocks, grants {points} per detection."
+    messages:
+      need_solid_block: "<red>Cannot place sensor - need solid block!</red>"
+      space_occupied: "<red>Cannot place sensor here - space is occupied!</red>"
+      no_ceiling: "<red>Cannot place sensor on ceiling!</red>"
+      placed: "<green>Proximity sensor placed! ({duration})</green>"
+  skin_stats:
+    name: "<aqua><b>Skin Statistics</b></aqua>"
+    lore: "<gray>Right-click to view hider skins</gray>"
+    description: "View which skin each hider is currently disguised as."
+  sword:
+    name: "<red><b>Seeker's Blade</b></red>"
+    lore: "<gray>Hunt down the hiders!</gray>"
+    description: "Main weapon: hold block to charge and throw your sword."

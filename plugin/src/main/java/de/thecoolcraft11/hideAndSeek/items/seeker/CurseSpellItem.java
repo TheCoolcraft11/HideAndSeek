@@ -63,7 +63,8 @@ public class CurseSpellItem implements GameItem {
             sword.setItemMeta(meta);
         }
 
-        seeker.sendMessage(Component.text("Curse spell activated! (" + duration + "s)", NamedTextColor.DARK_PURPLE));
+        seeker.sendMessage(plugin.trText(seeker, "item.curse_spell.messages.activated",
+                java.util.Map.of("duration", String.valueOf(duration))));
         Location loc = seeker.getLocation().add(0, 1, 0);
         if (voodoo) {
             seeker.getWorld().spawnParticle(Particle.SOUL, loc, 16, 0.3, 0.4, 0.3, 0.02);
@@ -172,7 +173,7 @@ public class CurseSpellItem implements GameItem {
             }
         }
 
-        hider.sendMessage(Component.text("You have been cursed!", NamedTextColor.DARK_PURPLE));
+        hider.sendMessage(plugin.trText(hider, "item.curse_spell.messages.cursed"));
         if (voodoo) {
             hider.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, hider.getLocation().add(0, 1, 0), 12, 0.25, 0.3,
                     0.25, 0.02);
@@ -227,8 +228,7 @@ public class CurseSpellItem implements GameItem {
 
     @Override
     public String getDescription(HideAndSeek plugin, @Nullable Player player) {
-        Number duration = plugin.getSettingRegistry().get("seeker-items.curse-spell.active-duration", 10);
-        return String.format("Empower your blade for %ds to curse hiders on hit.", duration.intValue());
+        return plugin.trText(player, "item.curse_spell.description");
     }
 
     public static boolean isCurseActive(UUID seekerId) {
