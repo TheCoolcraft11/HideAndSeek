@@ -7,8 +7,8 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +17,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 public class SlownessBallItem implements GameItem {
@@ -33,12 +32,14 @@ public class SlownessBallItem implements GameItem {
         ItemStack item = new ItemStack(Material.SNOWBALL);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Slowness Ball", NamedTextColor.AQUA, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.slowness_ball.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to throw at seekers", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.slowness_ball.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;

@@ -8,8 +8,8 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Candle;
@@ -22,7 +22,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,12 +38,14 @@ public class BigFirecrackerItem implements GameItem {
         ItemStack item = new ItemStack(Material.TNT);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Big Firecracker", NamedTextColor.RED, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.big_firecracker.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to place a big firecracker", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.big_firecracker.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
             item.setItemMeta(meta);

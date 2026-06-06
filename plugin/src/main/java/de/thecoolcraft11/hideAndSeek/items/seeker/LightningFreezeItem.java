@@ -9,8 +9,8 @@ import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -22,8 +22,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.lightningFreezeHiderXpTasks;
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.lightningFreezeXpTasks;
@@ -41,12 +39,14 @@ public class LightningFreezeItem implements GameItem {
         ItemStack item = new ItemStack(Material.LIGHTNING_ROD);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Lightning Freeze", NamedTextColor.YELLOW, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.lightning_freeze.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to freeze all hiders", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.lightning_freeze.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;

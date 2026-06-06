@@ -6,8 +6,8 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -17,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.UUID;
 
 import static de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem.randomizeBlockFor;
@@ -36,12 +35,14 @@ public class BlockRandomizerItem implements GameItem {
         ItemStack item = new ItemStack(Material.BLAZE_POWDER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Block Randomizer", NamedTextColor.RED, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.block_randomizer.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to randomize all blocks", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.block_randomizer.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;

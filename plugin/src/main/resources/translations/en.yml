@@ -1003,6 +1003,7 @@ item:
       only_hiders: "<red>Only hiders can use this item.</red>"
       activated: "<aqua>You are now invisible!</aqua>"
   ink_face:
+    name: "<gray><b>Ink Face</b></gray>"
     description: "Hidden helmet used for ink-blindness effects."
   knockback_stick:
     name: "<dark_red><b>Knockback Stick <gold>(Level {level}</gold>)</b></dark_red>"
@@ -1035,6 +1036,7 @@ item:
       invalid_block_type: "<red>Invalid block type in config: {type}</red>"
       transformed_block: "<green>Transformed into <gold>{block}</gold></green>"
       transformed_skin: "<green>Transformed into <gold>{skin}</gold></green>"
+      uses_exhausted: "<red>You ran out of random block uses!</red>"
   remote_gateway:
     name: "<dark_purple><b>Remote Gateway</b></dark_purple>"
     lore: "<gray>Right click to place your gateway anchors\nTwo anchors form a teleport pair</gray>"
@@ -1180,6 +1182,7 @@ item:
       all_frozen: "<aqua>All hiders frozen!</aqua>"
   mask:
     name: "<gray><b>Seekers Mask</b></gray>"
+    lore: "<gray>A spooky mask to scare the hiders</gray>"
     description: "Bound seeker helmet item."
   phantom_viewer:
     name: "<dark_purple><b>Phantom Viewer</b></dark_purple>"

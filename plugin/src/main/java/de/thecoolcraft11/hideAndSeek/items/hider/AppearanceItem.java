@@ -6,15 +6,13 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class AppearanceItem implements GameItem {
     public static final String ID = "has_hider_appearance";
@@ -30,15 +28,14 @@ public class AppearanceItem implements GameItem {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("Appearance Editor", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.appearance.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to customize appearance", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false),
-                    Component.empty(),
-                    Component.text("Available during Hiding & Seeking phases", NamedTextColor.DARK_GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.appearance.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
 

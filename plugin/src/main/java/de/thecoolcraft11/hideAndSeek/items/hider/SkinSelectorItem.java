@@ -6,15 +6,13 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class SkinSelectorItem implements GameItem {
 
@@ -34,13 +32,14 @@ public class SkinSelectorItem implements GameItem {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(
-                    Component.text("Skin Selector", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD)
-                            .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right-click to choose your disguise skin", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.skin_selector.name"))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.skin_selector.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;

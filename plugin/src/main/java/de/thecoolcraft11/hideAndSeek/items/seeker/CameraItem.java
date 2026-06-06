@@ -13,6 +13,7 @@ import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -629,21 +630,14 @@ public class CameraItem implements GameItem {
         ItemStack item = createCameraHeadItem();
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Camera", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.camera.name"))
                     .decoration(TextDecoration.ITALIC, false));
 
-            List<Component> lore = new LinkedList<>(List.of(
-                    Component.text("Shift + right click block to place", NamedTextColor.GRAY).decoration(
-                            TextDecoration.ITALIC, false),
-                    Component.text("Right click to watch your cameras", NamedTextColor.GRAY).decoration(
-                            TextDecoration.ITALIC, false),
-                    Component.text("Cycle through cameras with LMB and vision modes with RMB",
-                            NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Modes: Normal, Night Vision, Terminal Vision (glow)",
-                            NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Sneak to stop watching your cameras", NamedTextColor.GRAY).decoration(
-                            TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.camera.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
 
             if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
                 lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)

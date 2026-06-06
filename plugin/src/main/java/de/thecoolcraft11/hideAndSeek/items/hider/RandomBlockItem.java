@@ -10,8 +10,8 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -43,14 +43,16 @@ public class RandomBlockItem implements GameItem {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("Random Block", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD).append(
-                    Component.space()).append(
-                    Component.text("(" + maxUses + "/" + maxUses + ")", NamedTextColor.GRAY).decoration(
-                            TextDecoration.ITALIC, false)));
-            meta.lore(List.of(
-                    Component.text("Right click to randomize", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            meta.displayName(MiniMessage.miniMessage().deserialize(
+                            plugin.trText(null, "item.random_block.name",
+                                    java.util.Map.of("uses", maxUses, "maxUses", maxUses)))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.random_block.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
 
@@ -86,7 +88,8 @@ public class RandomBlockItem implements GameItem {
                 .allowArmor(false)
                 .cancelDefaultAction(true)
                 .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(
-                        Component.text("You ran out of random block uses!", NamedTextColor.RED)))
+                        MiniMessage.miniMessage().deserialize(
+                                plugin.trText(context.getPlayer(), "item.random_block.messages.uses_exhausted"))))
                 .withAppearanceProvider((player, item, context) -> {
                     ItemStack itemStack = item.getItemStack();
                     ItemMeta meta = itemStack.getItemMeta();

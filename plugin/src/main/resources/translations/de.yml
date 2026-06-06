@@ -1003,6 +1003,7 @@ item:
       only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
       activated: "<aqua>Du bist jetzt unsichtbar!</aqua>"
   ink_face:
+    name: "<gray><b>Tintengesicht</b></gray>"
     description: "Versteckter Helm für Tinten-Blindheitseffekte."
   knockback_stick:
     name: "<dark_red><b>Rückstoß-Stick <gold>(Level {level}</gold>)</b></dark_red>"
@@ -1035,6 +1036,7 @@ item:
       invalid_block_type: "<red>Ungültiger Block-Typ in der Konfiguration: {type}</red>"
       transformed_block: "<green>Verwandelt in <gold>{block}</gold></green>"
       transformed_skin: "<green>Verwandelt in <gold>{skin}</gold></green>"
+      uses_exhausted: "<red>Du hast keine zufälligen Blocknutzungen mehr!</red>"
   remote_gateway:
     name: "<dark_purple><b>Remote-Gateway</b></dark_purple>"
     lore: "<gray>Rechtsklick, um Gateway-Anker zu platzieren\nZwei Anker bilden ein Teleport-Paar</gray>"
@@ -1180,6 +1182,7 @@ item:
       all_frozen: "<aqua>Alle Verstecker eingefroren!</aqua>"
   mask:
     name: "<gray><b>Suchermaske</b></gray>"
+    lore: "<gray>Eine gruselige Maske, um die Verstecker zu erschrecken</gray>"
     description: "Gebundener Sucher-Helm."
   phantom_viewer:
     name: "<dark_purple><b>Phantom-Betrachter</b></dark_purple>"

@@ -7,8 +7,8 @@ import de.thecoolcraft11.hideAndSeek.model.SpeedBoostType;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -42,9 +42,34 @@ public class SpeedBoostItem implements GameItem {
         return ids;
     }
 
-    @Override
-    public ItemStack createItem(HideAndSeek plugin) {
-        return createSpeedBoostItem(0);
+    public static ItemStack createSpeedBoostItem(int level, HideAndSeek plugin) {
+        Material material = switch (level) {
+            case 0 -> Material.WOODEN_HOE;
+            case 1 -> Material.STONE_HOE;
+            case 2 -> Material.IRON_HOE;
+            case 3 -> Material.GOLDEN_HOE;
+            case 4 -> Material.DIAMOND_HOE;
+            default -> Material.NETHERITE_HOE;
+        };
+
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            meta.displayName(MiniMessage.miniMessage().deserialize(
+                            plugin.trText(null, "item.speed_boost.name", java.util.Map.of("level", level + 1)))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.speed_boost.lore", java.util.Map.of("level", level + 1));
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
+            meta.setUnbreakable(true);
+            item.setItemMeta(meta);
+        }
+
+        return item;
     }
 
     @Override
@@ -61,65 +86,42 @@ public class SpeedBoostItem implements GameItem {
         }
     }
 
-    @Override
-    public void register(HideAndSeek plugin) {
-        int speedBoostCooldown = plugin.getSettingRegistry().get("hider-items.speed-boost.cooldown", 10);
+    public static void upgradeSpeedItem(Player player, HideAndSeek plugin) {
+        int level = Math.min(5, getSpeedLevel(player.getUniqueId()) + 1);
+        speedLevels.put(player.getUniqueId(), level);
 
-        for (int level = 0; level <= 5; level++) {
-            String levelId = ID + "_" + level;
-            plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createSpeedBoostItem(level), levelId)
-                    .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> speedBoost(context.getPlayer(), plugin))
-                    .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> speedBoost(context.getPlayer(), plugin))
-                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR,
-                            context -> speedBoost(context.getPlayer(), plugin))
-                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
-                            context -> speedBoost(context.getPlayer(), plugin))
-                    .withVanillaCooldown(speedBoostCooldown * 20)
-                    .withCustomCooldown(speedBoostCooldown * 1000L)
-                    .withVanillaCooldownDisplay(true)
-                    .withDescription(getDescription(plugin, null))
-                    .withNameKey("item.speed_boost.name", Map.of("level", level + 1))
-                    .withLoreKey("item.speed_boost.lore", Map.of("level", level + 1))
-                    .withDropPrevention(true)
-                    .withCraftPrevention(true)
-                    .allowOffHand(false)
-                    .allowArmor(false)
-                    .cancelDefaultAction(true)
-                    .build());
+        ItemStack upgradedItem = null;
+        if (plugin != null) {
+            String runtimeItemId = ID + "_" + level;
+            var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
+            if (customItem != null) {
+                upgradedItem = customItem.getItemStack();
+
+                String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
+                if (selectedVariant != null) {
+                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId,
+                            selectedVariant);
+                    if (variant != null && variant.getItemStack() != null) {
+                        upgradedItem = variant.getItemStack().clone();
+                    }
+                }
+            }
         }
+
+        if (upgradedItem == null) {
+            upgradedItem = createSpeedBoostItem(level, plugin);
+        }
+
+        removeSpeedItems(player);
+        player.getInventory().addItem(upgradedItem);
+        if (plugin == null) return;
+        player.sendMessage(plugin.trText(player, "item.speed_boost.messages.upgraded",
+                java.util.Map.of("level", String.valueOf(level + 1))));
     }
 
-
-    public static ItemStack createSpeedBoostItem(int level) {
-        Material material = switch (level) {
-            case 0 -> Material.WOODEN_HOE;
-            case 1 -> Material.STONE_HOE;
-            case 2 -> Material.IRON_HOE;
-            case 3 -> Material.GOLDEN_HOE;
-            case 4 -> Material.DIAMOND_HOE;
-            default -> Material.NETHERITE_HOE;
-        };
-
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-
-        if (meta != null) {
-            meta.displayName(Component.text("Speed Boost", NamedTextColor.YELLOW, TextDecoration.BOLD)
-                    .append(Component.space())
-                    .append(Component.text("(Level " + (level + 1) + ")", NamedTextColor.GOLD)
-                            .decoration(TextDecoration.ITALIC, false))
-                    .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click for a speed boost", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false),
-                    Component.text("Level: " + (level + 1), NamedTextColor.GOLD)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
-            meta.setUnbreakable(true);
-            item.setItemMeta(meta);
-        }
-
-        return item;
+    @Override
+    public ItemStack createItem(HideAndSeek plugin) {
+        return createSpeedBoostItem(0, plugin);
     }
 
     private static void speedBoost(Player player, HideAndSeek plugin) {
@@ -230,37 +232,33 @@ public class SpeedBoostItem implements GameItem {
         }
     }
 
-    public static void upgradeSpeedItem(Player player, HideAndSeek plugin) {
-        int level = Math.min(5, getSpeedLevel(player.getUniqueId()) + 1);
-        speedLevels.put(player.getUniqueId(), level);
+    @Override
+    public void register(HideAndSeek plugin) {
+        int speedBoostCooldown = plugin.getSettingRegistry().get("hider-items.speed-boost.cooldown", 10);
 
-        ItemStack upgradedItem = null;
-        if (plugin != null) {
-            String runtimeItemId = ID + "_" + level;
-            var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
-            if (customItem != null) {
-                upgradedItem = customItem.getItemStack();
-
-                String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
-                if (selectedVariant != null) {
-                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId,
-                            selectedVariant);
-                    if (variant != null && variant.getItemStack() != null) {
-                        upgradedItem = variant.getItemStack().clone();
-                    }
-                }
-            }
+        for (int level = 0; level <= 5; level++) {
+            String levelId = ID + "_" + level;
+            plugin.getCustomItemManager().registerItem(
+                    new CustomItemBuilder(createSpeedBoostItem(level, plugin), levelId)
+                    .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> speedBoost(context.getPlayer(), plugin))
+                    .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> speedBoost(context.getPlayer(), plugin))
+                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR,
+                            context -> speedBoost(context.getPlayer(), plugin))
+                    .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                            context -> speedBoost(context.getPlayer(), plugin))
+                    .withVanillaCooldown(speedBoostCooldown * 20)
+                    .withCustomCooldown(speedBoostCooldown * 1000L)
+                    .withVanillaCooldownDisplay(true)
+                    .withDescription(getDescription(plugin, null))
+                    .withNameKey("item.speed_boost.name", Map.of("level", level + 1))
+                    .withLoreKey("item.speed_boost.lore", Map.of("level", level + 1))
+                    .withDropPrevention(true)
+                    .withCraftPrevention(true)
+                    .allowOffHand(false)
+                    .allowArmor(false)
+                    .cancelDefaultAction(true)
+                    .build());
         }
-
-        if (upgradedItem == null) {
-            upgradedItem = createSpeedBoostItem(level);
-        }
-
-        removeSpeedItems(player);
-        player.getInventory().addItem(upgradedItem);
-        if (plugin == null) return;
-        player.sendMessage(plugin.trText(player, "item.speed_boost.messages.upgraded",
-                java.util.Map.of("level", String.valueOf(level + 1))));
     }
 
     public static int getSpeedLevel(UUID playerId) {

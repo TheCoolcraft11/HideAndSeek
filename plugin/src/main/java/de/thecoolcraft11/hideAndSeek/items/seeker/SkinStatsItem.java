@@ -6,15 +6,13 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class SkinStatsItem implements GameItem {
 
@@ -30,13 +28,14 @@ public class SkinStatsItem implements GameItem {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(
-                    Component.text("Skin Statistics", NamedTextColor.AQUA, TextDecoration.BOLD)
-                            .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right-click to view hider skins", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.skin_stats.name"))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.skin_stats.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;

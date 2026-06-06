@@ -11,6 +11,7 @@ import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Mob;
@@ -22,7 +23,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,15 +42,14 @@ public class GhostEssenceItem implements GameItem {
         ItemMeta meta = item.getItemMeta();
         float duration = plugin.getSettingRegistry().get("hider-items.ghost-essence.max-duration", 1.5f);
         if (meta != null) {
-            meta.displayName(Component.text("Ghostly Essence", NamedTextColor.AQUA, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.ghost_essence.name"))
                     .decoration(TextDecoration.ITALIC, false));
 
-            List<Component> lore = new java.util.ArrayList<>(List.of(
-                    Component.text("Pass through walls for " + duration + " seconds", NamedTextColor.GRAY).decoration(
-                            TextDecoration.ITALIC, false),
-                    Component.text("You cannot descend while ghostly!", NamedTextColor.RED).decoration(
-                            TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.ghost_essence.lore", java.util.Map.of("duration", duration));
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
 
             if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
                 lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)

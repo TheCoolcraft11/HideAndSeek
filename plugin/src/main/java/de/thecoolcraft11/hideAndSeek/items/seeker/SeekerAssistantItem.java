@@ -7,8 +7,8 @@ import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -19,8 +19,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,24 +43,21 @@ public class SeekerAssistantItem implements GameItem {
         ItemStack item = new ItemStack(Material.ZOMBIE_HEAD);
         ItemMeta meta = item.getItemMeta();
 
-        meta.displayName(Component.text("Seeker's Assistant")
-                .color(NamedTextColor.RED)
-                .decorate(TextDecoration.BOLD)
+        meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.assistant.name"))
                 .decoration(TextDecoration.ITALIC, false));
 
-        List<Component> lore = new ArrayList<>(List.of(
-                Component.text("Summon a hunting assistant to track down hiders.", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false),
-                Component.text("Max 2 active at the same time.", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false),
-                Component.empty(),
-                Component.text("LEGENDARY", NamedTextColor.GOLD)
-                        .decorate(TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false)
-        ));
+        String loreStr = plugin.trText(null, "item.assistant.lore");
+        java.util.List<Component> lore = new java.util.ArrayList<>();
+        for (String line : loreStr.split("\n")) {
+            lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+        }
+
+        lore.add(Component.empty());
+        lore.add(MiniMessage.miniMessage().deserialize("<gold><bold>LEGENDARY</bold></gold>")
+                .decoration(TextDecoration.ITALIC, false));
 
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)
+            lore.add(MiniMessage.miniMessage().deserialize("<dark_red>Not available on this server version</dark_red>")
                     .decoration(TextDecoration.ITALIC, false));
         }
 
@@ -172,10 +169,8 @@ public class SeekerAssistantItem implements GameItem {
             player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.55f, 1.4f);
         }
 
-        player.sendActionBar(Component.text()
-                .append(Component.text("Assistant summoned! ", NamedTextColor.RED))
-                .append(Component.text("(" + lifetimeSeconds + "s lifetime)", NamedTextColor.GRAY))
-                .build());
+        player.sendActionBar(MiniMessage.miniMessage().deserialize(
+                plugin.trText(player, "item.assistant.messages.summoned", Map.of("lifetime", lifetimeSeconds))));
     }
 
     private String resolveSelectedSkin(Player player) {

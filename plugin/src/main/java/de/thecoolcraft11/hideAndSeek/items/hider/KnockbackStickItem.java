@@ -7,8 +7,8 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -42,9 +42,25 @@ public class KnockbackStickItem implements GameItem {
         return ids;
     }
 
-    @Override
-    public ItemStack createItem(HideAndSeek plugin) {
-        return createKnockbackStickItem(1);
+    public static ItemStack createKnockbackStickItem(int level, HideAndSeek plugin) {
+        ItemStack item = new ItemStack(Material.STICK);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.displayName(MiniMessage.miniMessage().deserialize(
+                            plugin.trText(null, "item.knockback_stick.name", java.util.Map.of("level", level + 1)))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.knockback_stick.lore", java.util.Map.of("level", level + 1));
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
+            meta.addEnchant(Enchantment.KNOCKBACK, Math.clamp(level, 1, 5), true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            meta.setUnbreakable(true);
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 
     @Override
@@ -52,52 +68,42 @@ public class KnockbackStickItem implements GameItem {
         return plugin.trText(player, "item.knockback_stick.description");
     }
 
-    @Override
-    public void register(HideAndSeek plugin) {
-        int knockbackCooldown = plugin.getSettingRegistry().get("hider-items.knockback-stick.cooldown", 5);
+    public static void upgradeKnockbackItem(Player player, HideAndSeek plugin) {
+        int level = Math.min(5, getKnockbackLevel(player.getUniqueId()) + 1);
+        knockbackLevels.put(player.getUniqueId(), level);
 
-        for (int level = 1; level <= 5; level++) {
-            String levelId = ID + "_" + level;
-            plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createKnockbackStickItem(level), levelId)
-                    .withAction(ItemActionType.LEFT_CLICK_ENTITY, KnockbackStickItem::knockbackHit)
-                    .withDescription(getDescription(plugin, null))
-                    .withNameKey("item.knockback_stick.name", Map.of("level", level + 1))
-                    .withLoreKey("item.knockback_stick.lore", Map.of("level", level + 1))
-                    .withDropPrevention(true)
-                    .withCraftPrevention(true)
-                    .withVanillaCooldown(knockbackCooldown * 20)
-                    .withCustomCooldown(knockbackCooldown * 1000L)
-                    .withVanillaCooldownDisplay(true)
-                    .allowOffHand(false)
-                    .allowArmor(false)
-                    .cancelDefaultAction(true)
-                    .cancelAttackOnCooldown(true)
-                    .build());
+        ItemStack upgradedItem = null;
+        if (plugin != null) {
+            String runtimeItemId = ID + "_" + level;
+            var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
+            if (customItem != null) {
+                upgradedItem = customItem.getItemStack();
+
+                String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
+                if (selectedVariant != null) {
+                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId,
+                            selectedVariant);
+                    if (variant != null && variant.getItemStack() != null) {
+                        upgradedItem = variant.getItemStack().clone();
+                    }
+                }
+            }
         }
+
+        if (upgradedItem == null) {
+            upgradedItem = createKnockbackStickItem(level, plugin);
+        }
+
+        removeKnockbackItems(player);
+        player.getInventory().addItem(upgradedItem);
+        if (plugin == null) return;
+        player.sendMessage(plugin.trText(player, "item.knockback_stick.messages.upgraded",
+                java.util.Map.of("level", String.valueOf(level))));
     }
 
-
-    public static ItemStack createKnockbackStickItem(int level) {
-        ItemStack item = new ItemStack(Material.STICK);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.displayName(Component.text("Knockback Stick", NamedTextColor.DARK_RED, TextDecoration.BOLD)
-                    .append(Component.space())
-                    .append(Component.text("(Level " + level + ")", NamedTextColor.GOLD)
-                            .decoration(TextDecoration.ITALIC, false))
-                    .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Left click to knock seekers away", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false),
-                    Component.text("Level: " + (level + 1), NamedTextColor.GOLD)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
-            meta.addEnchant(Enchantment.KNOCKBACK, Math.clamp(level, 1, 5), true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.setUnbreakable(true);
-            item.setItemMeta(meta);
-        }
-        return item;
+    @Override
+    public ItemStack createItem(HideAndSeek plugin) {
+        return createKnockbackStickItem(1, plugin);
     }
 
     private static void knockbackHit(ItemInteractionContext context) {
@@ -125,37 +131,29 @@ public class KnockbackStickItem implements GameItem {
         }
     }
 
-    public static void upgradeKnockbackItem(Player player, HideAndSeek plugin) {
-        int level = Math.min(5, getKnockbackLevel(player.getUniqueId()) + 1);
-        knockbackLevels.put(player.getUniqueId(), level);
+    @Override
+    public void register(HideAndSeek plugin) {
+        int knockbackCooldown = plugin.getSettingRegistry().get("hider-items.knockback-stick.cooldown", 5);
 
-        ItemStack upgradedItem = null;
-        if (plugin != null) {
-            String runtimeItemId = ID + "_" + level;
-            var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
-            if (customItem != null) {
-                upgradedItem = customItem.getItemStack();
-
-                String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
-                if (selectedVariant != null) {
-                    var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId,
-                            selectedVariant);
-                    if (variant != null && variant.getItemStack() != null) {
-                        upgradedItem = variant.getItemStack().clone();
-                    }
-                }
-            }
+        for (int level = 1; level <= 5; level++) {
+            String levelId = ID + "_" + level;
+            plugin.getCustomItemManager().registerItem(
+                    new CustomItemBuilder(createKnockbackStickItem(level, plugin), levelId)
+                    .withAction(ItemActionType.LEFT_CLICK_ENTITY, KnockbackStickItem::knockbackHit)
+                    .withDescription(getDescription(plugin, null))
+                    .withNameKey("item.knockback_stick.name", Map.of("level", level + 1))
+                    .withLoreKey("item.knockback_stick.lore", Map.of("level", level + 1))
+                    .withDropPrevention(true)
+                    .withCraftPrevention(true)
+                    .withVanillaCooldown(knockbackCooldown * 20)
+                    .withCustomCooldown(knockbackCooldown * 1000L)
+                    .withVanillaCooldownDisplay(true)
+                    .allowOffHand(false)
+                    .allowArmor(false)
+                    .cancelDefaultAction(true)
+                    .cancelAttackOnCooldown(true)
+                    .build());
         }
-
-        if (upgradedItem == null) {
-            upgradedItem = createKnockbackStickItem(level);
-        }
-
-        removeKnockbackItems(player);
-        player.getInventory().addItem(upgradedItem);
-        if (plugin == null) return;
-        player.sendMessage(plugin.trText(player, "item.knockback_stick.messages.upgraded",
-                java.util.Map.of("level", String.valueOf(level))));
     }
 
     public static int getKnockbackLevel(UUID playerId) {

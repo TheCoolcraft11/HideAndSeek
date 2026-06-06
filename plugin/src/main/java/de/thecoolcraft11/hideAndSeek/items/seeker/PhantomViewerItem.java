@@ -9,6 +9,7 @@ import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
@@ -502,12 +503,14 @@ public class PhantomViewerItem implements GameItem {
         ItemStack item = new ItemStack(Material.FILLED_MAP);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Phantom Viewer", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.phantom_viewer.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to capture a lo-fi phantom snapshot", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.phantom_viewer.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
@@ -525,8 +528,6 @@ public class PhantomViewerItem implements GameItem {
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> use(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> use(context, plugin))
                 .withDescription(getDescription(plugin, null))
-                .withNameKey("item.phantom_viewer.name")
-                .withLoreKey("item.phantom_viewer.lore")
                 .withNameKey("item.phantom_viewer.name")
                 .withLoreKey("item.phantom_viewer.lore")
                 .withDropPrevention(true)
