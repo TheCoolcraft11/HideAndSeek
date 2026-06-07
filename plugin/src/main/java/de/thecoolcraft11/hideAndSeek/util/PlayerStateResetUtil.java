@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.util;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
+import de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem;
+import de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
@@ -28,6 +30,7 @@ public final class PlayerStateResetUtil {
         resetCosmetics(player);
         resetCooldowns(player);
         resetPermissions(player);
+        resetUses(player);
     }
 
     public static void resetPlayerForSpectator(Player player, boolean clearInventory) {
@@ -126,5 +129,10 @@ public final class PlayerStateResetUtil {
             item.resetPlayerCooldowns(player.getUniqueId());
             item.resetPlayerUses(player.getUniqueId());
         });
+    }
+
+    private static void resetUses(Player player) {
+        SpeedBoostItem.resetSpeedLevel(player.getUniqueId());
+        KnockbackStickItem.resetKnockbackLevel(player.getUniqueId());
     }
 }

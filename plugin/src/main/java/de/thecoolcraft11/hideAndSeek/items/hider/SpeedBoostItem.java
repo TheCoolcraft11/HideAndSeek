@@ -253,6 +253,10 @@ public class SpeedBoostItem implements GameItem {
         return speedLevels.getOrDefault(playerId, 0);
     }
 
+    public static void resetSpeedLevel(UUID playerId) {
+        speedLevels.put(playerId, 0);
+    }
+
     private static void removeSpeedItems(Player player) {
         player.getInventory().remove(Material.WOODEN_HOE);
         player.getInventory().remove(Material.STONE_HOE);
