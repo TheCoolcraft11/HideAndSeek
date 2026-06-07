@@ -64,41 +64,10 @@ public class RandomBlockItem implements GameItem {
         return plugin.trText(player, "item.random_block.description");
     }
 
-    @Override
-    public void register(HideAndSeek plugin) {
-        int randomBlockCooldown = plugin.getSettingRegistry().get("hider-items.random-block.cooldown", 3);
-        int randomUses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);
-
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeBlockWithContext(context, plugin))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
-                        context -> randomizeBlockWithContext(context, plugin))
-                .withMaxPlayerUses(randomUses)
-                .withVanillaCooldown(randomBlockCooldown * 20)
-                .withCustomCooldown(randomBlockCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription(plugin, null))
-                .withNameKey("item.random_block.name", Map.of("uses", randomUses, "maxUses", randomUses))
-                .withLoreKey("item.random_block.lore")
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(
-                        MiniMessage.miniMessage().deserialize(
-                                plugin.trText(context.getPlayer(), "item.random_block.messages.uses_exhausted"))))
-                .withAppearanceProvider((player, item, context) -> {
-                    ItemStack itemStack = item.getItemStack();
-                    ItemMeta meta = itemStack.getItemMeta();
-                    meta.displayName(plugin.tr(player, "item.random_block.name",
-                            Map.of("uses", randomUses, "maxUses", randomUses)));
-                    itemStack.setItemMeta(meta);
-                    return itemStack;
-                })
-                .build());
+    private static String skinNameKey(String itemId, String variantId) {
+        String key = itemId.replace("has_hider_", "").replace("has_seeker_", "");
+        String skin = variantId.startsWith("skin_") ? variantId.substring(5) : variantId;
+        return "item." + key + ".skin." + skin;
     }
 
     private static void randomizeBlockWithContext(ItemInteractionContext context, HideAndSeek plugin) {
@@ -322,6 +291,62 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         randomizeSkin(player, plugin);
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int randomBlockCooldown = plugin.getSettingRegistry().get("hider-items.random-block.cooldown", 3);
+        int randomUses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);
+
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeBlockWithContext(context, plugin))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                        context -> randomizeBlockWithContext(context, plugin))
+                .withMaxPlayerUses(randomUses)
+                .withVanillaCooldown(randomBlockCooldown * 20)
+                .withCustomCooldown(randomBlockCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.random_block.name", Map.of("uses", randomUses, "maxUses", randomUses))
+                .withLoreKey("item.random_block.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(
+                        MiniMessage.miniMessage().deserialize(
+                                plugin.trText(context.getPlayer(), "item.random_block.messages.uses_exhausted"))))
+                .withAppearanceProvider((player, item, context) -> {
+                    String itemVariant = plugin.getCustomItemManager().getVariantManager().getPlayerVariant(player,
+                            item.getId());
+                    if (itemVariant != null) {
+                        var variant = plugin.getCustomItemManager().getVariantManager().getPlayerVariantObject(player,
+                                item.getId());
+                        if (variant != null) {
+                            ItemStack stack = variant.getItemStack().clone();
+                            ItemMeta meta = stack.getItemMeta();
+                            if (meta != null) {
+                                String skinNameKey = skinNameKey(item.getId(), itemVariant);
+                                meta.displayName(plugin.tr(player, skinNameKey,
+                                        Map.of("uses", context.getPlayerRemainingUses(), "maxUses", randomUses)));
+                                stack.setItemMeta(meta);
+                            }
+                            return stack;
+                        }
+                    }
+                    ItemStack itemStack = item.getItemStack().clone();
+                    ItemMeta meta = itemStack.getItemMeta();
+                    if (meta != null) {
+                        meta.displayName(plugin.tr(player, "item.random_block.name",
+                                Map.of("uses", context.getPlayerRemainingUses(), "maxUses", randomUses)));
+                        itemStack.setItemMeta(meta);
+                    }
+                    return itemStack;
+                })
+                .build());
     }
 
     @Override

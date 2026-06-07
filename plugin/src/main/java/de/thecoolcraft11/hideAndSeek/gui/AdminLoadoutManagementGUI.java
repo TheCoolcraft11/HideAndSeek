@@ -915,13 +915,13 @@ public class AdminLoadoutManagementGUI {
                 return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
                         TranslationArguments.ofNamed(Map.of("level", String.valueOf(
                                 de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem.getSpeedLevel(
-                                        player.getUniqueId()))))));
+                                        player.getUniqueId()) + 1)))));
             }
             case de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem.ID -> {
                 return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
                         TranslationArguments.ofNamed(Map.of("level", String.valueOf(
                                 de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem.getKnockbackLevel(
-                                        player.getUniqueId()))))));
+                                        player.getUniqueId()) + 1)))));
             }
             case de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem.ID -> {
                 int uses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);

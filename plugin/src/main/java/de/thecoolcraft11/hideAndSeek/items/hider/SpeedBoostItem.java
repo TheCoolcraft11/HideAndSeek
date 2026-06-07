@@ -91,18 +91,19 @@ public class SpeedBoostItem implements GameItem {
         speedLevels.put(player.getUniqueId(), level);
 
         ItemStack upgradedItem = null;
+        String selectedVariant = null;
         if (plugin != null) {
             String runtimeItemId = ID + "_" + level;
             var customItem = plugin.getCustomItemManager().getItem(runtimeItemId);
             if (customItem != null) {
-                upgradedItem = customItem.getItemStack();
+                upgradedItem = customItem.getIdentifiedItemStack(plugin);
 
-                String selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
+                selectedVariant = ItemSkinSelectionService.getSelectedVariant(player, ID);
                 if (selectedVariant != null) {
                     var variant = plugin.getCustomItemManager().getVariantManager().getVariant(runtimeItemId,
                             selectedVariant);
-                    if (variant != null && variant.getItemStack() != null) {
-                        upgradedItem = variant.getItemStack().clone();
+                    if (variant == null) {
+                        selectedVariant = null;
                     }
                 }
             }
@@ -112,8 +113,11 @@ public class SpeedBoostItem implements GameItem {
             upgradedItem = createSpeedBoostItem(level, plugin);
         }
 
-        removeSpeedItems(player);
+        removeSpeedItems(player, plugin);
         player.getInventory().addItem(upgradedItem);
+        if (selectedVariant != null) {
+            plugin.getCustomItemManager().getVariantManager().switchVariant(player, ID + "_" + level, selectedVariant);
+        }
         if (plugin == null) return;
         player.sendMessage(plugin.trText(player, "item.speed_boost.messages.upgraded",
                 java.util.Map.of("level", String.valueOf(level + 1))));
@@ -265,13 +269,36 @@ public class SpeedBoostItem implements GameItem {
         return speedLevels.getOrDefault(playerId, 0);
     }
 
-    private static void removeSpeedItems(Player player) {
-        player.getInventory().remove(Material.WOODEN_HOE);
-        player.getInventory().remove(Material.STONE_HOE);
-        player.getInventory().remove(Material.IRON_HOE);
-        player.getInventory().remove(Material.GOLDEN_HOE);
-        player.getInventory().remove(Material.DIAMOND_HOE);
-        player.getInventory().remove(Material.NETHERITE_HOE);
+    private static void removeSpeedItems(Player player, HideAndSeek plugin) {
+        var manager = plugin.getCustomItemManager();
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item != null) {
+                String id = manager.getCustomItemId(item);
+                if (id != null && id.startsWith(ID)) {
+                    inv.setItem(i, null);
+                }
+            }
+        }
+        ItemStack[] armor = inv.getArmorContents();
+        for (int i = 0; i < armor.length; i++) {
+            ItemStack item = armor[i];
+            if (item != null) {
+                String id = manager.getCustomItemId(item);
+                if (id != null && id.startsWith(ID)) {
+                    armor[i] = null;
+                }
+            }
+        }
+        inv.setArmorContents(armor);
+        ItemStack offHand = inv.getItemInOffHand();
+        if (offHand != null) {
+            String id = manager.getCustomItemId(offHand);
+            if (id != null && id.startsWith(ID)) {
+                inv.setItemInOffHand(null);
+            }
+        }
     }
 
     @Override

@@ -955,6 +955,9 @@ item:
     description: "Place a large firecracker that explodes, granting {points} points."
     messages:
       placed: "<gold>Big Firecracker placed! +{points} points!</gold>"
+    skin:
+      giant_present: "<gold><b>Giant Present</b></gold>"
+      boombox: "<gold><b>Boombox</b></gold>"
   block_selector:
     name: "<light_purple><b>Block Selector</b></light_purple>"
     lore: "<gray>Right click to choose your block</gray>"
@@ -974,18 +977,27 @@ item:
       skin:
         cursed: "<red>You are cursed and cannot swap skins!</red>"
         successful_swap: "<green>Swapped skins with {player}!</green>"
+    skin:
+      magic_mirror: "<gold><b>Magic Mirror</b></gold>"
+      quantum_link: "<gold><b>Quantum Link</b></gold>"
   explosion:
     name: "<red><b>Firecracker</b></red>"
     lore: "<gray>Right click to place a firecracker that will explode</gray>"
     description: "Place a firecracker that pops, granting {points} points."
     messages:
       placed: "<gold>Firecracker placed! +{points} points</gold>"
+    skin:
+      confetti_popper: "<gold><b>Confetti Popper</b></gold>"
+      bubble_popper: "<gold><b>Bubble Popper</b></gold>"
   firework_rocket:
     name: "<gold><b>Firework Rocket</b></gold>"
     lore: "<gray>Right click to place a firework battery that will launch fireworks</gray>"
     description: "Launch a high-altitude firework taunt, granting {points} points."
     messages:
       placed: "<gold>Firework sequence started! +{points} points</gold>"
+    skin:
+      space_shuttle: "<gold><b>Space Shuttle</b></gold>"
+      signal_flare: "<gold><b>Signal Flare</b></gold>"
   ghost_essence:
     name: "<aqua><b>Ghostly Essence</b></aqua>"
     lore: "<gray>Pass through walls while active\nYou cannot descend while ghostly!</gray>"
@@ -995,6 +1007,9 @@ item:
       activated: "<aqua>You are now a Ghost! Phasing enabled for {duration}s.</aqua>"
       materialized: "<green>You have successfully materialized!</green>"
       error: "<red>{reason}</red>"
+    skin:
+      spectral_form: "<gold><b>Spectral Form</b></gold>"
+      digital_phase: "<gold><b>Digital Phase</b></gold>"
   invisibility_cloak:
     name: "<dark_purple><b>Invisibility Cloak</b></dark_purple>"
     lore: "<gray>Right click to become invisible</gray>"
@@ -1002,15 +1017,21 @@ item:
     messages:
       only_hiders: "<red>Only hiders can use this item.</red>"
       activated: "<aqua>You are now invisible!</aqua>"
+    skin:
+      cardboard_box: "<gold><b>Cardboard Box</b></gold>"
+      camo_netting: "<gold><b>Camo Netting</b></gold>"
   ink_face:
     name: "<gray><b>Ink Face</b></gray>"
     description: "Hidden helmet used for ink-blindness effects."
   knockback_stick:
     name: "<dark_red><b>Knockback Stick <gold>(Level {level}</gold>)</b></dark_red>"
-    lore: "<gray>Left click to knock seekers away!\n<gold>Level: {level}</gold></gray>"
+    lore: "<gray>Left click to knock seekers away!\n<gold><gray>Level: {level}</gold></gray>"
     description: "Smack seekers to launch them away."
     messages:
       upgraded: "<gold>Upgraded to Level {level}!</gold>"
+    skin:
+      squeaky_hammer: "<gold><b>Squeaky Hammer <gray>(Level {level})</gray></b></gold>"
+      pool_noodle: "<gold><b>Pool Noodle <gray>(Level {level})</gray></b></gold>"
   medkit:
     name: "<green><b>Medkit</b></green>"
     lore: "<gray>Hold right click to channel heal</gray>\n<dark_gray>Release early to cancel</dark_gray>"
@@ -1019,6 +1040,9 @@ item:
       only_hiders: "<red>Only hiders can use this item.</red>"
       canceled: "<yellow>Medkit canceled. Hold for {remaining}s longer.</yellow>"
       healed: "<green>Healed!</green>"
+    skin:
+      bandage_roll: "<gold><b>Bandage Roll</b></gold>"
+      magic_potion: "<gold><b>Magic Potion</b></gold>"
   random_block:
     name: "<light_purple><b>Random Block <gray>({uses} / {maxUses})</gray></b></light_purple>"
     lore: "<gray>Right click to randomize your block</gray>"
@@ -1037,6 +1061,9 @@ item:
       transformed_block: "<green>Transformed into <gold>{block}</gold></green>"
       transformed_skin: "<green>Transformed into <gold>{skin}</gold></green>"
       uses_exhausted: "<red>You ran out of random block uses!</red>"
+    skin:
+      shapeshifter_dust: "<gold><b>Shapeshifter Dust</b></gold> <gray>({uses}/{maxUses})</gray>"
+      mystery_box: "<gold><b>Mystery Box</b></gold> <gray>({uses}/{maxUses})</gray>"
   remote_gateway:
     name: "<dark_purple><b>Remote Gateway</b></dark_purple>"
     lore: "<gray>Right click to place your gateway anchors\nTwo anchors form a teleport pair</gray>"
@@ -1049,6 +1076,11 @@ item:
       need_clear_space: "<red>Need clear space to place gateway.</red>"
       anchor_placed: "<green>Gateway anchor A placed. Place another anchor to link.</green>"
       gateway_linked: "<aqua>Gateway linked.</aqua>"
+    skin:
+      end_rift: "<gold><b>End Rift</b></gold>"
+      phase_door: "<gold><b>Phase Door</b></gold>"
+      dematerializer: "<gold><b>Dematerializer</b></gold>"
+      void_lattice: "<gold><b>Void Lattice</b></gold>"
   skin_selector:
     name: "<light_purple><b>Skin Selector</b></light_purple>"
     lore: "<gray>Right-click to choose your disguise skin</gray>"
@@ -1059,12 +1091,18 @@ item:
     description: "Throw an ice ball that slows seekers for {duration}s."
     messages:
       only_hiders: "<red>Only hiders can use this item.</red>"
+    skin:
+      sticky_honey: "<gold><b>Sticky Honey</b></gold>"
+      tar_ball: "<gold><b>Tar Ball</b></gold>"
   smoke_bomb:
     name: "<dark_gray><b>Smoke Bomb</b></dark_gray>"
     lore: "<gray>Right click to throw\nCreates a smoke cloud for cover</gray>"
     description: "Throw a smoke bomb that creates cover for {duration}s."
     messages:
       only_hiders: "<red>Only hiders can use this item.</red>"
+    skin:
+      ninja_smoke: "<gold><b>Ninja Smoke</b></gold>"
+      spore_cloud: "<gold><b>Spore Cloud</b></gold>"
   sound:
     name: "<aqua><b>Cat Sound</b></aqua>"
     lore: "<gray>Right click to play a sound</gray>"
@@ -1072,9 +1110,12 @@ item:
     messages:
       taunt_used: "<green>You used a taunt!</green>"
       points_earned: "<gold>+{points} points</gold>"
+    skin:
+      megaphone: "<gold><b>Megaphone</b></gold>"
+      rubber_chicken: "<gold><b>Rubber Chicken</b></gold>"
   speed_boost:
     name: "<yellow><b>Speed Boost <gold>(Level {level})</gold></b></yellow>"
-    lore: "<gray>Right click for a speed boost}\n<gold>Level: {level}</gold></gray>"
+    lore: "<gray>Right click for a speed boost}\n<gold><gray>Level: {level}</gold></gray>"
     description:
       velocity_boost: "Launch yourself forward with a velocity boost."
       speed_effect: "Gain speed effect for {duration}s to move faster."
@@ -1082,6 +1123,9 @@ item:
       velocity_activated: "<yellow>Velocity boost activated! <gold>(Level {level})</gold></yellow>"
       speed_activated: "<yellow>Speed boost activated! <gold>(Level {level})</gold></yellow>"
       upgraded: "<gold>Upgraded to Level {level}!</gold>"
+    skin:
+      rocket_boots: "<gold><b>Rocket Boots <gray>(Level {level})</gray></b></gold>"
+      sugar_rush: "<gold><b>Sugar Rush <gray>(Level {level})</gray></b></gold>"
   totem:
     name: "<light_purple><b>Totem of Undying</b></light_purple>"
     lore: "<gray>Right click to activate revive mode</gray>"
@@ -1090,6 +1134,9 @@ item:
       only_hiders: "<red>Only hiders can use this item.</red>"
       activated: "<gold>Revive mode activated for {duration} seconds!</gold>"
       revived: "<gold>You were revived!</gold>"
+    skin:
+      phoenix_feather: "<gold><b>Phoenix Feather</b></gold>"
+      extra_life_coin: "<gold><b>Extra Life Coin</b></gold>"
   crossbow:
     name: "<aqua><b>Tracker Crossbow</b></aqua>"
     lore: "<gray>Hit to upgrade speed & knockback</gray>"
@@ -1097,6 +1144,9 @@ item:
     messages:
       hit: "<gold>Crossbow hit! +{points} points</gold>"
       hit_progress: "<green>Hit seeker! {current}/{required}</green>"
+    skin:
+      paintball_gun: "<gold><b>Paintball Gun</b></gold>"
+      laser_tag: "<gold><b>Laser Tag</b></gold>"
   assistant:
     name: "<red><b>Seeker's Assistant</b></red>"
     lore: "<gray>Summon a hunting assistant to track down hiders.\nMax 2 active at the same time.\n\n<gold><b>LEGENDARY</b></gold></gray>"
@@ -1107,6 +1157,10 @@ item:
       max_active: "<red>You already have {max} assistants active!</red>"
       summon_failed: "<red>Failed to summon assistant.</red>"
       summoned: "<red>Assistant summoned! </red><gray>({lifetime}s lifetime)</gray>"
+    skin:
+      steel_golem: "<gold><b>Steel Golem</b></gold>"
+      ghost_drone: "<gold><b>Ghost Drone</b></gold>"
+      battle_mech: "<gold><b>Battle Mech</b></gold>"
   block_randomizer:
     name: "<red><b>Block Randomizer</b></red>"
     lore: "<gray>Right click to randomize all blocks</gray>"
@@ -1114,6 +1168,9 @@ item:
     messages:
       wrong_mode: "<red>Block Randomizer is only available in BLOCK or SKIN mode.</red>"
       blocks_randomized: "<green>Blocks randomized! ({count} hiders)</green>"
+    skin:
+      glitch_core: "<gold><b>Glitch Core</b></gold>"
+      chaos_magic: "<gold><b>Chaos Magic</b></gold>"
   block_stats:
     name: "<aqua><b>Block Statistics</b></aqua>"
     lore: "<gray>Right click to view block stats</gray>"
@@ -1125,6 +1182,9 @@ item:
     messages:
       placed: "<green>Cage trap placed! (Ready in {setupTime}s, lasts {durationMsg})</green>"
       triggered: "<dark_red>You've been trapped by a cage!</dark_red>"
+    skin:
+      laser_grid: "<gold><b>Laser Grid</b></gold>"
+      ice_block: "<gold><b>Ice Block</b></gold>"
   camera:
     name: "<dark_aqua><b>Camera</b></dark_aqua>"
     lore: "<gray>Shift + right click block to place\nRight click to watch your cameras\nCycle through cameras with LMB and vision modes with RMB\nModes: Normal, Night Vision, Terminal Vision (glow)\nSneak to stop watching your cameras</gray>"
@@ -1138,6 +1198,10 @@ item:
       no_cameras: "<red>You have no cameras placed.</red>"
       all_cameras_gone: "<red>All your cameras are gone.</red>"
       client_unsupported: "<red>Your client does not support camera mode on this server build.</red>"
+    skin:
+      spy_lens: "<gold><b>Spy Lens</b></gold>"
+      owl_eye: "<gold><b>Owl Eye</b></gold>"
+      orbital_spy: "<gold><b>Orbital Spy</b></gold>"
   chain_pull:
     name: "<dark_gray><b>Chain Pull</b></dark_gray>"
     lore: "<gray>Right click to pull hiders</gray>"
@@ -1146,6 +1210,9 @@ item:
       no_target: "<red>No hider in range.</red>"
       pulled: "<green>Pulled {target}!</green>"
       pulled_by_chain: "<dark_gray>You've been pulled by a chain!</dark_gray>"
+    skin:
+      energy_lasso: "<gold><b>Energy Lasso</b></gold>"
+      shadow_tendril: "<gold><b>Shadow Tendril</b></gold>"
   crowbar:
     name: "<aqua><b>Crowbar</b></aqua>"
     lore: "<gray>Left Click to destroy some blocks</gray>"
@@ -1157,6 +1224,9 @@ item:
     messages:
       activated: "<dark_purple>Curse spell activated! ({duration}s)</dark_purple>"
       cursed: "<dark_purple>You have been cursed!</dark_purple>"
+    skin:
+      voodoo_magic: "<gold><b>Voodoo Magic</b></gold>"
+      toxic_tome: "<gold><b>Toxic Tome</b></gold>"
   glowing_compass:
     name: "<gold><b>Glowing Compass</b></gold>"
     lore: "<gray>Right click to glow the nearest hider</gray>"
@@ -1164,22 +1234,28 @@ item:
     messages:
       hider_glowing: "<gold>{nearest} is now glowing!</gold>"
       no_hiders: "<red>No hiders found nearby!</red>"
-  grappling_hook:
-    name: "<aqua><b>Grappling Hook</b></aqua>"
-    lore: "<gray>Right click to launch yourself forward\ntoward where you're looking</gray>"
-    description: "Reel your hook to launch yourself toward the cast point."
+    skin:
+      tactical_tablet: "<gold><b>Tactical Tablet</b></gold>"
+      eye_of_the_oracle: "<gold><b>Eye of the Oracle</b></gold>"
+      dowsing_rod: "<gold><b>Dowsing Rod</b></gold>"
   ink_splash:
     name: "<dark_aqua><b>Ink Splash</b></dark_aqua>"
     lore: "<gray>Right click to blind hiders</gray>"
     description: "Temporarily blind hiders with ink, reducing visibility for {duration}s."
     messages:
       hit: "<dark_aqua>You've been hit with ink!</dark_aqua>"
+    skin:
+      paint_balloon: "<gold><b>Paint Balloon</b></gold>"
+      mud_ball: "<gold><b>Mud Ball</b></gold>"
   lightning_freeze:
     name: "<yellow><b>Lightning Freeze</b></yellow>"
     lore: "<gray>Right click to freeze all hiders</gray>"
     description: "Freeze all hiders in place with slowness effect for {duration}s."
     messages:
       all_frozen: "<aqua>All hiders frozen!</aqua>"
+    skin:
+      frost_wand: "<gold><b>Frost Wand</b></gold>"
+      time_stopper: "<gold><b>Time Stopper</b></gold>"
   mask:
     name: "<gray><b>Seekers Mask</b></gray>"
     lore: "<gray>A spooky mask to scare the hiders</gray>"
@@ -1195,6 +1271,11 @@ item:
       capturing: "<yellow>Capturing phantom snapshot...</yellow>"
       captured_player: "<green>PhantomViewer captured {target}'s perspective.</green>"
       captured_anonymous: "<green>PhantomViewer captured a phantom perspective.</green>"
+    skin:
+      echo_slate: "<gold><b>Echo Slate</b></gold>"
+      spectral_cartography: "<gold><b>Spectral Cartography</b></gold>"
+      quantum_viewfinder: "<gold><b>Quantum Viewfinder</b></gold>"
+      night_recon: "<gold><b>Night Recon</b></gold>"
   proximity_sensor:
     name: "<dark_red><b>Proximity Sensor</b></dark_red>"
     lore: "<gray>Right click to place a sensor</gray>"
@@ -1204,11 +1285,26 @@ item:
       space_occupied: "<red>Cannot place sensor here - space is occupied!</red>"
       no_ceiling: "<red>Cannot place sensor on ceiling!</red>"
       placed: "<green>Proximity sensor placed! ({duration})</green>"
+    skin:
+      cctv_camera: "<gold><b>CCTV Camera</b></gold>"
+      alarm_bell: "<gold><b>Alarm Bell</b></gold>"
   skin_stats:
     name: "<aqua><b>Skin Statistics</b></aqua>"
     lore: "<gray>Right-click to view hider skins</gray>"
     description: "View which skin each hider is currently disguised as."
+  grappling_hook:
+    name: "<yellow><b>Grappling Hook</b></yellow>"
+    lore: "<gray>Right click to grapple towards a hider</gray>"
+    description: "Grapple towards the nearest hider within range."
+    skin:
+      techno_tether: "<gold><b>Techno Tether</b></gold>"
+      jungle_vine: "<gold><b>Jungle Vine</b></gold>"
+      ghostly_chain: "<gold><b>Ghostly Chain</b></gold>"
   sword:
     name: "<red><b>Seeker's Blade</b></red>"
     lore: "<gray>Hunt down the hiders!</gray>"
     description: "Main weapon: hold block to charge and throw your sword."
+    skin:
+      energy_blade: "<gold><b>Energy Blade</b></gold>"
+      the_ban_hammer: "<gold><b>The Ban Hammer</b></gold>"
+      giant_spatula: "<gold><b>Giant Spatula</b></gold>"
