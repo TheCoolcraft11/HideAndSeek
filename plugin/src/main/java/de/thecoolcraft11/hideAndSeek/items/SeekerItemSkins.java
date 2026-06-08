@@ -83,7 +83,7 @@ public final class SeekerItemSkins {
             ItemRarity rarity
     ) {
         String nameKey = skinKey(itemId, variantId);
-        ItemStack stack = createVariantStack(plugin, itemId, variantId, nameKey, modelKey);
+        ItemStack stack = createVariantStack(plugin, itemId, variantId, modelKey);
         if (stack == null) {
             plugin.getLogger().warning("Skipping skin '" + variantId + "' for item '" + itemId + "' because base item stack is unavailable.");
             return;
@@ -98,7 +98,7 @@ public final class SeekerItemSkins {
         ItemSkinSelectionService.registerVariantMetadata(itemId, variantId, rarity);
     }
 
-    private static ItemStack createVariantStack(HideAndSeek plugin, String itemId, String variantId, String nameKey, String modelKey) {
+    private static ItemStack createVariantStack(HideAndSeek plugin, String itemId, String variantId, String modelKey) {
         var customItem = plugin.getCustomItemManager().getItem(itemId);
         if (customItem == null) {
             return null;

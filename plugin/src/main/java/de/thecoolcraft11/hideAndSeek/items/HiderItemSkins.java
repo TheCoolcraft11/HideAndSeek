@@ -97,7 +97,7 @@ public final class HiderItemSkins {
     ) {
         String nameKey = skinKey(itemId, variantId);
         Map<String, Object> nameArgs = nameArgs(plugin, itemId);
-        ItemStack stack = createVariantStack(plugin, itemId, variantId, nameKey, modelKey, nameArgs);
+        ItemStack stack = createVariantStack(plugin, itemId, variantId, modelKey);
         if (stack == null) {
             plugin.getLogger().warning("Skipping skin '" + variantId + "' for item '" + itemId + "' because base item stack is unavailable.");
             return;
@@ -128,7 +128,7 @@ public final class HiderItemSkins {
         return Map.of();
     }
 
-    private static ItemStack createVariantStack(HideAndSeek plugin, String itemId, String variantId, String nameKey, String modelKey, Map<String, Object> nameArgs) {
+    private static ItemStack createVariantStack(HideAndSeek plugin, String itemId, String variantId, String modelKey) {
         var customItem = plugin.getCustomItemManager().getItem(itemId);
         if (customItem == null) {
             return null;

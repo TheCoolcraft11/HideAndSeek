@@ -95,12 +95,12 @@ public class KnockbackStickItem implements GameItem {
             upgradedItem = createKnockbackStickItem(level, plugin);
         }
 
+        if (plugin == null) return;
         removeKnockbackItems(player, plugin);
         player.getInventory().addItem(upgradedItem);
         if (selectedVariant != null) {
             plugin.getCustomItemManager().getVariantManager().switchVariant(player, ID + "_" + level, selectedVariant);
         }
-        if (plugin == null) return;
         player.sendMessage(plugin.trText(player, "item.knockback_stick.messages.upgraded",
                 java.util.Map.of("level", String.valueOf(level))));
     }
@@ -188,11 +188,9 @@ public class KnockbackStickItem implements GameItem {
         }
         inv.setArmorContents(armor);
         ItemStack offHand = inv.getItemInOffHand();
-        if (offHand != null) {
-            String id = manager.getCustomItemId(offHand);
-            if (id != null && id.startsWith(ID)) {
-                inv.setItemInOffHand(null);
-            }
+        String id = manager.getCustomItemId(offHand);
+        if (id != null && id.startsWith(ID)) {
+            inv.setItemInOffHand(null);
         }
     }
 
