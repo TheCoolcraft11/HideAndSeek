@@ -680,7 +680,7 @@ public class SeekersSwordItem implements GameItem {
         if (selected != null) {
             var variant = plugin.getCustomItemManager().getVariantManager().getVariant(SeekersSwordItem.ID, selected);
             if (variant != null) {
-                return variant.getItemStack().clone();
+                return variant.createItemStack(plugin, seeker);
             }
         }
         return createItem(plugin);

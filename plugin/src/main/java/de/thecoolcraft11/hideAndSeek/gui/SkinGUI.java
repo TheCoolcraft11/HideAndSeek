@@ -610,7 +610,7 @@ public class SkinGUI {
     }
 
     private ItemStack createVariantButton(Player player, String logicalItemId, ItemVariant variant, String selectedVariant) {
-        ItemStack stack = variant.getItemStack().clone();
+        ItemStack stack = variant.createItemStack(plugin, player);
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) {
             return stack;

@@ -6,8 +6,6 @@ import de.thecoolcraft11.hideAndSeek.model.ItemRarity;
 import de.thecoolcraft11.hideAndSeek.util.CustomModelDataUtil;
 import de.thecoolcraft11.minigameframework.items.variants.ItemVariant;
 import de.thecoolcraft11.minigameframework.items.variants.ItemVariantBuilder;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -144,8 +142,6 @@ public final class HiderItemSkins {
         ItemStack stack = base.clone();
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
-            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, nameKey, nameArgs))
-                    .decoration(TextDecoration.ITALIC, false));
             meta.setItemModel(new NamespacedKey("minecraft", modelKey));
             stack.setItemMeta(meta);
         }
