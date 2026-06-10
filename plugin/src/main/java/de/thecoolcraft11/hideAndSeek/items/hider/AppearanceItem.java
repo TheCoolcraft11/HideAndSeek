@@ -6,14 +6,13 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public class AppearanceItem implements GameItem {
     public static final String ID = "has_hider_appearance";
@@ -29,15 +28,14 @@ public class AppearanceItem implements GameItem {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("Appearance Editor", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.appearance.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to customize appearance", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false),
-                    Component.empty(),
-                    Component.text("Available during Hiding & Seeking phases", NamedTextColor.DARK_GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.appearance.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
 
@@ -45,19 +43,25 @@ public class AppearanceItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Open the appearance editor for your current disguise.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.appearance.description");
     }
 
     @Override
     public void register(HideAndSeek plugin) {
         AppearanceGUI appearanceGUI = new AppearanceGUI(plugin, plugin.getBlockSelectorGUI());
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
-                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_AIR,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                        context -> openAppearanceUnhidden(context.getPlayer(), appearanceGUI))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.appearance.name")
+                .withLoreKey("item.appearance.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)

@@ -9,8 +9,8 @@ import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -21,8 +21,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
-
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.lightningFreezeHiderXpTasks;
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.lightningFreezeXpTasks;
@@ -40,12 +39,14 @@ public class LightningFreezeItem implements GameItem {
         ItemStack item = new ItemStack(Material.LIGHTNING_ROD);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Lightning Freeze", NamedTextColor.YELLOW, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.lightning_freeze.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to freeze all hiders", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.lightning_freeze.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
@@ -57,13 +58,18 @@ public class LightningFreezeItem implements GameItem {
         boolean timeStopper = ItemSkinSelectionService.isSelected(seeker, ID, "skin_time_stopper");
 
         if (frostWand) {
-            seeker.getWorld().spawnParticle(Particle.SNOWFLAKE, seeker.getLocation().add(0, 1.0, 0), 28, 0.45, 0.5, 0.45, 0.04);
-            seeker.getWorld().spawnParticle(Particle.ITEM_SNOWBALL, seeker.getLocation().add(0, 1.0, 0), 12, 0.32, 0.38, 0.32, 0.02);
+            seeker.getWorld().spawnParticle(Particle.SNOWFLAKE, seeker.getLocation().add(0, 1.0, 0), 28, 0.45, 0.5,
+                    0.45, 0.04);
+            seeker.getWorld().spawnParticle(Particle.ITEM_SNOWBALL, seeker.getLocation().add(0, 1.0, 0), 12, 0.32, 0.38,
+                    0.32, 0.02);
             seeker.playSound(seeker.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 0.55f, 1.4f);
         } else if (timeStopper) {
-            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1.0, 0), 26, 0.45, 0.5, 0.45, 0.02);
-            seeker.getWorld().spawnParticle(Particle.ENCHANT, seeker.getLocation().add(0, 1.0, 0), 20, 0.4, 0.45, 0.4, 0.03);
-            seeker.getWorld().spawnParticle(Particle.PORTAL, seeker.getLocation().add(0, 1.0, 0), 10, 0.35, 0.4, 0.35, 0.07);
+            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1.0, 0), 26, 0.45, 0.5, 0.45,
+                    0.02);
+            seeker.getWorld().spawnParticle(Particle.ENCHANT, seeker.getLocation().add(0, 1.0, 0), 20, 0.4, 0.45, 0.4,
+                    0.03);
+            seeker.getWorld().spawnParticle(Particle.PORTAL, seeker.getLocation().add(0, 1.0, 0), 10, 0.35, 0.4, 0.35,
+                    0.07);
             seeker.playSound(seeker.getLocation(), Sound.BLOCK_BELL_RESONATE, 0.45f, 0.75f);
         }
 
@@ -80,7 +86,8 @@ public class LightningFreezeItem implements GameItem {
 
             if (frostWand) {
                 hider.spawnParticle(Particle.SNOWFLAKE, hider.getLocation().add(0, 1.0, 0), 30, 0.38, 0.42, 0.38, 0.03);
-                hider.spawnParticle(Particle.ITEM_SNOWBALL, hider.getLocation().add(0, 1.0, 0), 12, 0.3, 0.3, 0.3, 0.02);
+                hider.spawnParticle(Particle.ITEM_SNOWBALL, hider.getLocation().add(0, 1.0, 0), 12, 0.3, 0.3, 0.3,
+                        0.02);
                 hider.spawnParticle(Particle.CLOUD, hider.getLocation().add(0, 1.0, 0), 8, 0.25, 0.3, 0.25, 0.01);
                 hider.playSound(hider.getLocation(), Sound.BLOCK_GLASS_BREAK, 0.8f, 1.4f);
                 hider.playSound(hider.getLocation(), Sound.BLOCK_POWDER_SNOW_PLACE, 0.35f, 0.9f);
@@ -91,8 +98,10 @@ public class LightningFreezeItem implements GameItem {
                 hider.playSound(hider.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.9f, 0.6f);
                 hider.playSound(hider.getLocation(), Sound.BLOCK_BELL_USE, 0.4f, 1.6f);
             } else {
-                hider.spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 20, 0.3, 0.3, 0.3, 0.05);
-                hider.spawnParticle(Particle.FLASH, hider.getLocation().add(0, 1.0, 0), 1, 0, 0, 0, Color.fromARGB(0xFFFFFF));
+                hider.spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 20, 0.3, 0.3, 0.3,
+                        0.05);
+                hider.spawnParticle(Particle.FLASH, hider.getLocation().add(0, 1.0, 0), 1, 0, 0, 0,
+                        Color.fromARGB(0xFFFFFF));
                 hider.playSound(hider.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
                 boolean sentClientLightning = false;
                 if (plugin.getNmsAdapter().hasCapability(NmsCapabilities.CLIENT_LIGHTNING_PACKET)) {
@@ -100,8 +109,11 @@ public class LightningFreezeItem implements GameItem {
                 }
                 if (!sentClientLightning) {
                     Entity entity = hider.getWorld().spawnEntity(hider.getLocation(), EntityType.LIGHTNING_BOLT);
-                    entity.getPersistentDataContainer().set(new NamespacedKey(plugin, "freezeLightning"), PersistentDataType.BOOLEAN, true);
-                    Bukkit.getOnlinePlayers().stream().filter(player -> !player.getUniqueId().equals(hider.getUniqueId())).forEach(p -> p.hideEntity(plugin, entity));
+                    entity.getPersistentDataContainer().set(new NamespacedKey(plugin, "freezeLightning"),
+                            PersistentDataType.BOOLEAN, true);
+                    Bukkit.getOnlinePlayers().stream().filter(
+                            player -> !player.getUniqueId().equals(hider.getUniqueId())).forEach(
+                            p -> p.hideEntity(plugin, entity));
                 }
                 hider.spawnParticle(Particle.WAX_ON, hider.getLocation().add(0, 1.0, 0), 8, 0.2, 0.25, 0.2, 0.01);
             }
@@ -139,7 +151,8 @@ public class LightningFreezeItem implements GameItem {
             BukkitTask prevHiderTask = lightningFreezeHiderXpTasks.remove(hider.getUniqueId());
             XpProgressHelper.SavedXp hiderSavedXp = XpProgressHelper.saveXp(hider);
             XpProgressHelper.stopAndClear(hider, prevHiderTask);
-            BukkitTask hiderXpTask = XpProgressHelper.start(plugin, hider, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+            BukkitTask hiderXpTask = XpProgressHelper.start(plugin, hider, duration * 20L,
+                    XpProgressHelper.Mode.COUNTDOWN, duration);
             lightningFreezeHiderXpTasks.put(hider.getUniqueId(), hiderXpTask);
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 BukkitTask t = lightningFreezeHiderXpTasks.remove(hider.getUniqueId());
@@ -147,22 +160,28 @@ public class LightningFreezeItem implements GameItem {
             }, duration * 20L);
         }
 
-        seeker.sendMessage(Component.text("All hiders frozen!", NamedTextColor.AQUA));
+        seeker.sendMessage(plugin.trText(seeker, "item.lightning_freeze.messages.all_frozen"));
         if (frostWand) {
-            seeker.getWorld().spawnParticle(Particle.SNOWFLAKE, seeker.getLocation().add(0, 1.0, 0), 24, 0.5, 0.5, 0.5, 0.03);
-            seeker.getWorld().spawnParticle(Particle.ITEM_SNOWBALL, seeker.getLocation().add(0, 1.0, 0), 8, 0.35, 0.35, 0.35, 0.01);
+            seeker.getWorld().spawnParticle(Particle.SNOWFLAKE, seeker.getLocation().add(0, 1.0, 0), 24, 0.5, 0.5, 0.5,
+                    0.03);
+            seeker.getWorld().spawnParticle(Particle.ITEM_SNOWBALL, seeker.getLocation().add(0, 1.0, 0), 8, 0.35, 0.35,
+                    0.35, 0.01);
         } else if (timeStopper) {
-            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1.0, 0), 22, 0.5, 0.5, 0.5, 0.03);
-            seeker.getWorld().spawnParticle(Particle.PORTAL, seeker.getLocation().add(0, 1.0, 0), 8, 0.35, 0.35, 0.35, 0.05);
+            seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1.0, 0), 22, 0.5, 0.5, 0.5,
+                    0.03);
+            seeker.getWorld().spawnParticle(Particle.PORTAL, seeker.getLocation().add(0, 1.0, 0), 8, 0.35, 0.35, 0.35,
+                    0.05);
         } else {
-            seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1.0, 0), 15, 0.5, 0.5, 0.5, 0.1);
+            seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1.0, 0), 15, 0.5, 0.5,
+                    0.5, 0.1);
         }
 
 
         BukkitTask prevTask = lightningFreezeXpTasks.remove(seeker.getUniqueId());
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(seeker);
         XpProgressHelper.stopAndClear(seeker, prevTask);
-        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, seeker, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                duration);
         lightningFreezeXpTasks.put(seeker.getUniqueId(), xpTask);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -172,10 +191,10 @@ public class LightningFreezeItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("seeker-items.lightning-freeze.duration", 5);
-        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Call lightning that freezes all hiders for %ds, grants %d points per hider.", duration.intValue(), points);
+        return plugin.trText(player, "item.lightning_freeze.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override
@@ -183,8 +202,13 @@ public class LightningFreezeItem implements GameItem {
         int lightningCooldown = plugin.getSettingRegistry().get("seeker-items.lightning-freeze.cooldown", 60);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> castLightningFreeze(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> castLightningFreeze(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> castLightningFreeze(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.lightning_freeze.name")
+                .withLoreKey("item.lightning_freeze.lore")
+                .withNameKey("item.lightning_freeze.name")
+                .withLoreKey("item.lightning_freeze.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(lightningCooldown * 20)

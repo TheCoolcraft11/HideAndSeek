@@ -8,9 +8,9 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -30,6 +30,7 @@ import org.bukkit.scoreboard.Team;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
@@ -51,39 +52,17 @@ public class ProximitySensorItem implements GameItem {
         ItemStack item = new ItemStack(Material.REDSTONE_TORCH);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Proximity Sensor", NamedTextColor.DARK_RED, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.proximity_sensor.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to place a sensor", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.proximity_sensor.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
-    }
-
-    @Override
-    public String getDescription(HideAndSeek plugin) {
-        Number range = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.range", 8.0);
-        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Place a sensor revealing hiders within %.0f blocks, grants %d points per detection.", range.doubleValue(), points);
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int proximityCooldown = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.cooldown", 20);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeProximitySensor(context, plugin))
-                .withDescription(getDescription(plugin))
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(proximityCooldown * 20)
-                .withCustomCooldown(proximityCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
     }
 
     private static void placeProximitySensor(ItemInteractionContext context, HideAndSeek plugin) {
@@ -98,7 +77,7 @@ public class ProximitySensorItem implements GameItem {
 
 
         if (!clickedBlock.getType().isSolid()) {
-            player.sendMessage(Component.text("Cannot place sensor - need solid block!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.proximity_sensor.messages.need_solid_block"));
             context.skipCooldown();
             return;
         }
@@ -120,7 +99,7 @@ public class ProximitySensorItem implements GameItem {
 
 
         if (!torchBlock.getType().isAir()) {
-            player.sendMessage(Component.text("Cannot place sensor here - space is occupied!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.proximity_sensor.messages.space_occupied"));
             context.skipCooldown();
             return;
         }
@@ -131,7 +110,7 @@ public class ProximitySensorItem implements GameItem {
 
         if (clickedFace == BlockFace.DOWN) {
 
-            player.sendMessage(Component.text("Cannot place sensor on ceiling!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.proximity_sensor.messages.no_ceiling"));
             context.skipCooldown();
             return;
         } else if (clickedFace == BlockFace.UP) {
@@ -142,10 +121,14 @@ public class ProximitySensorItem implements GameItem {
                 lightable.setLit(false);
             }
             torchBlock.setBlockData(torchData, false);
-            BlockDisplay display = (BlockDisplay) torchBlock.getLocation().getWorld().spawnEntity(torchBlock.getLocation(), EntityType.BLOCK_DISPLAY);
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-type"), PersistentDataType.STRING, "proximity");
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-block"), PersistentDataType.STRING, torchBlock.getLocation().toString());
-            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-facing"), PersistentDataType.STRING, "UP");
+            BlockDisplay display = (BlockDisplay) torchBlock.getLocation().getWorld().spawnEntity(
+                    torchBlock.getLocation(), EntityType.BLOCK_DISPLAY);
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-type"),
+                    PersistentDataType.STRING, "proximity");
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-block"),
+                    PersistentDataType.STRING, torchBlock.getLocation().toString());
+            display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-facing"),
+                    PersistentDataType.STRING, "UP");
             BlockData data = getSensorBlockData(player);
 
             display.setBlock(data);
@@ -172,10 +155,14 @@ public class ProximitySensorItem implements GameItem {
                 torchBlock.setBlockData(wallTorch, false);
 
 
-                BlockDisplay display = (BlockDisplay) torchBlock.getLocation().getWorld().spawnEntity(torchBlock.getLocation(), EntityType.BLOCK_DISPLAY);
-                display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-type"), PersistentDataType.STRING, "proximity");
-                display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-block"), PersistentDataType.STRING, torchBlock.getLocation().toString());
-                display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-facing"), PersistentDataType.STRING, clickedFace.name());
+                BlockDisplay display = (BlockDisplay) torchBlock.getLocation().getWorld().spawnEntity(
+                        torchBlock.getLocation(), EntityType.BLOCK_DISPLAY);
+                display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-type"),
+                        PersistentDataType.STRING, "proximity");
+                display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-block"),
+                        PersistentDataType.STRING, torchBlock.getLocation().toString());
+                display.getPersistentDataContainer().set(new NamespacedKey(plugin, "sensor-facing"),
+                        PersistentDataType.STRING, clickedFace.name());
                 BlockData data = getSensorBlockData(player);
 
                 display.setBlock(data);
@@ -193,13 +180,15 @@ public class ProximitySensorItem implements GameItem {
 
         if (alarmBell) {
             sensorLocation.getWorld().spawnParticle(Particle.WAX_ON, sensorLocation, 14, 0.2, 0.2, 0.2, 0.01);
-            sensorLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, sensorLocation, 10, 0.16, 0.16, 0.16, 0.03);
+            sensorLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, sensorLocation, 10, 0.16, 0.16, 0.16,
+                    0.03);
             player.playSound(sensorLocation, Sound.BLOCK_BELL_USE, 0.45f, 1.35f);
         }
 
         BlockDisplay sensorDisplay = sensorDisplays.get(torchBlock.getLocation());
         String facingStr = sensorDisplay != null ?
-                sensorDisplay.getPersistentDataContainer().get(new NamespacedKey(plugin, "sensor-facing"), PersistentDataType.STRING) :
+                sensorDisplay.getPersistentDataContainer().get(new NamespacedKey(plugin, "sensor-facing"),
+                        PersistentDataType.STRING) :
                 "UP";
         BlockFace sensorFacing = facingStr != null ? BlockFace.valueOf(facingStr) : BlockFace.UP;
 
@@ -217,14 +206,16 @@ public class ProximitySensorItem implements GameItem {
                 if (alarmBell && System.currentTimeMillis() - lastAuraPulseAt >= 1200L) {
                     lastAuraPulseAt = System.currentTimeMillis();
                     sensorLocation.getWorld().spawnParticle(Particle.WAX_ON, sensorLocation, 6, 0.18, 0.18, 0.18, 0.01);
-                    sensorLocation.getWorld().spawnParticle(Particle.END_ROD, sensorLocation, 4, 0.16, 0.16, 0.16, 0.01);
+                    sensorLocation.getWorld().spawnParticle(Particle.END_ROD, sensorLocation, 4, 0.16, 0.16, 0.16,
+                            0.01);
                 }
 
                 if (torchBlock.getType() != Material.REDSTONE_TORCH && torchBlock.getType() != Material.REDSTONE_WALL_TORCH) {
                     cancel();
 
                     if (alarmBell) {
-                        sensorLocation.getWorld().spawnParticle(Particle.SMOKE, sensorLocation, 12, 0.18, 0.18, 0.18, 0.02);
+                        sensorLocation.getWorld().spawnParticle(Particle.SMOKE, sensorLocation, 12, 0.18, 0.18, 0.18,
+                                0.02);
                         sensorLocation.getWorld().playSound(sensorLocation, Sound.BLOCK_BELL_RESONATE, 0.35f, 0.8f);
                     }
 
@@ -255,8 +246,10 @@ public class ProximitySensorItem implements GameItem {
                     cancel();
 
                     if (alarmBell) {
-                        sensorLocation.getWorld().spawnParticle(Particle.SMOKE, sensorLocation, 14, 0.2, 0.2, 0.2, 0.02);
-                        sensorLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, sensorLocation, 6, 0.15, 0.15, 0.15, 0.02);
+                        sensorLocation.getWorld().spawnParticle(Particle.SMOKE, sensorLocation, 14, 0.2, 0.2, 0.2,
+                                0.02);
+                        sensorLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, sensorLocation, 6, 0.15, 0.15,
+                                0.15, 0.02);
                         sensorLocation.getWorld().playSound(sensorLocation, Sound.BLOCK_BELL_RESONATE, 0.35f, 0.75f);
                     }
 
@@ -286,7 +279,8 @@ public class ProximitySensorItem implements GameItem {
                     double distance = hider.getLocation().distance(sensorLocation);
                     if (distance < range) {
                         if (sensorFacing != BlockFace.UP) {
-                            org.bukkit.util.Vector toHider = hider.getLocation().toVector().subtract(sensorLocation.toVector()).normalize();
+                            org.bukkit.util.Vector toHider = hider.getLocation().toVector().subtract(
+                                    sensorLocation.toVector()).normalize();
                             Vector sensorDirection = getSensorDirection(sensorFacing);
 
                             double angle = Math.toDegrees(Math.acos(sensorDirection.dot(toHider)));
@@ -312,7 +306,8 @@ public class ProximitySensorItem implements GameItem {
                         hidersInRange.add(hiderId);
 
                         if (!glowingHiders.containsKey(hiderId)) {
-                            sensorLocation.getWorld().playSound(sensorLocation, Sound.BLOCK_SCULK_SENSOR_CLICKING, 1.0f, 1.0f);
+                            sensorLocation.getWorld().playSound(sensorLocation, Sound.BLOCK_SCULK_SENSOR_CLICKING, 1.0f,
+                                    1.0f);
                         }
 
 
@@ -336,7 +331,8 @@ public class ProximitySensorItem implements GameItem {
 
                         if (!glowingHiders.containsKey(hiderId)) {
                             applyProximitySensorGlow(hider, plugin);
-                            plugin.getPointService().award(context.getPlayer().getUniqueId(), PointAction.SEEKER_UTILITY_SUCCESS);
+                            plugin.getPointService().award(context.getPlayer().getUniqueId(),
+                                    PointAction.SEEKER_UTILITY_SUCCESS);
                             plugin.getPointService().markUtilitySpotted(hiderId);
                         }
                         glowingHiders.put(hiderId, System.currentTimeMillis());
@@ -361,7 +357,38 @@ public class ProximitySensorItem implements GameItem {
         }.runTaskTimer(plugin, 0L, 4L);
 
         String durationMsg = sensorDuration == -1 ? "until round ends" : sensorDuration + " seconds";
-        context.getPlayer().sendMessage(Component.text("Proximity sensor placed! (" + durationMsg + ")", NamedTextColor.GREEN));
+        context.getPlayer().sendMessage(
+                plugin.trText(context.getPlayer(), "item.proximity_sensor.messages.placed",
+                        java.util.Map.of("duration", durationMsg)));
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int proximityCooldown = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.cooldown", 20);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> placeProximitySensor(context, plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.proximity_sensor.name")
+                .withLoreKey("item.proximity_sensor.lore")
+                .withNameKey("item.proximity_sensor.name")
+                .withLoreKey("item.proximity_sensor.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(proximityCooldown * 20)
+                .withCustomCooldown(proximityCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        Number range = plugin.getSettingRegistry().get("seeker-items.proximity-sensor.range", 8.0);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return plugin.trText(player, "item.proximity_sensor.description",
+                java.util.Map.of("range", String.valueOf(range.intValue()), "points", String.valueOf(points)));
     }
 
 
@@ -409,7 +436,8 @@ public class ProximitySensorItem implements GameItem {
                         if (hiderTeam != null) {
                             bd.setGlowColorOverride(textColorToColor(hiderTeam.color()));
                         }
-                        bd.getPersistentDataContainer().set(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING, hiderId.toString());
+                        bd.getPersistentDataContainer().set(new NamespacedKey(plugin, "temp_glow"),
+                                PersistentDataType.STRING, hiderId.toString());
                     });
 
                     HideAndSeek.getDataController().setBlockDisplay(hiderId, tempDisplay);
@@ -434,7 +462,8 @@ public class ProximitySensorItem implements GameItem {
             BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(hiderId);
             if (display != null && display.isValid()) {
 
-                String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
+                String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"),
+                        PersistentDataType.STRING);
                 if (tempGlowId != null && tempGlowId.equals(hiderId.toString())) {
 
                     display.remove();

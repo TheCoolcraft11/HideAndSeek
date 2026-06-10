@@ -13,6 +13,7 @@ import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -29,6 +30,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
@@ -64,13 +66,12 @@ public class CameraItem implements GameItem {
         Player player = context.getPlayer();
 
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            player.sendMessage(
-                    Component.text("The Camera is not available on this server version.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.nms_unavailable"));
             return;
         }
 
         if (!clickedBlock.getType().isSolid()) {
-            player.sendMessage(Component.text("Cannot place camera - need solid block!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.need_solid_block"));
             context.skipCooldown();
             return;
         }
@@ -87,14 +88,14 @@ public class CameraItem implements GameItem {
         }
 
         if (clickedFace == BlockFace.DOWN) {
-            player.sendMessage(Component.text("Cannot place camera on ceiling!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.no_ceiling"));
             context.skipCooldown();
             return;
         }
 
         Block torchBlock = clickedBlock.getRelative(clickedFace);
         if (!torchBlock.getType().isAir()) {
-            player.sendMessage(Component.text("Cannot place camera here - space is occupied!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.camera.messages.space_occupied"));
             context.skipCooldown();
             return;
         }
@@ -114,7 +115,8 @@ public class CameraItem implements GameItem {
 
         removeCameraAt(torchBlock.getLocation());
 
-        LinkedList<ItemStateManager.PlacedCamera> cameras = seekerCameras.computeIfAbsent(player.getUniqueId(), ignored -> new LinkedList<>());
+        LinkedList<ItemStateManager.PlacedCamera> cameras = seekerCameras.computeIfAbsent(player.getUniqueId(),
+                ignored -> new LinkedList<>());
         cameras.add(camera);
 
         String skinVariant = resolveActiveCameraSkin(player);
@@ -130,7 +132,8 @@ public class CameraItem implements GameItem {
             }
         }
 
-        player.sendMessage(Component.text("Camera placed! (" + cameras.size() + "/" + maxCameras + ")", NamedTextColor.GREEN));
+        player.sendMessage(plugin.trText(player, "item.camera.messages.placed",
+                java.util.Map.of("count", String.valueOf(cameras.size()), "maxCameras", String.valueOf(maxCameras))));
     }
 
     private static void placeTorchBase(Block torchBlock, BlockFace clickedFace) {
@@ -158,8 +161,10 @@ public class CameraItem implements GameItem {
         return spawn.getWorld().spawn(spawn, ItemDisplay.class, d -> {
             d.setItemStack(createCameraHeadItem());
             d.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
-            d.getPersistentDataContainer().set(new NamespacedKey(plugin, "camera-head"), PersistentDataType.BOOLEAN, true);
-            d.getPersistentDataContainer().set(new NamespacedKey(plugin, "camera-face"), PersistentDataType.STRING, face.name());
+            d.getPersistentDataContainer().set(new NamespacedKey(plugin, "camera-head"), PersistentDataType.BOOLEAN,
+                    true);
+            d.getPersistentDataContainer().set(new NamespacedKey(plugin, "camera-face"), PersistentDataType.STRING,
+                    face.name());
             d.setTransformation(getHeadTransformation(face, placementYaw));
         });
     }
@@ -253,7 +258,7 @@ public class CameraItem implements GameItem {
     public static boolean startCameraSession(Player seeker, HideAndSeek plugin, int preferredIndex) {
         LinkedList<ItemStateManager.PlacedCamera> cameras = getPlacedCameras(seeker.getUniqueId());
         if (cameras.isEmpty()) {
-            seeker.sendMessage(Component.text("You have no cameras placed.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.camera.messages.no_cameras"));
             return false;
         }
 
@@ -279,7 +284,7 @@ public class CameraItem implements GameItem {
         LinkedList<ItemStateManager.PlacedCamera> cameras = getPlacedCameras(seeker.getUniqueId());
         if (cameras.isEmpty()) {
             stopCameraSession(seeker, plugin, true);
-            seeker.sendMessage(Component.text("All your cameras are gone.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.camera.messages.all_cameras_gone"));
             return false;
         }
 
@@ -309,7 +314,7 @@ public class CameraItem implements GameItem {
 
         if (entityId == Integer.MIN_VALUE) {
             stopCameraSession(seeker, plugin, true);
-            seeker.sendMessage(Component.text("Your client does not support camera mode on this server build.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.camera.messages.client_unsupported"));
             return false;
         }
 
@@ -344,16 +349,20 @@ public class CameraItem implements GameItem {
 
         switch (skinVariant) {
             case SKIN_OWL_EYE -> {
-                seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().clone().add(0, 1.2, 0), 10, 0.35, 0.45, 0.35, 0.01);
+                seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().clone().add(0, 1.2, 0), 10, 0.35,
+                        0.45, 0.35, 0.01);
                 seeker.playSound(seeker.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.3f);
             }
             case SKIN_ORBITAL_SPY -> {
-                seeker.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, seeker.getLocation().clone().add(0, 1.2, 0), 12, 0.45, 0.55, 0.45, 0.02);
-                seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().clone().add(0, 1.2, 0), 10, 0.35, 0.45, 0.35, 0.01);
+                seeker.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, seeker.getLocation().clone().add(0, 1.2, 0),
+                        12, 0.45, 0.55, 0.45, 0.02);
+                seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().clone().add(0, 1.2, 0),
+                        10, 0.35, 0.45, 0.35, 0.01);
                 seeker.sendActionBar(Component.text("Orbital scan active", NamedTextColor.GOLD));
             }
             case SKIN_SPY_LENS -> {
-                seeker.getWorld().spawnParticle(Particle.WITCH, seeker.getLocation().clone().add(0, 1.1, 0), 10, 0.3, 0.35, 0.3, 0.01);
+                seeker.getWorld().spawnParticle(Particle.WITCH, seeker.getLocation().clone().add(0, 1.1, 0), 10, 0.3,
+                        0.35, 0.3, 0.01);
                 seeker.sendActionBar(Component.text("Spy Lens focus", NamedTextColor.AQUA));
             }
         }
@@ -621,16 +630,14 @@ public class CameraItem implements GameItem {
         ItemStack item = createCameraHeadItem();
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Camera", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.camera.name"))
                     .decoration(TextDecoration.ITALIC, false));
 
-            List<Component> lore = new LinkedList<>(List.of(
-                    Component.text("Shift + right click block to place", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Right click to watch your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Cycle through cameras with LMB and vision modes with RMB", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Modes: Normal, Night Vision, Terminal Vision (glow)", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                    Component.text("Sneak to stop watching your cameras", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.camera.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
 
             if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
                 lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)
@@ -644,9 +651,10 @@ public class CameraItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int maxCameras = plugin.getSettingRegistry().get("seeker-items.camera.max-placed", 5);
-        return String.format("Place up to %d cameras and spectate through them.", maxCameras);
+        return plugin.trText(player, "item.camera.description",
+                java.util.Map.of("maxCameras", String.valueOf(maxCameras)));
     }
 
     @Override
@@ -661,7 +669,11 @@ public class CameraItem implements GameItem {
                 .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> placeCamera(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> enterCameraMode(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> enterCameraMode(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.camera.name")
+                .withLoreKey("item.camera.lore")
+                .withNameKey("item.camera.name")
+                .withLoreKey("item.camera.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(cooldown * 20)

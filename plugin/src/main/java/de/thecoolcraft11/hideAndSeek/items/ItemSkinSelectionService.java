@@ -442,8 +442,8 @@ public final class ItemSkinSelectionService {
         }
 
         if (logicalItemId.equals(KnockbackStickItem.ID)) {
-            return KnockbackStickItem.ID + "_"
-                    + KnockbackStickItem.getKnockbackLevel(player.getUniqueId());
+            int level = Math.max(1, KnockbackStickItem.getKnockbackLevel(player.getUniqueId()));
+            return KnockbackStickItem.ID + "_" + level;
         }
 
         return logicalItemId;

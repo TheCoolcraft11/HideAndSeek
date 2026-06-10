@@ -6,8 +6,8 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -15,8 +15,8 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.UUID;
 
 import static de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem.randomizeBlockFor;
@@ -35,20 +35,17 @@ public class BlockRandomizerItem implements GameItem {
         ItemStack item = new ItemStack(Material.BLAZE_POWDER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Block Randomizer", NamedTextColor.RED, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.block_randomizer.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to randomize all blocks", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.block_randomizer.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
-    }
-
-    @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Force all hiders to reroll their disguise blocks.";
     }
 
     private static void randomizeAll(Player seeker, HideAndSeek plugin) {
@@ -59,8 +56,7 @@ public class BlockRandomizerItem implements GameItem {
         } else if (gameModeObj != null && gameModeObj.toString().equals("SKIN")) {
             randomizeSkins(seeker, plugin);
         } else {
-            seeker.sendMessage(
-                    Component.text("Block Randomizer is only available in BLOCK or SKIN mode.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.block_randomizer.messages.wrong_mode"));
         }
 
 
@@ -101,7 +97,8 @@ public class BlockRandomizerItem implements GameItem {
             }
             count++;
         }
-        seeker.sendMessage(Component.text("Blocks randomized! (" + count + " hiders)", NamedTextColor.GREEN));
+        seeker.sendMessage(plugin.trText(seeker, "item.block_randomizer.messages.blocks_randomized",
+                java.util.Map.of("count", String.valueOf(count))));
     }
 
     private static void randomizeSkins(Player seeker, HideAndSeek plugin) {
@@ -139,7 +136,13 @@ public class BlockRandomizerItem implements GameItem {
             }
             count++;
         }
-        seeker.sendMessage(Component.text("Blocks randomized! (" + count + " hiders)", NamedTextColor.GREEN));
+        seeker.sendMessage(plugin.trText(seeker, "item.block_randomizer.messages.blocks_randomized",
+                java.util.Map.of("count", String.valueOf(count))));
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.block_randomizer.description");
     }
 
     @Override
@@ -148,7 +151,9 @@ public class BlockRandomizerItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeAll(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeAll(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.block_randomizer.name")
+                .withLoreKey("item.block_randomizer.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(randCooldown * 20)

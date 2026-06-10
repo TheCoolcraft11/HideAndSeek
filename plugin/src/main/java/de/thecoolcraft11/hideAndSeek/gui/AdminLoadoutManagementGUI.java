@@ -15,10 +15,12 @@ import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryBuilder;
 import de.thecoolcraft11.minigameframework.inventory.InventoryClickHandler;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
+import de.thecoolcraft11.minigameframework.translation.TranslationArguments;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -154,7 +156,7 @@ public class AdminLoadoutManagementGUI {
                 loadoutManager.toggleRoleFilterItem(role, item);
                 int affected = loadoutManager.enforcePoliciesAndNotify();
                 p.sendMessage(plugin.tr(p, "gui.admin.loadout.item.updated",
-                        Map.of("item", humanize(item.name()), "count", String.valueOf(affected))));
+                        Map.of("item", getItemDisplayName(p, item.getItemId()), "count", String.valueOf(affected))));
                 openTab(p, tabByRole(role));
                 e.setCancelled(true);
             }));
@@ -511,7 +513,7 @@ public class AdminLoadoutManagementGUI {
                 int shown = 0;
                 for (LoadoutItemType previewItem : preset.getItems()) {
                     lore.add(plugin.tr(admin, "gui.admin.presets.preview_item",
-                            Map.of("item", humanize(previewItem.name()))));
+                            Map.of("item", getItemDisplayName(admin, previewItem.getItemId()))));
                     shown++;
                     if (shown >= 3) break;
                 }
@@ -662,7 +664,8 @@ public class AdminLoadoutManagementGUI {
             ItemStack stack = getPreviewItemStack(itemType);
             ItemMeta meta = stack.getItemMeta();
             if (meta != null) {
-                Component title = plugin.tr(admin, "gui.admin.item.name", Map.of("name", humanize(itemType.name())));
+                Component title = plugin.tr(admin, "gui.admin.item.name",
+                        Map.of("name", getItemDisplayName(admin, itemType.getItemId())));
                 meta.displayName(title.decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false));
                 meta.lore(List.of(plugin.tr(admin, "gui.admin.presets.forced_note").decoration(TextDecoration.ITALIC,
                         false)));
@@ -806,7 +809,8 @@ public class AdminLoadoutManagementGUI {
             return item;
         }
 
-        meta.displayName(plugin.tr(viewer, "gui.admin.item.name", Map.of("name", humanize(type.name()))));
+        meta.displayName(
+                plugin.tr(viewer, "gui.admin.item.name", Map.of("name", getItemDisplayName(viewer, type.getItemId()))));
         List<Component> lore = new ArrayList<>();
         lore.add(plugin.tr(viewer, "gui.admin.loadout.item.role", Map.of("role", role.name())).decoration(
                 TextDecoration.ITALIC, false));
@@ -894,15 +898,39 @@ public class AdminLoadoutManagementGUI {
         return role == LoadoutRole.HIDER ? Tab.HIDER : Tab.SEEKER;
     }
 
-    private String humanize(String value) {
-        StringBuilder result = new StringBuilder();
-        for (String part : value.split("_")) {
-            if (!result.isEmpty()) {
-                result.append(' ');
-            }
-            result.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1).toLowerCase());
+    private String getItemNameKey(String itemId) {
+        if (itemId.startsWith("has_hider_")) {
+            return "item." + itemId.substring("has_hider_".length()) + ".name";
         }
-        return result.toString();
+        if (itemId.startsWith("has_seeker_")) {
+            return "item." + itemId.substring("has_seeker_".length()) + ".name";
+        }
+        return "item." + itemId + ".name";
+    }
+
+    private String getItemDisplayName(Player player, String itemId) {
+        String key = getItemNameKey(itemId);
+        switch (itemId) {
+            case de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem.ID -> {
+                return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
+                        TranslationArguments.ofNamed(Map.of("level", String.valueOf(
+                                de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem.getSpeedLevel(
+                                        player.getUniqueId()) + 1)))));
+            }
+            case de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem.ID -> {
+                return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
+                        TranslationArguments.ofNamed(Map.of("level", String.valueOf(
+                                de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem.getKnockbackLevel(
+                                        player.getUniqueId()) + 1)))));
+            }
+            case de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem.ID -> {
+                int uses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);
+                return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
+                        TranslationArguments.ofNamed(
+                                Map.of("uses", String.valueOf(uses), "maxUses", String.valueOf(uses)))));
+            }
+        }
+        return MiniMessage.miniMessage().stripTags(plugin.trText(player, key));
     }
 
     private enum Tab {

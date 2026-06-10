@@ -10,8 +10,8 @@ import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.EntityType;
@@ -23,10 +23,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -47,7 +48,7 @@ public class FireworkRocketItem implements GameItem {
         );
         display.setBlock(Bukkit.createBlockData(Material.STRIPPED_BAMBOO_BLOCK));
         display.setTransformation(new Transformation(
-                new Vector3f(0.25f, 0, 0.25f),
+                        new Vector3f(0.25f, 0, 0.25f),
                         new Quaternionf(),
                         new Vector3f(0.5f, 0.75f, 0.5f),
                         new Quaternionf()
@@ -66,8 +67,8 @@ public class FireworkRocketItem implements GameItem {
         boolean spaceShuttle = ItemSkinSelectionService.isSelected(player, ID, "skin_space_shuttle");
         boolean signalFlare = ItemSkinSelectionService.isSelected(player, ID, "skin_signal_flare");
 
-        player.sendMessage(Component.text("Firework sequence started! +" + points + " points",
-                NamedTextColor.GOLD));
+        player.sendMessage(
+                plugin.tr(player, "items.firework_rocket.messages.placed", Map.of("points", String.valueOf(points))));
 
         var nms = plugin.getNmsAdapter();
         boolean useNoClip = nms != null && nms.isAvailable();
@@ -180,9 +181,10 @@ public class FireworkRocketItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int points = plugin.getPointService().getInt("points.hider.taunt.large", 75);
-        return String.format("Launch a high-altitude firework taunt, granting %d points.", points);
+        return plugin.trText(player, "item.firework_rocket.description",
+                java.util.Map.of("points", String.valueOf(points)));
     }
 
     private static void detonate(Firework firework, double volume, boolean spaceShuttle, boolean signalFlare) {
@@ -225,12 +227,14 @@ public class FireworkRocketItem implements GameItem {
         ItemStack item = new ItemStack(Material.FIREWORK_ROCKET);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Firework Rocket", NamedTextColor.GOLD, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.firework_rocket.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to launch a firework", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.firework_rocket.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
             item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
                     TooltipDisplay.tooltipDisplay()
@@ -253,7 +257,9 @@ public class FireworkRocketItem implements GameItem {
                         .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
                                 context -> launchFirework(context.getPlayer(),
                                         resolveLaunchLocation(context), plugin))
-                        .withDescription(getDescription(plugin))
+                        .withDescription(getDescription(plugin, null))
+                        .withNameKey("item.firework_rocket.name")
+                        .withLoreKey("item.firework_rocket.lore")
                         .withDropPrevention(true)
                         .withCraftPrevention(true)
                         .withVanillaCooldown(fireworkCooldown * 20)

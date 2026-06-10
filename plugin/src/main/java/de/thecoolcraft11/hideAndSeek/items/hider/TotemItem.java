@@ -9,14 +9,19 @@ import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.totemXpTasks;
 
@@ -35,12 +40,14 @@ public class TotemItem implements GameItem {
         ItemStack item = new ItemStack(Material.TOTEM_OF_UNDYING);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Totem of Undying", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.totem.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to activate revive mode", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.totem.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             meta.setUnbreakable(true);
             item.setItemMeta(meta);
         }
@@ -49,7 +56,7 @@ public class TotemItem implements GameItem {
 
     private static void activateTotem(Player player, HideAndSeek plugin) {
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.totem.messages.only_hiders"));
             return;
         }
 
@@ -60,11 +67,13 @@ public class TotemItem implements GameItem {
         totemActiveUntil.put(player.getUniqueId(), expiresAt);
 
         player.getInventory().removeItem(new ItemStack(Material.TOTEM_OF_UNDYING, 1));
-        player.sendMessage(Component.text("Revive mode activated for " + duration + " seconds!", NamedTextColor.GOLD));
+        player.sendMessage(plugin.trText(player, "item.totem.messages.activated",
+                java.util.Map.of("duration", String.valueOf(duration))));
 
 
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
-        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                duration);
         totemXpTasks.put(player.getUniqueId(), xpTask);
 
         new BukkitRunnable() {
@@ -113,9 +122,10 @@ public class TotemItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.totem.effect-duration", 5);
-        return String.format("Activate a one-time revive window for %ds.", duration.intValue());
+        return plugin.trText(player, "item.totem.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override
@@ -124,14 +134,17 @@ public class TotemItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> activateTotem(context.getPlayer(), plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> activateTotem(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.totem.name")
+                .withLoreKey("item.totem.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withMaxPlayerUses(totemUses)
                 .allowOffHand(false)
                 .allowArmor(false)
                 .cancelDefaultAction(true)
-                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(Component.text("You've already used your totem!", NamedTextColor.RED)))
+                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(
+                        Component.text("You've already used your totem!", NamedTextColor.RED)))
                 .build());
     }
 
@@ -153,7 +166,7 @@ public class TotemItem implements GameItem {
         if (xpTask != null) xpTask.cancel();
     }
 
-    public static void reviveWithTotem(Player player) {
+    public static void reviveWithTotem(Player player, HideAndSeek plugin) {
         if (player == null) {
             return;
         }
@@ -162,7 +175,8 @@ public class TotemItem implements GameItem {
         boolean lifeCoin = ItemSkinSelectionService.isSelected(player, ID, "skin_extra_life_coin");
 
         player.playEffect(org.bukkit.EntityEffect.PROTECTED_FROM_DEATH);
-        player.setHealth(Math.max(1.0, Objects.requireNonNull(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue()));
+        player.setHealth(Math.max(1.0,
+                Objects.requireNonNull(player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)).getValue()));
         player.setFoodLevel(20);
 
         org.bukkit.Location roundSpawn = HideAndSeek.getDataController().getRoundSpawnPoint();
@@ -183,6 +197,6 @@ public class TotemItem implements GameItem {
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.65f, 1.4f);
         }
 
-        player.sendMessage(Component.text("You were revived!", NamedTextColor.GOLD));
+        player.sendMessage(plugin.trText(player, "item.totem.messages.revived"));
     }
 }

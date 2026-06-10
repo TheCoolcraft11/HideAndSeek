@@ -7,9 +7,9 @@ import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
@@ -20,10 +20,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Transformation;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
-import java.util.List;
 import java.util.UUID;
 
 public class GlowingCompassItem implements GameItem {
@@ -39,42 +39,17 @@ public class GlowingCompassItem implements GameItem {
         ItemStack item = new ItemStack(Material.COMPASS);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Glowing Compass", NamedTextColor.GOLD, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.glowing_compass.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to glow the nearest hider", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.glowing_compass.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
-    }
-
-    @Override
-    public String getDescription(HideAndSeek plugin) {
-        Number duration = plugin.getSettingRegistry().get("seeker-items.glowing-compass.duration", 10);
-        Number range = plugin.getSettingRegistry().get("seeker-items.glowing-compass.range", 50);
-        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
-        return String.format("Reveal nearest hider within %d blocks with glow for %ds, grants %d points.", range.intValue(), duration.intValue(), points);
-    }
-
-    @Override
-    public void register(HideAndSeek plugin) {
-        int glowCooldown = plugin.getSettingRegistry().get("seeker-items.glowing-compass.cooldown", 25);
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> glowHider(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> glowHider(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .withVanillaCooldown(glowCooldown * 20)
-                .withCustomCooldown(glowCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .build());
-
     }
 
     private static void glowHider(Player seeker, HideAndSeek plugin) {
@@ -103,24 +78,64 @@ public class GlowingCompassItem implements GameItem {
             applyGlowEffect(nearest, duration, plugin);
             plugin.getPointService().award(seeker.getUniqueId(), PointAction.SEEKER_UTILITY_SUCCESS);
             plugin.getPointService().markUtilitySpotted(nearest.getUniqueId());
-            seeker.sendMessage(Component.text(nearest.getName() + " is now glowing!", NamedTextColor.GOLD));
+            seeker.sendMessage(plugin.trText(seeker, "item.glowing_compass.messages.hider_glowing",
+                    java.util.Map.of("nearest", nearest.getName())));
             if (tacticalTablet) {
-                seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1, 0), 12, 0.3, 0.3, 0.3, 0.03);
-                seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1, 0), 8, 0.25, 0.25, 0.25, 0.01);
+                seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().add(0, 1, 0), 12, 0.3,
+                        0.3, 0.3, 0.03);
+                seeker.getWorld().spawnParticle(Particle.END_ROD, seeker.getLocation().add(0, 1, 0), 8, 0.25, 0.25,
+                        0.25, 0.01);
                 seeker.playSound(seeker.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.55f, 1.4f);
             } else if (oracleEye) {
-                seeker.getWorld().spawnParticle(Particle.ENCHANT, seeker.getLocation().add(0, 1, 0), 20, 0.5, 0.3, 0.5, 0.2);
-                seeker.getWorld().spawnParticle(Particle.PORTAL, seeker.getLocation().add(0, 1, 0), 10, 0.35, 0.25, 0.35, 0.07);
+                seeker.getWorld().spawnParticle(Particle.ENCHANT, seeker.getLocation().add(0, 1, 0), 20, 0.5, 0.3, 0.5,
+                        0.2);
+                seeker.getWorld().spawnParticle(Particle.PORTAL, seeker.getLocation().add(0, 1, 0), 10, 0.35, 0.25,
+                        0.35, 0.07);
                 seeker.playSound(seeker.getLocation(), Sound.ENTITY_ENDER_EYE_LAUNCH, 0.65f, 1.0f);
             } else if (dowsingRod) {
-                seeker.getWorld().spawnParticle(Particle.CRIT, seeker.getLocation().add(0, 1, 0), 10, 0.35, 0.3, 0.35, 0.05);
-                seeker.getWorld().spawnParticle(Particle.WAX_ON, seeker.getLocation().add(0, 1, 0), 8, 0.25, 0.2, 0.25, 0.01);
+                seeker.getWorld().spawnParticle(Particle.CRIT, seeker.getLocation().add(0, 1, 0), 10, 0.35, 0.3, 0.35,
+                        0.05);
+                seeker.getWorld().spawnParticle(Particle.WAX_ON, seeker.getLocation().add(0, 1, 0), 8, 0.25, 0.2, 0.25,
+                        0.01);
                 seeker.playSound(seeker.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_HIT, 0.6f, 0.8f);
             }
             spawnScanTrail(seeker, nearest, tacticalTablet, oracleEye, dowsingRod);
         } else {
-            seeker.sendMessage(Component.text("No hiders found nearby!", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.glowing_compass.messages.no_hiders"));
         }
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int glowCooldown = plugin.getSettingRegistry().get("seeker-items.glowing-compass.cooldown", 25);
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> glowHider(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> glowHider(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.glowing_compass.name")
+                .withLoreKey("item.glowing_compass.lore")
+                .withNameKey("item.glowing_compass.name")
+                .withLoreKey("item.glowing_compass.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .withVanillaCooldown(glowCooldown * 20)
+                .withCustomCooldown(glowCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .build());
+
+    }
+
+    @Override
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        Number duration = plugin.getSettingRegistry().get("seeker-items.glowing-compass.duration", 10);
+        Number range = plugin.getSettingRegistry().get("seeker-items.glowing-compass.range", 50);
+        int points = plugin.getPointService().getInt("points.seeker.utility-success.amount", 40);
+        return plugin.trText(player, "item.glowing_compass.description",
+                java.util.Map.of("range", String.valueOf(range.intValue()), "duration",
+                        String.valueOf(duration.intValue()), "points", String.valueOf(points)));
     }
 
     private static void applyGlowEffect(Player hider, int duration, HideAndSeek plugin) {
@@ -138,7 +153,8 @@ public class GlowingCompassItem implements GameItem {
                 }
             }
         }
-        boolean tacticalTablet = seeker != null && ItemSkinSelectionService.isSelected(seeker, ID, "skin_tactical_tablet");
+        boolean tacticalTablet = seeker != null && ItemSkinSelectionService.isSelected(seeker, ID,
+                "skin_tactical_tablet");
         boolean oracleEye = seeker != null && ItemSkinSelectionService.isSelected(seeker, ID, "skin_eye_of_the_oracle");
         boolean dowsingRod = seeker != null && ItemSkinSelectionService.isSelected(seeker, ID, "skin_dowsing_rod");
 
@@ -183,7 +199,8 @@ public class GlowingCompassItem implements GameItem {
                         if (hiderTeam != null) {
                             bd.setGlowColorOverride(textColorToColor(hiderTeam.color()));
                         }
-                        bd.getPersistentDataContainer().set(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING, hiderId.toString());
+                        bd.getPersistentDataContainer().set(new NamespacedKey(plugin, "temp_glow"),
+                                PersistentDataType.STRING, hiderId.toString());
                     });
 
                     HideAndSeek.getDataController().setBlockDisplay(hiderId, tempDisplay);
@@ -215,7 +232,8 @@ public class GlowingCompassItem implements GameItem {
 
             @Override
             public void run() {
-                if (!hider.isOnline() || ticks >= maxTicks || !HideAndSeek.getDataController().isGlowing(hider.getUniqueId())) {
+                if (!hider.isOnline() || ticks >= maxTicks || !HideAndSeek.getDataController().isGlowing(
+                        hider.getUniqueId())) {
                     cancel();
                     return;
                 }
@@ -254,7 +272,8 @@ public class GlowingCompassItem implements GameItem {
             BlockDisplay display = HideAndSeek.getDataController().getBlockDisplay(hiderId);
             if (display != null && display.isValid()) {
 
-                String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"), PersistentDataType.STRING);
+                String tempGlowId = display.getPersistentDataContainer().get(new NamespacedKey(plugin, "temp_glow"),
+                        PersistentDataType.STRING);
                 if (tempGlowId != null && tempGlowId.equals(hiderId.toString())) {
 
                     display.remove();
@@ -277,7 +296,8 @@ public class GlowingCompassItem implements GameItem {
     private static void spawnScanTrail(Player seeker, Player target, boolean tacticalTablet, boolean oracleEye, boolean dowsingRod) {
         Location start = seeker.getEyeLocation();
         Location end = target.getLocation().add(0, 1, 0);
-        Vector3f dir = new Vector3f((float) (end.getX() - start.getX()), (float) (end.getY() - start.getY()), (float) (end.getZ() - start.getZ()));
+        Vector3f dir = new Vector3f((float) (end.getX() - start.getX()), (float) (end.getY() - start.getY()),
+                (float) (end.getZ() - start.getZ()));
         float len = dir.length();
         if (len < 0.1f) {
             return;

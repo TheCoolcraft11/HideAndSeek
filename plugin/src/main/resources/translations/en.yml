@@ -944,3 +944,367 @@ phase:
     coins_header: "<gold><bold>Coins:</bold></gold>"
     coins_gained: "<gray>  Gained: <gold>+{amount}</gold></gray>"
     coins_balance: "<gray>  Total: <gold>{amount}</gold></gray>"
+item:
+  appearance:
+    name: "<light_purple><b>Appearance Editor</b></light_purple>"
+    lore: "<gray>Right click to customize your appearance</gray>"
+    description: "Open the appearance editor for your current disguise."
+  big_firecracker:
+    name: "<red><b>Big Firecracker</b></red>"
+    lore: "<gray>Right click to place a big firecracker</gray>"
+    description: "Place a large firecracker that explodes, granting {points} points."
+    messages:
+      placed: "<gold>Big Firecracker placed! +{points} points!</gold>"
+    skin:
+      giant_present: "<gold><b>Giant Present</b></gold>"
+      boombox: "<gold><b>Boombox</b></gold>"
+  block_selector:
+    name: "<light_purple><b>Block Selector</b></light_purple>"
+    lore: "<gray>Right click to choose your block</gray>"
+    description: "Open the block picker to choose your disguise block."
+  block_swap:
+    name: "<dark_purple><b>Block Swap</b></dark_purple>"
+    lore: "<gray>Right click to swap blocks with another hider</gray>"
+    description: "Swap disguise blocks with the nearest other hider."
+    messages:
+      only_hiders: "<red>Only hiders can use this item!</red>"
+      unavailable: "<red>BLOCK swap is only available in BLOCK or SKIN mode!</red>"
+      no_hider: "<red>No hider nearby to swap with!</red>"
+      block:
+        cursed: "<red>You are cursed and cannot swap blocks!</red>"
+        successful_swap: "<green>Swapped blocks with {player}!</green>"
+        missing_data: "<red>Swap failed (Missing Block Data)</red>"
+      skin:
+        cursed: "<red>You are cursed and cannot swap skins!</red>"
+        successful_swap: "<green>Swapped skins with {player}!</green>"
+    skin:
+      magic_mirror: "<gold><b>Magic Mirror</b></gold>"
+      quantum_link: "<gold><b>Quantum Link</b></gold>"
+  explosion:
+    name: "<red><b>Firecracker</b></red>"
+    lore: "<gray>Right click to place a firecracker that will explode</gray>"
+    description: "Place a firecracker that pops, granting {points} points."
+    messages:
+      placed: "<gold>Firecracker placed! +{points} points</gold>"
+    skin:
+      confetti_popper: "<gold><b>Confetti Popper</b></gold>"
+      bubble_popper: "<gold><b>Bubble Popper</b></gold>"
+  firework_rocket:
+    name: "<gold><b>Firework Rocket</b></gold>"
+    lore: "<gray>Right click to place a firework battery that will launch fireworks</gray>"
+    description: "Launch a high-altitude firework taunt, granting {points} points."
+    messages:
+      placed: "<gold>Firework sequence started! +{points} points</gold>"
+    skin:
+      space_shuttle: "<gold><b>Space Shuttle</b></gold>"
+      signal_flare: "<gold><b>Signal Flare</b></gold>"
+  ghost_essence:
+    name: "<aqua><b>Ghostly Essence</b></aqua>"
+    lore: "<gray>Pass through walls while active\nYou cannot descend while ghostly!</gray>"
+    description: "Become ghostly to phase through blocks for {duration}s."
+    messages:
+      nms_unavailable: "<red>The Seeker's Assistant is not available on this server version.</red>"
+      activated: "<aqua>You are now a Ghost! Phasing enabled for {duration}s.</aqua>"
+      materialized: "<green>You have successfully materialized!</green>"
+      error: "<red>{reason}</red>"
+    skin:
+      spectral_form: "<gold><b>Spectral Form</b></gold>"
+      digital_phase: "<gold><b>Digital Phase</b></gold>"
+  invisibility_cloak:
+    name: "<dark_purple><b>Invisibility Cloak</b></dark_purple>"
+    lore: "<gray>Right click to become invisible</gray>"
+    description: "Turn invisible for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      activated: "<aqua>You are now invisible!</aqua>"
+    skin:
+      cardboard_box: "<gold><b>Cardboard Box</b></gold>"
+      camo_netting: "<gold><b>Camo Netting</b></gold>"
+  ink_face:
+    name: "<gray><b>Ink Face</b></gray>"
+    description: "Hidden helmet used for ink-blindness effects."
+  knockback_stick:
+    name: "<dark_red><b>Knockback Stick <gold>(Level {level}</gold>)</b></dark_red>"
+    lore: "<gray>Left click to knock seekers away!\n<gold><gray>Level: {level}</gold></gray>"
+    description: "Smack seekers to launch them away."
+    messages:
+      upgraded: "<gold>Upgraded to Level {level}!</gold>"
+    skin:
+      squeaky_hammer: "<gold><b>Squeaky Hammer <gray>(Level {level})</gray></b></gold>"
+      pool_noodle: "<gold><b>Pool Noodle <gray>(Level {level})</gray></b></gold>"
+  medkit:
+    name: "<green><b>Medkit</b></green>"
+    lore: "<gray>Hold right click to channel heal</gray>\n<dark_gray>Release early to cancel</dark_gray>"
+    description: "Hold block for {channel_time}s, then release to heal yourself fully."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      canceled: "<yellow>Medkit canceled. Hold for {remaining}s longer.</yellow>"
+      healed: "<green>Healed!</green>"
+    skin:
+      bandage_roll: "<gold><b>Bandage Roll</b></gold>"
+      magic_potion: "<gold><b>Magic Potion</b></gold>"
+  random_block:
+    name: "<light_purple><b>Random Block <gray>({uses} / {maxUses})</gray></b></light_purple>"
+    lore: "<gray>Right click to randomize your block</gray>"
+    description: "Reroll your disguise block from the map's allowed blocks."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      cursed_blocks: "<red>You are cursed and cannot change blocks right now!</red>"
+      cursed_skins: "<red>You are cursed and cannot change skins right now!</red>"
+      hidden_cannot_transform: "<red>You can't transform into a new block while being hidden!</red>"
+      no_active_map: "<red>No active map found.</red>"
+      no_allowed_blocks: "<red>No allowed blocks configured for this map.</red>"
+      no_allowed_skins: "<red>No allowed skins configured for this map.</red>"
+      invalid_block_pattern: "<red>Invalid block pattern in config: {pattern}</red>"
+      invalid_variant: "<red>Invalid default variant in config: {variant}</red>"
+      invalid_block_type: "<red>Invalid block type in config: {type}</red>"
+      transformed_block: "<green>Transformed into <gold>{block}</gold></green>"
+      transformed_skin: "<green>Transformed into <gold>{skin}</gold></green>"
+      uses_exhausted: "<red>You ran out of random block uses!</red>"
+    skin:
+      shapeshifter_dust: "<gold><b>Shapeshifter Dust</b></gold> <gray>({uses}/{maxUses})</gray>"
+      mystery_box: "<gold><b>Mystery Box</b></gold> <gray>({uses}/{maxUses})</gray>"
+  remote_gateway:
+    name: "<dark_purple><b>Remote Gateway</b></dark_purple>"
+    lore: "<gray>Right click to place your gateway anchors\nTwo anchors form a teleport pair</gray>"
+    description:
+      permanent: "Place paired gateways that teleport between anchors until the round ends."
+      timed: "Place paired gateways that teleport between anchors for {duration} seconds."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      aim_at_block: "<red>Aim at a block to place a gateway anchor.</red>"
+      need_clear_space: "<red>Need clear space to place gateway.</red>"
+      anchor_placed: "<green>Gateway anchor A placed. Place another anchor to link.</green>"
+      gateway_linked: "<aqua>Gateway linked.</aqua>"
+    skin:
+      end_rift: "<gold><b>End Rift</b></gold>"
+      phase_door: "<gold><b>Phase Door</b></gold>"
+      dematerializer: "<gold><b>Dematerializer</b></gold>"
+      void_lattice: "<gold><b>Void Lattice</b></gold>"
+  skin_selector:
+    name: "<light_purple><b>Skin Selector</b></light_purple>"
+    lore: "<gray>Right-click to choose your disguise skin</gray>"
+    description: "Open the skin picker to choose your disguise skin."
+  slowness_ball:
+    name: "<aqua><b>Slowness Ball</b></aqua>"
+    lore: "<gray>Right click to throw at seekers</gray>"
+    description: "Throw an ice ball that slows seekers for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+    skin:
+      sticky_honey: "<gold><b>Sticky Honey</b></gold>"
+      tar_ball: "<gold><b>Tar Ball</b></gold>"
+  smoke_bomb:
+    name: "<dark_gray><b>Smoke Bomb</b></dark_gray>"
+    lore: "<gray>Right click to throw\nCreates a smoke cloud for cover</gray>"
+    description: "Throw a smoke bomb that creates cover for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+    skin:
+      ninja_smoke: "<gold><b>Ninja Smoke</b></gold>"
+      spore_cloud: "<gold><b>Spore Cloud</b></gold>"
+  sound:
+    name: "<aqua><b>Cat Sound</b></aqua>"
+    lore: "<gray>Right click to play a sound</gray>"
+    description: "Play a loud cat taunt for all players, grants {points} points."
+    messages:
+      taunt_used: "<green>You used a taunt!</green>"
+      points_earned: "<gold>+{points} points</gold>"
+    skin:
+      megaphone: "<gold><b>Megaphone</b></gold>"
+      rubber_chicken: "<gold><b>Rubber Chicken</b></gold>"
+  speed_boost:
+    name: "<yellow><b>Speed Boost <gold>(Level {level})</gold></b></yellow>"
+    lore: "<gray>Right click for a speed boost}\n<gold><gray>Level: {level}</gold></gray>"
+    description:
+      velocity_boost: "Launch yourself forward with a velocity boost."
+      speed_effect: "Gain speed effect for {duration}s to move faster."
+    messages:
+      velocity_activated: "<yellow>Velocity boost activated! <gold>(Level {level})</gold></yellow>"
+      speed_activated: "<yellow>Speed boost activated! <gold>(Level {level})</gold></yellow>"
+      upgraded: "<gold>Upgraded to Level {level}!</gold>"
+    skin:
+      rocket_boots: "<gold><b>Rocket Boots <gray>(Level {level})</gray></b></gold>"
+      sugar_rush: "<gold><b>Sugar Rush <gray>(Level {level})</gray></b></gold>"
+  totem:
+    name: "<light_purple><b>Totem of Undying</b></light_purple>"
+    lore: "<gray>Right click to activate revive mode</gray>"
+    description: "Activate a one-time revive window for {duration}s."
+    messages:
+      only_hiders: "<red>Only hiders can use this item.</red>"
+      activated: "<gold>Revive mode activated for {duration} seconds!</gold>"
+      revived: "<gold>You were revived!</gold>"
+    skin:
+      phoenix_feather: "<gold><b>Phoenix Feather</b></gold>"
+      extra_life_coin: "<gold><b>Extra Life Coin</b></gold>"
+  crossbow:
+    name: "<aqua><b>Tracker Crossbow</b></aqua>"
+    lore: "<gray>Hit to upgrade speed & knockback</gray>"
+    description: "Hit seekers with arrows to upgrade items, grants {points} points per hit."
+    messages:
+      hit: "<gold>Crossbow hit! +{points} points</gold>"
+      hit_progress: "<green>Hit seeker! {current}/{required}</green>"
+    skin:
+      paintball_gun: "<gold><b>Paintball Gun</b></gold>"
+      laser_tag: "<gold><b>Laser Tag</b></gold>"
+  assistant:
+    name: "<red><b>Seeker's Assistant</b></red>"
+    lore: "<gray>Summon a hunting assistant to track down hiders.\nMax 2 active at the same time.\n\n<gold><b>LEGENDARY</b></gold></gray>"
+    description: "Summons a hunter assistant that tracks and shoots at visible hiders."
+    messages:
+      nms_unavailable: "<red>The Seeker's Assistant is not available on this server version.</red>"
+      seeking_only: "<red>The Seeker's Assistant can only be summoned during seeking.</red>"
+      max_active: "<red>You already have {max} assistants active!</red>"
+      summon_failed: "<red>Failed to summon assistant.</red>"
+      summoned: "<red>Assistant summoned! </red><gray>({lifetime}s lifetime)</gray>"
+    skin:
+      steel_golem: "<gold><b>Steel Golem</b></gold>"
+      ghost_drone: "<gold><b>Ghost Drone</b></gold>"
+      battle_mech: "<gold><b>Battle Mech</b></gold>"
+  block_randomizer:
+    name: "<red><b>Block Randomizer</b></red>"
+    lore: "<gray>Right click to randomize all blocks</gray>"
+    description: "Force all hiders to reroll their disguise blocks."
+    messages:
+      wrong_mode: "<red>Block Randomizer is only available in BLOCK or SKIN mode.</red>"
+      blocks_randomized: "<green>Blocks randomized! ({count} hiders)</green>"
+    skin:
+      glitch_core: "<gold><b>Glitch Core</b></gold>"
+      chaos_magic: "<gold><b>Chaos Magic</b></gold>"
+  block_stats:
+    name: "<aqua><b>Block Statistics</b></aqua>"
+    lore: "<gray>Right click to view block stats</gray>"
+    description: "Open the block statistics menu."
+  cage_trap:
+    name: "<gray><b>Cage Trap</b></gray>"
+    lore: "<gray>Right click to place a trap</gray>"
+    description: "Place a hidden trap that cages and immobilizes a hider for {duration}s."
+    messages:
+      placed: "<green>Cage trap placed! (Ready in {setupTime}s, lasts {durationMsg})</green>"
+      triggered: "<dark_red>You've been trapped by a cage!</dark_red>"
+    skin:
+      laser_grid: "<gold><b>Laser Grid</b></gold>"
+      ice_block: "<gold><b>Ice Block</b></gold>"
+  camera:
+    name: "<dark_aqua><b>Camera</b></dark_aqua>"
+    lore: "<gray>Shift + right click block to place\nRight click to watch your cameras\nCycle through cameras with LMB and vision modes with RMB\nModes: Normal, Night Vision, Terminal Vision (glow)\nSneak to stop watching your cameras</gray>"
+    description: "Place up to {maxCameras} cameras and spectate through them."
+    messages:
+      nms_unavailable: "<red>The Camera is not available on this server version.</red>"
+      need_solid_block: "<red>Cannot place camera - need solid block!</red>"
+      no_ceiling: "<red>Cannot place camera on ceiling!</red>"
+      space_occupied: "<red>Cannot place camera here - space is occupied!</red>"
+      placed: "<green>Camera placed! ({count}/{maxCameras})</green>"
+      no_cameras: "<red>You have no cameras placed.</red>"
+      all_cameras_gone: "<red>All your cameras are gone.</red>"
+      client_unsupported: "<red>Your client does not support camera mode on this server build.</red>"
+    skin:
+      spy_lens: "<gold><b>Spy Lens</b></gold>"
+      owl_eye: "<gold><b>Owl Eye</b></gold>"
+      orbital_spy: "<gold><b>Orbital Spy</b></gold>"
+  chain_pull:
+    name: "<dark_gray><b>Chain Pull</b></dark_gray>"
+    lore: "<gray>Right click to pull hiders</gray>"
+    description: "Pull the hider in front of you to your position."
+    messages:
+      no_target: "<red>No hider in range.</red>"
+      pulled: "<green>Pulled {target}!</green>"
+      pulled_by_chain: "<dark_gray>You've been pulled by a chain!</dark_gray>"
+    skin:
+      energy_lasso: "<gold><b>Energy Lasso</b></gold>"
+      shadow_tendril: "<gold><b>Shadow Tendril</b></gold>"
+  crowbar:
+    name: "<aqua><b>Crowbar</b></aqua>"
+    lore: "<gray>Left Click to destroy some blocks</gray>"
+    description: "Breaks Blocks of the map to help you reach small seekers."
+  curse_spell:
+    name: "<dark_purple><b>Curse Spell</b></dark_purple>"
+    lore: "<gray>Right click to curse hiders</gray>"
+    description: "Enhance your melee attacks against hiders for a limited time."
+    messages:
+      activated: "<dark_purple>Curse spell activated! ({duration}s)</dark_purple>"
+      cursed: "<dark_purple>You have been cursed!</dark_purple>"
+    skin:
+      voodoo_magic: "<gold><b>Voodoo Magic</b></gold>"
+      toxic_tome: "<gold><b>Toxic Tome</b></gold>"
+  glowing_compass:
+    name: "<gold><b>Glowing Compass</b></gold>"
+    lore: "<gray>Right click to glow the nearest hider</gray>"
+    description: "Reveal nearest hider within {range} blocks with glow for {duration}s, grants {points} points."
+    messages:
+      hider_glowing: "<gold>{nearest} is now glowing!</gold>"
+      no_hiders: "<red>No hiders found nearby!</red>"
+    skin:
+      tactical_tablet: "<gold><b>Tactical Tablet</b></gold>"
+      eye_of_the_oracle: "<gold><b>Eye of the Oracle</b></gold>"
+      dowsing_rod: "<gold><b>Dowsing Rod</b></gold>"
+  ink_splash:
+    name: "<dark_aqua><b>Ink Splash</b></dark_aqua>"
+    lore: "<gray>Right click to blind hiders</gray>"
+    description: "Temporarily blind hiders with ink, reducing visibility for {duration}s."
+    messages:
+      hit: "<dark_aqua>You've been hit with ink!</dark_aqua>"
+    skin:
+      paint_balloon: "<gold><b>Paint Balloon</b></gold>"
+      mud_ball: "<gold><b>Mud Ball</b></gold>"
+  lightning_freeze:
+    name: "<yellow><b>Lightning Freeze</b></yellow>"
+    lore: "<gray>Right click to freeze all hiders</gray>"
+    description: "Freeze all hiders in place with slowness effect for {duration}s."
+    messages:
+      all_frozen: "<aqua>All hiders frozen!</aqua>"
+    skin:
+      frost_wand: "<gold><b>Frost Wand</b></gold>"
+      time_stopper: "<gold><b>Time Stopper</b></gold>"
+  mask:
+    name: "<gray><b>Seekers Mask</b></gray>"
+    lore: "<gray>A spooky mask to scare the hiders</gray>"
+    description: "Bound seeker helmet item."
+  phantom_viewer:
+    name: "<dark_purple><b>Phantom Viewer</b></dark_purple>"
+    lore: "<gray>Right click to capture phantom snapshots</gray>"
+    description: "Capture a phantom snapshot showing a hider's view."
+    messages:
+      seeker_only: "<red>Only seekers can use this item.</red>"
+      no_target: "<red>No valid hider target found.</red>"
+      capture_failed: "<red>Could not capture phantom snapshot right now.</red>"
+      capturing: "<yellow>Capturing phantom snapshot...</yellow>"
+      captured_player: "<green>PhantomViewer captured {target}'s perspective.</green>"
+      captured_anonymous: "<green>PhantomViewer captured a phantom perspective.</green>"
+    skin:
+      echo_slate: "<gold><b>Echo Slate</b></gold>"
+      spectral_cartography: "<gold><b>Spectral Cartography</b></gold>"
+      quantum_viewfinder: "<gold><b>Quantum Viewfinder</b></gold>"
+      night_recon: "<gold><b>Night Recon</b></gold>"
+  proximity_sensor:
+    name: "<dark_red><b>Proximity Sensor</b></dark_red>"
+    lore: "<gray>Right click to place a sensor</gray>"
+    description: "Place a sensor revealing hiders within {range} blocks, grants {points} per detection."
+    messages:
+      need_solid_block: "<red>Cannot place sensor - need solid block!</red>"
+      space_occupied: "<red>Cannot place sensor here - space is occupied!</red>"
+      no_ceiling: "<red>Cannot place sensor on ceiling!</red>"
+      placed: "<green>Proximity sensor placed! ({duration})</green>"
+    skin:
+      cctv_camera: "<gold><b>CCTV Camera</b></gold>"
+      alarm_bell: "<gold><b>Alarm Bell</b></gold>"
+  skin_stats:
+    name: "<aqua><b>Skin Statistics</b></aqua>"
+    lore: "<gray>Right-click to view hider skins</gray>"
+    description: "View which skin each hider is currently disguised as."
+  grappling_hook:
+    name: "<yellow><b>Grappling Hook</b></yellow>"
+    lore: "<gray>Right click to grapple towards a hider</gray>"
+    description: "Grapple towards the nearest hider within range."
+    skin:
+      techno_tether: "<gold><b>Techno Tether</b></gold>"
+      jungle_vine: "<gold><b>Jungle Vine</b></gold>"
+      ghostly_chain: "<gold><b>Ghostly Chain</b></gold>"
+  sword:
+    name: "<red><b>Seeker's Blade</b></red>"
+    lore: "<gray>Hunt down the hiders!</gray>"
+    description: "Main weapon: hold block to charge and throw your sword."
+    skin:
+      energy_blade: "<gold><b>Energy Blade</b></gold>"
+      the_ban_hammer: "<gold><b>The Ban Hammer</b></gold>"
+      giant_spatula: "<gold><b>Giant Spatula</b></gold>"

@@ -8,16 +8,17 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Candle;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ExplosionItem implements GameItem {
@@ -34,12 +35,14 @@ public class ExplosionItem implements GameItem {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("Firecracker", NamedTextColor.RED, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.explosion.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to place a firecracker that will explode", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.explosion.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
 
@@ -47,9 +50,10 @@ public class ExplosionItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int points = plugin.getPointService().getInt("points.hider.taunt.small", 25);
-        return String.format("Place a firecracker that pops, granting %d points.", points);
+        return plugin.trText(player, "item.explosion.description",
+                java.util.Map.of("points", String.valueOf(points)));
     }
 
     @Override
@@ -61,7 +65,9 @@ public class ExplosionItem implements GameItem {
                 .withVanillaCooldown(cooldown * 20)
                 .withCustomCooldown(cooldown * 1000L)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.explosion.name")
+                .withLoreKey("item.explosion.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)
@@ -110,10 +116,14 @@ public class ExplosionItem implements GameItem {
         int baseAccentParticles = plugin.getSettingRegistry().get("hider-items.explosion.accent-particles", 2);
         int baseBurstParticles = plugin.getSettingRegistry().get("hider-items.explosion.burst-particles", 14);
         int fuseTime = plugin.getSettingRegistry().get("hider-items.explosion.fuse-time", 40);
-        double volumeMultiplier = plugin.getSettingRegistry().get("hider-items.explosion.variants." + variantKey + ".volume-multiplier", 1.0);
-        double pitchMultiplier = plugin.getSettingRegistry().get("hider-items.explosion.variants." + variantKey + ".pitch-multiplier", 1.0);
-        double smokeMultiplier = plugin.getSettingRegistry().get("hider-items.explosion.variants." + variantKey + ".smoke-multiplier", 1.0);
-        double burstMultiplier = plugin.getSettingRegistry().get("hider-items.explosion.variants." + variantKey + ".burst-multiplier", 1.0);
+        double volumeMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.explosion.variants." + variantKey + ".volume-multiplier", 1.0);
+        double pitchMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.explosion.variants." + variantKey + ".pitch-multiplier", 1.0);
+        double smokeMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.explosion.variants." + variantKey + ".smoke-multiplier", 1.0);
+        double burstMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.explosion.variants." + variantKey + ".burst-multiplier", 1.0);
 
         double volume = Math.max(0.05, baseVolume * volumeMultiplier);
         double pitch = Math.max(0.1, basePitch * pitchMultiplier);
@@ -122,11 +132,7 @@ public class ExplosionItem implements GameItem {
         int burstParticles = Math.max(1, (int) Math.round(baseBurstParticles * burstMultiplier));
 
         hider.sendMessage(
-                Component.text("You used a taunt!", NamedTextColor.GREEN)
-        );
-        hider.sendMessage(
-                Component.text("+" + tauntPoints + " points", NamedTextColor.GOLD)
-        );
+                plugin.tr(hider, "items.explosion.messages.placed", Map.of("points", String.valueOf(tauntPoints))));
 
         int smokeTaskId = Bukkit.getScheduler().runTaskTimer(
                 plugin,
@@ -197,8 +203,10 @@ public class ExplosionItem implements GameItem {
                                 (float) pitch
                         );
                         if (bubble) {
-                            target.getWorld().spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, explosionLoc, 10, 0.25, 0.25, 0.25, 0.01);
-                            target.playSound(location, Sound.ENTITY_BLAZE_SHOOT, Math.max(0.1f, (float) (volume * 0.35)), 1.45f);
+                            target.getWorld().spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, explosionLoc, 10, 0.25,
+                                    0.25, 0.25, 0.01);
+                            target.playSound(location, Sound.ENTITY_BLAZE_SHOOT,
+                                    Math.max(0.1f, (float) (volume * 0.35)), 1.45f);
                         }
                     }
                 },

@@ -168,7 +168,9 @@ public final class HideAndSeek extends MinigameFramework {
         scoreboardProvider = new CustomScoreboardProvider(this);
 
         Bukkit.getPluginManager().registerEvents(playerHitListener, this);
-        Bukkit.getPluginManager().registerEvents(new EnvironmentalDeathMessageListener(playerHitListener, playerHitListener.getDeathMessageService()), this);
+        Bukkit.getPluginManager().registerEvents(
+                new EnvironmentalDeathMessageListener(playerHitListener, playerHitListener.getDeathMessageService()),
+                this);
         Bukkit.getPluginManager().registerEvents(new GameStateListener(this), this);
         Bukkit.getPluginManager().registerEvents(blockModeListener, this);
         Bukkit.getPluginManager().registerEvents(antiCheatVisibilityListener, this);
@@ -228,19 +230,19 @@ public final class HideAndSeek extends MinigameFramework {
                 return Component.text(o.toString());
             }
             if (key.startsWith("rarity-")) {
-                    LoadoutItemType itemType = LoadoutItemType.fromID("has_hider_" + key.substring("rarity-".length()));
-                    if (itemType == null) {
-                        itemType = LoadoutItemType.fromID("has_seeker_" + key.substring("rarity-".length()));
-                    }
-                    if (itemType != null) {
-                        String color = switch (itemType.getRarity()) {
-                            case COMMON -> "white";
-                            case UNCOMMON -> "green";
-                            case RARE -> "blue";
-                            case EPIC -> "light_purple";
-                            case LEGENDARY -> "gold";
-                        };
-                        return Component.text("<" + color + ">" + itemType.getRarity().name() + "</" + color + ">");
+                LoadoutItemType itemType = LoadoutItemType.fromID("has_hider_" + key.substring("rarity-".length()));
+                if (itemType == null) {
+                    itemType = LoadoutItemType.fromID("has_seeker_" + key.substring("rarity-".length()));
+                }
+                if (itemType != null) {
+                    String color = switch (itemType.getRarity()) {
+                        case COMMON -> "white";
+                        case UNCOMMON -> "green";
+                        case RARE -> "blue";
+                        case EPIC -> "light_purple";
+                        case LEGENDARY -> "gold";
+                    };
+                    return Component.text("<" + color + ">" + itemType.getRarity().name() + "</" + color + ">");
                 }
             }
             if (key.startsWith("desc-")) {
@@ -249,7 +251,7 @@ public final class HideAndSeek extends MinigameFramework {
                     gameItem = SeekerItems.getItem("has_seeker_" + key.substring("desc-".length()));
                 }
                 if (gameItem != null) {
-                    return Component.text(gameItem.getDescription(this));
+                    return Component.text(gameItem.getDescription(this, player));
                 }
             }
             return Component.text("N/A");

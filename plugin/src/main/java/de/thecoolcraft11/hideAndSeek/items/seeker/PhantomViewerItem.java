@@ -9,6 +9,7 @@ import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
@@ -22,6 +23,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.Color;
 import java.lang.reflect.Method;
@@ -42,7 +44,7 @@ public class PhantomViewerItem implements GameItem {
     private static void use(ItemInteractionContext context, HideAndSeek plugin) {
         Player seeker = context.getPlayer();
         if (!HideAndSeek.getDataController().getSeekers().contains(seeker.getUniqueId())) {
-            seeker.sendMessage(Component.text("Only seekers can use this item.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.seeker_only"));
             context.skipCooldown();
             return;
         }
@@ -51,28 +53,32 @@ public class PhantomViewerItem implements GameItem {
         boolean targetRandom = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.target-random", true);
         boolean showPlayerName = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.show-player-name", false);
         int mapDuration = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.map-duration-seconds", 60);
-        boolean applyToViewerItem = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.apply-to-item-map-data", false);
-        boolean targetNameInLore = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.target-name-in-lore", false);
+        boolean applyToViewerItem = plugin.getSettingRegistry().get(
+                "seeker-items.phantom-viewer.apply-to-item-map-data", false);
+        boolean targetNameInLore = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.target-name-in-lore",
+                false);
 
         Player target = pickTargetHider(seeker, targetRandom);
         if (target == null) {
-            seeker.sendMessage(Component.text("No valid hider target found.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.no_target"));
             context.skipCooldown();
             return;
         }
 
         SnapshotContext snapshotContext = captureSnapshotContext(target, rayDistance);
         if (snapshotContext == null) {
-            seeker.sendMessage(Component.text("Could not capture phantom snapshot right now.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.capture_failed"));
             context.skipCooldown();
             return;
         }
 
-        seeker.sendMessage(Component.text("Capturing phantom snapshot...", NamedTextColor.YELLOW));
+        seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.capturing"));
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Color[] pixels = renderSnapshotPixels(snapshotContext);
-            Bukkit.getScheduler().runTask(plugin, () -> giveSnapshotMap(plugin, seeker, target, pixels, mapDuration, showPlayerName, applyToViewerItem, targetNameInLore));
+            Bukkit.getScheduler().runTask(plugin,
+                    () -> giveSnapshotMap(plugin, seeker, target, pixels, mapDuration, showPlayerName,
+                            applyToViewerItem, targetNameInLore));
         });
     }
 
@@ -224,15 +230,19 @@ public class PhantomViewerItem implements GameItem {
         }
 
         Material material = blockData.getMaterial();
-        if (material.name().contains("WATER") || material.name().contains("SEAGRASS") || material.name().contains("KELP")) {
+        if (material.name().contains("WATER") || material.name().contains("SEAGRASS") || material.name().contains(
+                "KELP")) {
             return new Color(65, 110, 210);
         } else if (material.name().contains("LAVA")) {
             return new Color(230, 100, 20);
-        } else if (material.name().contains("LEAVES") || material.name().contains("MOSS") || material.name().contains("GRASS") || material.name().contains("FERN") || material.name().contains("VINE") || material.name().contains("FLOWER")) {
+        } else if (material.name().contains("LEAVES") || material.name().contains("MOSS") || material.name().contains(
+                "GRASS") || material.name().contains("FERN") || material.name().contains(
+                "VINE") || material.name().contains("FLOWER")) {
             return new Color(75, 145, 70);
         } else if (material.name().contains("SAND") || material.name().contains("END_STONE")) {
             return new Color(218, 206, 143);
-        } else if (material.name().contains("WOOD") || material.name().contains("LOG") || material.name().contains("PLANK")) {
+        } else if (material.name().contains("WOOD") || material.name().contains("LOG") || material.name().contains(
+                "PLANK")) {
             return new Color(143, 104, 65);
         } else if (material.name().contains("NETHER")) {
             return new Color(130, 48, 48);
@@ -334,12 +344,14 @@ public class PhantomViewerItem implements GameItem {
                 tagSnapshot(plugin, heldMeta.getPersistentDataContainer(), token, expiryAt, true);
                 held.setItemMeta(heldMeta);
 
-                Bukkit.getScheduler().runTaskLater(plugin, () -> expireTokenFromPlayerInventory(plugin, seeker, token), Math.max(1, mapDurationSeconds) * 20L);
+                Bukkit.getScheduler().runTaskLater(plugin, () -> expireTokenFromPlayerInventory(plugin, seeker, token),
+                        Math.max(1, mapDurationSeconds) * 20L);
 
                 if (showPlayerName) {
-                    seeker.sendMessage(Component.text("PhantomViewer captured " + target.getName() + "'s perspective.", NamedTextColor.GREEN));
+                    seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_player",
+                            java.util.Map.of("target", target.getName())));
                 } else {
-                    seeker.sendMessage(Component.text("PhantomViewer captured a phantom perspective.", NamedTextColor.GREEN));
+                    seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_anonymous"));
                 }
                 return;
             }
@@ -360,14 +372,16 @@ public class PhantomViewerItem implements GameItem {
         seeker.getInventory().addItem(mapItem);
 
         if (showPlayerName) {
-            seeker.sendMessage(Component.text("PhantomViewer captured " + target.getName() + "'s perspective.", NamedTextColor.GREEN));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_player",
+                    java.util.Map.of("target", target.getName())));
         } else {
-            seeker.sendMessage(Component.text("PhantomViewer captured a phantom perspective.", NamedTextColor.GREEN));
+            seeker.sendMessage(plugin.trText(seeker, "item.phantom_viewer.messages.captured_anonymous"));
         }
 
         ItemStateManager.phantomViewerMapExpiry.put(seeker.getUniqueId(), expiryAt);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> expireTokenFromPlayerInventory(plugin, seeker, token), Math.max(1, mapDurationSeconds) * 20L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> expireTokenFromPlayerInventory(plugin, seeker, token),
+                Math.max(1, mapDurationSeconds) * 20L);
     }
 
     private static void tagSnapshot(HideAndSeek plugin, PersistentDataContainer container, String token, long expiryAt, boolean appliedToViewerItem) {
@@ -383,7 +397,8 @@ public class PhantomViewerItem implements GameItem {
         if (!(stack.getItemMeta() instanceof MapMeta mapMeta)) {
             return true;
         }
-        String token = mapMeta.getPersistentDataContainer().get(new NamespacedKey(plugin, SNAPSHOT_TOKEN_KEY), PersistentDataType.STRING);
+        String token = mapMeta.getPersistentDataContainer().get(new NamespacedKey(plugin, SNAPSHOT_TOKEN_KEY),
+                PersistentDataType.STRING);
         return token == null || token.isBlank();
     }
 
@@ -394,7 +409,8 @@ public class PhantomViewerItem implements GameItem {
         if (!(stack.getItemMeta() instanceof MapMeta mapMeta)) {
             return 0L;
         }
-        Long expiry = mapMeta.getPersistentDataContainer().get(new NamespacedKey(plugin, SNAPSHOT_EXPIRE_KEY), PersistentDataType.LONG);
+        Long expiry = mapMeta.getPersistentDataContainer().get(new NamespacedKey(plugin, SNAPSHOT_EXPIRE_KEY),
+                PersistentDataType.LONG);
         return expiry == null ? 0L : expiry;
     }
 
@@ -409,7 +425,8 @@ public class PhantomViewerItem implements GameItem {
         NamespacedKey appliedKey = new NamespacedKey(plugin, SNAPSHOT_APPLIED_KEY);
         NamespacedKey tokenKey = new NamespacedKey(plugin, SNAPSHOT_TOKEN_KEY);
         NamespacedKey expireKey = new NamespacedKey(plugin, SNAPSHOT_EXPIRE_KEY);
-        boolean applied = Boolean.TRUE.equals(mapMeta.getPersistentDataContainer().get(appliedKey, PersistentDataType.BOOLEAN));
+        boolean applied = Boolean.TRUE.equals(
+                mapMeta.getPersistentDataContainer().get(appliedKey, PersistentDataType.BOOLEAN));
 
         if (!applied) {
             return true;
@@ -452,7 +469,8 @@ public class PhantomViewerItem implements GameItem {
                 continue;
             }
 
-            boolean applied = Boolean.TRUE.equals(mapMeta.getPersistentDataContainer().get(appliedKey, PersistentDataType.BOOLEAN));
+            boolean applied = Boolean.TRUE.equals(
+                    mapMeta.getPersistentDataContainer().get(appliedKey, PersistentDataType.BOOLEAN));
             if (applied) {
                 expireSnapshotStack(plugin, stack);
             } else {
@@ -485,21 +503,22 @@ public class PhantomViewerItem implements GameItem {
         ItemStack item = new ItemStack(Material.FILLED_MAP);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Phantom Viewer", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.phantom_viewer.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to capture a lo-fi phantom snapshot", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.phantom_viewer.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        int rayDistance = plugin.getSettingRegistry().get("seeker-items.phantom-viewer.ray-distance", 24);
-        return "Capture a rough map snapshot from a hider perspective (" + rayDistance + " blocks).";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.phantom_viewer.description");
     }
 
     @Override
@@ -508,7 +527,9 @@ public class PhantomViewerItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> use(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> use(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.phantom_viewer.name")
+                .withLoreKey("item.phantom_viewer.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(cooldown * 20)

@@ -944,3 +944,367 @@ phase:
     coins_header: "<gold><bold>Münzen:</bold></gold>"
     coins_gained: "<gray>  Erhalten: <gold>+{amount}</gold></gray>"
     coins_balance: "<gray>  Gesamt: <gold>{amount}</gold></gray>"
+item:
+  appearance:
+    name: "<light_purple><b>Aussehen-Editor</b></light_purple>"
+    lore: "<gray>Rechtsklick, um dein Aussehen anzupassen</gray>"
+    description: "Öffne den Aussehen-Editor für deine aktuelle Verkleidung."
+  big_firecracker:
+    name: "<red><b>Großer Feuerknaller</b></red>"
+    lore: "<gray>Rechtsklick, um einen großen Feuerknaller zu platzieren</gray>"
+    description: "Platziere einen großen Feuerknaller, der explodiert und {points} Punkte gewährt."
+    messages:
+      placed: "<gold>Großer Feuerknaller platziert! +{points} Punkte!</gold>"
+    skin:
+      giant_present: "<gold><b>Riesiges Geschenk</b></gold>"
+      boombox: "<gold><b>Boombox</b></gold>"
+  block_selector:
+    name: "<light_purple><b>Blockauswahl</b></light_purple>"
+    lore: "<gray>Rechtsklick, um deinen Block zu wählen</gray>"
+    description: "Öffne die Blockauswahl, um deinen Verkleidungsblock zu wählen."
+  block_swap:
+    name: "<dark_purple><b>Blocktausch</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Blöcke mit einem anderen Verstecker zu tauschen</gray>"
+    description: "Tausche Verkleidungsblöcke mit dem nächstgelegenen anderen Verstecker."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen!</red>"
+      unavailable: "<red>BLOCK Tausch ist nur im BLOCK- oder SKIN-Modus verfügbar!</red>"
+      no_hider: "<red>Kein Verstecker in der Nähe zum Tauschen!</red>"
+      block:
+        cursed: "<red>Du bist verflucht und kannst keine Blöcke tauschen!</red>"
+        successful_swap: "<green>Blöcke mit {player} getauscht!</green>"
+        missing_data: "<red>Tausch fehlgeschlagen (Fehlende Block-Daten)</red>"
+      skin:
+        cursed: "<red>Du bist verflucht und kannst keine Skins tauschen!</red>"
+        successful_swap: "<green>Skins mit {player} getauscht!</green>"
+    skin:
+      magic_mirror: "<gold><b>Magischer Spiegel</b></gold>"
+      quantum_link: "<gold><b>Quantenlink</b></gold>"
+  explosion:
+    name: "<red><b>Feuerknaller</b></red>"
+    lore: "<gray>Rechtsklick, um einen Feuerknaller zu platzieren, der explodiert</gray>"
+    description: "Platziere einen Feuerknaller, der knallt und {points} Punkte gewährt."
+    messages:
+      placed: "<gold>Feuerknaller platziert! +{points} Punkte</gold>"
+    skin:
+      confetti_popper: "<gold><b>Konfetti-Knaller</b></gold>"
+      bubble_popper: "<gold><b>Blasen-Popper</b></gold>"
+  firework_rocket:
+    name: "<gold><b>Feuerwerksrakete</b></gold>"
+    lore: "<gray>Rechtsklick, um eine Feuerwerksbatterie zu platzieren, die Feuerwerke startet</gray>"
+    description: "Starte ein hoch fliegendes Feuerwerk zur Provokation und erhalte {points} Punkte."
+    messages:
+      placed: "<gold>Feuerwerk gestartet! +{points} Punkte</gold>"
+    skin:
+      space_shuttle: "<gold><b>Raumfähre</b></gold>"
+      signal_flare: "<gold><b>Signalfackel</b></gold>"
+  ghost_essence:
+    name: "<aqua><b>Geisteressenz</b></aqua>"
+    lore: "<gray>Gehe durch Wände, solange der Effekt aktiv ist\nDu kannst als Geist nicht nach unten!</gray>"
+    description: "Werde geisterhaft und gehe für {duration}s durch Blöcke."
+    messages:
+      nms_unavailable: "<red>Der Seeker's Assistant ist auf dieser Server-Version nicht verfügbar.</red>"
+      activated: "<aqua>Du bist jetzt ein Geist! Phasing für {duration}s aktiviert.</aqua>"
+      materialized: "<green>Du bist erfolgreich materialisiert!</green>"
+      error: "<red>{reason}</red>"
+    skin:
+      spectral_form: "<gold><b>Spektralform</b></gold>"
+      digital_phase: "<gold><b>Digitalphase</b></gold>"
+  invisibility_cloak:
+    name: "<dark_purple><b>Unsichtbarkeitsumhang</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um unsichtbar zu werden</gray>"
+    description: "Werde für {duration}s unsichtbar."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      activated: "<aqua>Du bist jetzt unsichtbar!</aqua>"
+    skin:
+      cardboard_box: "<gold><b>Karton</b></gold>"
+      camo_netting: "<gold><b>Tarnnetz</b></gold>"
+  ink_face:
+    name: "<gray><b>Tintengesicht</b></gray>"
+    description: "Versteckter Helm für Tinten-Blindheitseffekte."
+  knockback_stick:
+    name: "<dark_red><b>Rückstoß-Stick <gold>(Level {level}</gold>)</b></dark_red>"
+    lore: "<gray>Linksklick, um Sucher wegzustoßen!\n<gold><gray>Level: {level}</gold></gray>"
+    description: "Schlage Sucher, um sie wegzuschleudern."
+    messages:
+      upgraded: "<gold>Verbessert auf Level {level}!</gold>"
+    skin:
+      squeaky_hammer: "<gold><b>Quietsch-Hammer <gray>(Level {level})</gray></b></gold>"
+      pool_noodle: "<gold><b>Poolnudel <gray>(Level {level})</gray></b></gold>"
+  medkit:
+    name: "<green><b>Medkit</b></green>"
+    lore: "<gray>Halte Rechtsklick, um Heilung zu kanalisieren</gray>\n<dark_gray>Loslassen zum Abbrechen</dark_gray>"
+    description: "Halte Blocken für {channel_time}s und lass dann los, um dich vollständig zu heilen."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      canceled: "<yellow>Medkit abgebrochen. Halte noch {remaining}s länger fest.</yellow>"
+      healed: "<green>Geheilt!</green>"
+    skin:
+      bandage_roll: "<gold><b>Verbandsrolle</b></gold>"
+      magic_potion: "<gold><b>Magischer Trank</b></gold>"
+  random_block:
+    name: "<light_purple><b>Zufallsblock <gray>({uses} / {maxUses})</gray></b></light_purple>"
+    lore: "<gray>Rechtsklick, um deinen Block zufällig neu zu wählen</gray>"
+    description: "Würfle deinen Verkleidungsblock aus den erlaubten Blöcken der Karte neu."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      cursed_blocks: "<red>Du bist verflucht und kannst jetzt keine Blöcke ändern!</red>"
+      cursed_skins: "<red>Du bist verflucht und kannst jetzt keine Skins ändern!</red>"
+      hidden_cannot_transform: "<red>Du kannst dich nicht in einen neuen Block verwandeln, während du versteckt bist!</red>"
+      no_active_map: "<red>Keine aktive Karte gefunden.</red>"
+      no_allowed_blocks: "<red>Keine erlaubten Blöcke für diese Karte konfiguriert.</red>"
+      no_allowed_skins: "<red>Keine erlaubten Skins für diese Karte konfiguriert.</red>"
+      invalid_block_pattern: "<red>Ungültiges Block-Muster in der Konfiguration: {pattern}</red>"
+      invalid_variant: "<red>Ungültige Standard-Variante in der Konfiguration: {variant}</red>"
+      invalid_block_type: "<red>Ungültiger Block-Typ in der Konfiguration: {type}</red>"
+      transformed_block: "<green>Verwandelt in <gold>{block}</gold></green>"
+      transformed_skin: "<green>Verwandelt in <gold>{skin}</gold></green>"
+      uses_exhausted: "<red>Du hast keine zufälligen Blocknutzungen mehr!</red>"
+    skin:
+      shapeshifter_dust: "<gold><b>Gestaltwandler-Staub</b></gold> <gray>({uses}/{maxUses})</gray>"
+      mystery_box: "<gold><b>Mystery-Kiste</b></gold> <gray>({uses}/{maxUses})</gray>"
+  remote_gateway:
+    name: "<dark_purple><b>Remote-Gateway</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Gateway-Anker zu platzieren\nZwei Anker bilden ein Teleport-Paar</gray>"
+    description:
+      permanent: "Platziere gekoppelte Gateways, die bis zum Rundenende zwischen Ankern teleportieren."
+      timed: "Platziere gekoppelte Gateways, die für {duration} Sekunden zwischen Ankern teleportieren."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      aim_at_block: "<red>Ziele auf einen Block, um einen Gateway-Anker zu platzieren.</red>"
+      need_clear_space: "<red>Es wird freier Platz benötigt, um das Gateway zu platzieren.</red>"
+      anchor_placed: "<green>Gateway-Anker A platziert. Platziere einen weiteren Anker zum Verbinden.</green>"
+      gateway_linked: "<aqua>Gateway verbunden.</aqua>"
+    skin:
+      end_rift: "<gold><b>Endspalt</b></gold>"
+      phase_door: "<gold><b>Phasentür</b></gold>"
+      dematerializer: "<gold><b>Dematerialisierer</b></gold>"
+      void_lattice: "<gold><b>Leere-Gitter</b></gold>"
+  skin_selector:
+    name: "<light_purple><b>Skin-Auswahl</b></light_purple>"
+    lore: "<gray>Rechtsklick, um deinen Verkleidungs-Skin zu wählen</gray>"
+    description: "Öffne die Skin-Auswahl, um deinen Verkleidungs-Skin zu wählen."
+  slowness_ball:
+    name: "<aqua><b>Verlangsamungsball</b></aqua>"
+    lore: "<gray>Rechtsklick, um auf Sucher zu werfen</gray>"
+    description: "Wirf einen Eisball, der Sucher für {duration}s verlangsamt."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+    skin:
+      sticky_honey: "<gold><b>Klebriger Honig</b></gold>"
+      tar_ball: "<gold><b>Teerball</b></gold>"
+  smoke_bomb:
+    name: "<dark_gray><b>Rauchbombe</b></dark_gray>"
+    lore: "<gray>Rechtsklick zum Werfen\nErzeugt eine Rauchwolke zur Deckung</gray>"
+    description: "Wirf eine Rauchbombe, die für {duration}s Deckung erzeugt."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+    skin:
+      ninja_smoke: "<gold><b>Ninja-Rauch</b></gold>"
+      spore_cloud: "<gold><b>Sporenwolke</b></gold>"
+  sound:
+    name: "<aqua><b>Katzengeräusch</b></aqua>"
+    lore: "<gray>Rechtsklick, um einen Sound abzuspielen</gray>"
+    description: "Spiele eine laute Katzen-Provokation für alle Spieler ab und erhalte {points} Punkte."
+    messages:
+      taunt_used: "<green>Du hast eine Provokation benutzt!</green>"
+      points_earned: "<gold>+{points} Punkte</gold>"
+    skin:
+      megaphone: "<gold><b>Megafon</b></gold>"
+      rubber_chicken: "<gold><b>Gummihuhn</b></gold>"
+  speed_boost:
+    name: "<yellow><b>Temposchub <gold>(Level {level})</gold></b></yellow>"
+    lore: "<gray>Rechtsklick für einen Temposchub}\n<gold><gray>Level: {level}</gold></gray>"
+    description:
+      velocity_boost: "Katapultiere dich mit einem Geschwindigkeitsstoß nach vorn."
+      speed_effect: "Erhalte für {duration}s einen Geschwindigkeitseffekt, um dich schneller zu bewegen."
+    messages:
+      velocity_activated: "<yellow>Geschwindigkeitsstoß aktiviert! <gold>(Level {level})</gold></yellow>"
+      speed_activated: "<yellow>Temposchub aktiviert! <gold>(Level {level})</gold></yellow>"
+      upgraded: "<gold>Verbessert auf Level {level}!</gold>"
+    skin:
+      rocket_boots: "<gold><b>Raketenstiefel <gray>(Level {level})</gray></b></gold>"
+      sugar_rush: "<gold><b>Zuckerrausch <gray>(Level {level})</gray></b></gold>"
+  totem:
+    name: "<light_purple><b>Totem der Unsterblichkeit</b></light_purple>"
+    lore: "<gray>Rechtsklick, um den Wiederbelebungsmodus zu aktivieren</gray>"
+    description: "Aktiviere ein einmaliges Wiederbelebungsfenster für {duration}s."
+    messages:
+      only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
+      activated: "<gold>Wiederbelebungsmodus für {duration} Sekunden aktiviert!</gold>"
+      revived: "<gold>Du wurdest wiederbelebt!</gold>"
+    skin:
+      phoenix_feather: "<gold><b>Phönixfeder</b></gold>"
+      extra_life_coin: "<gold><b>Extra-Leben-Münze</b></gold>"
+  crossbow:
+    name: "<aqua><b>Tracker-Armbrust</b></aqua>"
+    lore: "<gray>Treffer verbessern Tempo & Rückstoß</gray>"
+    description: "Triff Sucher mit Pfeilen, um Items zu verbessern, und erhalte {points} Punkte pro Treffer."
+    messages:
+      hit: "<gold>Armbrust getroffen! +{points} Punkte</gold>"
+      hit_progress: "<green>Sucher getroffen! {current}/{required}</green>"
+    skin:
+      paintball_gun: "<gold><b>Paintball-Gewehr</b></gold>"
+      laser_tag: "<gold><b>Lasertag</b></gold>"
+  assistant:
+    name: "<red><b>Seeker's Assistant</b></red>"
+    lore: "<gray>Rufe einen jagenden Assistenten, um Verstecker aufzuspüren.\nMaximal 2 gleichzeitig aktiv.\n\n<gold><b>LEGENDÄR</b></gold></gray>"
+    description: "Beschwört einen Jäger-Assistenten, der sichtbare Verstecker aufspürt und beschießt."
+    messages:
+      nms_unavailable: "<red>Der Seeker's Assistant ist auf dieser Server-Version nicht verfügbar.</red>"
+      seeking_only: "<red>Der Seeker's Assistant kann nur während der Suchphase beschworen werden.</red>"
+      max_active: "<red>Du hast bereits {max} Assistenten aktiv!</red>"
+      summon_failed: "<red>Assistent konnte nicht beschworen werden.</red>"
+      summoned: "<red>Assistent beschworen! </red><gray>({lifetime}s Lebenszeit)</gray>"
+    skin:
+      steel_golem: "<gold><b>Stahlgolem</b></gold>"
+      ghost_drone: "<gold><b>Geisterdrohne</b></gold>"
+      battle_mech: "<gold><b>Kampf-Mech</b></gold>"
+  block_randomizer:
+    name: "<red><b>Block-Randomisierer</b></red>"
+    lore: "<gray>Rechtsklick, um alle Blöcke zu randomisieren</gray>"
+    description: "Zwinge alle Verstecker, ihre Verkleidungsblöcke neu zu würfeln."
+    messages:
+      wrong_mode: "<red>Block-Randomisierer ist nur im BLOCK- oder SKIN-Modus verfügbar.</red>"
+      blocks_randomized: "<green>Blöcke randomisiert! ({count} Verstecker)</green>"
+    skin:
+      glitch_core: "<gold><b>Glitch-Kern</b></gold>"
+      chaos_magic: "<gold><b>Chaos-Magie</b></gold>"
+  block_stats:
+    name: "<aqua><b>Block-Statistiken</b></aqua>"
+    lore: "<gray>Rechtsklick, um Block-Statistiken anzuzeigen</gray>"
+    description: "Öffne das Block-Statistiken-Menü."
+  cage_trap:
+    name: "<gray><b>Käfigfalle</b></gray>"
+    lore: "<gray>Rechtsklick, um eine Falle zu platzieren</gray>"
+    description: "Platziere eine versteckte Falle, die einen Verstecker für {duration}s einsperrt und bewegungsunfähig macht."
+    messages:
+      placed: "<green>Käfigfalle platziert! (Bereit in {setupTime}s, hält {durationMsg})</green>"
+      triggered: "<dark_red>Du wurdest von einer Käfigfalle gefangen!</dark_red>"
+    skin:
+      laser_grid: "<gold><b>Lasergitter</b></gold>"
+      ice_block: "<gold><b>Eisblock</b></gold>"
+  camera:
+    name: "<dark_aqua><b>Kamera</b></dark_aqua>"
+    lore: "<gray>Shift + Rechtsklick auf Block zum Platzieren\nRechtsklick zum Ansehen deiner Kameras\nWechsle Kameras mit LMT und Sichtmodi mit RMT\nModi: Normal, Nachtsicht, Terminal (Leuchten)\nSchleichen zum Beenden</gray>"
+    description: "Platziere bis zu {maxCameras} Kameras und beobachte durch sie."
+    messages:
+      nms_unavailable: "<red>Die Kamera ist auf dieser Server-Version nicht verfügbar.</red>"
+      need_solid_block: "<red>Kann Kamera nicht platzieren - fester Block erforderlich!</red>"
+      no_ceiling: "<red>Kann Kamera nicht an der Decke platzieren!</red>"
+      space_occupied: "<red>Kann Kamera hier nicht platzieren - Platz belegt!</red>"
+      placed: "<green>Kamera platziert! ({count}/{maxCameras})</green>"
+      no_cameras: "<red>Du hast keine Kameras platziert.</red>"
+      all_cameras_gone: "<red>Alle deine Kameras sind weg.</red>"
+      client_unsupported: "<red>Dein Client unterstützt den Kameramodus auf dieser Server-Version nicht.</red>"
+    skin:
+      spy_lens: "<gold><b>Spion-Linse</b></gold>"
+      owl_eye: "<gold><b>Eulenauge</b></gold>"
+      orbital_spy: "<gold><b>Orbital-Spion</b></gold>"
+  chain_pull:
+    name: "<dark_gray><b>Kettenzug</b></dark_gray>"
+    lore: "<gray>Rechtsklick, um Verstecker zu ziehen</gray>"
+    description: "Ziehe den Verstecker vor dir zu deiner Position."
+    messages:
+      no_target: "<red>Kein Verstecker in Reichweite.</red>"
+      pulled: "<green>{target} gezogen!</green>"
+      pulled_by_chain: "<dark_gray>Du wurdest von einer Kette gezogen!</dark_gray>"
+    skin:
+      energy_lasso: "<gold><b>Energie-Lasso</b></gold>"
+      shadow_tendril: "<gold><b>Schattenranke</b></gold>"
+  crowbar:
+    name: "<aqua><b>Brechstange</b></aqua>"
+    lore: "<gray>Linksklick, um Blöcke zu zerstören</gray>"
+    description: "Zerstört Kartenblöcke, um kleine Verstecker zu erreichen."
+  curse_spell:
+    name: "<dark_purple><b>Fluchzauber</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Verstecker zu verfluchen</gray>"
+    description: "Verbessere deine Nahkampfangriffe gegen Verstecker für kurze Zeit."
+    messages:
+      activated: "<dark_purple>Fluchzauber aktiviert! ({duration}s)</dark_purple>"
+      cursed: "<dark_purple>Du wurdest verflucht!</dark_purple>"
+    skin:
+      voodoo_magic: "<gold><b>Voodoo-Magie</b></gold>"
+      toxic_tome: "<gold><b>Giftbuch</b></gold>"
+  glowing_compass:
+    name: "<gold><b>Leuchtkompass</b></gold>"
+    lore: "<gray>Rechtsklick, um den nächsten Verstecker leuchten zu lassen</gray>"
+    description: "Zeige den nächsten Verstecker innerhalb von {range} Blöcken für {duration}s mit Leuchten, gewährt {points} Punkte."
+    messages:
+      hider_glowing: "<gold>{nearest} leuchtet jetzt!</gold>"
+      no_hiders: "<red>Keine Verstecker in der Nähe gefunden!</red>"
+    skin:
+      tactical_tablet: "<gold><b>Taktik-Tablet</b></gold>"
+      eye_of_the_oracle: "<gold><b>Auge des Orakels</b></gold>"
+      dowsing_rod: "<gold><b>Wünschelrute</b></gold>"
+  ink_splash:
+    name: "<dark_aqua><b>Tintenspritzer</b></dark_aqua>"
+    lore: "<gray>Rechtsklick, um Verstecker zu blenden</gray>"
+    description: "Blende Verstecker vorübergehend mit Tinte für {duration}s."
+    messages:
+      hit: "<dark_aqua>Du wurdest mit Tinte getroffen!</dark_aqua>"
+    skin:
+      paint_balloon: "<gold><b>Farbballon</b></gold>"
+      mud_ball: "<gold><b>Schmutzball</b></gold>"
+  lightning_freeze:
+    name: "<yellow><b>Blitzfrost</b></yellow>"
+    lore: "<gray>Rechtsklick, um alle Verstecker einzufrieren</gray>"
+    description: "Friert alle Verstecker für {duration}s mit Langsamkeit ein."
+    messages:
+      all_frozen: "<aqua>Alle Verstecker eingefroren!</aqua>"
+    skin:
+      frost_wand: "<gold><b>Frostzauberstab</b></gold>"
+      time_stopper: "<gold><b>Zeitanhalter</b></gold>"
+  mask:
+    name: "<gray><b>Suchermaske</b></gray>"
+    lore: "<gray>Eine gruselige Maske, um die Verstecker zu erschrecken</gray>"
+    description: "Gebundener Sucher-Helm."
+  phantom_viewer:
+    name: "<dark_purple><b>Phantom-Betrachter</b></dark_purple>"
+    lore: "<gray>Rechtsklick, um Phantom-Schnappschüsse zu machen</gray>"
+    description: "Mache einen Phantom-Schnappschuss, der die Sicht eines Versteckers zeigt."
+    messages:
+      seeker_only: "<red>Nur Sucher können dieses Item benutzen.</red>"
+      no_target: "<red>Kein gültiges Verstecker-Ziel gefunden.</red>"
+      capture_failed: "<red>Phantom-Schnappschuss konnte nicht gemacht werden.</red>"
+      capturing: "<yellow>Phantom-Schnappschuss wird erstellt...</yellow>"
+      captured_player: "<green>PhantomViewer hat {target}s Perspektive erfasst.</green>"
+      captured_anonymous: "<green>PhantomViewer hat eine Phantom-Perspektive erfasst.</green>"
+    skin:
+      echo_slate: "<gold><b>Echo-Schiefer</b></gold>"
+      spectral_cartography: "<gold><b>Spektralkartografie</b></gold>"
+      quantum_viewfinder: "<gold><b>Quantensucher</b></gold>"
+      night_recon: "<gold><b>Nachtaufklärung</b></gold>"
+  proximity_sensor:
+    name: "<dark_red><b>Näherungssensor</b></dark_red>"
+    lore: "<gray>Rechtsklick, um einen Sensor zu platzieren</gray>"
+    description: "Platziere einen Sensor, der Verstecker innerhalb von {range} Blöcken aufdeckt, gewährt {points} pro Erkennung."
+    messages:
+      need_solid_block: "<red>Kann Sensor nicht platzieren - fester Block erforderlich!</red>"
+      space_occupied: "<red>Kann Sensor hier nicht platzieren - Platz belegt!</red>"
+      no_ceiling: "<red>Kann Sensor nicht an der Decke platzieren!</red>"
+      placed: "<green>Näherungssensor platziert! ({duration})</green>"
+    skin:
+      cctv_camera: "<gold><b>Überwachungskamera</b></gold>"
+      alarm_bell: "<gold><b>Alarmglocke</b></gold>"
+  skin_stats:
+    name: "<aqua><b>Skin-Statistiken</b></aqua>"
+    lore: "<gray>Rechtsklick, um Verstecker-Skins anzuzeigen</gray>"
+    description: "Zeige, welchen Skin jeder Verstecker derzeit als Verkleidung trägt."
+  grappling_hook:
+    name: "<yellow><b>Enterhaken</b></yellow>"
+    lore: "<gray>Rechtsklick, um dich zu einem Verstecker zu ziehen</gray>"
+    description: "Ziehe dich zum nächstgelegenen Verstecker in Reichweite."
+    skin:
+      techno_tether: "<gold><b>Techno-Seil</b></gold>"
+      jungle_vine: "<gold><b>Dschungelranke</b></gold>"
+      ghostly_chain: "<gold><b>Geisterkette</b></gold>"
+  sword:
+    name: "<red><b>Sucherklinge</b></red>"
+    lore: "<gray>Jage die Verstecker!</gray>"
+    description: "Hauptwaffe: Halte Blocken zum Aufladen und wirf dein Schwert."
+    skin:
+      energy_blade: "<gold><b>Energieklinge</b></gold>"
+      the_ban_hammer: "<gold><b>Der Ban-Hammer</b></gold>"
+      giant_spatula: "<gold><b>Riesige Pfannenwender</b></gold>"

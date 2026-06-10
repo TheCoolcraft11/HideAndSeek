@@ -6,14 +6,13 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public class SkinSelectorItem implements GameItem {
 
@@ -33,21 +32,22 @@ public class SkinSelectorItem implements GameItem {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(
-                    Component.text("Skin Selector", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD)
-                            .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right-click to choose your disguise skin", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.skin_selector.name"))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.skin_selector.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Open the skin picker to choose your disguise skin.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.skin_selector.description");
     }
 
     @Override
@@ -64,7 +64,9 @@ public class SkinSelectorItem implements GameItem {
                                 ctx -> open(ctx.getPlayer(), gui))
                         .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
                                 ctx -> open(ctx.getPlayer(), gui))
-                        .withDescription(getDescription(plugin))
+                        .withDescription(getDescription(plugin, null))
+                        .withNameKey("item.skin_selector.name")
+                        .withLoreKey("item.skin_selector.lore")
                         .withDropPrevention(true)
                         .withCraftPrevention(true)
                         .allowOffHand(false)

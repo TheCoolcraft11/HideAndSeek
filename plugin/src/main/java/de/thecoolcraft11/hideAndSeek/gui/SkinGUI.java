@@ -9,6 +9,9 @@ import de.thecoolcraft11.hideAndSeek.items.effects.death.DeathMessageManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.death.DeathMessageSkin;
 import de.thecoolcraft11.hideAndSeek.items.effects.death.DeathMessageSkins;
 import de.thecoolcraft11.hideAndSeek.items.effects.win.WinSkinSkins;
+import de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem;
+import de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem;
+import de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem;
 import de.thecoolcraft11.hideAndSeek.model.ItemRarity;
 import de.thecoolcraft11.hideAndSeek.util.CustomModelDataUtil;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
@@ -17,6 +20,7 @@ import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
 import de.thecoolcraft11.minigameframework.items.variants.ItemVariant;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -36,6 +40,79 @@ public class SkinGUI {
 
     public SkinGUI(HideAndSeek plugin) {
         this.plugin = plugin;
+    }
+
+    private static String getItemNameKey(String logicalItemId) {
+        String key = logicalItemId
+                .replace("has_hider_", "")
+                .replace("has_seeker_", "");
+        return "item." + key + ".name";
+    }
+
+    private static String getSkinNameKey(String logicalItemId, String variantId) {
+        String itemKey = logicalItemId
+                .replace("has_hider_", "")
+                .replace("has_seeker_", "");
+        String skin = variantId.startsWith("skin_") ? variantId.substring(5) : variantId;
+        return "item." + itemKey + ".skin." + skin;
+    }
+
+    private String getItemDisplayName(Player player, String logicalItemId) {
+        String key = getItemNameKey(logicalItemId);
+        String translated = plugin.trText(player, key, getItemNameParams(player, logicalItemId));
+        if (translated == null || translated.isEmpty() || translated.equals(key)) {
+            return humanize(logicalItemId);
+        }
+        return MiniMessage.miniMessage().stripTags(translated);
+    }
+
+    private String getSkinDisplayName(Player player, String logicalItemId, String variantId) {
+        String key = getSkinNameKey(logicalItemId, variantId);
+        String translated = plugin.trText(player, key, getSkinNameParams(player, logicalItemId));
+        if (translated == null || translated.isEmpty() || translated.equals(key)) {
+            return variantId;
+        }
+        return MiniMessage.miniMessage().stripTags(translated);
+    }
+
+    private Map<String, Object> getItemNameParams(Player player, String logicalItemId) {
+        if (SpeedBoostItem.ID.equals(logicalItemId) || KnockbackStickItem.ID.equals(logicalItemId)) {
+            int level = SpeedBoostItem.ID.equals(logicalItemId)
+                    ? SpeedBoostItem.getSpeedLevel(player.getUniqueId()) + 1
+                    : KnockbackStickItem.getKnockbackLevel(player.getUniqueId()) + 1;
+            return Map.of("level", level);
+        }
+        if (RandomBlockItem.ID.equals(logicalItemId)) {
+            return getRandomBlockUsesParams(player, logicalItemId);
+        }
+        return Map.of();
+    }
+
+    private Map<String, Object> getSkinNameParams(Player player, String logicalItemId) {
+        if (SpeedBoostItem.ID.equals(logicalItemId) || KnockbackStickItem.ID.equals(logicalItemId)) {
+            int level = SpeedBoostItem.ID.equals(logicalItemId)
+                    ? SpeedBoostItem.getSpeedLevel(player.getUniqueId()) + 1
+                    : KnockbackStickItem.getKnockbackLevel(player.getUniqueId()) + 1;
+            return Map.of("level", level);
+        }
+        if (RandomBlockItem.ID.equals(logicalItemId)) {
+            return getRandomBlockUsesParams(player, logicalItemId);
+        }
+        return Map.of();
+    }
+
+    private Map<String, Object> getRandomBlockUsesParams(Player player, String logicalItemId) {
+        int maxUses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);
+        String runtimeId = ItemSkinSelectionService.resolveRuntimeItemId(player, logicalItemId);
+        var customItem = plugin.getCustomItemManager().getItem(runtimeId);
+        int uses = maxUses;
+        if (customItem != null && customItem.hasMaxPlayerUses()) {
+            int remaining = customItem.getPlayerRemainingUses(player.getUniqueId());
+            if (remaining > 0 && remaining < Integer.MAX_VALUE) {
+                uses = remaining;
+            }
+        }
+        return Map.of("uses", uses, "maxUses", maxUses);
     }
 
     private static String humanize(String id) {
@@ -125,7 +202,8 @@ public class SkinGUI {
 
             FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                     .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX,
+                            Map.of("item", getItemDisplayName(player, logicalItemId))))
                     .rows(6)
                     .allowOutsideClicks(false)
                     .allowDrag(false)
@@ -165,7 +243,8 @@ public class SkinGUI {
         withCoins(player, coins -> {
             FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                     .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX,
+                            Map.of("item", getItemDisplayName(player, logicalItemId))))
                     .rows(6)
                     .allowOutsideClicks(false)
                     .allowDrag(false)
@@ -207,7 +286,8 @@ public class SkinGUI {
         withCoins(player, coins -> {
             FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                     .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX,
+                            Map.of("item", getItemDisplayName(player, logicalItemId))))
                     .rows(6)
                     .allowOutsideClicks(false)
                     .allowDrag(false)
@@ -249,7 +329,8 @@ public class SkinGUI {
         withCoins(player, coins -> {
             FrameworkInventory inventory = new InventoryBuilder(plugin.getInventoryFramework())
                     .id("skin_variants_" + player.getUniqueId() + "_" + logicalItemId)
-                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX, Map.of("item", humanize(logicalItemId))))
+                    .title(plugin.trText(player, VARIANTS_TITLE_PREFIX,
+                            Map.of("item", getItemDisplayName(player, logicalItemId))))
                     .rows(6)
                     .allowOutsideClicks(false)
                     .allowDrag(false)
@@ -307,7 +388,8 @@ public class SkinGUI {
         clearBtn.setClickHandler((p, item, event, s) -> {
             ItemSkinSelectionService.clearSelectedVariant(p.getUniqueId(), logicalItemId);
             ItemSkinSelectionService.savePlayer(plugin, p.getUniqueId());
-            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item", Map.of("item", humanize(logicalItemId))));
+            p.sendMessage(plugin.tr(p, "gui.skin.item.cleared_for_item",
+                    Map.of("item", getItemDisplayName(player, logicalItemId))));
             p.playSound(p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.7f, 1.1f);
             refreshCurrentGUI(p, logicalItemId);
             event.setCancelled(true);
@@ -353,7 +435,7 @@ public class SkinGUI {
         ItemSkinSelectionService.savePlayer(plugin, player.getUniqueId());
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.3f);
         player.sendMessage(plugin.tr(player, "gui.skin.item.selected_skin",
-                Map.of("variant", variantId, "item", humanize(logicalItemId))));
+                Map.of("variant", variantId, "item", getItemDisplayName(player, logicalItemId))));
 
         if (clickType == ClickType.RIGHT) {
             player.closeInventory();
@@ -402,14 +484,17 @@ public class SkinGUI {
         int variantCount = plugin.getCustomItemManager().getVariantManager().getVariants(runtimeItemId).size();
 
 
-        meta.displayName(plugin.tr(player, "gui.skin.item.name", Map.of("name", humanize(logicalItemId))).decoration(
+        meta.displayName(plugin.tr(player, "gui.skin.item.name",
+                Map.of("name", getItemDisplayName(player, logicalItemId))).decoration(
                 TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         lore.add(plugin.tr(player, "gui.skin.item.unlocked_count",
                 Map.of("unlocked", unlockedCount, "total", variantCount)).decoration(TextDecoration.ITALIC, false));
-        lore.add(plugin.tr(player, "gui.skin.item.selected_variant", Map.of("selected",
-                (selected == null || selected.isBlank()) ? plugin.trText(player,
-                        "common.state.default") : selected)).decoration(TextDecoration.ITALIC, false));
+        String selectedDisplay = selected == null || selected.isBlank()
+                ? plugin.trText(player, "common.state.default")
+                : getSkinDisplayName(player, logicalItemId, selected);
+        lore.add(plugin.tr(player, "gui.skin.item.selected_variant", Map.of("selected", selectedDisplay))
+                .decoration(TextDecoration.ITALIC, false));
         lore.add(plugin.tr(player, "gui.skin.item.left_click_open").decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         meta.getPersistentDataContainer().set(
@@ -525,15 +610,18 @@ public class SkinGUI {
     }
 
     private ItemStack createVariantButton(Player player, String logicalItemId, ItemVariant variant, String selectedVariant) {
-        ItemStack stack = variant.getItemStack().clone();
+        ItemStack stack = variant.createItemStack(plugin, player);
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) {
             return stack;
         }
 
-        String label = variant.getDisplayName() == null || variant.getDisplayName().isBlank()
-                ? variant.getId()
-                : variant.getDisplayName();
+        String label;
+        if (variant.getDisplayName() != null && !variant.getDisplayName().isBlank()) {
+            label = variant.getDisplayName();
+        } else {
+            label = getSkinDisplayName(player, logicalItemId, variant.getId());
+        }
         boolean selected = variant.getId().equals(selectedVariant);
         boolean unlocked = ItemSkinSelectionService.isUnlocked(player.getUniqueId(), logicalItemId, variant.getId());
         int cost = ItemSkinSelectionService.getCost(plugin, logicalItemId, variant.getId());

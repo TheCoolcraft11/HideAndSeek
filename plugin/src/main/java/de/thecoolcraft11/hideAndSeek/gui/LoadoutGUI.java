@@ -15,11 +15,13 @@ import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 import de.thecoolcraft11.hideAndSeek.util.CustomModelDataUtil;
 import de.thecoolcraft11.minigameframework.inventory.FrameworkInventory;
 import de.thecoolcraft11.minigameframework.inventory.InventoryItem;
+import de.thecoolcraft11.minigameframework.translation.TranslationArguments;
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -196,7 +198,8 @@ public class LoadoutGUI {
     }
 
     private void openPresetsView(Player player) {
-        FrameworkInventory inv = new de.thecoolcraft11.minigameframework.inventory.InventoryBuilder(plugin.getInventoryFramework())
+        FrameworkInventory inv = new de.thecoolcraft11.minigameframework.inventory.InventoryBuilder(
+                plugin.getInventoryFramework())
                 .id("loadout_presets_" + player.getUniqueId() + "_combined")
                 .title(plugin.trText(player, "gui.loadout.presets.title"))
                 .rows(6)
@@ -218,7 +221,8 @@ public class LoadoutGUI {
         for (int presetSlot = 1; presetSlot <= PlayerLoadout.MAX_PRESETS; presetSlot++) {
             int guiSlot = presetSlots[presetSlot - 1];
             boolean hasPreset = loadoutManager.hasPreset(player.getUniqueId(), presetSlot);
-            LoadoutManager.PresetLoadResult analysis = loadoutManager.analyzePresetLoad(player.getUniqueId(), presetSlot);
+            LoadoutManager.PresetLoadResult analysis = loadoutManager.analyzePresetLoad(player.getUniqueId(),
+                    presetSlot);
 
             InventoryItem presetItem = new InventoryItem(createPresetItem(player, presetSlot, hasPreset, analysis));
             int finalPresetSlot = presetSlot;
@@ -251,7 +255,8 @@ public class LoadoutGUI {
 
                 if (event.getClick().isRightClick()) {
                     boolean removed = loadoutManager.deletePreset(p.getUniqueId(), finalPresetSlot);
-                    p.playSound(p.getLocation(), removed ? Sound.ENTITY_ITEM_BREAK : Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    p.playSound(p.getLocation(), removed ? Sound.ENTITY_ITEM_BREAK : Sound.ENTITY_VILLAGER_NO, 1.0f,
+                            1.0f);
                     p.sendMessage(
                             plugin.tr(p, removed ? "gui.loadout.presets.deleted" : "gui.loadout.presets.already_empty",
                                     Map.of("slot", String.valueOf(finalPresetSlot))));
@@ -284,7 +289,8 @@ public class LoadoutGUI {
                     )));
                 }
 
-                p.playSound(p.getLocation(), result.isFullyApplied() ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                p.playSound(p.getLocation(),
+                        result.isFullyApplied() ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                 openPresetsView(p);
                 event.setCancelled(true);
             });
@@ -346,7 +352,7 @@ public class LoadoutGUI {
         int cost = loadoutManager.getItemCost(itemToRemove);
         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
         player.sendMessage(plugin.tr(player, "gui.loadout.item.removed", Map.of(
-                "name", formatName(itemToRemove.name()),
+                "name", getItemDisplayName(player, itemToRemove.getItemId()),
                 "rarity", getRarityTag(itemToRemove.getRarity()),
                 "cost", String.valueOf(cost)
         )));
@@ -394,7 +400,7 @@ public class LoadoutGUI {
                 loadoutManager.saveLoadout(player.getUniqueId());
                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
                 player.sendMessage(plugin.tr(player, "gui.loadout.item.removed", Map.of(
-                        "name", formatName(clickedItem.name()),
+                        "name", getItemDisplayName(player, clickedItem.getItemId()),
                         "rarity", getRarityTag(clickedItem.getRarity()),
                         "cost", String.valueOf(cost)
                 )));
@@ -405,7 +411,7 @@ public class LoadoutGUI {
                     loadoutManager.saveLoadout(player.getUniqueId());
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
                     player.sendMessage(plugin.tr(player, "gui.loadout.item.added", Map.of(
-                            "name", formatName(clickedItem.name()),
+                            "name", getItemDisplayName(player, clickedItem.getItemId()),
                             "rarity", getRarityTag(clickedItem.getRarity()),
                             "cost", String.valueOf(cost)
                     )));
@@ -425,7 +431,7 @@ public class LoadoutGUI {
                 loadoutManager.saveLoadout(player.getUniqueId());
                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
                 player.sendMessage(plugin.tr(player, "gui.loadout.item.removed", Map.of(
-                        "name", formatName(clickedItem.name()),
+                        "name", getItemDisplayName(player, clickedItem.getItemId()),
                         "rarity", getRarityTag(clickedItem.getRarity()),
                         "cost", String.valueOf(cost)
                 )));
@@ -436,7 +442,7 @@ public class LoadoutGUI {
                     loadoutManager.saveLoadout(player.getUniqueId());
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
                     player.sendMessage(plugin.tr(player, "gui.loadout.item.added", Map.of(
-                            "name", formatName(clickedItem.name()),
+                            "name", getItemDisplayName(player, clickedItem.getItemId()),
                             "rarity", getRarityTag(clickedItem.getRarity()),
                             "cost", String.valueOf(cost)
                     )));
@@ -607,7 +613,8 @@ public class LoadoutGUI {
                     return;
                 }
                 boolean changed = loadoutManager.applyAdminPresetToPlayer(p.getUniqueId(), role, targetSlot);
-                p.playSound(p.getLocation(), changed ? Sound.ENTITY_EXPERIENCE_ORB_PICKUP : Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+                p.playSound(p.getLocation(), changed ? Sound.ENTITY_EXPERIENCE_ORB_PICKUP : Sound.UI_BUTTON_CLICK, 1.0f,
+                        1.0f);
                 openView(p, role == LoadoutRole.HIDER);
                 event.setCancelled(true);
             });
@@ -644,7 +651,8 @@ public class LoadoutGUI {
         }
 
         PlayerLoadout.Preset preset = loadoutManager.getPreset(player.getUniqueId(), presetSlot);
-        LoadoutItemType preview = preset.hiderItems.stream().findFirst().orElse(preset.seekerItems.stream().findFirst().orElse(null));
+        LoadoutItemType preview = preset.hiderItems.stream().findFirst().orElse(
+                preset.seekerItems.stream().findFirst().orElse(null));
         ItemStack item = preview == null ? item(GUIItems.L_PRESET_FALLBACK,
                 new ItemStack(Material.CHEST)) : getPreviewItemStack(preview);
         ItemMeta meta = item.getItemMeta();
@@ -732,7 +740,7 @@ public class LoadoutGUI {
 
 
         meta.displayName(plugin.tr(player, "gui.loadout.item.display_name", Map.of(
-                "name", formatName(type.name()),
+                "name", getItemDisplayName(player, type.getItemId()),
                 "color", getRarityTag(type.getRarity())
         )).decoration(TextDecoration.ITALIC, false));
 
@@ -779,7 +787,8 @@ public class LoadoutGUI {
         meta.lore(lore);
         item.setItemMeta(meta);
         CustomModelDataUtil.setCustomModelData(item, resolveRuntimeItemId(type), null);
-        item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
         return item;
     }
 
@@ -792,7 +801,7 @@ public class LoadoutGUI {
 
 
         meta.displayName(plugin.tr(player, "gui.loadout.item.display_name", Map.of(
-                "name", formatName(type.name()),
+                "name", getItemDisplayName(player, type.getItemId()),
                 "color", getRarityTag(type.getRarity())
         )).decoration(TextDecoration.ITALIC, false));
 
@@ -809,10 +818,10 @@ public class LoadoutGUI {
         meta.lore(lore);
 
 
-
         item.setItemMeta(meta);
         CustomModelDataUtil.setCustomModelData(item, resolveRuntimeItemId(type), null);
-        item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay().hiddenComponents(ALL_TOOLTIP_COMPONENTS).build());
         return item;
     }
 
@@ -822,7 +831,8 @@ public class LoadoutGUI {
             item = HiderItems.getItem(type.getItemId());
         }
 
-        return (item != null) ? item.getDescription(plugin) : plugin.trText(player, "gui.loadout.item.no_description");
+        return (item != null) ? item.getDescription(plugin, player) : plugin.trText(player,
+                "gui.loadout.item.no_description");
     }
 
     private enum GuiTab {
@@ -856,13 +866,39 @@ public class LoadoutGUI {
     }
 
 
-    private String formatName(String name) {
-        StringBuilder result = new StringBuilder();
-        for (String part : name.split("_")) {
-            if (!result.isEmpty()) result.append(" ");
-            result.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1).toLowerCase());
+    private String getItemNameKey(String itemId) {
+        if (itemId.startsWith("has_hider_")) {
+            return "item." + itemId.substring("has_hider_".length()) + ".name";
         }
-        return result.toString();
+        if (itemId.startsWith("has_seeker_")) {
+            return "item." + itemId.substring("has_seeker_".length()) + ".name";
+        }
+        return "item." + itemId + ".name";
+    }
+
+    private String getItemDisplayName(Player player, String itemId) {
+        String key = getItemNameKey(itemId);
+        switch (itemId) {
+            case de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem.ID -> {
+                return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
+                        TranslationArguments.ofNamed(Map.of("level", String.valueOf(
+                                de.thecoolcraft11.hideAndSeek.items.hider.SpeedBoostItem.getSpeedLevel(
+                                        player.getUniqueId()) + 1)))));
+            }
+            case de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem.ID -> {
+                return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
+                        TranslationArguments.ofNamed(Map.of("level", String.valueOf(
+                                de.thecoolcraft11.hideAndSeek.items.hider.KnockbackStickItem.getKnockbackLevel(
+                                        player.getUniqueId()) + 1)))));
+            }
+            case de.thecoolcraft11.hideAndSeek.items.hider.RandomBlockItem.ID -> {
+                int uses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);
+                return MiniMessage.miniMessage().stripTags(plugin.trText(player, key,
+                        TranslationArguments.ofNamed(
+                                Map.of("uses", String.valueOf(uses), "maxUses", String.valueOf(uses)))));
+            }
+        }
+        return MiniMessage.miniMessage().stripTags(plugin.trText(player, key));
     }
 
     private ItemStack item(String key, ItemStack fallback) {

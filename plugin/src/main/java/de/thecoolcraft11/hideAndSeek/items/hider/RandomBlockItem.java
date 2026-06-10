@@ -10,8 +10,8 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -19,8 +19,10 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -41,11 +43,16 @@ public class RandomBlockItem implements GameItem {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("Random Block", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD).append(Component.space()).append(Component.text("(" + maxUses + "/" + maxUses + ")", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
-            meta.lore(List.of(
-                    Component.text("Right click to randomize", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            meta.displayName(MiniMessage.miniMessage().deserialize(
+                            plugin.trText(null, "item.random_block.name",
+                                    java.util.Map.of("uses", maxUses, "maxUses", maxUses)))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.random_block.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
 
@@ -53,42 +60,14 @@ public class RandomBlockItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Reroll your disguise block from the map's allowed blocks.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.random_block.description");
     }
 
-    @Override
-    public void register(HideAndSeek plugin) {
-        int randomBlockCooldown = plugin.getSettingRegistry().get("hider-items.random-block.cooldown", 3);
-        int randomUses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);
-
-        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeBlockWithContext(context, plugin))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> randomizeBlockWithContext(context, plugin))
-                .withMaxPlayerUses(randomUses)
-                .withVanillaCooldown(randomBlockCooldown * 20)
-                .withCustomCooldown(randomBlockCooldown * 1000L)
-                .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription(plugin))
-                .withDropPrevention(true)
-                .withCraftPrevention(true)
-                .allowOffHand(false)
-                .allowArmor(false)
-                .cancelDefaultAction(true)
-                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(Component.text("You ran out of random block uses!", NamedTextColor.RED)))
-                .withAppearanceProvider((player, item, context) -> {
-                    ItemStack itemStack = item.getItemStack();
-                    ItemMeta meta = itemStack.getItemMeta();
-                    meta.displayName(Component.text("Random Block", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD)
-                            .append(Component.space())
-                            .append(Component.text("(" + context.getPlayerRemainingUses() + "/" + context.getMaxPlayerUses() + ")", NamedTextColor.GRAY)
-                                    .decoration(TextDecoration.ITALIC, false)));
-                    itemStack.setItemMeta(meta);
-                    return itemStack;
-                })
-                .build());
+    private static String skinNameKey(String itemId, String variantId) {
+        String key = itemId.replace("has_hider_", "").replace("has_seeker_", "");
+        String skin = variantId.startsWith("skin_") ? variantId.substring(5) : variantId;
+        return "item." + key + ".skin." + skin;
     }
 
     private static void randomizeBlockWithContext(ItemInteractionContext context, HideAndSeek plugin) {
@@ -98,12 +77,13 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.only_hiders"));
             context.skipCooldown();
             return;
         }
         if (isHiderCursed(player.getUniqueId())) {
-            player.sendMessage(Component.text("You are cursed and cannot change blocks right now!", NamedTextColor.RED));
+            player.sendMessage(
+                    plugin.trText(player, "item.random_block.messages.cursed_blocks"));
             context.skipCooldown();
             return;
         }
@@ -123,16 +103,18 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.only_hiders"));
             return;
         }
         if (isHiderCursed(player.getUniqueId())) {
-            player.sendMessage(Component.text("You are cursed and cannot change blocks right now!", NamedTextColor.RED));
+            player.sendMessage(
+                    plugin.trText(player, "item.random_block.messages.cursed_blocks"));
             return;
         }
 
         if (HideAndSeek.getDataController().isHidden(player.getUniqueId())) {
-            player.sendMessage(Component.text("You cant transform into a new block while being hidden!", NamedTextColor.RED));
+            player.sendMessage(
+                    plugin.trText(player, "item.random_block.messages.hidden_cannot_transform"));
             return;
         }
 
@@ -140,18 +122,19 @@ public class RandomBlockItem implements GameItem {
 
         String currentMap = HideAndSeek.getDataController().getCurrentMapName();
         if (currentMap == null || currentMap.isEmpty()) {
-            player.sendMessage(Component.text("No active map found.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_active_map"));
             return;
         }
 
         List<String> allowedBlocks = plugin.getMapManager().getAllowedBlocksForMap(currentMap);
         if (allowedBlocks.isEmpty()) {
-            player.sendMessage(Component.text("No allowed blocks configured for this map.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_allowed_blocks"));
             return;
         }
 
         List<String> possibleBlocks = allowedBlocks.stream()
-                .filter(block -> !block.equalsIgnoreCase(HideAndSeek.getDataController().getChosenBlock(player.getUniqueId()).name()))
+                .filter(block -> !block.equalsIgnoreCase(
+                        HideAndSeek.getDataController().getChosenBlock(player.getUniqueId()).name()))
                 .toList();
 
         String chosenPattern = possibleBlocks.get(new Random().nextInt(allowedBlocks.size()));
@@ -159,7 +142,8 @@ public class RandomBlockItem implements GameItem {
         BlockAppearanceConfig config = BlockAppearanceConfig.parse(chosenPattern);
 
         if (config == null) {
-            player.sendMessage(Component.text("Invalid block pattern in config: " + chosenPattern, NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.invalid_block_pattern",
+                    java.util.Map.of("pattern", chosenPattern)));
             return;
         }
 
@@ -169,14 +153,16 @@ public class RandomBlockItem implements GameItem {
             try {
                 chosenMaterial = Material.valueOf(config.getDefaultVariant());
             } catch (IllegalArgumentException e) {
-                player.sendMessage(Component.text("Invalid default variant in config: " + config.getDefaultVariant(), NamedTextColor.RED));
+                player.sendMessage(plugin.trText(player, "item.random_block.messages.invalid_variant",
+                        java.util.Map.of("variant", config.getDefaultVariant())));
                 return;
             }
         } else {
             try {
                 chosenMaterial = Material.valueOf(config.getBaseBlockType());
             } catch (IllegalArgumentException e) {
-                player.sendMessage(Component.text("Invalid block type in config: " + config.getBaseBlockType(), NamedTextColor.RED));
+                player.sendMessage(plugin.trText(player, "item.random_block.messages.invalid_block_type",
+                        java.util.Map.of("type", config.getBaseBlockType())));
                 return;
             }
         }
@@ -195,26 +181,31 @@ public class RandomBlockItem implements GameItem {
         }
 
         if (ItemSkinSelectionService.isSelected(player, ID, "skin_shapeshifter_dust")) {
-            player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1, 0), 18, 0.35, 0.35, 0.35, 0.02);
-            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 10, 0.35, 0.35, 0.35, 0.1);
+            player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1, 0), 18, 0.35, 0.35, 0.35,
+                    0.02);
+            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 10, 0.35, 0.35, 0.35,
+                    0.1);
             player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.9f, 1.4f);
         } else if (ItemSkinSelectionService.isSelected(player, ID, "skin_mystery_box")) {
-            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1, 0), 12, 0.35, 0.35, 0.35, 0.03);
+            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1, 0), 12, 0.35, 0.35,
+                    0.35, 0.03);
             player.getWorld().spawnParticle(Particle.NOTE, player.getLocation().add(0, 1, 0), 6, 0.25, 0.25, 0.25, 1.0);
             player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 0.8f, 1.2f);
         }
 
         boolean mysteryBox = ItemSkinSelectionService.isSelected(player, ID, "skin_mystery_box");
         if (mysteryBox) {
-            player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.25, 0.3, 0.25, 0.02);
-            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 6, 0.2, 0.25, 0.2, 0.02);
+            player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.25, 0.3, 0.25,
+                    0.02);
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 6, 0.2, 0.25,
+                    0.2, 0.02);
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.35f, 1.55f);
         }
 
         HiderItemUtil.updateAppearanceItem(player, plugin);
 
-        player.sendMessage(Component.text("Transformed into ", NamedTextColor.GREEN)
-                .append(Component.text(HiderItemUtil.formatName(chosenMaterial.name()), NamedTextColor.GOLD)));
+        player.sendMessage(plugin.trText(player, "item.random_block.messages.transformed_block",
+                java.util.Map.of("block", HiderItemUtil.formatName(chosenMaterial.name()))));
     }
 
     public static void randomizeSkin(Player player, HideAndSeek plugin) {
@@ -222,24 +213,24 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.only_hiders"));
             return;
         }
         if (isHiderCursed(player.getUniqueId())) {
-            player.sendMessage(Component.text("You are cursed and cannot change skins right now!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.cursed_skins"));
             return;
         }
 
 
         String currentMap = HideAndSeek.getDataController().getCurrentMapName();
         if (currentMap == null || currentMap.isEmpty()) {
-            player.sendMessage(Component.text("No active map found.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_active_map"));
             return;
         }
 
         List<String> allowedBlocks = plugin.getMapManager().getAllowedSkinsForMap(currentMap);
         if (allowedBlocks.isEmpty()) {
-            player.sendMessage(Component.text("No allowed skins configured for this map.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.random_block.messages.no_allowed_skins"));
             return;
         }
 
@@ -278,8 +269,8 @@ public class RandomBlockItem implements GameItem {
 
         HiderItemUtil.updateAppearanceItem(player, plugin);
 
-        player.sendMessage(Component.text("Transformed into ", NamedTextColor.GREEN)
-                .append(Component.text(HiderItemUtil.formatName(chosenSkin.name()), NamedTextColor.GOLD)));
+        player.sendMessage(plugin.trText(player, "item.random_block.messages.transformed_skin",
+                java.util.Map.of("skin", HiderItemUtil.formatName(chosenSkin.name()))));
     }
 
     public static void randomizeBlockFor(Player player, HideAndSeek plugin, boolean forceUnhide) {
@@ -300,6 +291,62 @@ public class RandomBlockItem implements GameItem {
             return;
         }
         randomizeSkin(player, plugin);
+    }
+
+    @Override
+    public void register(HideAndSeek plugin) {
+        int randomBlockCooldown = plugin.getSettingRegistry().get("hider-items.random-block.cooldown", 3);
+        int randomUses = plugin.getSettingRegistry().get("hider-items.random-block.uses", 5);
+
+        plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
+                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> randomizeBlockWithContext(context, plugin))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_AIR, context -> randomizeBlockWithContext(context, plugin))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                        context -> randomizeBlockWithContext(context, plugin))
+                .withMaxPlayerUses(randomUses)
+                .withVanillaCooldown(randomBlockCooldown * 20)
+                .withCustomCooldown(randomBlockCooldown * 1000L)
+                .withVanillaCooldownDisplay(true)
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.random_block.name", Map.of("uses", randomUses, "maxUses", randomUses))
+                .withLoreKey("item.random_block.lore")
+                .withDropPrevention(true)
+                .withCraftPrevention(true)
+                .allowOffHand(false)
+                .allowArmor(false)
+                .cancelDefaultAction(true)
+                .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(
+                        MiniMessage.miniMessage().deserialize(
+                                plugin.trText(context.getPlayer(), "item.random_block.messages.uses_exhausted"))))
+                .withAppearanceProvider((player, item, context) -> {
+                    String itemVariant = plugin.getCustomItemManager().getVariantManager().getPlayerVariant(player,
+                            item.getId());
+                    if (itemVariant != null) {
+                        var variant = plugin.getCustomItemManager().getVariantManager().getPlayerVariantObject(player,
+                                item.getId());
+                        if (variant != null) {
+                            ItemStack stack = variant.getItemStack().clone();
+                            ItemMeta meta = stack.getItemMeta();
+                            if (meta != null) {
+                                String skinNameKey = skinNameKey(item.getId(), itemVariant);
+                                meta.displayName(plugin.tr(player, skinNameKey,
+                                        Map.of("uses", context.getPlayerRemainingUses(), "maxUses", randomUses)));
+                                stack.setItemMeta(meta);
+                            }
+                            return stack;
+                        }
+                    }
+                    ItemStack itemStack = item.getItemStack().clone();
+                    ItemMeta meta = itemStack.getItemMeta();
+                    if (meta != null) {
+                        meta.displayName(plugin.tr(player, "item.random_block.name",
+                                Map.of("uses", context.getPlayerRemainingUses(), "maxUses", randomUses)));
+                        itemStack.setItemMeta(meta);
+                    }
+                    return itemStack;
+                })
+                .build());
     }
 
     @Override

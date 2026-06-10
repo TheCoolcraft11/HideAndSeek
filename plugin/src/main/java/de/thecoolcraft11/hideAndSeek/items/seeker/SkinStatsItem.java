@@ -6,13 +6,13 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public class SkinStatsItem implements GameItem {
 
@@ -28,21 +28,22 @@ public class SkinStatsItem implements GameItem {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(
-                    Component.text("Skin Statistics", NamedTextColor.AQUA, TextDecoration.BOLD)
-                            .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right-click to view hider skins", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.skin_stats.name"))
+                    .decoration(TextDecoration.ITALIC, false));
+            String loreStr = plugin.trText(null, "item.skin_stats.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "View which skin each hider is currently disguised as.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.skin_stats.description");
     }
 
     @Override
@@ -51,7 +52,11 @@ public class SkinStatsItem implements GameItem {
 
         plugin.getCustomItemManager().registerItem(
                 new CustomItemBuilder(createItem(plugin), getId())
-                        .withDescription(getDescription(plugin))
+                        .withDescription(getDescription(plugin, null))
+                        .withNameKey("item.skin_stats.name")
+                        .withLoreKey("item.skin_stats.lore")
+                        .withNameKey("item.skin_stats.name")
+                        .withLoreKey("item.skin_stats.lore")
                         .withAction(ItemActionType.RIGHT_CLICK_AIR,
                                 ctx -> gui.open(ctx.getPlayer()))
                         .withAction(ItemActionType.RIGHT_CLICK_BLOCK,

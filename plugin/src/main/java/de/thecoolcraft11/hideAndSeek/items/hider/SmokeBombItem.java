@@ -7,16 +7,16 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 public class SmokeBombItem implements GameItem {
@@ -32,23 +32,24 @@ public class SmokeBombItem implements GameItem {
         ItemStack item = new ItemStack(Material.GRAY_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Smoke Bomb", NamedTextColor.DARK_GRAY, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.smoke_bomb.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to throw", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false),
-                    Component.text("Creates a smoke cloud for cover", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.smoke_bomb.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             item.setItemMeta(meta);
         }
         return item;
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.smoke-bomb.duration", 8);
-        return String.format("Throw a smoke bomb that creates cover for %ds.", duration.intValue());
+        return plugin.trText(player, "item.smoke_bomb.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override
@@ -57,7 +58,9 @@ public class SmokeBombItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> throwSmokeBomb(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> throwSmokeBomb(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.smoke_bomb.name")
+                .withLoreKey("item.smoke_bomb.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(smokeBombCooldown * 20)
@@ -72,7 +75,7 @@ public class SmokeBombItem implements GameItem {
     private static void throwSmokeBomb(ItemInteractionContext context, HideAndSeek plugin) {
         Player player = context.getPlayer();
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.smoke_bomb.messages.only_hiders"));
             return;
         }
 
@@ -82,19 +85,26 @@ public class SmokeBombItem implements GameItem {
         boolean sporeCloud = ItemSkinSelectionService.isSelected(player, ID, "skin_spore_cloud");
 
         org.bukkit.entity.Snowball smokeBomb = player.launchProjectile(org.bukkit.entity.Snowball.class);
-        smokeBomb.setItem(new ItemStack(sporeCloud ? Material.BROWN_MUSHROOM : ninjaSmoke ? Material.GUNPOWDER : Material.BLACK_CONCRETE_POWDER));
+        smokeBomb.setItem(new ItemStack(
+                sporeCloud ? Material.BROWN_MUSHROOM : ninjaSmoke ? Material.GUNPOWDER : Material.BLACK_CONCRETE_POWDER));
         smokeBomb.setVelocity(smokeBomb.getVelocity().multiply(1.2));
-        smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb"), PersistentDataType.BOOLEAN, true);
-        smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_duration"), PersistentDataType.INTEGER, duration);
-        smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_radius"), PersistentDataType.INTEGER, radius);
+        smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb"), PersistentDataType.BOOLEAN,
+                true);
+        smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_duration"),
+                PersistentDataType.INTEGER, duration);
+        smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_radius"),
+                PersistentDataType.INTEGER, radius);
         if (ninjaSmoke) {
-            smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_skin"), PersistentDataType.STRING, "ninja_smoke");
+            smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_skin"),
+                    PersistentDataType.STRING, "ninja_smoke");
         } else if (sporeCloud) {
-            smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_skin"), PersistentDataType.STRING, "spore_cloud");
+            smokeBomb.getPersistentDataContainer().set(new NamespacedKey(plugin, "smoke_bomb_skin"),
+                    PersistentDataType.STRING, "spore_cloud");
         }
 
         if (sporeCloud) {
-            smokeBomb.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR, smokeBomb.getLocation(), 12, 0.16, 0.16, 0.16, 0.01);
+            smokeBomb.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR, smokeBomb.getLocation(), 12, 0.16, 0.16,
+                    0.16, 0.01);
             smokeBomb.getWorld().spawnParticle(Particle.WITCH, smokeBomb.getLocation(), 8, 0.15, 0.15, 0.15, 0.01);
             player.playSound(player.getLocation(), Sound.BLOCK_SCULK_CATALYST_BLOOM, 0.4f, 1.1f);
         }
@@ -108,10 +118,13 @@ public class SmokeBombItem implements GameItem {
                 }
 
                 if (sporeCloud) {
-                    smokeBomb.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR, smokeBomb.getLocation(), 2, 0.15, 0.15, 0.15, 0.01);
-                    smokeBomb.getWorld().spawnParticle(Particle.MYCELIUM, smokeBomb.getLocation(), 2, 0.12, 0.12, 0.12, 0.0);
+                    smokeBomb.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR, smokeBomb.getLocation(), 2, 0.15,
+                            0.15, 0.15, 0.01);
+                    smokeBomb.getWorld().spawnParticle(Particle.MYCELIUM, smokeBomb.getLocation(), 2, 0.12, 0.12, 0.12,
+                            0.0);
                 } else if (ninjaSmoke) {
-                    smokeBomb.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, smokeBomb.getLocation(), 2, 0.1, 0.1, 0.1, 0.005);
+                    smokeBomb.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, smokeBomb.getLocation(), 2, 0.1,
+                            0.1, 0.1, 0.005);
                 } else {
                     smokeBomb.getWorld().spawnParticle(Particle.SMOKE, smokeBomb.getLocation(), 2, 0.1, 0.1, 0.1, 0.02);
                 }

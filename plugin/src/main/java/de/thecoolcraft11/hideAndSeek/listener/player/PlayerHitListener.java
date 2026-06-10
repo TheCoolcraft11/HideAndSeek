@@ -260,7 +260,7 @@ public class PlayerHitListener implements Listener {
 
             if (isTotemActive(victim.getUniqueId()) && event.getFinalDamage() >= victim.getHealth()) {
                 event.setCancelled(true);
-                reviveWithTotem(victim);
+                reviveWithTotem(victim, plugin);
                 return;
             }
 

@@ -7,16 +7,16 @@ import de.thecoolcraft11.hideAndSeek.util.points.PointAction;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 public class SoundItem implements GameItem {
@@ -33,12 +33,14 @@ public class SoundItem implements GameItem {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("Cat Sound", NamedTextColor.AQUA, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.sound.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to play a sound", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.sound.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             item.setItemMeta(meta);
@@ -48,21 +50,26 @@ public class SoundItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         int points = plugin.getPointService().getInt("points.hider.taunt.small", 25);
-        return String.format("Play a loud cat taunt for all players, grants %d points.", points);
+        return plugin.trText(player, "item.sound.description",
+                java.util.Map.of("points", String.valueOf(points)));
     }
 
     @Override
     public void register(HideAndSeek plugin) {
         int soundCooldown = plugin.getSettingRegistry().get("hider-items.sound.cooldown", 4);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
-                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK, context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
+                .withAction(ItemActionType.SHIFT_RIGHT_CLICK_BLOCK,
+                        context -> playSoundForAll(context.getLocation(), plugin, context.getPlayer()))
                 .withVanillaCooldown(soundCooldown * 20)
                 .withCustomCooldown(soundCooldown * 1000L)
                 .withVanillaCooldownDisplay(true)
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.sound.name")
+                .withLoreKey("item.sound.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .allowOffHand(false)
@@ -90,17 +97,21 @@ public class SoundItem implements GameItem {
             accentParticle = Particle.HAPPY_VILLAGER;
         }
 
-        double volumeMultiplier = plugin.getSettingRegistry().get("hider-items.sound.variants." + variantKey + ".volume-multiplier", 1.0);
-        double pitchMultiplier = plugin.getSettingRegistry().get("hider-items.sound.variants." + variantKey + ".pitch-multiplier", 1.0);
-        double particleMultiplier = plugin.getSettingRegistry().get("hider-items.sound.variants." + variantKey + ".particle-multiplier", 1.0);
+        double volumeMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.sound.variants." + variantKey + ".volume-multiplier", 1.0);
+        double pitchMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.sound.variants." + variantKey + ".pitch-multiplier", 1.0);
+        double particleMultiplier = plugin.getSettingRegistry().get(
+                "hider-items.sound.variants." + variantKey + ".particle-multiplier", 1.0);
 
         double volume = Math.max(0.05, baseVolume * volumeMultiplier);
         double pitch = Math.max(0.1, basePitch * pitchMultiplier);
         int noteParticles = Math.max(1, (int) Math.round(baseNoteParticles * particleMultiplier));
         int accentParticles = Math.max(1, (int) Math.round(baseAccentParticles * particleMultiplier));
 
-        hider.sendMessage(Component.text("You used a taunt!", NamedTextColor.GREEN));
-        hider.sendMessage(Component.text("+" + tauntPoints + " points", NamedTextColor.GOLD));
+        hider.sendMessage(plugin.trText(hider, "item.sound.messages.taunt_used"));
+        hider.sendMessage(plugin.trText(hider, "item.sound.messages.points_earned",
+                java.util.Map.of("points", String.valueOf(tauntPoints))));
 
         Location particleLoc = location.clone().add(0.5, 1.0, 0.5);
         hider.getWorld().spawnParticle(Particle.NOTE, particleLoc, noteParticles, 0.3, 0.3, 0.3, 1.0);

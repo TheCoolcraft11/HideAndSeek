@@ -8,8 +8,8 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -18,8 +18,9 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,12 +39,14 @@ public class BlockSwapItem implements GameItem {
         ItemStack item = new ItemStack(Material.ENDER_PEARL);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Block Swap", NamedTextColor.DARK_PURPLE, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.block_swap.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to swap blocks with another hider", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.block_swap.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
             item.setItemMeta(meta);
@@ -52,8 +55,8 @@ public class BlockSwapItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
-        return "Swap disguise blocks with the nearest other hider.";
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
+        return plugin.trText(player, "item.block_swap.description");
     }
 
     @Override
@@ -62,7 +65,9 @@ public class BlockSwapItem implements GameItem {
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
                 .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> blockSwap(context, plugin))
                 .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> blockSwap(context, plugin))
-                .withDescription(getDescription(plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.block_swap.name")
+                .withLoreKey("item.block_swap.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(blockSwapCooldown * 20)
@@ -83,12 +88,12 @@ public class BlockSwapItem implements GameItem {
         Player player = context.getPlayer();
         if ("BLOCK".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
             if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-                player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.only_hiders"));
                 context.skipCooldown();
                 return;
             }
             if (isHiderCursed(player.getUniqueId())) {
-                player.sendMessage(Component.text("You are cursed and cannot swap blocks!", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.block.cursed"));
                 context.skipCooldown();
                 return;
             }
@@ -96,20 +101,19 @@ public class BlockSwapItem implements GameItem {
             blockSwap(player, plugin);
         } else if ("SKIN".equals(String.valueOf(plugin.getSettingService().getSetting("game.mode").getValue()))) {
             if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-                player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.only_hiders"));
                 context.skipCooldown();
                 return;
             }
             if (isHiderCursed(player.getUniqueId())) {
-                player.sendMessage(Component.text("You are cursed and cannot swap skins!", NamedTextColor.RED));
+                player.sendMessage(plugin.tr(player, "item.block_swap.messages.skin.cursed"));
                 context.skipCooldown();
                 return;
             }
 
             skinSwap(player, plugin);
         } else {
-            player.sendMessage(
-                    Component.text("Block swap is only available in BLOCK or SKIN mode.", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.unavailable"));
             context.skipCooldown();
         }
     }
@@ -135,7 +139,7 @@ public class BlockSwapItem implements GameItem {
         }
 
         if (target == null) {
-            player.sendMessage(Component.text("No hider nearby to swap with!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.no_hider"));
             return;
         }
 
@@ -147,7 +151,7 @@ public class BlockSwapItem implements GameItem {
         BlockData targetData = HideAndSeek.getDataController().getChosenBlockData(finalTarget.getUniqueId());
 
         if (playerMat == null || targetMat == null || playerData == null || targetData == null) {
-            player.sendMessage(Component.text("Swap failed (missing block data)", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.block.missing_data"));
             return;
         }
 
@@ -189,28 +193,40 @@ public class BlockSwapItem implements GameItem {
 
             if (magicMirror) {
                 player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
-                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation(), 18, 0.3, 0.3, 0.3, 0.04);
+                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation(), 18, 0.3, 0.3, 0.3,
+                        0.04);
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
-                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f,
+                        1.4f);
             } else if (quantumLink) {
                 player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation(), 20, 0.3, 0.3, 0.3, 0.05);
-                finalTarget.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, finalTarget.getLocation(), 20, 0.3, 0.3, 0.3, 0.05);
-                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
-                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                finalTarget.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, finalTarget.getLocation(), 20, 0.3, 0.3,
+                        0.3, 0.05);
+                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25,
+                        0.08);
+                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25,
+                        0.4, 0.25, 0.08);
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
-                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f, 1.2f);
+                finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1.0f,
+                        1.2f);
             } else {
-                player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05, 1);
-                finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3, 0.3, 0.05, 1);
-                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
-                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25, 0.08);
+                player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 0.3, 0.3, 0.3, 0.05,
+                        1);
+                finalTarget.getWorld().spawnParticle(Particle.DRAGON_BREATH, finalTarget.getLocation(), 10, 0.3, 0.3,
+                        0.3, 0.05, 1);
+                player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0, 1, 0), 15, 0.25, 0.4, 0.25,
+                        0.08);
+                finalTarget.getWorld().spawnParticle(Particle.GLOW, finalTarget.getLocation().add(0, 1, 0), 15, 0.25,
+                        0.4, 0.25, 0.08);
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
                 finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
             }
 
             if (quantumLink) {
-                player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2, 0.02);
-                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2, 0.02);
+                player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0), 8, 0.2, 0.25, 0.2,
+                        0.02);
+                finalTarget.getWorld().spawnParticle(Particle.END_ROD, finalTarget.getLocation().add(0, 1, 0), 8, 0.2,
+                        0.25, 0.2, 0.02);
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
                 finalTarget.getWorld().playSound(finalTarget.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.3f, 1.5f);
             }
@@ -218,8 +234,10 @@ public class BlockSwapItem implements GameItem {
             HiderItemUtil.updateAppearanceItem(player, plugin);
             HiderItemUtil.updateAppearanceItem(finalTarget, plugin);
 
-            player.sendMessage(Component.text("Swapped blocks with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
-            finalTarget.sendMessage(Component.text("Swapped blocks with " + player.getName() + "!", NamedTextColor.GREEN));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.block.successful_swap",
+                    Map.of("player", finalTarget.getName())));
+            finalTarget.sendMessage(plugin.tr(player, "item.block_swap.messages.block.successful_swap",
+                    Map.of("player", player.getName())));
         }, 2L);
     }
 
@@ -244,7 +262,7 @@ public class BlockSwapItem implements GameItem {
         }
 
         if (target == null) {
-            player.sendMessage(Component.text("No hider nearby to swap with!", NamedTextColor.RED));
+            player.sendMessage(plugin.tr(player, "item.block_swap.messages.no_hider"));
             return;
         }
 
@@ -301,7 +319,9 @@ public class BlockSwapItem implements GameItem {
         HiderItemUtil.updateAppearanceItem(player, plugin);
         HiderItemUtil.updateAppearanceItem(finalTarget, plugin);
 
-        player.sendMessage(Component.text("Swapped skins with " + finalTarget.getName() + "!", NamedTextColor.GREEN));
-        finalTarget.sendMessage(Component.text("Swapped skins with " + player.getName() + "!", NamedTextColor.GREEN));
+        player.sendMessage(plugin.tr(player, "item.block_swap.messages.skin.successful_swap",
+                Map.of("player", finalTarget.getName())));
+        finalTarget.sendMessage(
+                plugin.tr(player, "item.block_swap.messages.skin.successful_swap", Map.of("player", player.getName())));
     }
 }

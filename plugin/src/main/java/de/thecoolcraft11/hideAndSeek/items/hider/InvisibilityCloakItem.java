@@ -7,8 +7,8 @@ import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -21,8 +21,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 import static de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager.invisibilityCloakXpTasks;
@@ -40,12 +40,14 @@ public class InvisibilityCloakItem implements GameItem {
         ItemStack item = new ItemStack(Material.PHANTOM_MEMBRANE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text("Invisibility Cloak", NamedTextColor.DARK_PURPLE, TextDecoration.BOLD)
+            meta.displayName(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.invisibility_cloak.name"))
                     .decoration(TextDecoration.ITALIC, false));
-            meta.lore(List.of(
-                    Component.text("Right click to become invisible", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.ITALIC, false)
-            ));
+            String loreStr = plugin.trText(null, "item.invisibility_cloak.lore");
+            java.util.List<Component> lore = new java.util.ArrayList<>();
+            for (String line : loreStr.split("\n")) {
+                lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
+            meta.lore(lore);
             meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
             item.setItemMeta(meta);
@@ -55,7 +57,7 @@ public class InvisibilityCloakItem implements GameItem {
 
     private static void useInvisibilityCloak(Player player, HideAndSeek plugin) {
         if (!HideAndSeek.getDataController().getHiders().contains(player.getUniqueId())) {
-            player.sendMessage(Component.text("Only hiders can use this item.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "item.invisibility_cloak.messages.only_hiders"));
             return;
         }
 
@@ -92,17 +94,19 @@ public class InvisibilityCloakItem implements GameItem {
             ));
         }
 
-        player.sendMessage(Component.text("You are now invisible!", NamedTextColor.AQUA));
+        player.sendMessage(plugin.trText(player, "item.invisibility_cloak.messages.activated"));
 
         Location loc = player.getLocation().add(0, 1, 0);
         player.getWorld().spawnParticle(Particle.POOF, loc, 30, 0.5, 0.5, 0.5, 0.15);
         player.getWorld().spawnParticle(Particle.GLOW, loc, 15, 0.4, 0.4, 0.4, 0.1);
         player.playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 1.0f, 1.5f);
         if (cardboard) {
-            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3, Material.OAK_PLANKS.createBlockData());
+            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3,
+                    Material.OAK_PLANKS.createBlockData());
             player.playSound(player.getLocation(), Sound.BLOCK_WOOD_PLACE, 0.55f, 0.9f);
         } else if (camo) {
-            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3, Material.OAK_LEAVES.createBlockData());
+            player.getWorld().spawnParticle(Particle.BLOCK, loc, 18, 0.3, 0.4, 0.3,
+                    Material.OAK_LEAVES.createBlockData());
             player.playSound(player.getLocation(), Sound.BLOCK_AZALEA_LEAVES_FALL, 0.45f, 1.1f);
         }
 
@@ -111,7 +115,8 @@ public class InvisibilityCloakItem implements GameItem {
         XpProgressHelper.stopAndClear(player, prevXpTask);
 
         XpProgressHelper.SavedXp savedXp = XpProgressHelper.saveXp(player);
-        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN, duration);
+        BukkitTask xpTask = XpProgressHelper.start(plugin, player, duration * 20L, XpProgressHelper.Mode.COUNTDOWN,
+                duration);
         invisibilityCloakXpTasks.put(player.getUniqueId(), xpTask);
 
         new BukkitRunnable() {
@@ -154,9 +159,10 @@ public class InvisibilityCloakItem implements GameItem {
     }
 
     @Override
-    public String getDescription(HideAndSeek plugin) {
+    public String getDescription(HideAndSeek plugin, @Nullable Player player) {
         Number duration = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.duration", 8);
-        return String.format("Turn invisible for %ds.", duration.intValue());
+        return plugin.trText(player, "item.invisibility_cloak.description",
+                java.util.Map.of("duration", String.valueOf(duration.intValue())));
     }
 
     @Override
@@ -168,9 +174,13 @@ public class InvisibilityCloakItem implements GameItem {
     public void register(HideAndSeek plugin) {
         int invisibilityCloakCooldown = plugin.getSettingRegistry().get("hider-items.invisibility-cloak.cooldown", 20);
         plugin.getCustomItemManager().registerItem(new CustomItemBuilder(createItem(plugin), getId())
-                .withAction(ItemActionType.RIGHT_CLICK_AIR, context -> useInvisibilityCloak(context.getPlayer(), plugin))
-                .withAction(ItemActionType.RIGHT_CLICK_BLOCK, context -> useInvisibilityCloak(context.getPlayer(), plugin))
-                .withDescription(getDescription(plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_AIR,
+                        context -> useInvisibilityCloak(context.getPlayer(), plugin))
+                .withAction(ItemActionType.RIGHT_CLICK_BLOCK,
+                        context -> useInvisibilityCloak(context.getPlayer(), plugin))
+                .withDescription(getDescription(plugin, null))
+                .withNameKey("item.invisibility_cloak.name")
+                .withLoreKey("item.invisibility_cloak.lore")
                 .withDropPrevention(true)
                 .withCraftPrevention(true)
                 .withVanillaCooldown(invisibilityCloakCooldown * 20)
