@@ -168,7 +168,7 @@ public final class SeekerItems {
         }
         if (!hasValidItems) {
             plugin.getLogger().warning("All selected items for " + player.getName() + " are not implemented yet! Using default loadout instead.");
-            player.sendMessage(Component.text("Some items you selected are not implemented yet. Using default items instead.", NamedTextColor.YELLOW));
+            player.sendMessage(plugin.trText(player, "item.common.not_implemented"));
             itemsToGive = Set.of(LoadoutItemType.GRAPPLING_HOOK);
         }
 

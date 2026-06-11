@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CustomTabProvider {
+    private final HideAndSeek plugin;
     private final FileConfiguration config;
     private final Map<String, List<TextColor>> colorGradients = new HashMap<>();
     private final Map<String, Double> colorSpeeds = new HashMap<>();
@@ -26,6 +27,7 @@ public class CustomTabProvider {
     private int animationTick = 0;
 
     public CustomTabProvider(HideAndSeek plugin, FileConfiguration config) {
+        this.plugin = plugin;
         this.config = config;
         this.enableHeader = config.getBoolean("tab.enable-header", true);
         this.enableFooter = config.getBoolean("tab.enable-footer", true);
@@ -122,7 +124,7 @@ public class CustomTabProvider {
     private Component buildHeader(Map<String, Object> context) {
         var elements = config.getList("tab.header.elements");
         if (elements == null) {
-            return Component.text("Header not configured");
+            return plugin.tr(null, "tab.header_not_configured");
         }
 
         TextComponent.Builder builder = Component.text();
@@ -164,7 +166,7 @@ public class CustomTabProvider {
     private Component buildFooter(Map<String, Object> context) {
         var elements = config.getList("tab.footer.elements");
         if (elements == null) {
-            return Component.text("Footer not configured");
+            return plugin.tr(null, "tab.footer_not_configured");
         }
 
         TextComponent.Builder builder = Component.text();

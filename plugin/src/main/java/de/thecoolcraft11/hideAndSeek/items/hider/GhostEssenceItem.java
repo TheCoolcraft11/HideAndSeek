@@ -52,7 +52,8 @@ public class GhostEssenceItem implements GameItem {
             }
 
             if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-                lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)
+                lore.add(MiniMessage.miniMessage().deserialize(
+                        plugin.trText(null, "item.ghost_essence.messages.nms_unavailable_lore"))
                         .decoration(TextDecoration.ITALIC, false));
             }
 
@@ -340,29 +341,29 @@ public class GhostEssenceItem implements GameItem {
         player.teleport(adjustedLoc);
 
         boolean isCheating = false;
-        String reason = "";
+        String reasonKey = "";
 
         if (!player.getWorld().getWorldBorder().isInside(adjustedLoc)) {
             isCheating = true;
-            reason = "You cannot materialize outside the world border!";
+            reasonKey = "item.ghost_essence.messages.error_outside_border";
         } else if (adjustedLoc.distance(startLoc) > maxRadius + 1.5) {
             isCheating = true;
-            reason = "You wandered too far from your physical body!";
+            reasonKey = "item.ghost_essence.messages.error_too_far";
         } else if (adjustedLoc.getBlock().getType().isSolid() || player.getEyeLocation().getBlock().getType().isSolid()) {
             isCheating = true;
-            reason = "You materialized inside a wall!";
+            reasonKey = "item.ghost_essence.messages.error_in_wall";
         } else if (adjustedLoc.getBlock().getLightLevel() < minLightB && adjustedLoc.getBlock().getLightFromSky() < minLightS) {
             isCheating = true;
-            reason = "It's too dark to materialize here!";
+            reasonKey = "item.ghost_essence.messages.error_too_dark";
         } else if (!canPathfindBack(plugin, ghost, startLoc, adjustedLoc)) {
             isCheating = true;
-            reason = "There is no physical path to this location!";
+            reasonKey = "item.ghost_essence.messages.error_no_path";
         }
 
         if (isCheating) {
             player.teleport(startLoc);
             player.sendMessage(plugin.trText(player, "item.ghost_essence.messages.error",
-                    Map.of("reason", reason)));
+                    Map.of("reason", plugin.trText(player, reasonKey))));
             player.playSound(startLoc, Sound.ENTITY_GHAST_HURT, 1f, 1f);
         } else {
             player.sendMessage(plugin.trText(player, "item.ghost_essence.messages.materialized"));

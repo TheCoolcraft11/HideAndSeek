@@ -6,23 +6,28 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BasePerk implements PerkDefinition {
 
     @Override
-    public Component getDisplayName() {
-        return Component.text(getId().replace('_', ' '), NamedTextColor.GOLD)
-                .decoration(TextDecoration.ITALIC, false);
+    public Component getDisplayName(@Nullable Player player) {
+        HideAndSeek plugin = (HideAndSeek) HideAndSeek.getActiveInstance();
+        if (plugin != null) {
+            return plugin.tr(player, "perk." + getId() + ".name");
+        }
+        return Component.text(getId().replace('_', ' '));
     }
 
     @Override
-    public Component getDescription() {
-        return Component.text("No description.", NamedTextColor.GRAY)
-                .decoration(TextDecoration.ITALIC, false);
+    public Component getDescription(@Nullable Player player) {
+        HideAndSeek plugin = (HideAndSeek) HideAndSeek.getActiveInstance();
+        if (plugin != null) {
+            return plugin.tr(player, "perk." + getId() + ".description");
+        }
+        return Component.text(getId().replace('_', ' '));
     }
 
     @Override

@@ -80,7 +80,7 @@ public class AssistantAlertGoal extends Goal {
                 }
             }
             if (seeker != null && seeker.isOnline()) {
-                seeker.sendActionBar(net.kyori.adventure.text.Component.text("ASSISTANT ALERT - Target nearby!", net.kyori.adventure.text.format.NamedTextColor.RED));
+                seeker.sendActionBar(AssistantBridge.tr(plugin, seeker, "assistant.alert_target_nearby"));
             }
         }
     }

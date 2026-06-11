@@ -5,7 +5,6 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,6 +14,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Set;
@@ -31,16 +31,6 @@ public class CamouflagePerk extends BasePerk {
     @Override
     public String getId() {
         return "hider_camouflage";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Camouflage", NamedTextColor.GREEN);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Cleanses negative effects repeatedly.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -67,8 +57,8 @@ public class CamouflagePerk extends BasePerk {
     public void onPurchase(Player player, HideAndSeek plugin) {
         cleanse(player);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.5f);
-        player.showTitle(Title.title(Component.text("Camouflage active", NamedTextColor.GREEN),
-                Component.text("Effects cleansed", NamedTextColor.DARK_GREEN),
+        player.showTitle(Title.title(plugin.tr(player, "perk.hider_camouflage.active"),
+                plugin.tr(player, "perk.hider_camouflage.cleansed"),
                 Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1200), Duration.ofMillis(200))));
 
         long interval = plugin.getSettingRegistry().get("perks.perk.hider_camouflage.re-cleanse-interval-ticks", 100L);

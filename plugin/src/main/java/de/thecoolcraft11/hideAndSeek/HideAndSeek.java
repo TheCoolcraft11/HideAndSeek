@@ -169,7 +169,7 @@ public final class HideAndSeek extends MinigameFramework {
 
         Bukkit.getPluginManager().registerEvents(playerHitListener, this);
         Bukkit.getPluginManager().registerEvents(
-                new EnvironmentalDeathMessageListener(playerHitListener, playerHitListener.getDeathMessageService()),
+                new EnvironmentalDeathMessageListener(this, playerHitListener, playerHitListener.getDeathMessageService()),
                 this);
         Bukkit.getPluginManager().registerEvents(new GameStateListener(this), this);
         Bukkit.getPluginManager().registerEvents(blockModeListener, this);
@@ -226,7 +226,7 @@ public final class HideAndSeek extends MinigameFramework {
         getWikiRegistry().addPlaceholderResolver((player, key) -> {
             if (key.startsWith("setting-")) {
                 Object o = getSettingRegistry().get(key.substring("setting-".length()));
-                if (o == null) return Component.text("N/A");
+                if (o == null) return tr(player, "wiki.setting_not_found");
                 return Component.text(o.toString());
             }
             if (key.startsWith("rarity-")) {
@@ -254,7 +254,7 @@ public final class HideAndSeek extends MinigameFramework {
                     return Component.text(gameItem.getDescription(this, player));
                 }
             }
-            return Component.text("N/A");
+            return tr(player, "wiki.resolver_not_found");
         });
 
         getWikiRegistry().addItemPlaceholderResolver((player, key) -> {

@@ -4,30 +4,19 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class DoubleJumpPerk extends BasePerk {
     @Override
     public String getId() {
         return "hider_double_jump";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Double Jump", NamedTextColor.AQUA);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Press jump mid-air for a second leap.", NamedTextColor.GRAY);
     }
 
     @Override

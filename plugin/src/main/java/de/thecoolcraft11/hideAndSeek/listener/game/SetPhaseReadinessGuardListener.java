@@ -113,10 +113,14 @@ public class SetPhaseReadinessGuardListener implements Listener {
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .collect(Collectors.joining(", "));
 
-        sender.sendMessage(Component.text("Cannot switch to hiding: not everyone is ready.", NamedTextColor.RED));
+        sender.sendMessage(plugin.tr(
+                sender instanceof Player player ? player : null, "listeners.phase_guard.not_ready"));
         if (!names.isEmpty()) {
-            sender.sendMessage(Component.text("Not ready: " + names, NamedTextColor.YELLOW));
+            sender.sendMessage(plugin.tr(
+                    sender instanceof Player player ? player : null, "listeners.phase_guard.not_ready_list",
+                    java.util.Map.of("names", names)));
         }
-        sender.sendMessage(Component.text("Use /mg setphase hiding force to override.", NamedTextColor.GRAY));
+        sender.sendMessage(plugin.tr(
+                sender instanceof Player player ? player : null, "listeners.phase_guard.force_hint"));
     }
 }

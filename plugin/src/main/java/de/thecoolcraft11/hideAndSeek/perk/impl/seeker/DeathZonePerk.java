@@ -22,6 +22,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -33,16 +34,6 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
     @Override
     public String getId() {
         return "seeker_death_zone";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Death Zone", NamedTextColor.DARK_RED);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Draw a danger circle on the map.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -82,7 +73,7 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
     @Override
     public void onPurchase(Player player, HideAndSeek plugin) {
         if (!"seeking".equals(plugin.getStateManager().getCurrentPhaseId())) {
-            player.sendMessage(Component.text("Death Zone can only be used in seeking phase.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.seeker_death_zone.wrong_phase"));
             return;
         }
 
@@ -107,14 +98,14 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
                     .area(minX, minZ, maxX, maxZ)
                     .cursorMode(CursorMode.CIRCLE)
                     .inputMethod(InputMethod.BOTH)
-                    .title("Death Zone")
+                    .title(plugin.trText(player, "perk.seeker_death_zone.map_picker_title"))
                     .showPlayerMarker(true)
                     .freezePlayer(true)
                     .allowSnapToPosition(true)
                     .sendBlockPacketsToPlayer(player)
                     .coordDisplay(CoordDisplay.BOSSBAR)
                     .coordColor(NamedTextColor.RED)
-                    .coordFormat("Creating Death zone at: X: {x}, Z: {z} Radius: {radius}")
+                    .coordFormat(plugin.trText(player, "perk.seeker_death_zone.map_picker_coord_format"))
                     .cursorColor(Color.RED)
                     .rightClickShowsHelp(true)
                     .circleRadius(zoneRadius)
@@ -135,11 +126,11 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
                             for (UUID hiderId : hidersSnapshot) {
                                 Player hider = Bukkit.getPlayer(hiderId);
                                 if (hider != null && hider.isOnline()) {
-                                    hider.sendMessage(Component.text("Death Zone active - leave the zone before time runs out!", NamedTextColor.RED));
+                                    hider.sendMessage(plugin.trText(hider, "perk.seeker_death_zone.hider_warning"));
                                 }
                             }
 
-                            player.sendMessage(Component.text("Death Zone activated.", NamedTextColor.RED));
+                            player.sendMessage(plugin.trText(player, "perk.seeker_death_zone.activated"));
 
                             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                                 for (UUID hiderId : hidersSnapshot) {
@@ -166,12 +157,12 @@ public class DeathZonePerk extends BasePerk implements DelayedActivationPerk {
                         @Override
                         public void onCancel(CancelReason reason) {
                             refundPurchase(player, plugin, cost);
-                            player.sendMessage(Component.text("Death Zone cancelled.", NamedTextColor.GRAY));
+                            player.sendMessage(plugin.trText(player, "perk.seeker_death_zone.cancelled"));
                         }
                     });
         } catch (IllegalStateException ex) {
             refundPurchase(player, plugin, cost);
-            player.sendMessage(Component.text("Could not open the map picker right now. Your points were refunded.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.seeker_death_zone.cant_open"));
         }
     }
 

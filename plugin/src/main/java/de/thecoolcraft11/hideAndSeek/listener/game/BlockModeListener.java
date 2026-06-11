@@ -466,7 +466,7 @@ public class BlockModeListener implements Listener {
             HideAndSeek.getDataController().clearSneakStart(playerId);
             player.setLevel(0);
             player.setExp(0.0f);
-            player.sendMessage(Component.text("You are cursed and cannot hide right now!", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "listeners.block_mode.cursed_cannot_hide"));
             return;
         }
 
@@ -493,9 +493,7 @@ public class BlockModeListener implements Listener {
     private void placeBlockAndHide(Player player) {
         Material chosenBlock = HideAndSeek.getDataController().getChosenBlock(player.getUniqueId());
         if (chosenBlock == null) {
-            player.sendMessage(
-                    Component.text("You haven't chosen a block yet! Use the block selector to change your block",
-                            NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "listeners.block_mode.no_block_selected"));
             player.setLevel(0);
             player.setExp(0.0f);
             return;
@@ -513,9 +511,7 @@ public class BlockModeListener implements Listener {
                 var selector = plugin.getBlockSelectorGUI();
                 var resolvedConfig = selector.resolveConfigForMaterial(allowedBlocks, chosenData.getMaterial());
                 if (resolvedConfig == null || !resolvedConfig.isBlockStateAllowed(chosenData)) {
-                    player.sendMessage(Component.text(
-                            "That block is not allowed on this map! Use the block selector to change your block.",
-                            NamedTextColor.RED));
+                    player.sendMessage(plugin.trText(player, "listeners.block_mode.block_not_allowed"));
                     HideAndSeek.getDataController().clearSneakStart(player.getUniqueId());
                     player.setLevel(0);
                     player.setExp(0.0f);
@@ -557,10 +553,11 @@ public class BlockModeListener implements Listener {
         }
 
         if (targetBlock == null || !targetBlock.getType().isAir()) {
-            String error = inLiquid
-                    ? "Cannot place block here - air above water/lava (within " + maxAirAbove + " blocks) is required!"
-                    : "Cannot place block here - not in air!";
-            player.sendMessage(Component.text(error, NamedTextColor.RED));
+            Component error = inLiquid
+                    ? plugin.tr(player, "listeners.block_mode.cannot_place_water",
+                            java.util.Map.of("maxAirAbove", String.valueOf(maxAirAbove)))
+                    : plugin.tr(player, "listeners.block_mode.cannot_place_not_air");
+            player.sendMessage(error);
             HideAndSeek.getDataController().clearSneakStart(player.getUniqueId());
             player.setLevel(0);
             player.setExp(0.0f);
@@ -672,7 +669,7 @@ public class BlockModeListener implements Listener {
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
 
-        player.sendActionBar(Component.text("Dismount (Shift) to unhide", NamedTextColor.GRAY));
+        player.sendActionBar(plugin.tr(player, "listeners.block_mode.dismount_to_unhide"));
 
         if (plugin.getDebugSettings().isVerboseLoggingEnabled()) {
             plugin.getLogger().info(player.getName() + " hid as a " + chosenBlock.name() + " at " +
@@ -956,7 +953,7 @@ public class BlockModeListener implements Listener {
 
         player.setCollidable(true);
 
-        player.sendMessage(Component.text("You are no longer hidden!", NamedTextColor.YELLOW));
+        player.sendMessage(plugin.trText(player, "listeners.block_mode.no_longer_hidden"));
 
 
         updateBlockDisplay(player);

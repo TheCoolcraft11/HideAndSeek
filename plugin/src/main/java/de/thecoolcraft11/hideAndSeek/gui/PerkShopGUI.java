@@ -148,14 +148,14 @@ public class PerkShopGUI {
 
             ItemMeta meta = sold.getItemMeta();
 
-            meta.displayName(perk.getDisplayName()
+            meta.displayName(perk.getDisplayName(player)
                     .decoration(TextDecoration.STRIKETHROUGH, true)
                     .color(NamedTextColor.GRAY)
                     .decoration(TextDecoration.ITALIC, false)
                     .append(plugin.tr(player, "gui.perks.locked_suffix")));
 
             List<Component> lockedLore = new ArrayList<>();
-            lockedLore.add(perk.getDescription().color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            lockedLore.add(perk.getDescription(player).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
             lockedLore.add(Component.empty());
 
             if (perk.getTarget() == PerkTarget.HIDER) {
@@ -184,13 +184,13 @@ public class PerkShopGUI {
 
         ItemStack item = new ItemStack(perk.getIcon());
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(perk.getDisplayName().decoration(TextDecoration.ITALIC, false));
+        meta.displayName(perk.getDisplayName(player).decoration(TextDecoration.ITALIC, false));
 
         boolean canAfford = balance >= cost;
         boolean isSeekerPerk = perk.getTarget() == PerkTarget.SEEKER;
 
         List<Component> lore = new ArrayList<>();
-        lore.add(perk.getDescription().color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(perk.getDescription(player).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         lore.add(Component.empty());
 
         if (isSeekerPerk) {

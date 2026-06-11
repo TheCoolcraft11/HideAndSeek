@@ -33,8 +33,6 @@ public class SeekerAssistantHandler {
             mob.setCanPickupItems(false);
             mob.setSilent(false);
             mob.setRemoveWhenFarAway(false);
-            mob.customName(net.kyori.adventure.text.Component.text("Seeker's Assistant"));
-            mob.setCustomNameVisible(true);
 
             var speed = mob.getAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED);
             if (speed != null) {

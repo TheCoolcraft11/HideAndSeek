@@ -2,8 +2,6 @@ package de.thecoolcraft11.hideAndSeek.perk;
 
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
@@ -127,8 +125,8 @@ public class AreaWarnHelper {
         int secondsRemaining = ticksRemaining / 20;
         player.showTitle(Title.title(
                 Component.empty(),
-                Component.text("DANGER ZONE - leave in " + secondsRemaining + "s", NamedTextColor.RED)
-                        .decoration(TextDecoration.BOLD, true),
+                plugin.tr(player, "listeners.area_warn.danger_zone_title",
+                        java.util.Map.of("seconds", String.valueOf(secondsRemaining))),
                 Title.Times.times(Duration.ZERO, Duration.ofMillis(1200), Duration.ofMillis(150))
         ));
 
@@ -141,11 +139,12 @@ public class AreaWarnHelper {
 
     private void showBossBar(Player player) {
         BossBar bar = bossBars.computeIfAbsent(player.getUniqueId(), key ->
-                Bukkit.createBossBar("Danger Zone", BarColor.RED, BarStyle.SOLID));
+                Bukkit.createBossBar(plugin.trText(player, "listeners.area_warn.bossbar_name"), BarColor.RED, BarStyle.SOLID));
 
         double progress = Math.clamp((double) ticksRemaining / totalTicks, 0.0, 1.0);
         bar.setProgress(progress);
-        bar.setTitle("Leave the danger zone! " + ticksRemaining / 20 + "s remaining");
+        bar.setTitle(plugin.trText(player, "listeners.area_warn.bossbar_subtitle",
+                java.util.Map.of("seconds", String.valueOf(ticksRemaining / 20))));
 
         if (!bar.getPlayers().contains(player)) {
             bar.addPlayer(player);

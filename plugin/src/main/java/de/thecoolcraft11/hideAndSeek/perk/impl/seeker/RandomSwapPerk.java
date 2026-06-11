@@ -4,8 +4,6 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -13,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,16 +21,6 @@ public class RandomSwapPerk extends BasePerk {
     @Override
     public String getId() {
         return "seeker_random_swap";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Random Swap", NamedTextColor.LIGHT_PURPLE);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Swap positions with a random hider.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -72,7 +61,7 @@ public class RandomSwapPerk extends BasePerk {
         }
 
         if (candidates.isEmpty()) {
-            seeker.sendMessage(Component.text("No valid hider to swap with.", NamedTextColor.RED));
+            seeker.sendMessage(plugin.trText(seeker, "perk.seeker_random_swap.no_target"));
             return;
         }
 

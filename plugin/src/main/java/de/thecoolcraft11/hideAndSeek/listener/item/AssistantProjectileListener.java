@@ -174,12 +174,8 @@ public class AssistantProjectileListener implements Listener {
             hLoc.getWorld().playSound(hLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.5f, 1.5f);
         }
 
-        Component directMsg = Component.text()
-                .append(Component.text("DIRECT HIT! ", NamedTextColor.RED).decorate(TextDecoration.BOLD))
-                .append(Component.text("Assistant projectile hit ", NamedTextColor.GRAY))
-                .append(Component.text(hider.getName(), NamedTextColor.RED))
-                .append(Component.text("!", NamedTextColor.GRAY))
-                .build();
+        Component directMsg = plugin.tr(null, "listeners.assistant_projectile.direct_hit",
+                java.util.Map.of("player", hider.getName()));
 
         for (UUID sid : HideAndSeek.getDataController().getSeekers()) {
             Player seeker = Bukkit.getPlayer(sid);
@@ -188,10 +184,7 @@ public class AssistantProjectileListener implements Listener {
             }
         }
 
-        hider.sendMessage(Component.text()
-                .append(Component.text("You were hit ", NamedTextColor.RED).decorate(TextDecoration.BOLD))
-                .append(Component.text("by the Seeker's Assistant!", NamedTextColor.GRAY))
-                .build());
+        hider.sendMessage(plugin.tr(hider, "listeners.assistant_projectile.hider_hit"));
 
         if (seekerUUID != null) {
             int points = plugin.getSettingRegistry().get("seeker-items.assistant.hit-direct-points", 60);
@@ -224,12 +217,8 @@ public class AssistantProjectileListener implements Listener {
         if (seekerUUID != null) {
             Player seeker = Bukkit.getPlayer(seekerUUID);
             if (seeker != null && seeker.isOnline()) {
-                seeker.sendMessage(Component.text()
-                        .append(Component.text("NEAR HIT! ", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD))
-                        .append(Component.text("Assistant projectile grazed ", NamedTextColor.GRAY))
-                        .append(Component.text(hider.getName(), NamedTextColor.YELLOW))
-                        .append(Component.text("!", NamedTextColor.GRAY))
-                        .build());
+                seeker.sendMessage(plugin.tr(seeker, "listeners.assistant_projectile.near_hit",
+                        java.util.Map.of("player", hider.getName())));
             }
 
             int points = plugin.getSettingRegistry().get("seeker-items.assistant.hit-near-points", 20);
@@ -272,10 +261,8 @@ public class AssistantProjectileListener implements Listener {
 
         ItemStateManager.removeAssistant(assistantUUID);
 
-        Component msg = Component.text()
-                .append(Component.text("Seeker's Assistant", NamedTextColor.RED).decorate(TextDecoration.BOLD))
-                .append(Component.text(" was destroyed (" + maxHits + " hits)!", NamedTextColor.GRAY))
-                .build();
+        Component msg = plugin.tr(null, "listeners.assistant_projectile.assistant_destroyed",
+                java.util.Map.of("hits", String.valueOf(maxHits)));
         Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(msg));
     }
 

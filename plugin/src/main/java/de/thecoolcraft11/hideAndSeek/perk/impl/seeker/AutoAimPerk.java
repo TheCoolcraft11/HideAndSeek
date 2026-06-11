@@ -4,10 +4,10 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+
+import javax.annotation.Nullable;
 
 public class AutoAimPerk extends BasePerk {
 
@@ -16,16 +16,6 @@ public class AutoAimPerk extends BasePerk {
     @Override
     public String getId() {
         return ID;
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Auto Aim", NamedTextColor.AQUA);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Guides the Seeker's Blade toward nearby hiders.", NamedTextColor.GRAY);
     }
 
     @Override

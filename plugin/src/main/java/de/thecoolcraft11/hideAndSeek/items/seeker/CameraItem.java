@@ -325,7 +325,7 @@ public class CameraItem implements GameItem {
         if (state.visionMode() == CameraVisionMode.TERMINAL_VISION || state.visionMode() == CameraVisionMode.NIGHT_VISION) {
             setViewerGlow(seeker, plugin, true);
         } else {
-            playCameraSkinCosmetics(seeker, state.skinVariant());
+            playCameraSkinCosmetics(seeker, state.skinVariant(), plugin);
         }
 
         return true;
@@ -342,7 +342,7 @@ public class CameraItem implements GameItem {
         return ItemSkinSelectionService.isUnlocked(seeker.getUniqueId(), ID, selected) ? selected : null;
     }
 
-    private static void playCameraSkinCosmetics(Player seeker, String skinVariant) {
+    private static void playCameraSkinCosmetics(Player seeker, String skinVariant, HideAndSeek plugin) {
         if (seeker == null || skinVariant == null || skinVariant.isBlank()) {
             return;
         }
@@ -358,12 +358,12 @@ public class CameraItem implements GameItem {
                         12, 0.45, 0.55, 0.45, 0.02);
                 seeker.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, seeker.getLocation().clone().add(0, 1.2, 0),
                         10, 0.35, 0.45, 0.35, 0.01);
-                seeker.sendActionBar(Component.text("Orbital scan active", NamedTextColor.GOLD));
+                seeker.sendActionBar(plugin.tr(seeker, "item.camera.messages.orbital_scan_active"));
             }
             case SKIN_SPY_LENS -> {
                 seeker.getWorld().spawnParticle(Particle.WITCH, seeker.getLocation().clone().add(0, 1.1, 0), 10, 0.3,
                         0.35, 0.3, 0.01);
-                seeker.sendActionBar(Component.text("Spy Lens focus", NamedTextColor.AQUA));
+                seeker.sendActionBar(plugin.tr(seeker, "item.camera.messages.spy_lens_focus"));
             }
         }
 
@@ -640,7 +640,8 @@ public class CameraItem implements GameItem {
             }
 
             if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-                lore.add(Component.text("Not available on this server version", NamedTextColor.DARK_RED)
+                lore.add(MiniMessage.miniMessage().deserialize(
+                        plugin.trText(null, "item.camera.messages.nms_unavailable_lore"))
                         .decoration(TextDecoration.ITALIC, false));
             }
 

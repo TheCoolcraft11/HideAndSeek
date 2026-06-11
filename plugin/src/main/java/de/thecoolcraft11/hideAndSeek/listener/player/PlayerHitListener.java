@@ -151,10 +151,8 @@ public class PlayerHitListener implements Listener {
 
                 Component customKillMessage = deathMessageService.getKillMessage(killer, deceased);
                 if (customKillMessage == null) {
-                    customKillMessage = Component.text(killer.getName(), NamedTextColor.GREEN)
-                            .append(Component.text(" found ", NamedTextColor.YELLOW))
-                            .append(Component.text(deceased.getName(), NamedTextColor.GREEN))
-                            .append(Component.text("!", NamedTextColor.YELLOW));
+                    customKillMessage = plugin.tr(null, "listeners.player_hit.found",
+                            java.util.Map.of("killer", killer.getName(), "victim", deceased.getName()));
                 }
 
                 event.deathMessage(customKillMessage);
@@ -296,7 +294,7 @@ public class PlayerHitListener implements Listener {
         playAssistantDeathEffects(loc);
 
         if (killer != null && HideAndSeek.getDataController().getHiders().contains(killer.getUniqueId())) {
-            killer.sendMessage(Component.text("You destroyed a Seeker Assistant!", NamedTextColor.GREEN));
+            killer.sendMessage(plugin.trText(killer, "listeners.player_hit.assistant_destroyed"));
         }
 
         ItemStateManager.removeAssistant(assistantId);
@@ -450,7 +448,7 @@ public class PlayerHitListener implements Listener {
                         PlayerStateResetUtil.resetPlayerCompletely(player, false);
                         SeekerItems.giveItemsWithLoadout(player, plugin);
                         plugin.getPerkShopGUI().refreshForPlayer(player);
-                        player.sendMessage(Component.text("You were transformed! You're now a seeker!", NamedTextColor.GREEN));
+                        player.sendMessage(plugin.trText(player, "listeners.player_hit.transformed_seeker"));
                         plugin.getAntiCheatVisibilityListener().refreshSoon();
                     }, 3L);
                 }
@@ -470,7 +468,7 @@ public class PlayerHitListener implements Listener {
                     HiderItems.giveItems(player, plugin, false);
                     plugin.getPerkShopGUI().refreshForPlayer(player);
 
-                    player.sendMessage(Component.text("You respawned! Keep hiding!", NamedTextColor.GREEN));
+                    player.sendMessage(plugin.trText(player, "listeners.player_hit.respawned_hiding"));
                     plugin.getAntiCheatVisibilityListener().refreshSoon();
                 }, 3L);
             }
@@ -488,7 +486,8 @@ public class PlayerHitListener implements Listener {
         plugin.getSeekingBossBarService().onHiderEliminated();
 
         if (seeker != null) {
-            seeker.sendMessage(Component.text("+" + seekerPoints + " points for finding " + hider.getName() + "!", NamedTextColor.GOLD));
+            seeker.sendMessage(plugin.trText(seeker, "listeners.player_hit.points_for_finding",
+                    java.util.Map.of("points", String.valueOf(seekerPoints), "player", hider.getName())));
         }
 
         if (gameStyle == GameStyleEnum.INVASION || gameStyle == GameStyleEnum.INFINITE) {
@@ -509,7 +508,7 @@ public class PlayerHitListener implements Listener {
             case INFINITE:
 
 
-                hider.sendMessage(Component.text("You'll respawn and can continue hiding!", NamedTextColor.GOLD));
+                hider.sendMessage(plugin.trText(hider, "listeners.player_hit.will_respawn"));
                 break;
         }
         Bukkit.getOnlinePlayers().forEach(player -> player.playSound(hider.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 0.5f, 1.0f));
@@ -539,8 +538,8 @@ public class PlayerHitListener implements Listener {
             SpectatorTeleportGUI.give(plugin, hider);
 
             Title title = Title.title(
-                    Component.text("YOU WERE FOUND!", NamedTextColor.RED),
-                    Component.text("You are now spectating", NamedTextColor.GRAY),
+                    plugin.tr(hider, "listeners.player_hit.found_title"),
+                    plugin.tr(hider, "listeners.player_hit.found_subtitle"),
                     Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
             );
             hider.showTitle(title);
@@ -591,8 +590,8 @@ public class PlayerHitListener implements Listener {
 
 
             Title title = Title.title(
-                    Component.text("YOU'RE NOW A SEEKER!", NamedTextColor.RED),
-                    Component.text("Help find the remaining hiders!", NamedTextColor.YELLOW),
+                    plugin.tr(hider, "listeners.player_hit.seeker_title"),
+                    plugin.tr(hider, "listeners.player_hit.seeker_subtitle"),
                     Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
             );
             hider.showTitle(title);
@@ -635,7 +634,8 @@ public class PlayerHitListener implements Listener {
         boolean refund = plugin.getSettingRegistry().get("perks.refund-hider-perks-on-convert", false);
         int refunded = plugin.getPerkStateManager().clearPurchasedPerks(hider.getUniqueId(), PerkTarget.HIDER, refund);
         if (refund && refunded > 0) {
-            hider.sendMessage(Component.text("Your hider perks were removed and " + refunded + " points were refunded.", NamedTextColor.YELLOW));
+            hider.sendMessage(plugin.trText(hider, "listeners.player_hit.perks_refunded",
+                    java.util.Map.of("points", String.valueOf(refunded))));
         }
     }
 
@@ -709,32 +709,22 @@ public class PlayerHitListener implements Listener {
     }
 
     private Component buildFallbackEnvironmentalDeathMessage(Player victim, EnvironmentalDeathCause cause) {
-        return switch (cause) {
-            case CAMPING -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" was struck down for camping too long.", NamedTextColor.YELLOW));
-            case WORLD_BORDER -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" was consumed by the world border.", NamedTextColor.YELLOW));
-            case DROWNING -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" drowned after staying underwater too long.", NamedTextColor.YELLOW));
-            case FIRE -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" burned for too long.", NamedTextColor.YELLOW));
-            case LAVA -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" sank into lava and could not recover.", NamedTextColor.YELLOW));
-            case SUFFOCATION -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" suffocated in a tight space.", NamedTextColor.YELLOW));
-            case FREEZING -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" froze solid.", NamedTextColor.YELLOW));
-            case HOT_FLOOR -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" stood on scorching ground for too long.", NamedTextColor.YELLOW));
-            case CONTACT -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" was shredded by hazardous terrain.", NamedTextColor.YELLOW));
-            case PERK_DEATH_ZONE -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" failed to escape the Death Zone.", NamedTextColor.YELLOW));
-            case PERK_RELOCATE -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" did not relocate in time.", NamedTextColor.YELLOW));
-            default -> Component.text(victim.getName(), NamedTextColor.GREEN)
-                    .append(Component.text(" was eliminated by the environment.", NamedTextColor.YELLOW));
+        String key = switch (cause) {
+            case CAMPING -> "listeners.environmental_death.camping";
+            case WORLD_BORDER -> "listeners.environmental_death.world_border";
+            case DROWNING -> "listeners.environmental_death.drowning";
+            case FIRE -> "listeners.environmental_death.fire";
+            case LAVA -> "listeners.environmental_death.lava";
+            case SUFFOCATION -> "listeners.environmental_death.suffocation";
+            case FREEZING -> "listeners.environmental_death.freezing";
+            case HOT_FLOOR -> "listeners.environmental_death.hot_floor";
+            case CONTACT -> "listeners.environmental_death.contact";
+            case PERK_DEATH_ZONE -> "listeners.environmental_death.death_zone";
+            case PERK_RELOCATE -> "listeners.environmental_death.relocate";
+            default -> "listeners.environmental_death.generic";
         };
+        return Component.text(victim.getName(), NamedTextColor.GREEN)
+                .append(plugin.tr(victim, key));
     }
 
     public DeathMessageService getDeathMessageService() {

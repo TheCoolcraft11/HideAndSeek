@@ -44,7 +44,7 @@ public class GameStateListener implements Listener {
         if (currentPhase.equals("seeking") || currentPhase.equals("hiding")) {
 
             PlayerStateResetUtil.resetPlayerForSpectator(player, false);
-            player.sendMessage(Component.text("A game is in progress. You're spectating.", NamedTextColor.YELLOW));
+            player.sendMessage(plugin.trText(player, "listeners.game_state.spectating"));
             teleportNextTick(player, resolveIngameJoinSpawn());
         } else {
 

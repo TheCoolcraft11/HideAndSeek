@@ -4,8 +4,6 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -13,6 +11,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,16 +23,6 @@ public class ExtraLifePerk extends BasePerk {
     @Override
     public String getId() {
         return "hider_extra_life";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Extra Life", NamedTextColor.LIGHT_PURPLE);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Earn absorption hearts from points.", NamedTextColor.GRAY);
     }
 
     @Override

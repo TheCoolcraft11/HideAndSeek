@@ -139,8 +139,7 @@ public class TrackerCrossbowItem implements GameItem {
         }
 
         if (!hasSpeedBoost && !hasKnockbackStick) {
-            player.sendMessage(
-                    Component.text("You don't have Speed Boost or Knockback Stick selected!", NamedTextColor.YELLOW));
+            player.sendMessage(plugin.trText(player, "item.crossbow.messages.no_upgrade_items"));
         }
     }
 }

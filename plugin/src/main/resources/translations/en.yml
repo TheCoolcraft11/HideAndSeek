@@ -1006,6 +1006,12 @@ item:
       nms_unavailable: "<red>The Seeker's Assistant is not available on this server version.</red>"
       activated: "<aqua>You are now a Ghost! Phasing enabled for {duration}s.</aqua>"
       materialized: "<green>You have successfully materialized!</green>"
+      nms_unavailable_lore: "<dark_red>Not available on this server version</dark_red>"
+      error_outside_border: "You cannot materialize outside the world border!"
+      error_too_far: "You wandered too far from your physical body!"
+      error_in_wall: "You materialized inside a wall!"
+      error_too_dark: "It's too dark to materialize here!"
+      error_no_path: "There is no physical path to this location!"
       error: "<red>{reason}</red>"
     skin:
       spectral_form: "<gold><b>Spectral Form</b></gold>"
@@ -1133,6 +1139,7 @@ item:
     messages:
       only_hiders: "<red>Only hiders can use this item.</red>"
       activated: "<gold>Revive mode activated for {duration} seconds!</gold>"
+      uses_exhausted: "<red>You've already used your totem!</red>"
       revived: "<gold>You were revived!</gold>"
     skin:
       phoenix_feather: "<gold><b>Phoenix Feather</b></gold>"
@@ -1142,6 +1149,7 @@ item:
     lore: "<gray>Hit to upgrade speed & knockback</gray>"
     description: "Hit seekers with arrows to upgrade items, grants {points} points per hit."
     messages:
+      no_upgrade_items: "<yellow>You don't have Speed Boost or Knockback Stick selected!</yellow>"
       hit: "<gold>Crossbow hit! +{points} points</gold>"
       hit_progress: "<green>Hit seeker! {current}/{required}</green>"
     skin:
@@ -1157,6 +1165,7 @@ item:
       max_active: "<red>You already have {max} assistants active!</red>"
       summon_failed: "<red>Failed to summon assistant.</red>"
       summoned: "<red>Assistant summoned! </red><gray>({lifetime}s lifetime)</gray>"
+      alert_target_nearby: "<red>ASSISTANT ALERT - Target nearby!</red>"
     skin:
       steel_golem: "<gold><b>Steel Golem</b></gold>"
       ghost_drone: "<gold><b>Ghost Drone</b></gold>"
@@ -1197,6 +1206,10 @@ item:
       placed: "<green>Camera placed! ({count}/{maxCameras})</green>"
       no_cameras: "<red>You have no cameras placed.</red>"
       all_cameras_gone: "<red>All your cameras are gone.</red>"
+      nms_unavailable_lore: "<dark_red>Not available on this server version</dark_red>"
+      orbital_scan_active: "<gold>Orbital scan active</gold>"
+      spy_lens_focus: "<aqua>Spy Lens focus</aqua>"
+      detached: "<yellow>Detached from camera.</yellow>"
       client_unsupported: "<red>Your client does not support camera mode on this server build.</red>"
     skin:
       spy_lens: "<gold><b>Spy Lens</b></gold>"
@@ -1264,6 +1277,10 @@ item:
     name: "<dark_purple><b>Phantom Viewer</b></dark_purple>"
     lore: "<gray>Right click to capture phantom snapshots</gray>"
     description: "Capture a phantom snapshot showing a hider's view."
+    applied_name: "<dark_aqua><bold>Phantom Viewer</bold></dark_aqua>"
+    applied_lore: "<gray>Right click to capture a lo-fi phantom snapshot</gray>"
+    snapshot_name: "<aqua>Phantom Snapshot</aqua>"
+    snapshot_lore: "<aqua>Snapshot: {target}</aqua>"
     messages:
       seeker_only: "<red>Only seekers can use this item.</red>"
       no_target: "<red>No valid hider target found.</red>"
@@ -1308,3 +1325,237 @@ item:
       energy_blade: "<gold><b>Energy Blade</b></gold>"
       the_ban_hammer: "<gold><b>The Ban Hammer</b></gold>"
       giant_spatula: "<gold><b>Giant Spatula</b></gold>"
+  common:
+    not_implemented: "<yellow>Some items you selected are not implemented yet. Using default items instead.</yellow>"
+  ban_hammer:
+    banned_text: "<red><bold>BANNED</bold></red>"
+
+listeners:
+  environmental_death:
+    camping: "<yellow> was struck down for camping too long.</yellow>"
+    world_border: "<yellow> was consumed by the world border.</yellow>"
+    drowning: "<yellow> drowned after staying underwater too long.</yellow>"
+    fire: "<yellow> burned for too long.</yellow>"
+    lava: "<yellow> sank into lava and could not recover.</yellow>"
+    suffocation: "<yellow> suffocated in a tight space.</yellow>"
+    freezing: "<yellow> froze solid.</yellow>"
+    hot_floor: "<yellow> stood on scorching ground for too long.</yellow>"
+    contact: "<yellow> was shredded by hazardous terrain.</yellow>"
+    death_zone: "<yellow> failed to escape the Death Zone.</yellow>"
+    relocate: "<yellow> did not relocate in time.</yellow>"
+    generic: "<yellow> was eliminated by the environment.</yellow>"
+  player_hit:
+    assistant_destroyed: "<green>You destroyed a Seeker Assistant!</green>"
+    transformed_seeker: "<green>You were transformed! You're now a seeker!</green>"
+    respawned_hiding: "<green>You respawned! Keep hiding!</green>"
+    points_for_finding: "<gold>+{points} points for finding {player}!</gold>"
+    will_respawn: "<gold>You'll respawn and can continue hiding!</gold>"
+    found_title: "<red><b>YOU WERE FOUND!</b></red>"
+    found_subtitle: "<gray>You are now spectating</gray>"
+    seeker_title: "<red><b>YOU'RE NOW A SEEKER!</b></red>"
+    seeker_subtitle: "<yellow>Help find the remaining hiders!</yellow>"
+    perks_refunded: "<yellow>Your hider perks were removed and {points} points were refunded.</yellow>"
+    found: "<green>{killer}</green> <yellow>found </yellow><green>{victim}</green><yellow>!</yellow>"
+  seeker_kill:
+    seeker_killed: "<green>You killed {player} by looking at them!</green>"
+    hider_killed: "<red>You were killed by {player} through their gaze!</red>"
+  assistant_projectile:
+    direct_hit: "<red><b>DIRECT HIT! </b></red><gray>Assistant projectile hit </gray><red>{player}</red><gray>!</gray>"
+    hider_hit: "<red><b>You were hit </b></red><gray>by the Seeker's Assistant!</gray>"
+    near_hit: "<yellow><b>NEAR HIT! </b></yellow><gray>Assistant projectile grazed </gray><yellow>{player}</yellow><gray>!</gray>"
+    assistant_destroyed: "<red><b>Seeker's Assistant</b></red><gray> was destroyed ({hits} hits)!</gray>"
+  slowness_ball:
+    hit_message: "<aqua>You've been hit by a slowness ball!</aqua>"
+  camera_view:
+    mode_night_vision: "<green>Night Vision</green>"
+    mode_terminal_vision: "<light_purple>Terminal Vision</light_purple>"
+    mode_normal: "<aqua>Normal</aqua>"
+  perk:
+    shop_closed: "<red>The perk shop is only open during the seeking phase.</red>"
+    shop_inventory_mode: "<gray>Your perk shop is configured to use the inventory instead.</gray>"
+  block_mode:
+    cursed_cannot_hide: "<red>You are cursed and cannot hide right now!</red>"
+    no_block_selected: "<red>You haven't chosen a block yet! Use the block selector to change your block</red>"
+    block_not_allowed: "<red>That block is not allowed on this map! Use the block selector to change your block.</red>"
+    cannot_place_water: "<red>Cannot place block here - air above water/lava (within {maxAirAbove} blocks) is required!</red>"
+    cannot_place_not_air: "<red>Cannot place block here - not in air!</red>"
+    dismount_to_unhide: "<gray>Dismount (Shift) to unhide</gray>"
+    no_longer_hidden: "<yellow>You are no longer hidden!</yellow>"
+  game_state:
+    spectating: "<yellow>A game is in progress. You're spectating.</yellow>"
+  camping:
+    stop_camping_title: "<red><b>STOP CAMPING</b></red>"
+    stop_camping_subtitle: "<gold>Move now or keep taking damage</gold>"
+    move_title: "<yellow><b>MOVE</b></yellow>"
+    move_subtitle: "<red>Camping punish in {seconds}s</red>"
+  phase_guard:
+    not_ready: "<red>Cannot switch to hiding: not everyone is ready.</red>"
+    not_ready_list: "<yellow>Not ready: {names}</yellow>"
+    force_hint: "<gray>Use /mg setphase hiding force to override.</gray>"
+  area_warn:
+    danger_zone_title: "<red><bold>DANGER ZONE - leave in {seconds}s</bold></red>"
+    bossbar_name: "Danger Zone"
+    bossbar_subtitle: "Leave the danger zone! {seconds}s remaining"
+
+loadout:
+  updated_by_admin: "<yellow>Your loadout was updated by an admin. Removed {count} disallowed item(s).</yellow>"
+
+perk:
+  no_description: "<gray>No description.</gray>"
+  purchase:
+    already_owned: "<red>You already have this perk.</red>"
+    at_limit: "<red>That perk is already at the global player limit.</red>"
+    cooldown: "<red>You can buy that perk again in {seconds}s.</red>"
+    not_enough_points: "<red>Not enough points! Need {cost}, have {balance}.</red>"
+    activation_failed: "<red>That perk could not be activated.</red>"
+    points_refunded: "<red>Your points were refunded.</red>"
+    perk_activated: "<gold>Perk activated: </gold>"
+  shop:
+    vending_machine_name: "<gold><bold>Perk Shop</bold></gold>"
+  hider_trap_sense:
+    name: "<red>Trap Sense</red>"
+    description: "<gray>Highlights nearby traps.</gray>"
+    trap_nearby: "<red>Trap nearby!</red>"
+  hider_shadow_step:
+    name: "<aqua>Shadow Step</aqua>"
+    description: "<gray>Auto-teleports once at critical HP.</gray>"
+    charging: "<yellow>Shadow Step charging...</yellow>"
+    activated: "<aqua>Shadow Step!</aqua>"
+  hider_seeker_warning:
+    name: "<red>Seeker Warning</red>"
+    description: "<gray>Warns when a seeker approaches.</gray>"
+    seeker_approaching: "<red>Seeker approaching!</red>"
+  hider_extra_life:
+    name: "<light_purple>Extra Life</light_purple>"
+    description: "<gray>Earn absorption hearts from points.</gray>"
+  hider_camouflage:
+    name: "<green>Camouflage</green>"
+    description: "<gray>Cleanses negative effects repeatedly.</gray>"
+    active: "<green>Camouflage active</green>"
+    cleansed: "<dark_green>Effects cleansed</dark_green>"
+  hider_adaptive_speed:
+    name: "<yellow>Adaptive Speed</yellow>"
+    description: "<gray>Gain Speed when low HP.</gray>"
+  hider_double_jump:
+    name: "<aqua>Double Jump</aqua>"
+    description: "<gray>Press jump mid-air for a second leap.</gray>"
+  seeker_map_teleport:
+    name: "<gold>Map Teleport</gold>"
+    description: "<gray>Select a teleport point on the map.</gray>"
+    map_picker_title: "Map Teleport"
+    map_picker_coord_format: "Teleporting to: X: {x}, Z: {z}"
+    too_close: "<red>Too close to a hider.</red>"
+    cancelled: "<gray>Teleport cancelled.</gray>"
+    cant_open: "<red>Could not open the map picker right now. Your points were refunded.</red>"
+  seeker_death_zone:
+    name: "<dark_red>Death Zone</dark_red>"
+    description: "<gray>Draw a danger circle on the map.</gray>"
+    map_picker_title: "Death Zone"
+    map_picker_coord_format: "Creating Death zone at: X: {x}, Z: {z} Radius: {radius}"
+    wrong_phase: "<red>Death Zone can only be used in seeking phase.</red>"
+    hider_warning: "<red>Death Zone active - leave the zone before time runs out!</red>"
+    activated: "<red>Death Zone activated.</red>"
+    cancelled: "<gray>Death Zone cancelled.</gray>"
+    cant_open: "<red>Could not open the map picker right now. Your points were refunded.</red>"
+  seeker_sword_bounce:
+    name: "<aqua>Sword Bounce</aqua>"
+    description: "<gray>The Seeker's Blade ricochets to nearby hiders after each hit.</gray>"
+  seeker_hit_display:
+    name: "<green>Hit Display</green>"
+    description: "<gray>Shows the sword's projected flight curve while charging.</gray>"
+  seeker_auto_aim:
+    name: "<aqua>Auto Aim</aqua>"
+    description: "<gray>Guides the Seeker's Blade toward nearby hiders.</gray>"
+  seeker_scent_trail:
+    name: "<gold>Scent Trail</gold>"
+    description: "<gray>Shows recent hider movement trail.</gray>"
+  seeker_relocate:
+    name: "<red>Relocate</red>"
+    description: "<gray>Force hiders to move away from their current position.</gray>"
+    activated: "<red>Relocate activated - move out of your marked zone!</red>"
+  seeker_random_swap:
+    name: "<light_purple>Random Swap</light_purple>"
+    description: "<gray>Swap positions with a random hider.</gray>"
+    no_target: "<red>No valid hider to swap with.</red>"
+  seeker_proximity_meter:
+    name: "<aqua>Proximity Meter</aqua>"
+    description: "<gray>Subtitle ping based on nearest hider distance.</gray>"
+    burning_hot: "<dark_red><bold>BURNING HOT</bold></dark_red>"
+    very_warm: "<red>Very Warm</red>"
+    warm: "<gold>Warm</gold>"
+    lukewarm: "<yellow>Lukewarm</yellow>"
+    cool: "<aqua>Cool</aqua>"
+    cold: "<blue>Cold</blue>"
+  seeker_elytra_rush:
+    name: "<aqua>Elytra Rush</aqua>"
+    description: "<gray>Temporary gliding boost.</gray>"
+
+death_messages:
+  msg_classic:
+    camping: "<green>{victim}</green><yellow> was struck down for camping too long.</yellow>"
+    world_border: "<green>{victim}</green><yellow> was consumed by the world border.</yellow>"
+    drowning: "<green>{victim}</green><yellow> drowned after staying underwater too long.</yellow>"
+    fire: "<green>{victim}</green><yellow> burned for too long.</yellow>"
+    lava: "<green>{victim}</green><yellow> sank into lava and could not recover.</yellow>"
+    suffocation: "<green>{victim}</green><yellow> suffocated in a tight space.</yellow>"
+    freezing: "<green>{victim}</green><yellow> froze solid.</yellow>"
+    hot_floor: "<green>{victim}</green><yellow> stood on scorching ground for too long.</yellow>"
+    contact: "<green>{victim}</green><yellow> was shredded by hazardous terrain.</yellow>"
+    perk_death_zone: "<green>{victim}</green><yellow> failed to escape the Death Zone.</yellow>"
+    perk_relocate: "<green>{victim}</green><yellow> did not relocate in time.</yellow>"
+    "default": "<green>{victim}</green><yellow> was eliminated by the environment.</yellow>"
+    kill: "<red>{killer}</red><gray> eliminated </gray><green>{victim}</green><gray>.</gray>"
+  msg_creative:
+    camping: "<yellow>{victim}</yellow><aqua> became a permanent campfire.</aqua>"
+    world_border: "<yellow>{victim}</yellow><aqua> reached the edge of reality.</aqua>"
+    drowning: "<yellow>{victim}</yellow><aqua> forgot that breathing is useful underwater.</aqua>"
+    fire: "<yellow>{victim}</yellow><aqua> tested a very bad fire-resistance theory.</aqua>"
+    lava: "<yellow>{victim}</yellow><aqua> discovered lava is not a jacuzzi.</aqua>"
+    suffocation: "<yellow>{victim}</yellow><aqua> tried to phase through a block and failed.</aqua>"
+    freezing: "<yellow>{victim}</yellow><aqua> turned into a hide-and-seek popsicle.</aqua>"
+    hot_floor: "<yellow>{victim}</yellow><aqua> learned magma is just spicy flooring.</aqua>"
+    contact: "<yellow>{victim}</yellow><aqua> hugged dangerous plants a bit too hard.</aqua>"
+    perk_death_zone: "<yellow>{victim}</yellow><aqua> couldn't handle the pressure zone.</aqua>"
+    perk_relocate: "<yellow>{victim}</yellow><aqua> teleported to oblivion.</aqua>"
+    "default": "<yellow>{victim}</yellow><aqua> fell victim to fate.</aqua>"
+    kill: "<light_purple>{killer}</light_purple><gray> took </gray><yellow>{victim}</yellow><gray> down!</gray>"
+  msg_dramatic:
+    camping: "<red>{victim}</red><dark_purple>'s reign ended... by their own indolence.</dark_purple>"
+    world_border: "<red>{victim}</red><dark_purple> ventured beyond the veil and was claimed by the void.</dark_purple>"
+    drowning: "<red>{victim}</red><dark_purple> was silenced by the crushing depths.</dark_purple>"
+    fire: "<red>{victim}</red><dark_purple> was consumed by relentless flames.</dark_purple>"
+    lava: "<red>{victim}</red><dark_purple> sank into molten ruin.</dark_purple>"
+    suffocation: "<red>{victim}</red><dark_purple> was entombed where no breath remained.</dark_purple>"
+    freezing: "<red>{victim}</red><dark_purple> was claimed by merciless frost.</dark_purple>"
+    hot_floor: "<red>{victim}</red><dark_purple> could not endure the searing ground.</dark_purple>"
+    contact: "<red>{victim}</red><dark_purple> bled out against the cruel terrain.</dark_purple>"
+    perk_death_zone: "<red>{victim}</red><dark_purple> could not escape the wrath of the Death Zone.</dark_purple>"
+    perk_relocate: "<red>{victim}</red><dark_purple> failed to heed relocation and perished.</dark_purple>"
+    "default": "<red>{victim}</red><dark_purple> met their final doom.</dark_purple>"
+    kill: "<dark_red>{killer}</dark_red><gold> has vanquished </gold><red>{victim}</red><gold> in glorious combat!</gold>"
+  msg_humorous:
+    camping: "<yellow>{victim}</yellow><green> became one with the campfire. Literally.</green>"
+    world_border: "<yellow>{victim}</yellow><green> tried to find the end of the world... and found it.</green>"
+    drowning: "<yellow>{victim}</yellow><green> ran out of air and out of excuses.</green>"
+    fire: "<yellow>{victim}</yellow><green> was grilled to medium-well.</green>"
+    lava: "<yellow>{victim}</yellow><green> took a lava bath and instantly regretted it.</green>"
+    suffocation: "<yellow>{victim}</yellow><green> learned that walls are not breathable.</green>"
+    freezing: "<yellow>{victim}</yellow><green> became a limited-edition ice sculpture.</green>"
+    hot_floor: "<yellow>{victim}</yellow><green> did the magma dance one step too long.</green>"
+    contact: "<yellow>{victim}</yellow><green> hugged a cactus and lost the argument.</green>"
+    perk_death_zone: "<yellow>{victim}</yellow><green> discovered that zones have feelings too.</green>"
+    perk_relocate: "<yellow>{victim}</yellow><green> teleported into the shadow realm by accident.</green>"
+    "default": "<yellow>{victim}</yellow><green> became part of the environment.</green>"
+    kill: "<aqua>{killer}</aqua><gray> sent </gray><yellow>{victim}</yellow><gray> to the shadow realm!</gray>"
+
+entity:
+  seeker_assistant:
+    name: "<red>Seeker's Assistant</red>"
+
+tab:
+  header_not_configured: "<red>Header not configured</red>"
+  footer_not_configured: "<red>Footer not configured</red>"
+
+wiki:
+  setting_not_found: "<gray>N/A</gray>"
+  resolver_not_found: "<gray>N/A</gray>"

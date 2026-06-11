@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.UUID;
 
@@ -29,16 +30,6 @@ public class MapTeleportPerk extends BasePerk implements DelayedActivationPerk {
     @Override
     public String getId() {
         return "seeker_map_teleport";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Map Teleport", NamedTextColor.GOLD);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Select a teleport point on the map.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -81,14 +72,14 @@ public class MapTeleportPerk extends BasePerk implements DelayedActivationPerk {
                     .area(minX, minZ, maxX, maxZ)
                     .cursorMode(CursorMode.POINT)
                     .inputMethod(InputMethod.BOTH)
-                    .title("Map Teleport")
+                    .title(plugin.trText(player, "perk.seeker_map_teleport.map_picker_title"))
                     .showPlayerMarker(true)
                     .freezePlayer(true)
                     .allowSnapToPosition(true)
                     .sendBlockPacketsToPlayer(player)
                     .coordDisplay(CoordDisplay.BOSSBAR)
                     .coordColor(NamedTextColor.RED)
-                    .coordFormat("Teleporting to: X: {x}, Z: {z}")
+                    .coordFormat(plugin.trText(player, "perk.seeker_map_teleport.map_picker_coord_format"))
                     .cursorColor(Color.ORANGE)
                     .rightClickShowsHelp(true)
                     .mapViewHeight(mapViewHeight)
@@ -108,7 +99,7 @@ public class MapTeleportPerk extends BasePerk implements DelayedActivationPerk {
                                     continue;
                                 }
                                 if (hider.getLocation().distance(target) < minDistance) {
-                                    player.sendMessage(Component.text("Too close to a hider.", NamedTextColor.RED));
+                                    player.sendMessage(plugin.trText(player, "perk.seeker_map_teleport.too_close"));
                                     return;
                                 }
                             }
@@ -120,12 +111,12 @@ public class MapTeleportPerk extends BasePerk implements DelayedActivationPerk {
                         @Override
                         public void onCancel(CancelReason reason) {
                             refundPurchase(player, plugin, cost);
-                            player.sendMessage(Component.text("Teleport cancelled.", NamedTextColor.GRAY));
+                            player.sendMessage(plugin.trText(player, "perk.seeker_map_teleport.cancelled"));
                         }
                     });
         } catch (IllegalStateException ex) {
             refundPurchase(player, plugin, cost);
-            player.sendMessage(Component.text("Could not open the map picker right now. Your points were refunded.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.seeker_map_teleport.cant_open"));
         }
     }
 

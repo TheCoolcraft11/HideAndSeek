@@ -4,8 +4,6 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,6 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -25,16 +24,6 @@ public class ElytraRushPerk extends BasePerk {
     @Override
     public String getId() {
         return "seeker_elytra_rush";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Elytra Rush", NamedTextColor.AQUA);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Temporary gliding boost.", NamedTextColor.GRAY);
     }
 
     @Override

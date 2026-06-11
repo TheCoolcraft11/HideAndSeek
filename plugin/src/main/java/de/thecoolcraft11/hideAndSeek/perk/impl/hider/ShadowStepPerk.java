@@ -5,13 +5,13 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -21,16 +21,6 @@ public class ShadowStepPerk extends BasePerk {
     @Override
     public String getId() {
         return "hider_shadow_step";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Shadow Step", NamedTextColor.AQUA);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Auto-teleports once at critical HP.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -73,7 +63,7 @@ public class ShadowStepPerk extends BasePerk {
             plugin.getPerkStateManager().shadowStepTriggered.put(player.getUniqueId(), true);
             player.showTitle(Title.title(
                     Component.empty(),
-                    Component.text("Shadow Step charging...", NamedTextColor.YELLOW),
+                    plugin.tr(player, "perk.hider_shadow_step.charging"),
                     Title.Times.times(Duration.ZERO, Duration.ofMillis(1400), Duration.ofMillis(120))
             ));
             player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 0.9f, 1.0f);
@@ -98,7 +88,7 @@ public class ShadowStepPerk extends BasePerk {
                 target.getWorld().spawnParticle(Particle.PORTAL, target, 30, 0.5, 0.8, 0.5, 0.05);
                 oldLoc.getWorld().playSound(oldLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                 target.getWorld().playSound(target, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
-                player.showTitle(Title.title(Component.text("Shadow Step!", NamedTextColor.AQUA), Component.empty(),
+                player.showTitle(Title.title(plugin.tr(player, "perk.hider_shadow_step.activated"), Component.empty(),
                         Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(900), Duration.ofMillis(300))));
 
                 onExpire(player, plugin);

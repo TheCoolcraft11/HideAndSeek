@@ -6,14 +6,13 @@ import de.thecoolcraft11.hideAndSeek.perk.AreaWarnHelper;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class RelocatePerk extends BasePerk {
@@ -23,16 +22,6 @@ public class RelocatePerk extends BasePerk {
     @Override
     public String getId() {
         return "seeker_relocate";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Relocate", NamedTextColor.RED);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Force hiders to move away from their current position.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -83,7 +72,7 @@ public class RelocatePerk extends BasePerk {
         for (UUID hiderId : HideAndSeek.getDataController().getHiders()) {
             Player hider = Bukkit.getPlayer(hiderId);
             if (hider != null && hider.isOnline()) {
-                hider.sendMessage(Component.text("Relocate activated - move out of your marked zone!", NamedTextColor.RED));
+                hider.sendMessage(plugin.trText(hider, "perk.seeker_relocate.activated"));
             }
         }
 

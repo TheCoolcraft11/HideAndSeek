@@ -7,7 +7,6 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.entity.Display;
@@ -15,6 +14,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,16 +25,6 @@ public class TrapSensePerk extends BasePerk {
     @Override
     public String getId() {
         return "hider_trap_sense";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Trap Sense", NamedTextColor.RED);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Highlights nearby traps.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -104,7 +94,7 @@ public class TrapSensePerk extends BasePerk {
             if (hasTrapNearby && now - last >= warnCooldown * 50L) {
                 player.showTitle(Title.title(
                         Component.empty(),
-                        Component.text("Trap nearby!", NamedTextColor.RED),
+                        plugin.tr(player, "perk.hider_trap_sense.trap_nearby"),
                         Title.Times.times(Duration.ZERO, Duration.ofMillis(1000), Duration.ofMillis(120))
                 ));
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 0.6f);

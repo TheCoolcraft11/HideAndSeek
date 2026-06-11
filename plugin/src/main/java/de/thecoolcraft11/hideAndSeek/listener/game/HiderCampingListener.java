@@ -154,10 +154,8 @@ public class HiderCampingListener implements Listener {
         if (currentTicks - state.lastPunishSignalTicks >= PUNISH_SIGNAL_INTERVAL_TICKS) {
             state.lastPunishSignalTicks = currentTicks;
             hider.showTitle(Title.title(
-                    Component.text("STOP CAMPING", NamedTextColor.RED, TextDecoration.BOLD)
-                            .decoration(TextDecoration.ITALIC, false),
-                    Component.text("Move now or keep taking damage", NamedTextColor.GOLD)
-                            .decoration(TextDecoration.ITALIC, false),
+                    plugin.tr(hider, "listeners.camping.stop_camping_title"),
+                    plugin.tr(hider, "listeners.camping.stop_camping_subtitle"),
                     Title.Times.times(Duration.ofMillis(120), Duration.ofMillis(700), Duration.ofMillis(120))
             ));
             hider.spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 12, 0.25, 0.25, 0.25, 0.03);
@@ -190,10 +188,9 @@ public class HiderCampingListener implements Listener {
 
         state.lastWarningSignalTicks = currentTicks;
         hider.showTitle(Title.title(
-                Component.text("MOVE", NamedTextColor.YELLOW, TextDecoration.BOLD)
-                        .decoration(TextDecoration.ITALIC, false),
-                Component.text("Camping punish in " + Math.max(0, remainingSeconds) + "s", NamedTextColor.RED)
-                        .decoration(TextDecoration.ITALIC, false),
+                plugin.tr(hider, "listeners.camping.move_title"),
+                plugin.tr(hider, "listeners.camping.move_subtitle",
+                        java.util.Map.of("seconds", String.valueOf(Math.max(0, remainingSeconds)))),
                 Title.Times.times(Duration.ofMillis(120), Duration.ofMillis(700), Duration.ofMillis(120))
         ));
         hider.spawnParticle(Particle.ELECTRIC_SPARK, hider.getLocation().add(0, 1.0, 0), 8, 0.2, 0.2, 0.2, 0.03);

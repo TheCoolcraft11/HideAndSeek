@@ -144,7 +144,7 @@ public class TotemItem implements GameItem {
                 .allowArmor(false)
                 .cancelDefaultAction(true)
                 .withUsesExhaustedHandler((context, isTeamLimit) -> context.getPlayer().sendMessage(
-                        Component.text("You've already used your totem!", NamedTextColor.RED)))
+                        plugin.trText(context.getPlayer(), "item.totem.messages.uses_exhausted")))
                 .build());
     }
 

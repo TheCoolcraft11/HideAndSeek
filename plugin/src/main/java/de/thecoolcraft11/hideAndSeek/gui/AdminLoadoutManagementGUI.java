@@ -192,7 +192,7 @@ public class AdminLoadoutManagementGUI {
                             plugin.tr(admin, "gui.admin.perks.role", Map.of("role", role.name())),
                             plugin.tr(admin, "gui.admin.perks.status",
                                     Map.of("state", disabled ? "DISABLED" : "ENABLED")),
-                            perk.getDescription(),
+                            perk.getDescription(admin),
                             plugin.tr(admin, "gui.admin.perks.click_toggle")
                     ));
 
@@ -836,8 +836,8 @@ public class AdminLoadoutManagementGUI {
         }
 
         Component display = disabled
-                ? perk.getDisplayName().decorate(TextDecoration.STRIKETHROUGH)
-                : perk.getDisplayName().decoration(TextDecoration.BOLD, true);
+                ? perk.getDisplayName(viewer).decorate(TextDecoration.STRIKETHROUGH)
+                : perk.getDisplayName(viewer).decoration(TextDecoration.BOLD, true);
         meta.displayName(display.decoration(TextDecoration.ITALIC, false));
 
         List<Component> lore = new ArrayList<>();

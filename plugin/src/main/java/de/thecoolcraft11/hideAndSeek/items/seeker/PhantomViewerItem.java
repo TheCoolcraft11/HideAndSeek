@@ -7,7 +7,6 @@ import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
@@ -331,14 +330,15 @@ public class PhantomViewerItem implements GameItem {
             ItemStack held = seeker.getInventory().getItemInMainHand();
             if (held.getType() == Material.FILLED_MAP && held.getItemMeta() instanceof MapMeta heldMeta) {
                 heldMeta.setMapView(mapView);
-                heldMeta.displayName(Component.text("Phantom Viewer", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+                heldMeta.displayName(plugin.tr(seeker, "item.phantom_viewer.applied_name")
                         .decoration(TextDecoration.ITALIC, false));
                 List<Component> lore = new ArrayList<>();
-                lore.add(Component.text("Right click to capture a lo-fi phantom snapshot", NamedTextColor.GRAY)
+                lore.add(plugin.tr(seeker, "item.phantom_viewer.applied_lore")
                         .decoration(TextDecoration.ITALIC, false));
                 if (targetNameInLore) {
-                    lore.add(Component.text("Snapshot: " + target.getName(), NamedTextColor.AQUA)
-                            .decoration(TextDecoration.ITALIC, false));
+                    lore.add(MiniMessage.miniMessage().deserialize(
+                            plugin.trText(seeker, "item.phantom_viewer.snapshot_lore", java.util.Map.of("target", target.getName()))
+                    ).decoration(TextDecoration.ITALIC, false));
                 }
                 heldMeta.lore(lore);
                 tagSnapshot(plugin, heldMeta.getPersistentDataContainer(), token, expiryAt, true);
@@ -364,7 +364,7 @@ public class PhantomViewerItem implements GameItem {
         }
 
         mapMeta.setMapView(mapView);
-        mapMeta.displayName(Component.text("Phantom Snapshot", NamedTextColor.AQUA)
+        mapMeta.displayName(plugin.tr(seeker, "item.phantom_viewer.snapshot_name")
                 .decoration(TextDecoration.ITALIC, false));
         tagSnapshot(plugin, mapMeta.getPersistentDataContainer(), token, expiryAt, false);
         mapItem.setItemMeta(mapMeta);
@@ -433,10 +433,10 @@ public class PhantomViewerItem implements GameItem {
         }
 
         mapMeta.setMapView(null);
-        mapMeta.displayName(Component.text("Phantom Viewer", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+        mapMeta.displayName(plugin.tr(null, "item.phantom_viewer.applied_name")
                 .decoration(TextDecoration.ITALIC, false));
         mapMeta.lore(List.of(
-                Component.text("Right click to capture a lo-fi phantom snapshot", NamedTextColor.GRAY)
+                plugin.tr(null, "item.phantom_viewer.applied_lore")
                         .decoration(TextDecoration.ITALIC, false)
         ));
         mapMeta.getPersistentDataContainer().remove(tokenKey);

@@ -1006,6 +1006,12 @@ item:
       nms_unavailable: "<red>Der Seeker's Assistant ist auf dieser Server-Version nicht verfügbar.</red>"
       activated: "<aqua>Du bist jetzt ein Geist! Phasing für {duration}s aktiviert.</aqua>"
       materialized: "<green>Du bist erfolgreich materialisiert!</green>"
+      nms_unavailable_lore: "<dark_red>Auf dieser Server-Version nicht verfügbar</dark_red>"
+      error_outside_border: "Du kannst dich nicht außerhalb der Weltgrenze materialisieren!"
+      error_too_far: "Du hast dich zu weit von deinem physischen Körper entfernt!"
+      error_in_wall: "Du hast dich in einer Wand materialisiert!"
+      error_too_dark: "Es ist zu dunkel, um sich hier zu materialisieren!"
+      error_no_path: "Es gibt keinen physischen Pfad zu diesem Ort!"
       error: "<red>{reason}</red>"
     skin:
       spectral_form: "<gold><b>Spektralform</b></gold>"
@@ -1133,6 +1139,7 @@ item:
     messages:
       only_hiders: "<red>Nur Verstecker können dieses Item benutzen.</red>"
       activated: "<gold>Wiederbelebungsmodus für {duration} Sekunden aktiviert!</gold>"
+      uses_exhausted: "<red>Du hast dein Totem bereits benutzt!</red>"
       revived: "<gold>Du wurdest wiederbelebt!</gold>"
     skin:
       phoenix_feather: "<gold><b>Phönixfeder</b></gold>"
@@ -1142,6 +1149,7 @@ item:
     lore: "<gray>Treffer verbessern Tempo & Rückstoß</gray>"
     description: "Triff Sucher mit Pfeilen, um Items zu verbessern, und erhalte {points} Punkte pro Treffer."
     messages:
+      no_upgrade_items: "<yellow>Du hast keinen Geschwindigkeitsschub oder Knockback-Stick ausgewählt!</yellow>"
       hit: "<gold>Armbrust getroffen! +{points} Punkte</gold>"
       hit_progress: "<green>Sucher getroffen! {current}/{required}</green>"
     skin:
@@ -1157,6 +1165,7 @@ item:
       max_active: "<red>Du hast bereits {max} Assistenten aktiv!</red>"
       summon_failed: "<red>Assistent konnte nicht beschworen werden.</red>"
       summoned: "<red>Assistent beschworen! </red><gray>({lifetime}s Lebenszeit)</gray>"
+      alert_target_nearby: "<red>ASSISTENTEN-ALARM - Ziel in der Nähe!</red>"
     skin:
       steel_golem: "<gold><b>Stahlgolem</b></gold>"
       ghost_drone: "<gold><b>Geisterdrohne</b></gold>"
@@ -1197,6 +1206,10 @@ item:
       placed: "<green>Kamera platziert! ({count}/{maxCameras})</green>"
       no_cameras: "<red>Du hast keine Kameras platziert.</red>"
       all_cameras_gone: "<red>Alle deine Kameras sind weg.</red>"
+      nms_unavailable_lore: "<dark_red>Auf dieser Server-Version nicht verfügbar</dark_red>"
+      orbital_scan_active: "<gold>Orbitalscan aktiv</gold>"
+      spy_lens_focus: "<aqua>Spion-Linse fokussiert</aqua>"
+      detached: "<yellow>Von Kamera getrennt.</yellow>"
       client_unsupported: "<red>Dein Client unterstützt den Kameramodus auf dieser Server-Version nicht.</red>"
     skin:
       spy_lens: "<gold><b>Spion-Linse</b></gold>"
@@ -1308,3 +1321,179 @@ item:
       energy_blade: "<gold><b>Energieklinge</b></gold>"
       the_ban_hammer: "<gold><b>Der Ban-Hammer</b></gold>"
       giant_spatula: "<gold><b>Riesige Pfannenwender</b></gold>"
+  common:
+    not_implemented: "<yellow>Einige ausgewählte Gegenstände sind noch nicht implementiert. Standard-Gegenstände werden stattdessen verwendet.</yellow>"
+  ban_hammer:
+    banned_text: "<red><bold>GEBANNT</bold></red>"
+
+listeners:
+  environmental_death:
+    camping: "<yellow> wurde niedergestreckt, weil er zu lange campierte.</yellow>"
+    world_border: "<yellow> wurde von der Weltgrenze verschlungen.</yellow>"
+    drowning: "<yellow> ertrank, nachdem er zu lange unter Wasser war.</yellow>"
+    fire: "<yellow> brannte zu lange.</yellow>"
+    lava: "<yellow> sank in Lava und konnte sich nicht retten.</yellow>"
+    suffocation: "<yellow> erstickte auf engem Raum.</yellow>"
+    freezing: "<yellow> fror zu Eis.</yellow>"
+    hot_floor: "<yellow> stand zu lange auf brennendem Boden.</yellow>"
+    contact: "<yellow> wurde von gefährlichem Gelände zerrissen.</yellow>"
+    death_zone: "<yellow> konnte der Todeszone nicht entkommen.</yellow>"
+    relocate: "<yellow> ist nicht rechtzeitig umgezogen.</yellow>"
+    generic: "<yellow> wurde durch die Umwelt eliminiert.</yellow>"
+  player_hit:
+    assistant_destroyed: "<green>Du hast einen Sucher-Assistenten zerstört!</green>"
+    transformed_seeker: "<green>Du wurdest verwandelt! Du bist jetzt ein Sucher!</green>"
+    respawned_hiding: "<green>Du bist wiederauferstanden! Versteck dich weiter!</green>"
+    points_for_finding: "<gold>+{points} Punkte für das Finden von {player}!</gold>"
+    will_respawn: "<gold>Du wirst wiederauferstehen und dich weiter verstecken können!</gold>"
+    found_title: "<red><b>DU WURDEST GEFUNDEN!</b></red>"
+    found_subtitle: "<gray>Du siehst jetzt zu</gray>"
+    seeker_title: "<red><b>DU BIST JETZT EIN SUCHER!</b></red>"
+    seeker_subtitle: "<yellow>Hilf mit, die restlichen Verstecker zu finden!</yellow>"
+    perks_refunded: "<yellow>Deine Verstecker-Perks wurden entfernt und {points} Punkte wurden erstattet.</yellow>"
+    found: "<green>{killer}</green> <yellow>hat </yellow><green>{victim}</green><yellow> gefunden!</yellow>"
+  seeker_kill:
+    seeker_killed: "<green>Du hast {player} durch Ansehen getötet!</green>"
+    hider_killed: "<red>Du wurdest von {player} durch dessen Blick getötet!</red>"
+  assistant_projectile:
+    direct_hit: "<red><b>DIREKTITREFFER! </b></red><gray>Assistentengeschoss traf </gray><red>{player}</red><gray>!</gray>"
+    hider_hit: "<red><b>Du wurdest getroffen </b></red><gray>vom Assistenten des Suchers!</gray>"
+    near_hit: "<yellow><b>BEINAHETREFFER! </b></yellow><gray>Assistentengeschoss streifte </gray><yellow>{player}</yellow><gray>!</gray>"
+    assistant_destroyed: "<red><b>Assistent des Suchers</b></red><gray> wurde zerstört ({hits} Treffer)!</gray>"
+  slowness_ball:
+    hit_message: "<aqua>Du wurdest von einem Langsamkeitsball getroffen!</aqua>"
+  camera_view:
+    mode_night_vision: "<green>Nachtsicht</green>"
+    mode_terminal_vision: "<light_purple>Terminal-Sicht</light_purple>"
+    mode_normal: "<aqua>Normal</aqua>"
+  perk:
+    shop_closed: "<red>Der Perk-Shop ist nur während der Suchphase geöffnet.</red>"
+    shop_inventory_mode: "<gray>Dein Perk-Shop ist auf Inventar-Nutzung eingestellt.</gray>"
+  block_mode:
+    cursed_cannot_hide: "<red>Du bist verflucht und kannst dich nicht verstecken!</red>"
+    no_block_selected: "<red>Du hast noch keinen Block ausgewählt! Nutze den Block-Auswähler, um deinen Block zu ändern</red>"
+    block_not_allowed: "<red>Dieser Block ist auf dieser Karte nicht erlaubt! Nutze den Block-Auswähler, um deinen Block zu ändern.</red>"
+    cannot_place_water: "<red>Kann Block hier nicht platzieren - Luft über Wasser/Lava (innerhalb von {maxAirAbove} Blöcken) erforderlich!</red>"
+    cannot_place_not_air: "<red>Kann Block hier nicht platzieren - nicht in der Luft!</red>"
+    dismount_to_unhide: "<gray>Absteigen (Shift) zum Enttarnen</gray>"
+    no_longer_hidden: "<yellow>Du bist nicht länger versteckt!</yellow>"
+  game_state:
+    spectating: "<yellow>Ein Spiel läuft gerade. Du siehst zu.</yellow>"
+  camping:
+    stop_camping_title: "<red><b>HÖR AUF ZU CAMPEN</b></red>"
+    stop_camping_subtitle: "<gold>Beweg dich oder nimm weiter Schaden</gold>"
+    move_title: "<yellow><b>BEWEG DICH</b></yellow>"
+    move_subtitle: "<red>Camping-Bestrafung in {seconds}s</red>"
+  phase_guard:
+    not_ready: "<red>Kann nicht zu Verstecken wechseln: Nicht alle sind bereit.</red>"
+    not_ready_list: "<yellow>Nicht bereit: {names}</yellow>"
+    force_hint: "<gray>Benutze /mg setphase hiding force zum Überschreiben.</gray>"
+  area_warn:
+    danger_zone_title: "<red><bold>GEFAHRENZONE - Verlasse in {seconds}s</bold></red>"
+    bossbar_name: "Gefahrenzone"
+    bossbar_subtitle: "Verlasse die Gefahrenzone! {seconds}s verbleibend"
+
+loadout:
+  updated_by_admin: "<yellow>Dein Loadout wurde von einem Admin aktualisiert. {count} nicht erlaubte Gegenstände entfernt.</yellow>"
+
+perk:
+  no_description: "<gray>Keine Beschreibung.</gray>"
+  purchase:
+    already_owned: "<red>Du hast diesen Perk bereits.</red>"
+    at_limit: "<red>Dieser Perk hat bereits das globale Spielerlimit erreicht.</red>"
+    cooldown: "<red>Du kannst diesen Perk in {seconds}s erneut kaufen.</red>"
+    not_enough_points: "<red>Nicht genügend Punkte! Benötigt {cost}, hast {balance}.</red>"
+    activation_failed: "<red>Dieser Perk konnte nicht aktiviert werden.</red>"
+    points_refunded: "<red>Deine Punkte wurden erstattet.</red>"
+    perk_activated: "<gold>Perk aktiviert: </gold>"
+  shop:
+    vending_machine_name: "<gold><bold>Perk Shop</bold></gold>"
+  hider_trap_sense:
+    name: "<red>Fallenspürsinn</red>"
+    description: "<gray>Hebt nahe Fallen hervor.</gray>"
+    trap_nearby: "<red>Falle in der Nähe!</red>"
+  hider_shadow_step:
+    name: "<aqua>Schattenschritt</aqua>"
+    description: "<gray>Teleportiert automatisch bei kritischer Gesundheit.</gray>"
+    charging: "<yellow>Schattenschritt lädt...</yellow>"
+    activated: "<aqua>Schattenschritt!</aqua>"
+  hider_seeker_warning:
+    name: "<red>Suchender-Warnung</red>"
+    description: "<gray>Warnt, wenn sich ein Suchender nähert.</gray>"
+    seeker_approaching: "<red>Suchender nähert sich!</red>"
+  hider_extra_life:
+    name: "<light_purple>Extra Leben</light_purple>"
+    description: "<gray>Verdiene Absorptionsherzen durch Punkte.</gray>"
+  hider_camouflage:
+    name: "<green>Tarnung</green>"
+    description: "<gray>Entfernt wiederholt negative Effekte.</gray>"
+    active: "<green>Tarnung aktiv</green>"
+    cleansed: "<dark_green>Effekte beseitigt</dark_green>"
+  hider_adaptive_speed:
+    name: "<yellow>Anpassungsgeschwindigkeit</yellow>"
+    description: "<gray>Erhalte Geschwindigkeit bei niedriger HP.</gray>"
+  hider_double_jump:
+    name: "<aqua>Doppelsprung</aqua>"
+    description: "<gray>Drücke Sprung in der Luft für einen zweiten Satz.</gray>"
+  seeker_map_teleport:
+    name: "<gold>Karten-Teleport</gold>"
+    description: "<gray>Wähle einen Teleportpunkt auf der Karte.</gray>"
+    map_picker_title: "Karten-Teleport"
+    map_picker_coord_format: "Teleportiere zu: X: {x}, Z: {z}"
+    too_close: "<red>Zu nah an einem Verstecker.</red>"
+    cancelled: "<gray>Teleport abgebrochen.</gray>"
+    cant_open: "<red>Karte konnte nicht geöffnet werden. Deine Punkte wurden erstattet.</red>"
+  seeker_death_zone:
+    name: "<dark_red>Todeszone</dark_red>"
+    description: "<gray>Zeichne einen Gefahrenkreis auf die Karte.</gray>"
+    map_picker_title: "Todeszone"
+    map_picker_coord_format: "Erstelle Todeszone bei: X: {x}, Z: {z} Radius: {radius}"
+    wrong_phase: "<red>Todeszone kann nur in der Suchphase verwendet werden.</red>"
+    hider_warning: "<red>Todeszone aktiv - verlasse die Zone bevor die Zeit abläuft!</red>"
+    activated: "<red>Todeszone aktiviert.</red>"
+    cancelled: "<gray>Todeszone abgebrochen.</gray>"
+    cant_open: "<red>Karte konnte nicht geöffnet werden. Deine Punkte wurden erstattet.</red>"
+  seeker_sword_bounce:
+    name: "<aqua>Schwert-Abpraller</aqua>"
+    description: "<gray>Die Klinge des Suchenden prallt nach jedem Treffer zu nahen Versteckern ab.</gray>"
+  seeker_hit_display:
+    name: "<green>Trefferanzeige</green>"
+    description: "<gray>Zeigt die voraussichtliche Flugbahn des Schwertes beim Aufladen.</gray>"
+  seeker_auto_aim:
+    name: "<aqua>Auto-Ziel</aqua>"
+    description: "<gray>Lenkt die Klinge des Suchenden zu nahen Versteckern.</gray>"
+  seeker_scent_trail:
+    name: "<gold>Geruchsspur</gold>"
+    description: "<gray>Zeigt die Bewegungs Spur von Versteckern.</gray>"
+  seeker_relocate:
+    name: "<red>Umsiedlung</red>"
+    description: "<gray>Zwingt Verstecker, sich von ihrer Position zu entfernen.</gray>"
+    activated: "<red>Umsiedlung aktiviert - verlasse deine markierte Zone!</red>"
+  seeker_random_swap:
+    name: "<light_purple>Zufallstausch</light_purple>"
+    description: "<gray>Tausche die Position mit einem zufälligen Verstecker.</gray>"
+    no_target: "<red>Kein gültiger Verstecker zum Tauschen.</red>"
+  seeker_proximity_meter:
+    name: "<aqua>Näherungsmesser</aqua>"
+    description: "<gray>Untertitel-Ping basierend auf der Entfernung zum nächsten Verstecker.</gray>"
+    burning_hot: "<dark_red><bold>GLÜHEND HEISS</bold></dark_red>"
+    very_warm: "<red>Sehr warm</red>"
+    warm: "<gold>Warm</gold>"
+    lukewarm: "<yellow>Lau</yellow>"
+    cool: "<aqua>Kühl</aqua>"
+    cold: "<blue>Kalt</blue>"
+  seeker_elytra_rush:
+    name: "<aqua>Elytren-Schub</aqua>"
+    description: "<gray>Vorübergehender Gleit-Boost.</gray>"
+
+entity:
+  seeker_assistant:
+    name: "<red>Assistent des Suchers</red>"
+
+tab:
+  header_not_configured: "<red>Kopfzeile nicht konfiguriert</red>"
+  footer_not_configured: "<red>Fußzeile nicht konfiguriert</red>"
+
+wiki:
+  setting_not_found: "<gray>N/A</gray>"
+  resolver_not_found: "<gray>N/A</gray>"

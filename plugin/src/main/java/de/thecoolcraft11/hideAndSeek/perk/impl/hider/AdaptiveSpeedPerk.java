@@ -4,8 +4,6 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -14,22 +12,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class AdaptiveSpeedPerk extends BasePerk {
     @Override
     public String getId() {
         return "hider_adaptive_speed";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Adaptive Speed", NamedTextColor.YELLOW);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Gain Speed when low HP.", NamedTextColor.GRAY);
     }
 
     @Override

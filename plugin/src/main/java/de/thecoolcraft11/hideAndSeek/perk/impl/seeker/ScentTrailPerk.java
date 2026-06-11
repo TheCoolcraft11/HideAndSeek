@@ -4,12 +4,15 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class ScentTrailPerk extends BasePerk {
@@ -20,16 +23,6 @@ public class ScentTrailPerk extends BasePerk {
     @Override
     public String getId() {
         return "seeker_scent_trail";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Scent Trail", NamedTextColor.GOLD);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Shows recent hider movement trail.", NamedTextColor.GRAY);
     }
 
     @Override

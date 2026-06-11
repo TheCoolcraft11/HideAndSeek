@@ -121,12 +121,10 @@ public class SeekerKillModeListener implements Listener {
                 lastGazeKillTime.put(seekerId, now);
 
 
-                seeker.sendMessage(Component.text("You killed ", NamedTextColor.GREEN)
-                        .append(Component.text(hider.getName(), NamedTextColor.YELLOW))
-                        .append(Component.text(" by looking at them!", NamedTextColor.GREEN)));
-                hider.sendMessage(Component.text("You were killed by ", NamedTextColor.RED)
-                        .append(Component.text(seeker.getName(), NamedTextColor.YELLOW))
-                        .append(Component.text(" through their gaze!", NamedTextColor.RED)));
+                seeker.sendMessage(plugin.trText(seeker, "listeners.seeker_kill.seeker_killed",
+                        java.util.Map.of("player", hider.getName())));
+                hider.sendMessage(plugin.trText(hider, "listeners.seeker_kill.hider_killed",
+                        java.util.Map.of("player", seeker.getName())));
                 break;
             }
         }

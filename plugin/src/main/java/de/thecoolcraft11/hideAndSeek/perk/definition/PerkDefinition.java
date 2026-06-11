@@ -5,13 +5,15 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
+
 public interface PerkDefinition {
 
     String getId();
 
-    Component getDisplayName();
+    Component getDisplayName(@Nullable Player player);
 
-    Component getDescription();
+    Component getDescription(@Nullable Player player);
 
     Material getIcon();
 

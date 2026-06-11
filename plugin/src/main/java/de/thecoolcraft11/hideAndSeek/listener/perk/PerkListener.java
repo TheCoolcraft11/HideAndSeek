@@ -99,7 +99,7 @@ public class PerkListener implements Listener {
         event.setCancelled(true);
 
         if (!"seeking".equals(plugin.getStateManager().getCurrentPhaseId())) {
-            event.getPlayer().sendMessage(Component.text("The perk shop is only open during the seeking phase.", NamedTextColor.RED));
+            event.getPlayer().sendMessage(plugin.trText(event.getPlayer(), "listeners.perk.shop_closed"));
             return;
         }
 
@@ -109,7 +109,7 @@ public class PerkListener implements Listener {
                 ? plugin.getSettingRegistry().get("perks.hider-shop-mode", PerkShopMode.INVENTORY)
                 : plugin.getSettingRegistry().get("perks.seeker-shop-mode", PerkShopMode.INVENTORY);
         if ((!isHider && !isSeeker) || shopMode != PerkShopMode.VENDING_MACHINE) {
-            event.getPlayer().sendMessage(Component.text("Your perk shop is configured to use the inventory instead.", NamedTextColor.GRAY));
+            event.getPlayer().sendMessage(plugin.trText(event.getPlayer(), "listeners.perk.shop_inventory_mode"));
             return;
         }
 

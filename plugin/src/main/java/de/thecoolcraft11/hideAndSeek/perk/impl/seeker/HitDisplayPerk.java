@@ -4,10 +4,10 @@ import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+
+import javax.annotation.Nullable;
 
 public class HitDisplayPerk extends BasePerk {
 
@@ -16,16 +16,6 @@ public class HitDisplayPerk extends BasePerk {
     @Override
     public String getId() {
         return ID;
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Hit Display", NamedTextColor.GREEN);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Shows the sword's projected flight curve while charging.", NamedTextColor.GRAY);
     }
 
     @Override

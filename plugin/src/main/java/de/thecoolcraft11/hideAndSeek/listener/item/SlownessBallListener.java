@@ -98,7 +98,7 @@ public class SlownessBallListener implements Listener {
                 );
             }
 
-            seeker.sendMessage(Component.text("You've been hit by a slowness ball!", NamedTextColor.AQUA));
+            seeker.sendMessage(plugin.trText(seeker, "listeners.slowness_ball.hit_message"));
 
 
             snowball.remove();

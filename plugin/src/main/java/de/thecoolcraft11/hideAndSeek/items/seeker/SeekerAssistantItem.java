@@ -49,15 +49,11 @@ public class SeekerAssistantItem implements GameItem {
         String loreStr = plugin.trText(null, "item.assistant.lore");
         java.util.List<Component> lore = new java.util.ArrayList<>();
         for (String line : loreStr.split("\n")) {
-            lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
-        }
-
-        lore.add(Component.empty());
-        lore.add(MiniMessage.miniMessage().deserialize("<gold><bold>LEGENDARY</bold></gold>")
-                .decoration(TextDecoration.ITALIC, false));
+        lore.add(MiniMessage.miniMessage().deserialize(line).decoration(TextDecoration.ITALIC, false));
+            }
 
         if (!plugin.getNmsAdapter().hasNmsCapabilities()) {
-            lore.add(MiniMessage.miniMessage().deserialize("<dark_red>Not available on this server version</dark_red>")
+            lore.add(MiniMessage.miniMessage().deserialize(plugin.trText(null, "item.assistant.messages.nms_unavailable_lore"))
                     .decoration(TextDecoration.ITALIC, false));
         }
 
@@ -136,6 +132,9 @@ public class SeekerAssistantItem implements GameItem {
                     selectedSkin
             );
         }
+
+        assistant.customName(plugin.tr(player, "entity.seeker_assistant.name"));
+        assistant.setCustomNameVisible(true);
 
         UUID assistantId = assistant.getUniqueId();
         active.add(assistantId);

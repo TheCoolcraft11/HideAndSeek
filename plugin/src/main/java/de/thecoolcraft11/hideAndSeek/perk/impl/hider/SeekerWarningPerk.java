@@ -5,7 +5,6 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,16 +20,6 @@ public class SeekerWarningPerk extends BasePerk {
     @Override
     public String getId() {
         return "hider_seeker_warning";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Seeker Warning", NamedTextColor.RED);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Warns when a seeker approaches.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -86,7 +75,7 @@ public class SeekerWarningPerk extends BasePerk {
                 if (inFov || movingCloser) {
                     player.showTitle(Title.title(
                             Component.empty(),
-                            Component.text("Seeker approaching!", NamedTextColor.RED),
+                            plugin.tr(player, "perk.hider_seeker_warning.seeker_approaching"),
                             Title.Times.times(Duration.ZERO, Duration.ofMillis(1100), Duration.ofMillis(120))
                     ));
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.4f, 0.8f);

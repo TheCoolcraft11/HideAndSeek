@@ -1,6 +1,8 @@
 package de.thecoolcraft11.hideAndSeek.nms.impl.v1_21_10.assistant;
 
 import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
+import org.bukkit.command.CommandSender;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
@@ -183,6 +185,18 @@ public final class AssistantBridge {
                 snowball.remove();
             }
         }, Math.max(1, lifetime));
+    }
+
+    public static Component tr(Plugin plugin, CommandSender sender, String key) {
+        try {
+            Method tr = plugin.getClass().getMethod("tr", CommandSender.class, String.class);
+            Object result = tr.invoke(plugin, sender, key);
+            if (result instanceof Component component) {
+                return component;
+            }
+        } catch (Throwable ignored) {
+        }
+        return Component.text(key);
     }
 
     private static Object getDataController() {

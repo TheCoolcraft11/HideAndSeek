@@ -207,7 +207,7 @@ public class LoadoutManager {
             int removed = sanitizePlayerLoadout(player.getUniqueId());
             boolean presetAdjusted = applyAdminPresetPolicy(player.getUniqueId());
             if (removed > 0 || presetAdjusted) {
-                player.sendMessage(Component.text("Your loadout was updated by an admin. Removed " + removed + " disallowed item(s).", NamedTextColor.YELLOW));
+                player.sendMessage(plugin.trText(player, "loadout.updated_by_admin", java.util.Map.of("count", String.valueOf(removed))));
                 refreshRoleInventory(player);
             }
         }

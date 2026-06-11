@@ -47,7 +47,7 @@ public class CameraViewListener implements Listener {
         }
 
         CameraItem.stopCameraSession(player, plugin, true);
-        player.sendMessage(Component.text("Detached from camera.", NamedTextColor.YELLOW));
+        player.sendMessage(plugin.trText(player, "item.camera.messages.detached"));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -260,7 +260,8 @@ public class CameraViewListener implements Listener {
 
         state.currentIndex((state.currentIndex() + 1) % size);
         CameraItem.attachToCurrentCamera(player, plugin);
-        player.sendActionBar(Component.text("Camera " + (state.currentIndex() + 1) + "/" + size, NamedTextColor.AQUA));
+        player.sendActionBar(plugin.tr(player, "listeners.camera_view.camera_counter",
+                java.util.Map.of("current", String.valueOf(state.currentIndex() + 1), "total", String.valueOf(size))));
     }
 
     private void cycleVisionMode(Player player) {
@@ -278,14 +279,11 @@ public class CameraViewListener implements Listener {
         CameraItem.attachToCurrentCamera(player, plugin);
         CameraItem.playVisionModeSwitchSound(player, state.skinVariant(), state.visionMode());
 
-        String modeLabel = switch (state.visionMode()) {
-            case NIGHT_VISION -> "Night Vision";
-            case TERMINAL_VISION -> "Terminal Vision";
-            default -> "Normal";
+        String modeKey = switch (state.visionMode()) {
+            case NIGHT_VISION -> "listeners.camera_view.mode_night_vision";
+            case TERMINAL_VISION -> "listeners.camera_view.mode_terminal_vision";
+            default -> "listeners.camera_view.mode_normal";
         };
-        NamedTextColor color = state.visionMode() == CameraVisionMode.TERMINAL_VISION
-                ? NamedTextColor.LIGHT_PURPLE
-                : state.visionMode() == CameraVisionMode.NIGHT_VISION ? NamedTextColor.GREEN : NamedTextColor.AQUA;
-        player.sendActionBar(Component.text("Camera mode: " + modeLabel, color));
+        player.sendActionBar(plugin.tr(player, modeKey));
     }
 }

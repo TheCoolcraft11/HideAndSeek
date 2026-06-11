@@ -3,8 +3,6 @@ package de.thecoolcraft11.hideAndSeek.perk;
 import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.util.map.MapData;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -92,7 +90,7 @@ public class VendingMachineManager {
             s.setMarker(true);
             s.setSmall(true);
             s.setCustomNameVisible(true);
-            s.customName(Component.text("Perk Shop", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true));
+            s.customName(plugin.tr(null, "perk.shop.vending_machine_name"));
             s.getPersistentDataContainer().set(new NamespacedKey(plugin, "perk_shop_label"), PersistentDataType.BOOLEAN, true);
         });
         labelEntities.add(stand.getUniqueId());

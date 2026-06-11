@@ -5,7 +5,6 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.DelayedActivationPerk;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkDefinition;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -46,7 +45,7 @@ public class PerkStateManager {
                 || (isSeekerPerk && plugin.getPerkRegistry().isFiniteSeekerPerk(perk.getId()));
 
         if (isFinitePerk && hasPurchased(id, perk.getId())) {
-            player.sendMessage(Component.text("You already have this perk.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.purchase.already_owned"));
             return;
         }
 
@@ -55,7 +54,7 @@ public class PerkStateManager {
             if (limit > 0) {
                 Set<UUID> owners = finiteOwners.computeIfAbsent(perk.getId(), ignored -> ConcurrentHashMap.newKeySet());
                 if (owners.size() >= limit && !owners.contains(id)) {
-                    player.sendMessage(Component.text("That perk is already at the global player limit.", NamedTextColor.RED));
+                    player.sendMessage(plugin.trText(player, "perk.purchase.at_limit"));
                     return;
                 }
             }
@@ -63,7 +62,7 @@ public class PerkStateManager {
             long remainingTicks = getPurchaseCooldownRemainingTicks(id, perk.getId());
             if (remainingTicks > 0) {
                 long seconds = Math.max(1L, (remainingTicks + 19L) / 20L);
-                player.sendMessage(Component.text("You can buy that perk again in " + seconds + "s.", NamedTextColor.RED));
+                player.sendMessage(plugin.trText(player, "perk.purchase.cooldown", java.util.Map.of("seconds", String.valueOf(seconds))));
                 return;
             }
         }
@@ -71,7 +70,7 @@ public class PerkStateManager {
         int cost = plugin.getSettingRegistry().get("perks.perk." + perk.getId() + ".cost", perk.getCost());
         int balance = HideAndSeek.getDataController().getPoints(id);
         if (balance < cost) {
-            player.sendMessage(Component.text("Not enough points! Need " + cost + ", have " + balance + ".", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.purchase.not_enough_points", java.util.Map.of("cost", String.valueOf(cost), "balance", String.valueOf(balance))));
             return;
         }
 
@@ -87,8 +86,8 @@ public class PerkStateManager {
         try {
             perk.onPurchase(player, plugin);
         } catch (RuntimeException ex) {
-            player.sendMessage(Component.text("That perk could not be activated.", NamedTextColor.RED));
-            player.sendMessage(Component.text("Your points were refunded.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.purchase.activation_failed"));
+            player.sendMessage(plugin.trText(player, "perk.purchase.points_refunded"));
             refundPurchase(id, perk.getId(), cost);
             if (!(perk instanceof DelayedActivationPerk)) {
                 plugin.getLogger().warning("Perk activation failed for " + perk.getId() + ": " + ex.getMessage());
@@ -97,10 +96,7 @@ public class PerkStateManager {
         }
 
         if (!(perk instanceof DelayedActivationPerk)) {
-            player.sendMessage(Component.text()
-                    .append(Component.text("Perk activated: ", NamedTextColor.GOLD))
-                    .append(perk.getDisplayName())
-                    .build());
+            player.sendMessage(plugin.tr(player, "perk.purchase.perk_activated").append(perk.getDisplayName(player)));
         }
 
         if (isFinitePerk) {
@@ -121,7 +117,7 @@ public class PerkStateManager {
                 || (isSeekerPerk && plugin.getPerkRegistry().isFiniteSeekerPerk(perk.getId()));
 
         if (isFinitePerk && hasPurchased(id, perk.getId())) {
-            player.sendMessage(Component.text("You already have this perk.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.purchase.already_owned"));
             return false;
         }
 
@@ -130,7 +126,7 @@ public class PerkStateManager {
             if (limit > 0) {
                 Set<UUID> owners = finiteOwners.computeIfAbsent(perk.getId(), ignored -> ConcurrentHashMap.newKeySet());
                 if (owners.size() >= limit && !owners.contains(id)) {
-                    player.sendMessage(Component.text("That perk is already at the global player limit.", NamedTextColor.RED));
+                    player.sendMessage(plugin.trText(player, "perk.purchase.at_limit"));
                     return false;
                 }
             }
@@ -138,7 +134,7 @@ public class PerkStateManager {
             long remainingTicks = getPurchaseCooldownRemainingTicks(id, perk.getId());
             if (remainingTicks > 0) {
                 long seconds = Math.max(1L, (remainingTicks + 19L) / 20L);
-                player.sendMessage(Component.text("You can buy that perk again in " + seconds + "s.", NamedTextColor.RED));
+                player.sendMessage(plugin.trText(player, "perk.purchase.cooldown", java.util.Map.of("seconds", String.valueOf(seconds))));
                 return false;
             }
         }
@@ -153,7 +149,7 @@ public class PerkStateManager {
         try {
             perk.onPurchase(player, plugin);
         } catch (RuntimeException ex) {
-            player.sendMessage(Component.text("That perk could not be activated.", NamedTextColor.RED));
+            player.sendMessage(plugin.trText(player, "perk.purchase.activation_failed"));
             removePurchased(id, perk.getId());
             if (!(perk instanceof DelayedActivationPerk)) {
                 plugin.getLogger().warning("Perk activation failed for " + perk.getId() + ": " + ex.getMessage());
@@ -162,10 +158,7 @@ public class PerkStateManager {
         }
 
         if (!(perk instanceof DelayedActivationPerk)) {
-            player.sendMessage(Component.text()
-                    .append(Component.text("Perk activated: ", NamedTextColor.GOLD))
-                    .append(perk.getDisplayName())
-                    .build());
+            player.sendMessage(plugin.tr(player, "perk.purchase.perk_activated").append(perk.getDisplayName(player)));
         }
 
         if (isFinitePerk) {

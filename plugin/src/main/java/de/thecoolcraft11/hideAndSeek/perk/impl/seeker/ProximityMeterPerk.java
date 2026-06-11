@@ -5,8 +5,6 @@ import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTarget;
 import de.thecoolcraft11.hideAndSeek.perk.definition.PerkTier;
 import de.thecoolcraft11.hideAndSeek.perk.impl.BasePerk;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -15,27 +13,18 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.UUID;
 
 public class ProximityMeterPerk extends BasePerk {
 
-    private record PingTier(Component subtitle, float soundPitch, int intervalTicks) {
+    private record PingTier(String labelKey, float soundPitch, int intervalTicks) {
     }
 
     @Override
     public String getId() {
         return "seeker_proximity_meter";
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.text("Proximity Meter", NamedTextColor.AQUA);
-    }
-
-    @Override
-    public Component getDescription() {
-        return Component.text("Subtitle ping based on nearest hider distance.", NamedTextColor.GRAY);
     }
 
     @Override
@@ -96,7 +85,7 @@ public class ProximityMeterPerk extends BasePerk {
 
         seeker.showTitle(Title.title(
                 Component.empty(),
-                tier.subtitle,
+                plugin.tr(seeker, "perk.seeker_proximity_meter." + tier.labelKey),
                 Title.Times.times(Duration.ZERO,
                         Duration.ofMillis(tier.intervalTicks * 50L + 250L),
                         Duration.ofMillis(250L))
@@ -125,21 +114,21 @@ public class ProximityMeterPerk extends BasePerk {
         double cool = plugin.getSettingRegistry().get("perks.perk.seeker_proximity_meter.threshold-cool", 50.0d);
 
         if (dist <= burning) {
-            return new PingTier(Component.text("BURNING HOT", NamedTextColor.DARK_RED).decoration(TextDecoration.BOLD, true), 2.0f, 20);
+            return new PingTier("burning_hot", 2.0f, 20);
         }
         if (dist <= veryWarm) {
-            return new PingTier(Component.text("Very Warm", NamedTextColor.RED), 1.8f, 30);
+            return new PingTier("very_warm", 1.8f, 30);
         }
         if (dist <= warm) {
-            return new PingTier(Component.text("Warm", NamedTextColor.GOLD), 1.5f, 40);
+            return new PingTier("warm", 1.5f, 40);
         }
         if (dist <= lukewarm) {
-            return new PingTier(Component.text("Lukewarm", NamedTextColor.YELLOW), 1.2f, 50);
+            return new PingTier("lukewarm", 1.2f, 50);
         }
         if (dist <= cool) {
-            return new PingTier(Component.text("Cool", NamedTextColor.AQUA), 0.9f, 60);
+            return new PingTier("cool", 0.9f, 60);
         }
-        return new PingTier(Component.text("Cold", NamedTextColor.BLUE), 0.6f, 80);
+        return new PingTier("cold", 0.6f, 80);
     }
 }
 

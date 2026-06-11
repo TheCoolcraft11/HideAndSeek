@@ -38,7 +38,7 @@ public class BanHammerKillEffect implements KillEffect {
         });
 
         TextDisplay bannedText = base.getWorld().spawn(base.clone().add(0, 2.4, 0), TextDisplay.class, display -> {
-            display.text(net.kyori.adventure.text.Component.text("BANNED"));
+            display.text(plugin.tr(null, "item.ban_hammer.banned_text"));
             display.setBillboard(Display.Billboard.CENTER);
             display.setSeeThrough(false);
             display.setShadowed(true);
