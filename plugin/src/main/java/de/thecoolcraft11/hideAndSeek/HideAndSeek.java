@@ -39,10 +39,7 @@ import de.thecoolcraft11.hideAndSeek.setting.SettingChangeListener;
 import de.thecoolcraft11.hideAndSeek.setting.SettingRegistrar;
 import de.thecoolcraft11.hideAndSeek.tab.CustomScoreboardProvider;
 import de.thecoolcraft11.hideAndSeek.tab.CustomTabProvider;
-import de.thecoolcraft11.hideAndSeek.util.AdrenalineRushService;
-import de.thecoolcraft11.hideAndSeek.util.DataController;
-import de.thecoolcraft11.hideAndSeek.util.SeekingBossBarService;
-import de.thecoolcraft11.hideAndSeek.util.UnstuckManager;
+import de.thecoolcraft11.hideAndSeek.util.*;
 import de.thecoolcraft11.hideAndSeek.util.map.MapManager;
 import de.thecoolcraft11.hideAndSeek.util.points.PointService;
 import de.thecoolcraft11.hideAndSeek.util.skin.SkinManager;
@@ -269,6 +266,9 @@ public final class HideAndSeek extends MinigameFramework {
             return new ItemStack(Material.AIR);
         });
 
+
+        WikiHelper.ensureWikiExists(this);
+        WikiHelper.registerPlaceholders(this);
 
         updateWorldIconsForAllMaps();
 
