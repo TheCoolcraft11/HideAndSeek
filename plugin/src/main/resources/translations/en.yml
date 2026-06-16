@@ -396,6 +396,10 @@ gui:
       status: "<gray>Status: {state}</gray>"
       click_to_toggle: "<gray>Click to toggle</gray>"
       voting_not_complete: "<yellow>Voting is not complete yet.</yellow>"
+      map_description: "<gray>{description}</gray>"
+      size: "<yellow>Size: {size}</yellow>"
+      players: "<light_purple>Players: {players}</light_purple>"
+      can_still_ready: "<gray>You can still ready manually.</gray>"
   main_menu:
     loadout:
       name: "<aqua><bold>Loadout Selector</bold></aqua>"
