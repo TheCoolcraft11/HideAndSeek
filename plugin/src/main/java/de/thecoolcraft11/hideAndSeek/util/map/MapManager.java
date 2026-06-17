@@ -723,6 +723,7 @@ public class MapManager {
         HideAndSeek.getDataController().setRoundSpawnPoint(spawnLocation);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
+            plugin.getCosmeticManager().cleanupPlayer(player.getUniqueId());
             player.teleport(spawnLocation);
         }
 
