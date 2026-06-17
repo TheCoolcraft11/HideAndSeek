@@ -465,4 +465,8 @@ public class EndedPhase implements GamePhase {
         return false;
     }
 
+    @Override
+    public boolean allowCosmetics() {
+        return false;
+    }
 }

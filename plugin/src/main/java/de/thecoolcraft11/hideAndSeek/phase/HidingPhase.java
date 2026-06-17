@@ -779,4 +779,9 @@ public class HidingPhase implements GamePhase {
     public boolean usesBooster() {
         return true;
     }
+
+    @Override
+    public boolean allowCosmetics() {
+        return false;
+    }
 }
