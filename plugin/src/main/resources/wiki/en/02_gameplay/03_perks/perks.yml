@@ -1,0 +1,21 @@
+id: "perks"
+name: "Hider Perks"
+icon: "minecraft:experience_bottle"
+
+description:
+  - "<gray>Passive and active abilities for hiders</gray>"
+
+keywords:
+  - "perk"
+  - "hider"
+  - "ability"
+  - "passive"
+
+body: |
+  Hider perks provide passive or active advantages to help you survive. Perks can be purchased through the perk shop during the hiding phase.
+
+  Hider perks mainly provide long-term or permanent advantages, often helping you escape dangerous situations.
+
+related:
+  - page: hider
+    label: "Hider"

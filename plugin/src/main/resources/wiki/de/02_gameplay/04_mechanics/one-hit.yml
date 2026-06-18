@@ -1,0 +1,22 @@
+id: "one_hit"
+name: "One-Hit-Modus"
+icon: "minecraft:diamond_sword"
+
+description:
+  - "<gray>Jeder erfolgreiche Treffer eliminiert einen Verstecker sofort</gray>"
+
+keywords:
+  - "one"
+  - "hit"
+  - "kill"
+  - "modus"
+  - "sofort"
+
+body: |
+  Im <bold>ONE HIT</bold>-Killmodus eliminiert jeder erfolgreiche Treffer einen Verstecker sofort. Es gibt keine Gesundheitsverwaltung — eine Berührung reicht aus.
+
+  Siehe {kill-modes} für alle verfügbaren Kill-Modi.
+
+related:
+  - page: kill-modes
+    label: "Kill-Modi"

@@ -1,0 +1,23 @@
+id: "skins"
+name: "Skins"
+icon: "minecraft:armor_stand"
+
+description:
+  - "<gray>Customize your appearance with earned skins</gray>"
+
+keywords:
+  - "skin"
+  - "cosmetic"
+  - "appearance"
+  - "customize"
+
+body: |
+  Skins allow you to customize your in-game appearance. Unlock new skins by earning {coins} and spending them in the skin shop.
+
+  Your current skins can be selected during the {lobby} phase.
+
+related:
+  - page: coins
+    label: "Coins"
+  - page: lobby
+    label: "Lobby Phase"

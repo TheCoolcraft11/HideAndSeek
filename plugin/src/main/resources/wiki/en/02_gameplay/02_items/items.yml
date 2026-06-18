@@ -1,0 +1,21 @@
+id: "items"
+name: "Seeker Items"
+icon: "minecraft:iron_ingot"
+
+description:
+  - "<gray>Items that help seekers locate and eliminate hiders</gray>"
+
+keywords:
+  - "item"
+  - "seeker"
+  - "tool"
+  - "hunt"
+
+body: |
+  Seekers have access to a variety of items to help them locate and eliminate hiders. Items can be found in the seeker inventory and have different rarities.
+
+  Browse the items section to learn about each item.
+
+related:
+  - page: seeker
+    label: "Seeker"

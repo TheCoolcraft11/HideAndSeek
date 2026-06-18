@@ -1,0 +1,23 @@
+id: "normal"
+name: "Normal-Modus"
+icon: "minecraft:player_head"
+
+description:
+  - "<gray>Standard-Spielmodus mit normaler Bewegung</gray>"
+
+keywords:
+  - "normal"
+  - "modus"
+  - "standard"
+  - "default"
+
+body: |
+  Im <bold>NORMAL</bold>-Spielmodus bewegen sich Verstecker mit normaler Geschwindigkeit und haben normale Gesundheit. Suchende müssen Verstecker durch direkten Kampf eliminieren.
+
+  Dies ist der Standardmodus ohne besondere Änderungen.
+
+related:
+  - page: hider
+    label: "Verstecker"
+  - page: seeker
+    label: "Suchende"

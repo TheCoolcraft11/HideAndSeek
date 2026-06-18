@@ -1,0 +1,21 @@
+id: "taunts"
+name: "Taunts"
+icon: "minecraft:note_block"
+
+description:
+  - "<gray>Use taunts to earn points during the game</gray>"
+
+keywords:
+  - "taunt"
+  - "points"
+  - "emote"
+  - "interaction"
+
+body: |
+  Taunts are actions or gestures you can perform during the game to earn additional {points}.
+
+  Use taunts strategically — while they reward you with points, they may also reveal your position.
+
+related:
+  - page: points
+    label: "Points"

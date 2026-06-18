@@ -1,0 +1,4 @@
+name: "Vorteile"
+icon: "minecraft:light[tooltip_display={hidden_components:[\"block_state\"]}]"
+description:
+  - "<gray>Spezielle Fähigkeiten für Hider und Seeker</gray>"

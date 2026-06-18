@@ -1,0 +1,23 @@
+id: "skins"
+name: "Skins"
+icon: "minecraft:armor_stand"
+
+description:
+  - "<gray>Passe dein Aussehen mit verdienten Skins an</gray>"
+
+keywords:
+  - "skin"
+  - "kosmetik"
+  - "aussehen"
+  - "anpassung"
+
+body: |
+  Skins ermöglichen es dir, dein Aussehen im Spiel anzupassen. Schalte neue Skins frei, indem du {coins} verdienst und sie im Skin-Shop ausgibst.
+
+  Deine aktuellen Skins können während der {lobby}-Phase ausgewählt werden.
+
+related:
+  - page: coins
+    label: "Münzen"
+  - page: lobby
+    label: "Lobby-Phase"

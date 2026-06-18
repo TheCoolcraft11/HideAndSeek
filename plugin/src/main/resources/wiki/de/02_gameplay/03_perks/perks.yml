@@ -1,0 +1,21 @@
+id: "perks"
+name: "Verstecker-Fähigkeiten"
+icon: "minecraft:experience_bottle"
+
+description:
+  - "<gray>Passive und aktive Fähigkeiten für Verstecker</gray>"
+
+keywords:
+  - "fähigkeit"
+  - "verstecker"
+  - "perk"
+  - "passiv"
+
+body: |
+  Verstecker-Fähigkeiten bieten passive oder aktive Vorteile, die dir beim Überleben helfen. Fähigkeiten können während der Versteck-Phase im Fähigkeitenladen gekauft werden.
+
+  Verstecker-Fähigkeiten bieten meist langfristige oder permanente Vorteile, die dir oft helfen, aus gefährlichen Situationen zu entkommen.
+
+related:
+  - page: hider
+    label: "Verstecker"

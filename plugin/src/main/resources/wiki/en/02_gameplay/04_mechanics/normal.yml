@@ -1,0 +1,23 @@
+id: "normal"
+name: "Normal Mode"
+icon: "minecraft:player_head"
+
+description:
+  - "<gray>Default game mode with standard movement</gray>"
+
+keywords:
+  - "normal"
+  - "mode"
+  - "default"
+  - "standard"
+
+body: |
+  In <bold>NORMAL</bold> game mode, hiders move at standard speed and have standard health. Seekers must eliminate hiders through direct combat.
+
+  This is the default mode with no special modifications.
+
+related:
+  - page: hider
+    label: "Hider"
+  - page: seeker
+    label: "Seeker"

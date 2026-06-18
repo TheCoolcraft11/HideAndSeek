@@ -1,0 +1,22 @@
+id: "gaze"
+name: "Gaze Kill Mode"
+icon: "minecraft:ender_eye"
+
+description:
+  - "<gray>Eliminate hiders simply by looking at them</gray>"
+
+keywords:
+  - "gaze"
+  - "kill"
+  - "mode"
+  - "look"
+  - "laser"
+
+body: |
+  In <bold>GAZE KILL</bold> mode, seekers can eliminate hiders simply by looking at them within range and line-of-sight. A laser particle line indicates the gaze target. This mode has a cooldown between kills.
+
+  See {kill-modes} for all available kill modes.
+
+related:
+  - page: kill-modes
+    label: "Kill Modes"

@@ -1,0 +1,21 @@
+id: "taunts"
+name: "Taunts"
+icon: "minecraft:note_block"
+
+description:
+  - "<gray>Nutze Taunts, um während des Spiels Punkte zu verdienen</gray>"
+
+keywords:
+  - "taunt"
+  - "punkte"
+  - "emote"
+  - "interaktion"
+
+body: |
+  Taunts sind Aktionen oder Gesten, die du während des Spiels ausführen kannst, um zusätzliche {points} zu verdienen.
+
+  Setze Taunts strategisch ein — während sie dir Punkte einbringen, können sie auch deine Position verraten.
+
+related:
+  - page: points
+    label: "Punkte"

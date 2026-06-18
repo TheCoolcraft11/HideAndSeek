@@ -1,0 +1,22 @@
+id: "one_hit"
+name: "One Hit Mode"
+icon: "minecraft:diamond_sword"
+
+description:
+  - "<gray>Any successful hit instantly eliminates a hider</gray>"
+
+keywords:
+  - "one"
+  - "hit"
+  - "kill"
+  - "mode"
+  - "instant"
+
+body: |
+  In <bold>ONE HIT</bold> kill mode, any successful hit on a hider instantly eliminates them. There is no health management — one touch is all it takes.
+
+  See {kill-modes} for all available kill modes.
+
+related:
+  - page: kill-modes
+    label: "Kill Modes"

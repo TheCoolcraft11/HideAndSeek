@@ -1,0 +1,23 @@
+id: "perk"
+name: "Seeker Perk Shop"
+icon: "minecraft:experience_bottle"
+
+description:
+  - "<gray>Perks that seekers can purchase during the game</gray>"
+
+keywords:
+  - "perk"
+  - "seeker"
+  - "shop"
+  - "ability"
+
+body: |
+  The Seeker perk shop becomes active during the {seeking} phase. Seekers can purchase perks to gain temporary advantages in hunting hiders.
+
+  Seeker perks are mostly temporary effects to weaken or hinder hiders.
+
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: seeking
+    label: "Seeking Phase"

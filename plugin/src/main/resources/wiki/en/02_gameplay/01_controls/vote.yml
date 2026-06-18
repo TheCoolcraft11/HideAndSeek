@@ -1,0 +1,21 @@
+id: "vote"
+name: "Voting"
+icon: "minecraft:compass"
+
+description:
+  - "<gray>Vote on maps and game modes in the lobby</gray>"
+
+keywords:
+  - "vote"
+  - "map"
+  - "mode"
+  - "lobby"
+
+body: |
+  During the {lobby} phase, you can vote on the map and game mode for the upcoming round.
+
+  The option with the most votes is selected when the round starts.
+
+related:
+  - page: lobby
+    label: "Lobby Phase"

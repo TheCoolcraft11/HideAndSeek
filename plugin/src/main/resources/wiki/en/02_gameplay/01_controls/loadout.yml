@@ -1,0 +1,23 @@
+id: "loadout"
+name: "Loadout"
+icon: "minecraft:chest"
+
+description:
+  - "<gray>Select your items and perks before the game starts</gray>"
+
+keywords:
+  - "loadout"
+  - "preset"
+  - "setup"
+  - "inventory"
+
+body: |
+  During the {lobby} phase, you can select your loadout — a preset of items and perks for the upcoming round.
+
+  If no loadout is chosen, a default fallback loadout is assigned.
+
+related:
+  - page: lobby
+    label: "Lobby Phase"
+  - page: seeking
+    label: "Seeking Phase"

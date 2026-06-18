@@ -1,0 +1,21 @@
+id: "small"
+name: "Klein-Modus"
+icon: "minecraft:rabbit_foot"
+
+description:
+  - "<gray>Verstecker werden auf eine kleinere Größe geschrumpft</gray>"
+
+keywords:
+  - "klein"
+  - "modus"
+  - "winzig"
+  - "größe"
+
+body: |
+  Im <bold>KLEIN</bold>-Spielmodus werden Verstecker verkleinert, wodurch sie schwerer zu entdecken und zu treffen sind.
+
+  Aktuelle Versteckergröße: x%setting-game.small-mode.hider-size%
+
+related:
+  - page: hider
+    label: "Verstecker"

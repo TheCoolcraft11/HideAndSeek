@@ -1,0 +1,23 @@
+id: "loadout"
+name: "Ausrüstung"
+icon: "minecraft:chest"
+
+description:
+  - "<gray>Wähle deine Gegenstände und Fähigkeiten vor Spielbeginn</gray>"
+
+keywords:
+  - "ausrüstung"
+  - "loadout"
+  - "voreinstellung"
+  - "setup"
+
+body: |
+  Während der {lobby}-Phase kannst du deine Ausrüstung auswählen – eine Voreinstellung von Gegenständen und Fähigkeiten für die kommende Runde.
+
+  Wenn keine Ausrüstung ausgewählt wird, wird eine Standard-Ausrüstung zugewiesen.
+
+related:
+  - page: lobby
+    label: "Lobby-Phase"
+  - page: seeking
+    label: "Such-Phase"

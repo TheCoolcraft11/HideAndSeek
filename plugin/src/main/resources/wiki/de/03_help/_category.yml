@@ -1,0 +1,4 @@
+name: "Hilfe"
+icon: "minecraft:redstone_torch"
+description:
+  - "<gray>Nützliche Informationen, einschließlich Regeln und Spieltipps</gray>"

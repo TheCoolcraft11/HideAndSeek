@@ -1,0 +1,22 @@
+id: "gaze"
+name: "Blick-Kill-Modus"
+icon: "minecraft:ender_eye"
+
+description:
+  - "<gray>Eliminiere Verstecker allein durch Ansehen</gray>"
+
+keywords:
+  - "blick"
+  - "kill"
+  - "modus"
+  - "ansehen"
+  - "laser"
+
+body: |
+  Im <bold>GAZE KILL</bold>-Modus können Suchende Verstecker eliminieren, indem sie sie innerhalb der Reichweite und Sichtlinie ansehen. Eine Laserpartikellinie zeigt das Blickziel an. Dieser Modus hat eine Abklingzeit zwischen den Tötungen.
+
+  Siehe {kill-modes} für alle verfügbaren Kill-Modi.
+
+related:
+  - page: kill-modes
+    label: "Kill-Modi"

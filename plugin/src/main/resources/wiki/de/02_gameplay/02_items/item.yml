@@ -1,0 +1,21 @@
+id: "item"
+name: "Verstecker-Gegenstände"
+icon: "minecraft:iron_ingot"
+
+description:
+  - "<gray>Gegenstände, die Versteckern bei der Flucht und dem Überleben helfen</gray>"
+
+keywords:
+  - "gegenstand"
+  - "verstecker"
+  - "werkzeug"
+  - "flucht"
+
+body: |
+  Verstecker haben Zugriff auf eine Vielzahl von Gegenständen, die ihnen bei der Flucht und dem Überleben helfen. Gegenstände befinden sich im Verstecker-Inventar und haben unterschiedliche Seltenheitsstufen.
+
+  Durchstöbere den Gegenstände-Bereich, um mehr über jeden Gegenstand zu erfahren.
+
+related:
+  - page: hider
+    label: "Verstecker"

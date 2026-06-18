@@ -1,0 +1,21 @@
+id: "items"
+name: "Suchender-Gegenstände"
+icon: "minecraft:iron_ingot"
+
+description:
+  - "<gray>Gegenstände, die Suchenden helfen, Verstecker aufzuspüren und zu eliminieren</gray>"
+
+keywords:
+  - "gegenstand"
+  - "suchender"
+  - "werkzeug"
+  - "jagd"
+
+body: |
+  Suchende haben Zugriff auf eine Vielzahl von Gegenständen, die ihnen helfen, Verstecker aufzuspüren und zu eliminieren. Gegenstände befinden sich im Suchender-Inventar und haben unterschiedliche Seltenheitsstufen.
+
+  Durchstöbere den Gegenstände-Bereich, um mehr über jeden Gegenstand zu erfahren.
+
+related:
+  - page: seeker
+    label: "Suchende"

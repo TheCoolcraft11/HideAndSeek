@@ -1,0 +1,21 @@
+id: "vote"
+name: "Abstimmung"
+icon: "minecraft:compass"
+
+description:
+  - "<gray> Stimme in der Lobby über Karten und Spielmodi ab</gray>"
+
+keywords:
+  - "abstimmung"
+  - "karte"
+  - "modus"
+  - "lobby"
+
+body: |
+  Während der {lobby}-Phase kannst du über die Karte und den Spielmodus für die kommende Runde abstimmen.
+
+  Die Option mit den meisten Stimmen wird zu Rundenbeginn ausgewählt.
+
+related:
+  - page: lobby
+    label: "Lobby-Phase"

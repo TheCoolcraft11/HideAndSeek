@@ -1,0 +1,23 @@
+id: "perk"
+name: "Suchender-Fähigkeitenladen"
+icon: "minecraft:experience_bottle"
+
+description:
+  - "<gray>Fähigkeiten, die Suchende während des Spiels kaufen können</gray>"
+
+keywords:
+  - "fähigkeit"
+  - "suchender"
+  - "laden"
+  - "perk"
+
+body: |
+  Der Suchender-Fähigkeitenladen wird während der {seeking}-Phase aktiviert. Suchende können Fähigkeiten kaufen, um temporäre Vorteile bei der Jagd auf Verstecker zu erhalten.
+
+  Suchender-Fähigkeiten sind meist temporäre Effekte, um Verstecker zu schwächen oder zu behindern.
+
+related:
+  - page: seeker
+    label: "Suchende"
+  - page: seeking
+    label: "Such-Phase"

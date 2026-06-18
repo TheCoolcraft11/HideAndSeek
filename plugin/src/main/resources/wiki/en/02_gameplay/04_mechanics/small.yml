@@ -1,0 +1,21 @@
+id: "small"
+name: "Small Mode"
+icon: "minecraft:rabbit_foot"
+
+description:
+  - "<gray>Hiders are shrunk to a smaller size</gray>"
+
+keywords:
+  - "small"
+  - "mode"
+  - "tiny"
+  - "size"
+
+body: |
+  In <bold>SMALL</bold> game mode, hiders are reduced in size, making them harder to spot and hit.
+
+  Current hider size: x%setting-game.small-mode.hider-size%
+
+related:
+  - page: hider
+    label: "Hider"

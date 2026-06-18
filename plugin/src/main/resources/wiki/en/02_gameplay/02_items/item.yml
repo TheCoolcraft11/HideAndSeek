@@ -1,0 +1,21 @@
+id: "item"
+name: "Hider Items"
+icon: "minecraft:iron_ingot"
+
+description:
+  - "<gray>Items that help hiders escape and survive</gray>"
+
+keywords:
+  - "item"
+  - "hider"
+  - "tool"
+  - "escape"
+
+body: |
+  Hiders have access to a variety of items to help them escape and survive. Items can be found in the hider inventory and have different rarities.
+
+  Browse the items section to learn about each item.
+
+related:
+  - page: hider
+    label: "Hider"
