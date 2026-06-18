@@ -135,8 +135,7 @@ public class SlotPreferencesGUI {
 
 
         InventoryItem clearAllButton = new InventoryItem(
-                createUtilityItem(GUIItems.KEY_CLEAR, plugin.trText(player, "gui.slotprefs.clear_all.title"),
-                        NamedTextColor.RED,
+                createUtilityItem(GUIItems.KEY_CLEAR, plugin.tr(player, "gui.slotprefs.clear_all.title"),
                         List.of(plugin.tr(player, "gui.slotprefs.clear_all.hint").decoration(TextDecoration.ITALIC,
                                 false))
                         , new ItemStack(Material.BARRIER)));
@@ -158,8 +157,7 @@ public class SlotPreferencesGUI {
 
 
         InventoryItem backButton = new InventoryItem(
-                createUtilityItem(GUIItems.SP_BACK_LOADOUT, plugin.trText(player, "gui.slotprefs.back_to_loadout"),
-                        NamedTextColor.YELLOW,
+                createUtilityItem(GUIItems.SP_BACK_LOADOUT, plugin.tr(player, "gui.slotprefs.back_to_loadout"),
                         List.of(plugin.tr(player, "gui.slotprefs.back_to_loadout.hint").decoration(
                                 TextDecoration.ITALIC, false)),
                         new ItemStack(Material.ARROW)));
@@ -240,8 +238,7 @@ public class SlotPreferencesGUI {
 
         InventoryItem backButton = new InventoryItem(
                 createUtilityItem(GUIItems.SP_BACK_PREFS,
-                        plugin.trText(player, "gui.slotprefs.back_to_preferences.title"),
-                        NamedTextColor.YELLOW,
+                        plugin.tr(player, "gui.slotprefs.back_to_preferences.title"),
                         List.of(plugin.tr(player, "gui.slotprefs.back_to_preferences.hint").decoration(
                                 TextDecoration.ITALIC, false)),
                         new ItemStack(Material.ARROW)));
@@ -390,13 +387,13 @@ public class SlotPreferencesGUI {
         return item;
     }
 
-    private ItemStack createUtilityItem(String key, String title, NamedTextColor color, List<Component> lore, ItemStack fallback) {
+    private ItemStack createUtilityItem(String key, Component title, List<Component> lore, ItemStack fallback) {
         ItemStack item = item(key, fallback);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return item;
         }
-        meta.displayName(Component.text(title, color, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+        meta.displayName(title.decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
         item.setItemMeta(meta);
         return item;

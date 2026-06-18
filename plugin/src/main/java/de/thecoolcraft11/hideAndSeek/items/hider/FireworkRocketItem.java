@@ -276,6 +276,6 @@ public class FireworkRocketItem implements GameItem {
         if (context.getBlock() != null) {
             return context.getBlock().getLocation().clone().add(0, 1, 0);
         }
-        return context.getPlayer().getLocation().clone().add(0, 1, 0);
+        return context.getPlayer().getLocation().clone().add(0, 1, 0).setRotation(0, 0);
     }
 }
