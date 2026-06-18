@@ -1,3 +1,4 @@
 name: "Hider"
-icon: GRASS_BLOCK
-description: [ ]
+icon: "minecraft:grass_block"
+description:
+  - "<gray>Escape, stealth, and survival tools for hiders</gray>"

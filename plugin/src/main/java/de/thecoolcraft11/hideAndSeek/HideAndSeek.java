@@ -5,7 +5,6 @@ import de.thecoolcraft11.hideAndSeek.gui.*;
 import de.thecoolcraft11.hideAndSeek.gui.config.GUIItems;
 import de.thecoolcraft11.hideAndSeek.gui.config.GUINames;
 import de.thecoolcraft11.hideAndSeek.items.*;
-import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.items.api.ItemStateManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectManager;
 import de.thecoolcraft11.hideAndSeek.items.effects.KillEffectSkins;
@@ -21,7 +20,6 @@ import de.thecoolcraft11.hideAndSeek.listener.perk.PlaceholderItemProtectionList
 import de.thecoolcraft11.hideAndSeek.listener.player.*;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutDataService;
 import de.thecoolcraft11.hideAndSeek.loadout.LoadoutManager;
-import de.thecoolcraft11.hideAndSeek.model.LoadoutItemType;
 import de.thecoolcraft11.hideAndSeek.nms.NmsAdapter;
 import de.thecoolcraft11.hideAndSeek.nms.NmsLoader;
 import de.thecoolcraft11.hideAndSeek.perk.PerkRegistry;
@@ -48,7 +46,6 @@ import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
 import de.thecoolcraft11.timer.Timer;
 import de.thecoolcraft11.timer.api.TimerAPI;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -219,53 +216,6 @@ public final class HideAndSeek extends MinigameFramework {
         MinigameSubcommandRegistry.register(new StatsCommand(this));
 
         unstuckManager.startTrackingTask();
-
-        getWikiRegistry().addPlaceholderResolver((player, key) -> {
-            if (key.startsWith("setting-")) {
-                Object o = getSettingRegistry().get(key.substring("setting-".length()));
-                if (o == null) return tr(player, "wiki.setting_not_found");
-                return Component.text(o.toString());
-            }
-            if (key.startsWith("rarity-")) {
-                LoadoutItemType itemType = LoadoutItemType.fromID("has_hider_" + key.substring("rarity-".length()));
-                if (itemType == null) {
-                    itemType = LoadoutItemType.fromID("has_seeker_" + key.substring("rarity-".length()));
-                }
-                if (itemType != null) {
-                    String color = switch (itemType.getRarity()) {
-                        case COMMON -> "white";
-                        case UNCOMMON -> "green";
-                        case RARE -> "blue";
-                        case EPIC -> "light_purple";
-                        case LEGENDARY -> "gold";
-                    };
-                    return Component.text("<" + color + ">" + itemType.getRarity().name() + "</" + color + ">");
-                }
-            }
-            if (key.startsWith("desc-")) {
-                GameItem gameItem = HiderItems.getItem("has_hider_" + key.substring("desc-".length()));
-                if (gameItem == null) {
-                    gameItem = SeekerItems.getItem("has_seeker_" + key.substring("desc-".length()));
-                }
-                if (gameItem != null) {
-                    return Component.text(gameItem.getDescription(this, player));
-                }
-            }
-            return tr(player, "wiki.resolver_not_found");
-        });
-
-        getWikiRegistry().addItemPlaceholderResolver((player, key) -> {
-            if (key.startsWith("item-")) {
-                GameItem gameItem = SeekerItems.getItem("has_seeker_" + key.substring("item-".length()));
-                if (gameItem == null) {
-                    gameItem = HiderItems.getItem("has_hider_" + key.substring("item-".length()));
-                }
-                if (gameItem == null) return new ItemStack(Material.BARRIER);
-                return gameItem.createItem(this);
-            }
-            return new ItemStack(Material.AIR);
-        });
-
 
         WikiHelper.ensureWikiExists(this);
         WikiHelper.registerPlaceholders(this);

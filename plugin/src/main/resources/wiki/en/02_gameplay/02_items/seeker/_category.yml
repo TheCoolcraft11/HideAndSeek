@@ -1,3 +1,4 @@
 name: "Seeker"
-icon: IRON_SWORD
-description: [ ]
+icon: "minecraft:iron_sword"
+description:
+  - "<gray>Tracking, trapping, and mobility tools for seekers</gray>"

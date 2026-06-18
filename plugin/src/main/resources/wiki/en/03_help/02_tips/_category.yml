@@ -1,3 +1,4 @@
 name: "Tips"
-icon: KNOWLEDGE_BOOK
-description: [ ]
+icon: "minecraft:knowledge_book"
+description:
+  - "<gray>General and role-specific tips to improve your gameplay</gray>"

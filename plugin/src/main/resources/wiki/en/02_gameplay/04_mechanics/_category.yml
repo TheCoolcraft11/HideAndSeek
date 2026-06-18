@@ -1,3 +1,4 @@
 name: "Mechanics"
-icon: REDSTONE
-description: [ ]
+icon: "minecraft:redstone"
+description:
+  - "<gray>Game systems that affect gameplay beyond items and perks</gray>"

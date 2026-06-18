@@ -1,3 +1,4 @@
 name: "Controls"
-icon: OBSERVER
-description: [ ]
+icon: "minecraft:observer"
+description:
+  - "<gray>All available commands and how to use them</gray>"

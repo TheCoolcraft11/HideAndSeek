@@ -1,4 +1,4 @@
 name: "Basics"
-icon: GRASS_BLOCK
+icon: "minecraft:grass_block"
 description:
   - "<gray>Learn the basics about HideAndSeek!</gray>"

@@ -1,3 +1,4 @@
 name: "Gameplay"
-icon: SPYGLASS
-description: [ ]
+icon: "minecraft:spyglass"
+description:
+  - "<gray>Detailed information about controls, items, perks, and mechanics</gray>"

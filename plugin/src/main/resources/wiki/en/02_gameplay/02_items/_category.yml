@@ -1,3 +1,4 @@
 name: "Items"
-icon: IRON_INGOT
-description: [ ]
+icon: "minecraft:iron_ingot"
+description:
+  - "<gray>Usable items for both hiders and seekers</gray>"

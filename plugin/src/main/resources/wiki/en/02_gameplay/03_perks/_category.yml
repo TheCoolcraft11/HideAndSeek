@@ -1,3 +1,4 @@
 name: "Perks"
-icon: LIGHT
-description: [ ]
+icon: "minecraft:light[tooltip_display={hidden_components:[\"block_state\"]}]"
+description:
+  - "<gray>Special abilities for hiders and seekers</gray>"

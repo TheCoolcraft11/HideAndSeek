@@ -1,3 +1,4 @@
 name: "Win Scoring"
-icon: DIAMOND
-description: [ ]
+icon: "minecraft:diamond"
+description:
+  - "<gray>Learn how winning, scoring, and rewards work</gray>"

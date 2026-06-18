@@ -1,3 +1,4 @@
 name: "Rules"
-icon: WRITTEN_BOOK
-description: [ ]
+icon: "minecraft:written_book"
+description:
+  - "<gray>Official game rules and guidelines</gray>"

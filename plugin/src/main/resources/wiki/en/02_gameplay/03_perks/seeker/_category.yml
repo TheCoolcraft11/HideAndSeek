@@ -1,3 +1,4 @@
 name: "Seeker Perks"
-icon: NETHERITE_SWORD
-description: [ ]
+icon: "minecraft:netherite_sword"
+description:
+  - "<gray>Seeker-specific perks that aid in hunting hiders</gray>"

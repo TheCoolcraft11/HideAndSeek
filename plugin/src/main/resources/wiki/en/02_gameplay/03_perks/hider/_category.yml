@@ -1,3 +1,4 @@
 name: "Hider Perks"
-icon: SHIELD
-description: [ ]
+icon: "minecraft:shield"
+description:
+  - "<gray>Hider-specific perks for survival and evasion</gray>"

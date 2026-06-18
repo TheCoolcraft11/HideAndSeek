@@ -1,3 +1,4 @@
 name: "Help"
-icon: REDSTONE_TORCH
-description: [ ]
+icon: "minecraft:redstone_torch"
+description:
+  - "<gray>Useful information including rules and gameplay tips</gray>"

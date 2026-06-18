@@ -1,4 +1,4 @@
 name: "Roles"
-icon: PLAYER_HEAD
+icon: "minecraft:player_head"
 description:
   - "<gray>Learn about Hiders & Seekers</gray>"

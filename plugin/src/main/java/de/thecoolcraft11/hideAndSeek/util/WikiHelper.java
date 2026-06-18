@@ -26,6 +26,8 @@ public class WikiHelper {
 
     public static void registerPlaceholders(HideAndSeek plugin) {
         plugin.getWikiRegistry().addPlaceholderResolver((player, key) -> {
+            if (plugin.getDebugSettings().isVerboseLoggingEnabled())
+                plugin.getLogger().info("Resolving placeholder: " + key);
             if (key.startsWith("setting-")) {
                 Object o = plugin.getSettingRegistry().get(key.substring("setting-".length()));
                 if (o == null) return plugin.tr(player, "wiki.setting_not_found");
@@ -59,6 +61,7 @@ public class WikiHelper {
             if (key.startsWith("perk-rarity-")) {
                 String perkId = key.substring("perk-rarity-".length());
                 for (PerkDefinition perk : plugin.getPerkRegistry().getAllPerks()) {
+                    plugin.getLogger().info("Checking perk " + perk.getId() + " against " + perkId);
                     if (perk.getId().equals(perkId)) {
                         String color = switch (perk.getTier()) {
                             case COMMON -> "white";
