@@ -1,0 +1,34 @@
+id: "game-styles"
+name: "Spielstile"
+icon: "minecraft:comparator"
+
+description:
+  - "<gray>Wie mit eliminierten Spielern umgegangen wird</gray>"
+
+keywords:
+  - "stil"
+  - "zuschauer"
+  - "invasion"
+  - "unendlich"
+  - "eliminierung"
+  - "wiederbeleben"
+
+body: |
+  Spielstile bestimmen, was mit Spielern passiert, wenn sie eliminiert werden. Der aktuelle Stil wird über <gold>%setting-game.style%</gold> eingestellt.
+  
+  <bold>ZUSCHAUER</bold>
+  Eliminierte Spieler werden zu Zuschauern. Sie können über die Karte fliegen, das Spiel aus jeder Perspektive betrachten und die Zuschauer-Teleportations-GUI verwenden, um Spielern zu folgen. Dies ist der Standardstil.
+  
+  <bold>INVASION</bold>
+  Eliminierte Sucher werden als Hider wiederbelebt. Ihr Inventar wird zurückgesetzt, sie erhalten Hider-Gegenstände und werden zum Hider-Team verschoben. Dies erzeugt eine Dynamik, bei der das Sucher-Team mit der Zeit schrumpft.
+  
+  <bold>UNENDLICH</bold>
+  Eliminierte Hider werden am Startpunkt der Runde mit einem vollen Hider-Inventar wiederbelebt. Hider haben unbegrenzte Leben, was es für Sucher sehr schwierig macht, durch Eliminierung zu gewinnen — Sucher müssen sich auf den Runden-Timer verlassen.
+
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: hider
+    label: "Hider"
+  - page: kill-modes
+    label: "Kill-Modi"

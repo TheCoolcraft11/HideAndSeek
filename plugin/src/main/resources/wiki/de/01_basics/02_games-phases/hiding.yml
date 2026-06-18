@@ -15,6 +15,14 @@ body: |
   
   Als Hider ist es dein Ziel, ein geeignetes Versteck zu finden, bevor die Zeit abläuft.
   
-  <bold>Aktuelle Versteck-Zeit</bold>: <yellow>%setting-timer.hiding%<yellow>
+  <bold>Aktuelle Versteck-Zeit</bold>: <yellow>%setting-game.hiding-time%s</yellow>
 
-related: [ ]
+related:
+  - page: lobby
+    label: "Lobby-Phase"
+  - page: seeking
+    label: "Such-Phase"
+  - page: hider
+    label: "Hider"
+  - page: seeker
+    label: "Seeker"

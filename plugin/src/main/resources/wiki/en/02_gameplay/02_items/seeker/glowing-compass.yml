@@ -14,7 +14,11 @@ keywords:
   - ""
 
 body: |
-  The <green>Glowing Compass</green> is a %rarity-glowing_compass% item. On use it make every hider in a radius of <#00ffff>%setting-seeker-items.glowing-compass.range% blocks</#00ffff> glow for <#00ffff>%setting-seeker-items.glowing-compass.duration%s</#00ffff>
+  The <green>Glowing Compass</green> is a %rarity-glowing_compass% item. On use, it makes every hider in a radius of <#00ffff>%setting-seeker-items.glowing-compass.range% blocks</#00ffff> glow for <#00ffff>%setting-seeker-items.glowing-compass.duration%s</#00ffff>.
   It has a cooldown of <#00ffff>%setting-seeker-items.glowing-compass.cooldown%s</#00ffff>.
 
-related: [ ]
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Seeker Items"

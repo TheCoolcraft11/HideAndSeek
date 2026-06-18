@@ -15,8 +15,13 @@ keywords:
   - "role"
 
 body: |
-  As a <bold>Hider</bold>, your main objective is to avoid being caught be the {seeker}. Your {item} can help you escape if you got discovered. By surviving or using {taunts} you will earn {points}, which can be spent {perks}. Hider {perks} mainly provide long-term or permanent advantages, often helping you escape dangerous situations. Unspent {points} are automatically converted into {coins}. Depending on the currently selected gamemode you will gain different advantages.
-  - {normal}, {small} (Currently: x%setting-game.small-mode.hider-size%), {block}
+  As a <bold>Hider</bold>, your main objective is to avoid being caught be the {seeker}. Your {item} can help you escape if you got discovered.
+  
+  By surviving or using {taunts} you will earn {points}, which can be spent on {perks}. Hider {perks} mainly provide long-term or permanent advantages, often helping you escape dangerous situations. Unspent {points} are automatically converted into {coins}.
+  
+  Depending on the currently selected gamemode you will gain different advantages:
+  - {normal}, {small} (Currently: x<#00ffff>%setting-game.small-mode.hider-size%</#00ffff>), {block}, {skin-mode}
+  
   Current Mode: <gold>%setting-game.mode%</gold>
 
 related:
@@ -40,3 +45,7 @@ related:
     label: "Points"
   - page: coins
     label: "Coins"
+  - page: skin-mode
+    label: "SKIN Mode"
+  - page: game-styles
+    label: "Game Styles"

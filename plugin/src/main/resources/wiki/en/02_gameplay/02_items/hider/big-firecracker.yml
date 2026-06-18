@@ -17,7 +17,9 @@ keywords:
   - "place"
 
 body: |
-  The <green>Big Firecracker</green> is a %rarity-big_firecracker% item. When placed on the ground, it immediately grants <gold>%setting-points.hider.taunt.large% {points}. After a short delay, it explodes, producing a loud sound that alerts nearby seekers and splits into %setting-hider-items.big-firecracker.mini-count% normal firecrackers.
+  The <green>Big Firecracker</green> is a %rarity-big_firecracker% item. When placed on the ground, it immediately grants <underlined><gold>%setting-points.hider.taunt.large%</gold></underlined> {points}.
+  
+  After a short delay, it explodes, producing a loud sound that alerts nearby seekers and splits into <#00ffff>%setting-hider-items.big-firecracker.mini-count%</#00ffff> normal firecrackers.
   It has a cooldown of <#00ffff>%setting-hider-items.big-firecracker.cooldown%s</#00ffff>.
 
 related:

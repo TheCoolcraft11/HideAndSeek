@@ -14,7 +14,10 @@ keywords:
   - ""
 
 body: |
-  The <green>Cage Trap</green> is a %rarity-cage_trap% item. It can be placed down on the floor. When placed down, it requires <#00ffff>%setting-seeker-items.cage-trap.setup-time%s</#00ffff> to setup. After setup it trap the first hider that enter a radius <#00ffff>%setting-seeker-items.cage-trap.range% blocks</#00ffff>. The trapped hider cannot move for <#00ffff>%setting-seeker-items.cage-trap.paralyze-duration%s</#00ffff>. Placed traps stay for [<#00ffff>%setting-seeker-items.cage-trap.duration%s</#00ffff>](-1 = until the round ends).
+  The <green>Cage Trap</green> is a %rarity-cage_trap% item. It can be placed down on the floor.
+  
+  When placed, it requires <#00ffff>%setting-seeker-items.cage-trap.setup-time%s</#00ffff> to set up. After setup, it traps the first hider that enters within a radius of <#00ffff>%setting-seeker-items.cage-trap.range% blocks</#00ffff>. The trapped hider cannot move for <#00ffff>%setting-seeker-items.cage-trap.paralyze-duration%s</#00ffff>.
+  Placed traps stay for <#00ffff>%setting-seeker-items.cage-trap.duration%s</#00ffff> (-1 = until the round ends).
   It has a cooldown of <#00ffff>%setting-seeker-items.cage-trap.cooldown%s</#00ffff>.
 
 related: [ ]

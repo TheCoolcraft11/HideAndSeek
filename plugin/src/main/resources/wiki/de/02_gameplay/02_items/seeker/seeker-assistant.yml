@@ -20,12 +20,16 @@ body: |
   
   Während der Aktivität verwendet der Assistent die folgenden Mechanismen:
   
-  - <b>Schnüffeln:</b> Durchsucht die Umgebung nach Versteckern in einem vorderen Bereich von <#00ffff>%setting-seeker-items.assistant.sniff-range-front% Blöcken</#00ffff> und einem hinteren Bereich von <#00ffff>%setting-seeker-items.assistant.sniff-range-rear% Blöcken</#00ffff>. Die Erkennungsreichweite für versteckte Verstecker wird um einen Multiplikator von <#00ffff>%setting-seeker-items.assistant.sniff-hidden-multiplier%</#00ffff> reduziert.
-  - <b>Verfolgung:</b> Sobald ein Ziel gefunden wurde, navigiert der Assistent zu ihm, während er versucht, einen Sicherheitsabstand von <#00ffff>%setting-seeker-items.assistant.standoff-range% Blöcken</#00ffff> einzuhalten.
-  - <b>Kampf:</b> Schießt automatisch Projektile auf sichtbare Verstecker innerhalb von <#00ffff>%setting-seeker-items.assistant.shoot-range% Blöcken</#00ffff> alle <#00ffff>%setting-seeker-items.assistant.shoot-cooldown% Ticks</#00ffff>.
-  - <b>Alarm:</b> Wenn sich ein Ziel innerhalb von <#00ffff>%setting-seeker-items.assistant.alert-range% Blöcken</#00ffff> befindet, sendet der Assistent eine Aktionsleisten-Benachrichtigung und spielt ein Alarmgeräusch für seinen Besitzer ab.
-  - <b>Umherstreifen:</b> Wenn kein Ziel erkannt wird, patrouilliert der Assistent in der Umgebung seines Beschwörungsortes, wobei der Patrouillenradius mit der Zeit allmählich auf bis zu <#00ffff>%setting-seeker-items.assistant.wander-radius-phase3% Blöcke</#00ffff> anwächst.
+  - <bold>Schnüffeln:</bold> Durchsucht die Umgebung nach Versteckern in einem vorderen Bereich von <#00ffff>%setting-seeker-items.assistant.sniff-range-front% Blöcken</#00ffff> und einem hinteren Bereich von <#00ffff>%setting-seeker-items.assistant.sniff-range-rear% Blöcken</#00ffff>. Die Erkennungsreichweite für versteckte Verstecker wird um einen Multiplikator von <#00ffff>%setting-seeker-items.assistant.sniff-hidden-multiplier%</#00ffff> reduziert.
+  - <bold>Verfolgung:</bold> Sobald ein Ziel gefunden wurde, navigiert der Assistent zu ihm, während er versucht, einen Sicherheitsabstand von <#00ffff>%setting-seeker-items.assistant.standoff-range% Blöcken</#00ffff> einzuhalten.
+  - <bold>Kampf:</bold> Schießt automatisch Projektile auf sichtbare Verstecker innerhalb von <#00ffff>%setting-seeker-items.assistant.shoot-range% Blöcken</#00ffff> alle <#00ffff>%setting-seeker-items.assistant.shoot-cooldown% Ticks</#00ffff>.
+  - <bold>Alarm:</bold> Wenn sich ein Ziel innerhalb von <#00ffff>%setting-seeker-items.assistant.alert-range% Blöcken</#00ffff> befindet, sendet der Assistent eine Aktionsleisten-Benachrichtigung und spielt ein Alarmgeräusch für seinen Besitzer ab.
+  - <bold>Umherstreifen:</bold> Wenn kein Ziel erkannt wird, patrouilliert der Assistent in der Umgebung seines Beschwörungsortes, wobei der Patrouillenradius mit der Zeit allmählich auf bis zu <#00ffff>%setting-seeker-items.assistant.wander-radius-phase3% Blöcke</#00ffff> anwächst.
   
   Das Item hat eine Abklingzeit von <#00ffff>%setting-seeker-items.assistant.cooldown%s</#00ffff>.
 
-related: [ ]
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Seeker-Gegenstände"

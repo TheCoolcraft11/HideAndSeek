@@ -1,0 +1,34 @@
+id: "game-styles"
+name: "Game Styles"
+icon: "minecraft:comparator"
+
+description:
+  - "<gray>How eliminated players are handled</gray>"
+
+keywords:
+  - "style"
+  - "spectator"
+  - "invasion"
+  - "infinite"
+  - "elimination"
+  - "respawn"
+
+body: |
+  Game styles determine what happens to players when they are eliminated. The current style is set via <gold>%setting-game.style%</gold>.
+  
+  <bold>SPECTATOR</bold>
+  Eliminated players become spectators. They can fly around the map, view the game from any perspective, and use the spectator teleportation GUI to follow players. This is the default style.
+  
+  <bold>INVASION</bold>
+  Eliminated seekers respawn as hiders. Their inventory is reset, they receive hider items, and they are moved to the hider team. This creates a dynamic where the seeker team shrinks over time.
+  
+  <bold>INFINITE</bold>
+  Eliminated hiders respawn at the round spawn point with a full hider inventory. Hiders have unlimited lives, making it very difficult for seekers to win by elimination — seekers must rely on the round timer.
+
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: hider
+    label: "Hider"
+  - page: kill-modes
+    label: "Kill Modes"

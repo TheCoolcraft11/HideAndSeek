@@ -17,6 +17,8 @@ keywords:
   - "totem"
 
 body: |
-  The <green>Totem Of Undying</green> is a %rarity-totem% item. It can only be used <#00ffff>%setting-hider-items.totem.max-uses%</#00ffff>. On use it will grant a <#00ffff>%setting-hider-items.totem.max-uses%</#00ffff> invincibility time. If a hider dies during this time window, they will respawn
+  The <green>Totem Of Undying</green> is a %rarity-totem% item. It can be used up to <#00ffff>%setting-hider-items.totem.max-uses%</#00ffff> times.
+  
+  On use, it grants an invincibility time of <#00ffff>%setting-hider-items.totem.effect-duration%s</#00ffff>. If a hider dies during this time window, they will respawn.
 
 related: [ ]

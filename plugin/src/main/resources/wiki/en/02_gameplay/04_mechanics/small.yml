@@ -14,7 +14,7 @@ keywords:
 body: |
   In <bold>SMALL</bold> game mode, hiders are reduced in size, making them harder to spot and hit.
 
-  Current hider size: x%setting-game.small-mode.hider-size%
+  Current hider size: x<#00ffff>%setting-game.small-mode.hider-size%</#00ffff>
 
 related:
   - page: hider

@@ -17,8 +17,8 @@ keywords:
 
 body: |
   Der <green>Random Block</green> ist ein %rarity-random_block% Gegenstand. Es tauscht deinen aktuellen Block gegen einen zufälligen aus dem erlaubten Blockpool aus. Es kann bis zu <#00ffff>%setting-hider-items.random-block.uses%</#00ffff> Mal verwendet werden.
-  <b>Hinweis</b>: Dieser Gegenstand ist nur im {block-mode} Spielmodus verfügbar.
-  Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.crossbow.cooldown%s</#00ffff>
+  <bold>Hinweis</bold>: Dieser Gegenstand ist nur im {block-mode} Spielmodus verfügbar.
+  Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.random-block.cooldown%s</#00ffff>.
 
 related:
   - page: block-mode

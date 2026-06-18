@@ -21,7 +21,7 @@ keywords:
 body: |
   The <green>Speed Boost</green> item is a %rarity-speed_boost% item. When used, it grants either a speed or velocity boost, depending on the selected setting. Current: <#00ffff>%setting-hider-items.speed-boost.type%</#00ffff>.
   When used in combination with the {tracker-crossbow}, it can be upgraded by landing successful hits. Each upgrade increases either the speed amplifier or the velocity boost strength.
-  It has a cooldown of  <#00ffff>%setting-hider-items.speed-boost.cooldown%s</#00ffff>
+  It has a cooldown of <#00ffff>%setting-hider-items.speed-boost.cooldown%s</#00ffff>.
 
 related:
   - page: tracker-crossbow

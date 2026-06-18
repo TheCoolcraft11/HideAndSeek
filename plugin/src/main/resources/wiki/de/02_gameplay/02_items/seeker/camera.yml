@@ -15,9 +15,13 @@ keywords:
 
 body: |
   Die <green>Camera</green> ist ein %rarity-camera% Gegenstand. Sie kann auf dem Boden platziert oder durch Schleichen und Rechtsklick an Wänden befestigt werden. Einmal platziert, kann eine Kamera durch Rechtsklick betrachtet werden. Es können maximal <#00ffff>%setting-seeker-items.camera.max-placed%</#00ffff> Kameras gleichzeitig platziert werden. Während der Betrachtung einer Kamera:
-  - <b>Scrollen</b> zum Drehen der Kamera
-  - <b>Linksklick</b> zum Wechseln zwischen platzierten Kameras
-  - <b>Rechtsklick</b> zum Umschalten von Infrarot- oder Nachtsicht
+  - <bold>Scrollen</bold> zum Drehen der Kamera
+  - <bold>Linksklick</bold> zum Wechseln zwischen platzierten Kameras
+  - <bold>Rechtsklick</bold> zum Umschalten von Infrarot- oder Nachtsicht
   Das Item hat eine Abklingzeit von <#00ffff>%setting-seeker-items.camera.cooldown%s</#00ffff>.
 
-related: [ ]
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Seeker-Gegenstände"

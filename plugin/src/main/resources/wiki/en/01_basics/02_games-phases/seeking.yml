@@ -17,7 +17,10 @@ keywords:
 body: |
   At the start of the seeking phase, all seekers are released. Every player receives the {loadout} they selected in the {lobby}. If no loadout was chosen, a default fallback {loadout} is assigned.
   Each {seeker} is equipped with a <red>Seeker’s Blade</red>. It can be thrown by holding right-click.
-  The {perk} shop is now active. It can be accessed either through the inventory or by interacting with vending machines placed across the map. Current Shop Modes: %perk-shop-modes%
+  The {perk} shop is now active. It can be accessed either through the inventory or by interacting with vending machines placed across the map.
+  
+  <bold>Hider Shop Mode:</bold> <yellow>%setting-perks.hider-shop-mode%</yellow>
+  <bold>Seeker Shop Mode:</bold> <yellow>%setting-perks.seeker-shop-mode%</yellow>
 
 related:
   - page: loadout

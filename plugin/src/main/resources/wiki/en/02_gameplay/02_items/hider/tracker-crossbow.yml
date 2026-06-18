@@ -18,7 +18,7 @@ keywords:
 
 body: |
   The <green>Tracker Crossbow</green> is a %rarity-crossbow% item. It behaves just like a normal crossbow. When hitting a seeker <#00ffff>%setting-hider-items.crossbow.hits-per-upgrade%</#00ffff> times it will upgrade your {speed-boost} and {knockback-stick}.
-  It has a cooldown of <#00ffff>%setting-hider-items.crossbow.cooldown%s</#00ffff>
+  It has a cooldown of <#00ffff>%setting-hider-items.crossbow.cooldown%s</#00ffff>.
 
 related:
   - page: speed-boost

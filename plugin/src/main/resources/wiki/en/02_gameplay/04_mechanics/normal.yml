@@ -21,3 +21,5 @@ related:
     label: "Hider"
   - page: seeker
     label: "Seeker"
+  - page: game-modes
+    label: "Game Modes"

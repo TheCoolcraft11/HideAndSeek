@@ -19,7 +19,11 @@ keywords:
   - "flucht"
 
 body: |
-  Der <green>Ghost Essence</green> ist ein %rarity-ghost_essence% Gegenstand. Bei Benutzung versetzt es dich für <#00ffff>%setting-hider-items.ghost-essence.max-duration%s</#00ffff> in einen Geisterzustand. In diesem Zustand kannst du durch Blöcke hindurchgehen und umherfliegen. Wenn der Geisterzustand endet, wird versucht, dich zu materialisieren. Dies ist nur möglich, wenn es einen Pfad zu diesem Punkt gibt und es nicht völlig dunkel ist. Du kannst nicht weiter als <#00ffff>%setting-hider-items.ghost-essence.max-radius%</#00ffff> Blöcke von deiner Startposition entfernt fliegen.
+  Der <green>Ghost Essence</green> ist ein %rarity-ghost_essence% Gegenstand.
+  
+  Bei Benutzung versetzt es dich für <#00ffff>%setting-hider-items.ghost-essence.max-duration%s</#00ffff> in einen Geisterzustand. In diesem Zustand kannst du durch Blöcke hindurchgehen und umherfliegen.
+  
+  Wenn der Geisterzustand endet, wird versucht, dich zu materialisieren. Dies ist nur möglich, wenn es einen freien Pfad zu deinem Standort gibt und es nicht völlig dunkel ist. Du kannst nicht weiter als <#00ffff>%setting-hider-items.ghost-essence.max-radius% Blöcke</#00ffff> von deiner Startposition entfernt fliegen.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.ghost-essence.cooldown%s</#00ffff>.
 
 related: [ ]

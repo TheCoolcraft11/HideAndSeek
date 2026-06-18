@@ -18,7 +18,9 @@ keywords:
   - "werfen"
 
 body: |
-  Der <green>Slowness Ball</green> ist ein %rarity-slowness_ball% Gegenstand. Er kann wie ein Schneeball geworfen werden. Wenn das Projektil einen Sucher trifft, wird es <#00ffff>Slowness %setting-hider-items.slowness-ball.amplifier%</#00ffff> für <#00ffff>%setting-hider-items.slowness-ball.duration%s</#00ffff> anwenden.
+  Der <green>Slowness Ball</green> ist ein %rarity-slowness_ball% Gegenstand. Er kann wie ein Schneeball geworfen werden.
+  
+  Wenn das Projektil einen Sucher trifft, wendet es <#00ffff>Slowness %setting-hider-items.slowness-ball.amplifier%</#00ffff> für <#00ffff>%setting-hider-items.slowness-ball.duration%s</#00ffff> an.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.slowness-ball.cooldown%s</#00ffff>.
 
 related: [ ]

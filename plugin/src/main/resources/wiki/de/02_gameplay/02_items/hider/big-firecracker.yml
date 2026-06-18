@@ -17,7 +17,9 @@ keywords:
   - "platzieren"
 
 body: |
-  Der <green>Big Firecracker</green> ist ein %rarity-big_firecracker% Gegenstand. Wenn es auf den Boden gelegt wird, gewährt es sofort <gold>%setting-points.hider.taunt.large% {points}. Nach einer kurzen Verzögerung explodiert es, erzeugt ein lautes Geräusch, das nahe Sucher alarmiert, und teilt sich in %setting-hider-items.big-firecracker.mini-count% normale Firecracker auf.
+  Der <green>Big Firecracker</green> ist ein %rarity-big_firecracker% Gegenstand. Wenn es auf den Boden gelegt wird, gewährt es sofort <underlined><gold>%setting-points.hider.taunt.large%</gold></underlined> {points}.
+  
+  Nach einer kurzen Verzögerung explodiert es, erzeugt ein lautes Geräusch, das nahe Sucher alarmiert, und teilt sich in <#00ffff>%setting-hider-items.big-firecracker.mini-count%</#00ffff> normale Firecracker auf.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.big-firecracker.cooldown%s</#00ffff>.
 
 related:

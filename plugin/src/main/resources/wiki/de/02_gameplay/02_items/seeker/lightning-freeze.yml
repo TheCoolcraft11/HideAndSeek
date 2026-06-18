@@ -14,7 +14,9 @@ keywords:
   - ""
 
 body: |
-  Der <green>Lightning Freeze</green> ist ein %rarity-lightning_freeze% Gegenstand. Bei Benutzung friert es jeden Verstecker für <#00ffff>%setting-seeker-items.lightning-freeze.duration%s</#00ffff> ein.
+  Der <green>Lightning Freeze</green> ist ein %rarity-lightning_freeze% Gegenstand.
+  
+  Bei Benutzung friert es jeden Verstecker für <#00ffff>%setting-seeker-items.lightning-freeze.duration%s</#00ffff> ein.
   Es hat eine Abklingzeit von <#00ffff>%setting-seeker-items.lightning-freeze.cooldown%s</#00ffff>.
 
 related: [ ]

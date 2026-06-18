@@ -29,8 +29,18 @@ body: |
   Hiders can disguise themselves as blocks by sneaking for a few seconds. Once disguised, they appear as a regular block to seekers. Use the Appearance Editor to choose your block type and block state. Breaking a hider's disguise block requires the correct tool for that block type.
   
   <bold>SKIN Mode</bold>
-  Hiders can change their player skin to any skin loaded from the skin shop. This allows blending in with custom NPC skins or the environment.
+  Hiders can change their player skin to any skin loaded from the skin shop. This allows blending in with custom NPC skins or the environment. See {skin-mode} for details.
 
 related:
   - page: block-mode
     label: "Block Mode"
+  - page: normal
+    label: "Normal Mode"
+  - page: small
+    label: "Small Mode"
+  - page: block
+    label: "Block Mode"
+  - page: skin-mode
+    label: "SKIN Mode"
+  - page: hider
+    label: "Hider"

@@ -29,8 +29,18 @@ body: |
   Hider können sich als Blöcke tarnen, indem sie sich für ein paar Sekunden hinhocken. Sobald getarnt, erscheinen sie für Sucher als normaler Block. Verwende den Aussehen-Editor, um deinen Blocktyp und Blockzustand zu wählen. Das Zerstören des Tarnblocks eines Hiders erfordert das richtige Werkzeug für diesen Blocktyp.
   
   <bold>SKIN-Modus</bold>
-  Hider können ihren Spieler-Skin zu jedem Skin ändern, der aus dem Skin-Shop geladen wurde. Dies ermöglicht das Verschmelzen mit benutzerdefinierten NPC-Skins oder der Umgebung.
+  Hider können ihren Spieler-Skin zu jedem Skin ändern, der aus dem Skin-Shop geladen wurde. Dies ermöglicht das Verschmelzen mit benutzerdefinierten NPC-Skins oder der Umgebung. Siehe {skin-mode} für Details.
 
 related:
   - page: block-mode
     label: "Block-Modus"
+  - page: normal
+    label: "Normal-Modus"
+  - page: small
+    label: "Klein-Modus"
+  - page: block
+    label: "Block-Modus"
+  - page: skin-mode
+    label: "SKIN-Modus"
+  - page: hider
+    label: "Hider"

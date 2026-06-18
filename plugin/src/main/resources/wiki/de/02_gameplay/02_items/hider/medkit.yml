@@ -19,7 +19,7 @@ keywords:
   - "gesundheit"
 
 body: |
-  Der <green>Medkit</green> ist ein %rarity-medkit% Gegenstand. Es kann verwendet werden, indem man die rechte Maustaste für mehr als <#00ffff>%setting-hider-items.medkit.channel-time%</#00ffff> gedrückt hält. Beim Loslassen werden <#00ffff>%setting-hider-items.medkit.heal-amount%</#00ffff> wiederhergestellt.
+  Der <green>Medkit</green> ist ein %rarity-medkit% Gegenstand. Es kann verwendet werden, indem man die rechte Maustaste für mehr als <#00ffff>%setting-hider-items.medkit.channel-time%s</#00ffff> gedrückt hält. Beim Loslassen werden <#00ffff>%setting-hider-items.medkit.heal-amount% ❤</#00ffff> wiederhergestellt.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.medkit.cooldown%s</#00ffff>.
 
 related: [ ]

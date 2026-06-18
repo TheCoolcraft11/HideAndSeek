@@ -17,7 +17,9 @@ keywords:
   - "place"
 
 body: |
-  The <green>Firecracker</green> is a %rarity-explosion% item. When placed on the ground, it immediately grants <gold>%setting-points.hider.taunt.small% {points}. After a short delay, it explodes, producing a loud sound that alerts nearby seekers.
+  The <green>Firecracker</green> is a %rarity-explosion% item. When placed on the ground, it immediately grants <underlined><gold>%setting-points.hider.taunt.small%</gold></underlined> {points}.
+  
+  After a short delay, it explodes, producing a loud sound that alerts nearby seekers.
   It has a cooldown of <#00ffff>%setting-hider-items.explosion.cooldown%s</#00ffff>.
 
 related:

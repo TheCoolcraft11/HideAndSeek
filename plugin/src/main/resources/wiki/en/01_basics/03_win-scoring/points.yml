@@ -34,3 +34,9 @@ related:
     label: "Hiders"
   - page: seeker
     label: "Seekers"
+  - page: coins
+    label: "Coins"
+  - page: taunts
+    label: "Taunts"
+  - page: perks
+    label: "Perks"

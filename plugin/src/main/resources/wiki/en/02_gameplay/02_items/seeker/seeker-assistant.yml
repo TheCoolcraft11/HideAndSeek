@@ -20,12 +20,16 @@ body: |
   
   While active, the assistant uses the following mechanics:
   
-  - <b>Sniffing:</b> Scans for hiders within a front-facing range of <#00ffff>%setting-seeker-items.assistant.sniff-range-front% blocks</#00ffff> and a rear range of <#00ffff>%setting-seeker-items.assistant.sniff-range-rear% blocks</#00ffff>. Detection range for hidden hiders is reduced by a multiplier of <#00ffff>%setting-seeker-items.assistant.sniff-hidden-multiplier%</#00ffff>.
-  - <b>Tracking:</b> Once a target is found, the assistant pathfinds toward them while attempting to maintain a standoff distance of <#00ffff>%setting-seeker-items.assistant.standoff-range% blocks</#00ffff>.
-  - <b>Combat:</b> Automatically shoots projectiles at visible hiders within <#00ffff>%setting-seeker-items.assistant.shoot-range% blocks</#00ffff> every <#00ffff>%setting-seeker-items.assistant.shoot-cooldown% ticks</#00ffff>.
-  - <b>Alert:</b> If a target is within <#00ffff>%setting-seeker-items.assistant.alert-range% blocks</#00ffff>, the assistant sends an action bar notification and plays an alert sound for its owner.
-  - <b>Wandering:</b> If no target is detected, the assistant patrols the area around its summon location, with the patrol radius gradually expanding up to <#00ffff>%setting-seeker-items.assistant.wander-radius-phase3% blocks</#00ffff> over time.
+  - <bold>Sniffing:</bold> Scans for hiders within a front-facing range of <#00ffff>%setting-seeker-items.assistant.sniff-range-front% blocks</#00ffff> and a rear range of <#00ffff>%setting-seeker-items.assistant.sniff-range-rear% blocks</#00ffff>. Detection range for hidden hiders is reduced by a multiplier of <#00ffff>%setting-seeker-items.assistant.sniff-hidden-multiplier%</#00ffff>.
+  - <bold>Tracking:</bold> Once a target is found, the assistant pathfinds toward them while attempting to maintain a standoff distance of <#00ffff>%setting-seeker-items.assistant.standoff-range% blocks</#00ffff>.
+  - <bold>Combat:</bold> Automatically shoots projectiles at visible hiders within <#00ffff>%setting-seeker-items.assistant.shoot-range% blocks</#00ffff> every <#00ffff>%setting-seeker-items.assistant.shoot-cooldown% ticks</#00ffff>.
+  - <bold>Alert:</bold> If a target is within <#00ffff>%setting-seeker-items.assistant.alert-range% blocks</#00ffff>, the assistant sends an action bar notification and plays an alert sound for its owner.
+  - <bold>Wandering:</bold> If no target is detected, the assistant patrols the area around its summon location, with the patrol radius gradually expanding up to <#00ffff>%setting-seeker-items.assistant.wander-radius-phase3% blocks</#00ffff> over time.
   
   The item has a cooldown of <#00ffff>%setting-seeker-items.assistant.cooldown%s</#00ffff>.
 
-related: [ ]
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Seeker Items"

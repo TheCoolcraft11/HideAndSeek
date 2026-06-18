@@ -14,7 +14,10 @@ keywords:
   - ""
 
 body: |
-  The <green>Phantom Viewer</green> is a %rarity-phantom_viewer% item. On use it will capture the FOV of a [random hider](Random: %setting-seeker-items.phantom-viewer.target-random%) and give it to the activator. This snapshot will remain in the inventory for <#00ffff>%setting-seeker-items.phantom-viewer.map-duration-seconds%s</#00ffff>
+  The <green>Phantom Viewer</green> is a %rarity-phantom_viewer% item.
+  
+  On use, it captures the FOV of a random hider and gives it to the activator. Whether a random or specific hider is targeted depends on the setting: <#00ffff>%setting-seeker-items.phantom-viewer.target-random%</#00ffff>.
+  This snapshot remains in the inventory for <#00ffff>%setting-seeker-items.phantom-viewer.map-duration-seconds%s</#00ffff>.
   It has a cooldown of <#00ffff>%setting-seeker-items.phantom-viewer.cooldown%s</#00ffff>.
 
 related: [ ]

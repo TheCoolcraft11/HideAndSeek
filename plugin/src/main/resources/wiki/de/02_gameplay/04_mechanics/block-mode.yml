@@ -21,7 +21,7 @@ body: |
   
   Verwende den Aussehen-Editor, um auszuwählen, als welcher Block du dich tarnen möchtest. Du kannst auch Blockzustandseigenschaften (Richtung, Wasser gefüllt usw.) anpassen.
   
-  Während der Tarnung:
+  <bold>Während der Tarnung:</bold>
   - Du bist für Sucher als Spieler-Entity unsichtbar
   - Eine Block-Anzeige-Entity erscheint an deiner Stelle
   - Sucher können deinen Tarnblock zerstören — die Verwendung des richtigen Werkzeugs für den Blocktyp verursacht zusätzlichen Schaden
@@ -30,4 +30,14 @@ body: |
   
   Verwende den Block-Auswähler, um schnell durch deine Lieblingsblöcke zu wechseln.
 
-related: [ ]
+related:
+  - page: block
+    label: "Block-Modus"
+  - page: game-modes
+    label: "Spielmodi"
+  - page: hider
+    label: "Hider"
+  - page: block-swap
+    label: "Blocktausch"
+  - page: random-block
+    label: "Zufallsblock"

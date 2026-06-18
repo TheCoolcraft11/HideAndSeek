@@ -15,6 +15,14 @@ body: |
   
   As a hider, your objective is to find a suitable hiding spot before the time runs out.
   
-  <bold>Current hiding time</bold>: <yellow>%setting-timer.hiding%<yellow>
+  <bold>Current hiding time</bold>: <yellow>%setting-game.hiding-time%s</yellow>
 
-related: [ ]
+related:
+  - page: lobby
+    label: "Lobby Phase"
+  - page: seeking
+    label: "Seeking Phase"
+  - page: hider
+    label: "Hider"
+  - page: seeker
+    label: "Seeker"

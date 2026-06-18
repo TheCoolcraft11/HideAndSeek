@@ -1,0 +1,38 @@
+id: "skin-mode"
+name: "SKIN Mode"
+icon: "minecraft:player_head"
+
+description:
+  - "<gray>Disguise yourself using custom player skins</gray>"
+
+keywords:
+  - "skin"
+  - "disguise"
+  - "hide"
+  - "cosmetic"
+  - "mode"
+
+body: |
+  In <bold>SKIN</bold> game mode, hiders can change their player skin to any skin loaded from the skin shop. This allows blending in with custom NPC skins or the environment.
+  
+  To use a skin, open the skin shop in the lobby and purchase or select a skin. Hiders are then automatically disguised with their selected skin when the round starts.
+  
+  Hiders in SKIN mode may be optionally scaled down for increased hiding difficulty:
+  - <bold>Hider size:</bold> x<#00ffff>%setting-game.skin-mode.hider-size%</#00ffff>
+  - <bold>Seeker size:</bold> x<#00ffff>%setting-game.skin-mode.seeker-size%</#00ffff>
+  
+  The Skin Stats GUI (if enabled) shows statistics about skin usage during the round, such as which skins are most effective.
+
+related:
+  - page: game-modes
+    label: "Game Modes"
+  - page: hider
+    label: "Hider"
+  - page: skins
+    label: "Skins"
+  - page: normal
+    label: "Normal Mode"
+  - page: small
+    label: "Small Mode"
+  - page: block
+    label: "Block Mode"

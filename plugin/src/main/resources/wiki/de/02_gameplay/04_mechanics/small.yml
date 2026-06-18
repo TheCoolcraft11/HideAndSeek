@@ -14,7 +14,7 @@ keywords:
 body: |
   Im <bold>KLEIN</bold>-Spielmodus werden Verstecker verkleinert, wodurch sie schwerer zu entdecken und zu treffen sind.
 
-  Aktuelle Versteckergröße: x%setting-game.small-mode.hider-size%
+  Aktuelle Versteckergröße: x<#00ffff>%setting-game.small-mode.hider-size%</#00ffff>
 
 related:
   - page: hider

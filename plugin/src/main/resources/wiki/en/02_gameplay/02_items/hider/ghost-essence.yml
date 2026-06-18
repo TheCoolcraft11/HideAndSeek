@@ -19,7 +19,11 @@ keywords:
   - "escape"
 
 body: |
-  The <green>Ghost Essence</green> is a %rarity-ghost_essence% item. On use, it will put you into a ghost state for <#00ffff>%setting-hider-items.ghost-essence.max-duration%s</#00ffff>. During this state, you will be able to phase though blocks and fly around. When the ghost state ends, it will try to materialize you. This is only possible if there is a path to this point and is not complete darkness. You cannot fly further than <#00ffff>%setting-hider-items.ghost-essence.max-radius%</#00ffff> blocks from your start location.
+  The <green>Ghost Essence</green> is a %rarity-ghost_essence% item.
+  
+  On use, it puts you into a ghost state for <#00ffff>%setting-hider-items.ghost-essence.max-duration%s</#00ffff>. During this state, you can phase through blocks and fly around.
+  
+  When the ghost state ends, it tries to materialize you. This is only possible if there is a clear path to your location and it is not in complete darkness. You cannot fly further than <#00ffff>%setting-hider-items.ghost-essence.max-radius% blocks</#00ffff> from your start location.
   It has a cooldown of <#00ffff>%setting-hider-items.ghost-essence.cooldown%s</#00ffff>.
 
 related: [ ]

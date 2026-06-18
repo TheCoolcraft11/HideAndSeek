@@ -16,9 +16,11 @@ keywords:
   - "points"
 
 body: |
-  The <green>Cat Sound</green> is a %rarity-sound% item. It can be used on any block. When activated, it grants <gold>%setting-points.hider.taunt.small% {points} and plays a sound at the targeted block, alerting nearby seekers. 
+  The <green>Cat Sound</green> is a %rarity-sound% item. It can be used on any block.
+  
+  When activated, it grants <underlined><gold>%setting-points.hider.taunt.small%</gold></underlined> {points} and plays a sound at the targeted block, alerting nearby seekers.
   It has a cooldown of <#00ffff>%setting-hider-items.sound.cooldown%s</#00ffff>.
 
 related:
   - page: points
-    label: "Points"
+    label: "<gold>Points"

@@ -17,7 +17,10 @@ keywords:
   - "explosion"
 
 body: |
-  The <green>Firework Rocket</green> is a %rarity-firework_rocket% item. When placed on the ground, it immediately grants <gold>%setting-points.hider.taunt.large% {points}. It places a firework battery down, that will shoot 6 rockets into the sky, each can fly through blocks and makes a loud sound for everyone in a radius of <#00ffff>200</#00ffff> blocks. The first and last rocket fly straight up, all others fly with a random rotation.
+  The <green>Firework Rocket</green> is a %rarity-firework_rocket% item. When placed on the ground, it immediately grants <underlined><gold>%setting-points.hider.taunt.large%</gold></underlined> {points}.
+  
+  It places a firework battery down, that will shoot 6 rockets into the sky. Each rocket can fly through blocks and makes a loud sound for everyone in a radius of <#00ffff>200</#00ffff> blocks.
+  The first and last rocket fly straight up, all others fly with a random rotation.
   It has a cooldown of <#00ffff>%setting-hider-items.firework-rocket.cooldown%s</#00ffff>.
 
 related:

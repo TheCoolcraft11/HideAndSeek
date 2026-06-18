@@ -18,7 +18,7 @@ keywords:
 
 body: |
   The <green>Block Swap</green> is a %rarity-block_swap% item. Upon activation, it swaps your current block with that of the nearest hider within a range of <#00ffff>%setting-hider-items.block-swap.range%</#00ffff> blocks.
-  <b>Note</b>: This item is only available in the {block-mode} gamemode.
+  <bold>Note</bold>: This item is only available in the {block-mode} gamemode.
   It has a cooldown of <#00ffff>%setting-hider-items.block-swap.cooldown%s</#00ffff>.
 
 related:

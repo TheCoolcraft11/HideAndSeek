@@ -18,7 +18,11 @@ keywords:
   - "verknüpfung"
 
 body: |
-  Der <green>Remote Gateway</green> ist ein %rarity-remote_gateway% Gegenstand. Es kann auf dem Boden verwendet werden. Bei Benutzung erscheint ein Portal auf dem Boden. Ein zweites Portal wird zur Verknüpfung benötigt. Wenn zwei Portale miteinander verbunden sind, können sich [Spieler](Sucher können teleportieren: %setting-hider-items.remote-gateway.seeker-can-use%) hindurch teleportieren, indem sie für <#00ffff>%setting-hider-items.remote-gateway.portal-stand-seconds%</#00ffff> darin stehen. Nach der Teleportation können Spieler für <#00ffff>%setting-hider-items.remote-gateway.travel-cooldown-seconds%</#00ffff> nicht teleportieren.
+  Der <green>Remote Gateway</green> ist ein %rarity-remote_gateway% Gegenstand. Es kann auf dem Boden verwendet werden.
+  
+  Bei Benutzung erscheint ein Portal auf dem Boden. Ein zweites Portal wird zur Verknüpfung benötigt. Wenn zwei Portale miteinander verbunden sind, können sich Spieler hindurch teleportieren, indem sie für <#00ffff>%setting-hider-items.remote-gateway.portal-stand-seconds%</#00ffff> darin stehen.
+  Nach der Teleportation können Spieler für <#00ffff>%setting-hider-items.remote-gateway.travel-cooldown-seconds%</#00ffff> nicht teleportieren.
+  Sucher können Portale nutzen: <#00ffff>%setting-hider-items.remote-gateway.seeker-can-use%</#00ffff>.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.remote-gateway.cooldown%s</#00ffff>.
 
 related: [ ]

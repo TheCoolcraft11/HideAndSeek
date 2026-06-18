@@ -14,7 +14,10 @@ keywords:
   - ""
 
 body: |
-  Der <green>Phantom Viewer</green> ist ein %rarity-phantom_viewer% Gegenstand. Bei Benutzung erfasst es das Sichtfeld eines [zufälligen Versteckers](Zufällig: %setting-seeker-items.phantom-viewer.target-random%) und gibt es dem Aktivator. Diese Aufnahme bleibt für <#00ffff>%setting-seeker-items.phantom-viewer.map-duration-seconds%s</#00ffff> im Inventar.
+  Der <green>Phantom Viewer</green> ist ein %rarity-phantom_viewer% Gegenstand.
+  
+  Bei Benutzung erfasst es das Sichtfeld eines zufälligen Versteckers und gibt es dem Aktivator. Ob ein zufälliger oder ein bestimmter Verstecker als Ziel ausgewählt wird, hängt von der Einstellung ab: <#00ffff>%setting-seeker-items.phantom-viewer.target-random%</#00ffff>.
+  Diese Aufnahme bleibt für <#00ffff>%setting-seeker-items.phantom-viewer.map-duration-seconds%s</#00ffff> im Inventar.
   Es hat eine Abklingzeit von <#00ffff>%setting-seeker-items.phantom-viewer.cooldown%s</#00ffff>.
 
 related: [ ]

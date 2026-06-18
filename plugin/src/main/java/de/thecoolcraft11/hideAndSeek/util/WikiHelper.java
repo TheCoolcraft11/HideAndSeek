@@ -61,7 +61,6 @@ public class WikiHelper {
             if (key.startsWith("perk-rarity-")) {
                 String perkId = key.substring("perk-rarity-".length());
                 for (PerkDefinition perk : plugin.getPerkRegistry().getAllPerks()) {
-                    plugin.getLogger().info("Checking perk " + perk.getId() + " against " + perkId);
                     if (perk.getId().equals(perkId)) {
                         String color = switch (perk.getTier()) {
                             case COMMON -> "white";

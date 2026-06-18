@@ -15,9 +15,13 @@ keywords:
 
 body: |
   The <green>Camera</green> is a %rarity-camera% item. It can be placed on the ground or attached to walls by sneaking and right-clicking. Once placed, a camera can be viewed by right-clicking it. A maximum of <#00ffff>%setting-seeker-items.camera.max-placed%</#00ffff> cameras can be placed at the same time. While viewing a camera:
-  - <b>Scroll</b> to rotate the camera
-  - <b>Left-click</b> to cycle through placed cameras
-  - <b>Right-click</b> to toggle infrared or night vision
+  - <bold>Scroll</bold> to rotate the camera
+  - <bold>Left-click</bold> to cycle through placed cameras
+  - <bold>Right-click</bold> to toggle infrared or night vision
   The item has a cooldown of <#00ffff>%setting-seeker-items.camera.cooldown%s</#00ffff>.
 
-related: [ ]
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Seeker Items"

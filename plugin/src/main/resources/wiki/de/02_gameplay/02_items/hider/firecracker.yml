@@ -17,7 +17,9 @@ keywords:
   - "platzieren"
 
 body: |
-  Der <green>Firecracker</green> ist ein %rarity-explosion% Gegenstand. Wenn es auf den Boden gelegt wird, gewährt es sofort <gold>%setting-points.hider.taunt.small% {points}. Nach einer kurzen Verzögerung explodiert es und erzeugt ein lautes Geräusch, das nahe Sucher alarmiert.
+  Der <green>Firecracker</green> ist ein %rarity-explosion% Gegenstand. Wenn es auf den Boden gelegt wird, gewährt es sofort <underlined><gold>%setting-points.hider.taunt.small%</gold></underlined> {points}.
+  
+  Nach einer kurzen Verzögerung explodiert es und erzeugt ein lautes Geräusch, das nahe Sucher alarmiert.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.explosion.cooldown%s</#00ffff>.
 
 related:

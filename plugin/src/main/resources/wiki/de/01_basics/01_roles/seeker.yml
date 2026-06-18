@@ -14,7 +14,11 @@ keywords:
   - "schwert"
 
 body: |
-  Als <bold>Seeker</bold> ist es dein Hauptziel, {hider} zu eliminieren. Deine {items} helfen dir dabei, {hider} aufzuspüren oder ihre Flucht zu verhindern. Die Verfolgung deines Hauptziels bringt dir {points} ein. Seeker-{perks} sind meist temporäre Effekte, um {hider} zu schwächen oder zu behindern. Nicht genutzte {points} werden automatisch in {coins} umgewandelt. Zu Beginn der {seeking}-Phase erhältst du ein Schwert. Du kannst es werfen, indem du die rechte Maustaste gedrückt hältst – je länger du gedrückt hältst, desto stärker wird der Wurf. Außerdem gibt es verschiedene Kill-Modi: {normal}, {one_hit}, {gaze}.
+  Als <bold>Seeker</bold> ist es dein Hauptziel, {hider} zu eliminieren. Deine {items} helfen dir dabei, {hider} aufzuspüren oder ihre Flucht zu verhindern.
+  
+  Die Verfolgung deines Hauptziels bringt dir {points} ein. Seeker-{perks} sind meist temporäre Effekte, um {hider} zu schwächen oder zu behindern. Nicht genutzte {points} werden automatisch in {coins} umgewandelt.
+  
+  Zu Beginn der {seeking}-Phase erhältst du ein Schwert. Du kannst es werfen, indem du die rechte Maustaste gedrückt hältst – je länger du gedrückt hältst, desto stärker wird der Wurf. Außerdem gibt es verschiedene Kill-Modi: {normal}, {one_hit}, {gaze}. Die {game-styles}-Einstellung bestimmt, was mit eliminierten Spielern passiert.
 
 related:
   - page: hider
@@ -35,3 +39,5 @@ related:
     label: "Coins"
   - page: seeking
     label: "Such-Phase"
+  - page: game-styles
+    label: "Spielstile"

@@ -1,0 +1,29 @@
+id: "crowbar"
+name: "Brechstange"
+icon: "minecraft:iron_pickaxe"
+
+icon_meta:
+  custom_item_id: "%item-crowbar%"
+
+description:
+  - "<gray>%desc-crowbar%</gray>"
+
+keywords:
+  - "block"
+  - "zerstören"
+  - "tarnung"
+  - "brechen"
+  - "brechstange"
+
+body: |
+  Die <green>Brechstange</green> ist ein Suchender-Gegenstand, der Blöcke zerstören kann. Sie wird hauptsächlich verwendet, um Tarnblöcke von Hidern im {block-mode} zu zerstören oder durch Wände und Verstecke zu brechen.
+  
+  Zum Verwenden die rechte Maustaste auf einem Block gedrückt halten. Nach <#00ffff>%setting-seeker-items.crowbar.breaking-ticks% Ticks</#00ffff> zerbricht der Block. Die Brechstange hat eine Abklingzeit von <#00ffff>%setting-seeker-items.crowbar.cooldown%s</#00ffff> zwischen den Anwendungen.
+
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Suchender-Gegenstände"
+  - page: block-mode
+    label: "Block-Modus"

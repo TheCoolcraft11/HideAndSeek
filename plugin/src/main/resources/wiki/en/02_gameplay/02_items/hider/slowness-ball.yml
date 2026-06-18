@@ -18,7 +18,9 @@ keywords:
   - "throw"
 
 body: |
-  The <green>Slowness Ball</green> is a %rarity-slowness_ball% item. It can be thrown like a snowball. If the projectile hits a seeker, it will apply <#00ffff>Slowness %setting-hider-items.slowness-ball.amplifier%</#00ffff> for <#00ffff>%setting-hider-items.slowness-ball.duration%s</#00ffff>
+  The <green>Slowness Ball</green> is a %rarity-slowness_ball% item. It can be thrown like a snowball.
+  
+  If the projectile hits a seeker, it applies <#00ffff>Slowness %setting-hider-items.slowness-ball.amplifier%</#00ffff> for <#00ffff>%setting-hider-items.slowness-ball.duration%s</#00ffff>.
   It has a cooldown of <#00ffff>%setting-hider-items.slowness-ball.cooldown%s</#00ffff>.
 
 related: [ ]

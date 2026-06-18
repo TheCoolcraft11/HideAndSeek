@@ -17,4 +17,8 @@ body: |
   Der <green>Glowing Compass</green> ist ein %rarity-glowing_compass% Gegenstand. Bei Benutzung bringt es jeden Verstecker in einem Radius von <#00ffff>%setting-seeker-items.glowing-compass.range% Blöcken</#00ffff> für <#00ffff>%setting-seeker-items.glowing-compass.duration%s</#00ffff> zum Leuchten.
   Es hat eine Abklingzeit von <#00ffff>%setting-seeker-items.glowing-compass.cooldown%s</#00ffff>.
 
-related: [ ]
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Seeker-Gegenstände"

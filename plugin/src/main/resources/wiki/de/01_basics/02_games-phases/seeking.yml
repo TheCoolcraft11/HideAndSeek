@@ -17,7 +17,10 @@ keywords:
 body: |
   Zu Beginn der Such-Phase werden alle Seeker freigelassen. Jeder Spieler erhält das {loadout}, das er in der {lobby} ausgewählt hat. Falls kein Loadout ausgewählt wurde, wird ein standardmäßiges Ersatz-{loadout} zugewiesen.
   Jeder {seeker} ist mit einer <red>Seeker-Klinge</red> ausgestattet. Sie kann durch Gedrückthalten der rechten Maustaste geworfen werden.
-  Der {perk}-Shop ist jetzt aktiv. Er kann entweder über das Inventar oder durch Interaktion mit Verkaufsautomaten, die auf der Karte verteilt sind, geöffnet werden. Aktuelle Shop-Modi: %perk-shop-modes%
+  Der {perk}-Shop ist jetzt aktiv. Er kann entweder über das Inventar oder durch Interaktion mit Verkaufsautomaten, die auf der Karte verteilt sind, geöffnet werden.
+  
+  <bold>Hider-Shop-Modus:</bold> <yellow>%setting-perks.hider-shop-mode%</yellow>
+  <bold>Seeker-Shop-Modus:</bold> <yellow>%setting-perks.seeker-shop-mode%</yellow>
 
 related:
   - page: loadout

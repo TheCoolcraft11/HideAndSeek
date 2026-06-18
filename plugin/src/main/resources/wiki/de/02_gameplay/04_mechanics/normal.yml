@@ -21,3 +21,5 @@ related:
     label: "Verstecker"
   - page: seeker
     label: "Suchende"
+  - page: game-modes
+    label: "Spielmodi"

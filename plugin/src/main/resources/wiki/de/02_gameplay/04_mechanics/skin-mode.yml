@@ -1,0 +1,38 @@
+id: "skin-mode"
+name: "SKIN-Modus"
+icon: "minecraft:player_head"
+
+description:
+  - "<gray>Tarne dich mit benutzerdefinierten Spieler-Skins</gray>"
+
+keywords:
+  - "skin"
+  - "tarnung"
+  - "verstecken"
+  - "kosmetik"
+  - "modus"
+
+body: |
+  Im <bold>SKIN</bold>-Spielmodus können Hider ihren Spieler-Skin zu jedem Skin ändern, der aus dem Skin-Shop geladen wurde. Dies ermöglicht das Verschmelzen mit benutzerdefinierten NPC-Skins oder der Umgebung.
+  
+  Um einen Skin zu verwenden, öffne den Skin-Shop in der Lobby und kaufe oder wähle einen Skin aus. Hider werden dann automatisch mit ihrem ausgewählten Skin getarnt, wenn die Runde beginnt.
+  
+  Hider im SKIN-Modus können optional verkleinert werden, um die Versteck-Schwierigkeit zu erhöhen:
+  - <bold>Hider-Größe:</bold> x<#00ffff>%setting-game.skin-mode.hider-size%</#00ffff>
+  - <bold>Seeker-Größe:</bold> x<#00ffff>%setting-game.skin-mode.seeker-size%</#00ffff>
+  
+  Die Skin-Statistik-GUI (falls aktiviert) zeigt Statistiken zur Skin-Nutzung während der Runde an, z. B. welche Skins am effektivsten sind.
+
+related:
+  - page: game-modes
+    label: "Spielmodi"
+  - page: hider
+    label: "Hider"
+  - page: skins
+    label: "Skins"
+  - page: normal
+    label: "Normal-Modus"
+  - page: small
+    label: "Klein-Modus"
+  - page: block
+    label: "Block-Modus"

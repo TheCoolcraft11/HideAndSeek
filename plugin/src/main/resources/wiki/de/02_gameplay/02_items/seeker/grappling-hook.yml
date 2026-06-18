@@ -14,7 +14,9 @@ keywords:
   - ""
 
 body: |
-  Der <green>Grappling Hook</green> ist ein %rarity-grappling_hook% Gegenstand. Bei Benutzung wirft es einen Angelköder aus. Beim Einholen zieht es dich durch die Luft in die Richtung, in die der Köder geworfen wurde. Je weiter der Köder entfernt ist, desto stärker ist der Zug.
+  Der <green>Grappling Hook</green> ist ein %rarity-grappling_hook% Gegenstand.
+  
+  Bei Benutzung wirft es einen Angelköder aus. Beim Einholen zieht es dich durch die Luft in die Richtung, in die der Köder geworfen wurde. Je weiter der Köder entfernt ist, desto stärker ist der Zug.
   Es hat eine Abklingzeit von <#00ffff>%setting-seeker-items.grappling-hook.cooldown%s</#00ffff>.
 
 related: [ ]

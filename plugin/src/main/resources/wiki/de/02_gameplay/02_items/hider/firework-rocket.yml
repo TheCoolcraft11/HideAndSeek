@@ -17,7 +17,10 @@ keywords:
   - "explosion"
 
 body: |
-  Der <green>Firework Rocket</green> ist ein %rarity-firework_rocket% Gegenstand. Wenn es auf den Boden gelegt wird, gewährt es sofort <gold>%setting-points.hider.taunt.large% {points}. Es platziert eine Feuerwerksladung, die 6 Raketen in den Himmel schießt. Jede Rakete kann durch Blöcke fliegen und erzeugt ein lautes Geräusch für alle in einem Radius von <#00ffff>200</#00ffff> Blöcken. Die erste und letzte Rakete fliegen gerade nach oben, alle anderen fliegen mit einer zufälligen Rotation.
+  Der <green>Firework Rocket</green> ist ein %rarity-firework_rocket% Gegenstand. Wenn es auf den Boden gelegt wird, gewährt es sofort <underlined><gold>%setting-points.hider.taunt.large%</gold></underlined> {points}.
+  
+  Es platziert eine Feuerwerksladung, die 6 Raketen in den Himmel schießt. Jede Rakete kann durch Blöcke fliegen und erzeugt ein lautes Geräusch für alle in einem Radius von <#00ffff>200</#00ffff> Blöcken.
+  Die erste und letzte Rakete fliegen gerade nach oben, alle anderen fliegen mit einer zufälligen Rotation.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.firework-rocket.cooldown%s</#00ffff>.
 
 related:

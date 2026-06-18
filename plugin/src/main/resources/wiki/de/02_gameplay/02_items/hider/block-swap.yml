@@ -18,7 +18,7 @@ keywords:
 
 body: |
   Der <green>Block Swap</green> ist ein %rarity-block_swap% Gegenstand. Bei Aktivierung tauscht es deinen aktuellen Block mit dem des nächstgelegenen Versteckers innerhalb einer Reichweite von <#00ffff>%setting-hider-items.block-swap.range%</#00ffff> Blöcken.
-  <b>Hinweis</b>: Dieser Gegenstand ist nur im {block-mode} Spielmodus verfügbar.
+  <bold>Hinweis</bold>: Dieser Gegenstand ist nur im {block-mode} Spielmodus verfügbar.
   Es hat eine Abklingzeit von <#00ffff>%setting-hider-items.block-swap.cooldown%s</#00ffff>.
 
 related:

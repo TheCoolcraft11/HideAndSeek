@@ -14,8 +14,10 @@ keywords:
   - ""
 
 body: |
-  The <green>Proximity Sensor</green> is a %rarity-proximity_sensor% item. It can be placed on the ground or attached to walls. If a hider enters the sensor's detection range of <#00ffff>%setting-seeker-items.proximity-sensor.range% blocks</#00ffff> and is within its field of view of <#00ffff>%setting-seeker-items.proximity-sensor.fov-angle%°</#00ffff>, the hider will begin to glow. Additionally, the sensor owner will hear a notification sound when a hider is detected. 
-  The Proximity Sensor remains active for [<#00ffff>%setting-seeker-items.proximity-sensor.duration%s</#00ffff>](-1 = until the round ends).
+  The <green>Proximity Sensor</green> is a %rarity-proximity_sensor% item. It can be placed on the ground or attached to walls.
+  
+  If a hider enters the sensor's detection range of <#00ffff>%setting-seeker-items.proximity-sensor.range% blocks</#00ffff> and is within its field of view of <#00ffff>%setting-seeker-items.proximity-sensor.fov-angle%°</#00ffff>, the hider will begin to glow. Additionally, the sensor owner will hear a notification sound when a hider is detected.
+  The Proximity Sensor stays for <#00ffff>%setting-seeker-items.proximity-sensor.duration%s</#00ffff> (-1 = until the round ends).
   The item has a cooldown of <#00ffff>%setting-seeker-items.proximity-sensor.cooldown%s</#00ffff>.
 
 related: [ ]

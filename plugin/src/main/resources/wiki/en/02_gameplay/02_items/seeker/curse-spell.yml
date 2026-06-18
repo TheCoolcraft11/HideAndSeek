@@ -14,7 +14,11 @@ keywords:
   - ""
 
 body: |
-  The <green>Curse Spell</green> is a %rarity-curse_spell% item. Upon activation it will enchant the Seekers Sword for <#00ffff>%setting-seeker-items.curse-spell.active-duration%s</#00ffff>. Punching a hider inside this time window will curse them for <#00ffff>%setting-seeker-items.curse-spell.curse-duration%s</#00ffff>. While this curse is active, hider wont be able to [place themselves down or change their disguise](Only in BLOCK mode) and [grow back to normal size](Only in SMALL mode).
+  The <green>Curse Spell</green> is a %rarity-curse_spell% item.
+  
+  Upon activation, it enchants the Seeker's Sword for <#00ffff>%setting-seeker-items.curse-spell.active-duration%s</#00ffff>. Punching a hider inside this time window will curse them for <#00ffff>%setting-seeker-items.curse-spell.curse-duration%s</#00ffff>.
+  
+  While this curse is active, hiders cannot place themselves down or change their disguise (in BLOCK mode only) and cannot grow back to normal size (in SMALL mode only).
   It has a cooldown of <#00ffff>%setting-seeker-items.curse-spell.cooldown%s</#00ffff>.
 
 related: [ ]

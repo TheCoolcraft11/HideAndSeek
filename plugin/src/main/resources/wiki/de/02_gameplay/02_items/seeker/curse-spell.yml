@@ -14,7 +14,11 @@ keywords:
   - ""
 
 body: |
-  Der <green>Curse Spell</green> ist ein %rarity-curse_spell% Gegenstand. Bei Aktivierung verzaubert es das Schwert des Suchers für <#00ffff>%setting-seeker-items.curse-spell.active-duration%s</#00ffff>. Das Schlagen eines Versteckers innerhalb dieses Zeitfensters verflucht ihn für <#00ffff>%setting-seeker-items.curse-spell.curse-duration%s</#00ffff>. Während dieser Fluch aktiv ist, kann der Verstecker [sich nicht hinsetzen oder seine Tarnung ändern](Nur im BLOCK-Modus) und [nicht zur normalen Größe zurückwachsen](Nur im SMALL-Modus).
+  Der <green>Curse Spell</green> ist ein %rarity-curse_spell% Gegenstand.
+  
+  Bei Aktivierung verzaubert es das Schwert des Suchers für <#00ffff>%setting-seeker-items.curse-spell.active-duration%s</#00ffff>. Das Schlagen eines Versteckers innerhalb dieses Zeitfensters verflucht ihn für <#00ffff>%setting-seeker-items.curse-spell.curse-duration%s</#00ffff>.
+  
+  Während dieser Fluch aktiv ist, können sich Hider nicht hinsetzen oder ihre Tarnung ändern (nur im BLOCK-Modus) und nicht zur normalen Größe zurückwachsen (nur im SMALL-Modus).
   Es hat eine Abklingzeit von <#00ffff>%setting-seeker-items.curse-spell.cooldown%s</#00ffff>.
 
 related: [ ]

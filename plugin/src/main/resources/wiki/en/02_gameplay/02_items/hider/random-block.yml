@@ -17,8 +17,8 @@ keywords:
 
 body: |
   The <green>Random Block</green> item is a %rarity-random_block%. It swaps your current block with a random one from the allowed block pool. It can be used up to <#00ffff>%setting-hider-items.random-block.uses%</#00ffff> times.
-  <b>Note</b>: This item is only available in the {block-mode} gamemode.
-  It has a cooldown of <#00ffff>%setting-hider-items.crossbow.cooldown%s</#00ffff>
+  <bold>Note</bold>: This item is only available in the {block-mode} gamemode.
+  It has a cooldown of <#00ffff>%setting-hider-items.random-block.cooldown%s</#00ffff>.
 
 related:
   - page: block-mode

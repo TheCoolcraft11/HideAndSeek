@@ -1,0 +1,29 @@
+id: "crowbar"
+name: "Crowbar"
+icon: "minecraft:iron_pickaxe"
+
+icon_meta:
+  custom_item_id: "%item-crowbar%"
+
+description:
+  - "<gray>%desc-crowbar%</gray>"
+
+keywords:
+  - "block"
+  - "break"
+  - "destroy"
+  - "disguise"
+  - "crowbar"
+
+body: |
+  The <green>Crowbar</green> is a seeker item that can break blocks. It is primarily used to destroy hider disguise blocks in {block-mode}, or to break through walls and hiding spots.
+  
+  To use, hold right-click on a block. After <#00ffff>%setting-seeker-items.crowbar.breaking-ticks% ticks</#00ffff>, the block breaks. The crowbar has a cooldown of <#00ffff>%setting-seeker-items.crowbar.cooldown%s</#00ffff> between uses.
+
+related:
+  - page: seeker
+    label: "Seeker"
+  - page: items
+    label: "Seeker Items"
+  - page: block-mode
+    label: "Block Mode"

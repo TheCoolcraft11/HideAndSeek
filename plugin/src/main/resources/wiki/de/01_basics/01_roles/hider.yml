@@ -15,8 +15,13 @@ keywords:
   - "rolle"
 
 body: |
-  Als <bold>Hider</bold> ist es dein Hauptziel, nicht vom {seeker} gefunden zu werden. Dein {item} kann dir helfen zu entkommen, falls du entdeckt wirst. Durch Überleben oder das Nutzen von {taunts} verdienst du {points}, die für {perks} ausgegeben werden können. Hider-{perks} bieten hauptsächlich langfristige oder permanente Vorteile und helfen dir oft, aus gefährlichen Situationen zu entkommen. Nicht ausgegebene {points} werden automatisch in {coins} umgewandelt. Abhängig vom aktuell ausgewählten Spielmodus erhältst du unterschiedliche Vorteile.
-  - {normal}, {small} (Aktuell: x%setting-game.small-mode.hider-size%), {block}
+  Als <bold>Hider</bold> ist es dein Hauptziel, nicht vom {seeker} gefunden zu werden. Dein {item} kann dir helfen zu entkommen, falls du entdeckt wirst.
+  
+  Durch Überleben oder das Nutzen von {taunts} verdienst du {points}, die für {perks} ausgegeben werden können. Hider-{perks} bieten hauptsächlich langfristige oder permanente Vorteile und helfen dir oft, aus gefährlichen Situationen zu entkommen. Nicht ausgegebene {points} werden automatisch in {coins} umgewandelt.
+  
+  Abhängig vom aktuell ausgewählten Spielmodus erhältst du unterschiedliche Vorteile:
+  - {normal}, {small} (Aktuell: x<#00ffff>%setting-game.small-mode.hider-size%</#00ffff>), {block}, {skin-mode}
+  
   Aktueller Modus: <gold>%setting-game.mode%</gold>
 
 related:
@@ -40,3 +45,7 @@ related:
     label: "Punkte"
   - page: coins
     label: "Coins"
+  - page: skin-mode
+    label: "SKIN-Modus"
+  - page: game-styles
+    label: "Spielstile"

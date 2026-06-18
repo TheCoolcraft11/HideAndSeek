@@ -18,7 +18,7 @@ keywords:
 
 body: |
   Die <green>Tracker Crossbow</green> ist ein %rarity-crossbow% Gegenstand. Sie verhält sich wie eine normale Armbrust. Wenn du einen Sucher <#00ffff>%setting-hider-items.crossbow.hits-per-upgrade%</#00ffff> Mal triffst, wird dein {speed-boost} und {knockback-stick} verbessert.
-  Sie hat eine Abklingzeit von <#00ffff>%setting-hider-items.crossbow.cooldown%s</#00ffff>
+  Sie hat eine Abklingzeit von <#00ffff>%setting-hider-items.crossbow.cooldown%s</#00ffff>.
 
 related:
   - page: speed-boost

@@ -21,7 +21,7 @@ body: |
   
   Use the Appearance Editor to select which block you want to disguise as. You can also customize block state properties (direction, waterlogged, etc.).
   
-  While disguised:
+  <bold>While disguised:</bold>
   - You are invisible to seekers as a player entity
   - A block display entity appears in your place
   - Seekers can break your disguise block — using the correct tool for the block type deals extra damage
@@ -30,4 +30,14 @@ body: |
   
   Use the Block Selector to quickly cycle through your favorite blocks.
 
-related: [ ]
+related:
+  - page: block
+    label: "Block Mode"
+  - page: game-modes
+    label: "Game Modes"
+  - page: hider
+    label: "Hider"
+  - page: block-swap
+    label: "Block Swap"
+  - page: random-block
+    label: "Random Block"

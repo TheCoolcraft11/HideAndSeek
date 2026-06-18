@@ -17,6 +17,8 @@ keywords:
   - "totem"
 
 body: |
-  Der <green>Totem Of Undying</green> ist ein %rarity-totem% Gegenstand. Es kann nur <#00ffff>%setting-hider-items.totem.max-uses%</#00ffff> Mal verwendet werden. Bei Benutzung gewährt es eine <#00ffff>%setting-hider-items.totem.max-uses%</#00ffff> Unverwundbarkeitszeit. Wenn ein Verstecker während dieses Zeitfensters stirbt, wird er wiederbelebt.
+  Der <green>Totem Of Undying</green> ist ein %rarity-totem% Gegenstand. Es kann bis zu <#00ffff>%setting-hider-items.totem.max-uses%</#00ffff> Mal verwendet werden.
+  
+  Bei Benutzung gewährt es eine Unverwundbarkeitszeit von <#00ffff>%setting-hider-items.totem.effect-duration%s</#00ffff>. Wenn ein Verstecker während dieses Zeitfensters stirbt, wird er wiederbelebt.
 
 related: [ ]

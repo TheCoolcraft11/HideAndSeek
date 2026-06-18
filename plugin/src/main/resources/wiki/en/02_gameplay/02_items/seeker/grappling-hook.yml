@@ -14,7 +14,9 @@ keywords:
   - ""
 
 body: |
-  The <green>Grappling Hook</green> is a %rarity-grappling_hook% item. On use it will cast a fishing bobber out. When reeled it will pull you through the air in the directing the bobber was thrown. The farther the bobber is away, the stronger the pull will be.
+  The <green>Grappling Hook</green> is a %rarity-grappling_hook% item.
+  
+  On use, it casts a fishing bobber out. When reeled in, it pulls you through the air in the direction the bobber was thrown. The farther the bobber is away, the stronger the pull will be.
   It has a cooldown of <#00ffff>%setting-seeker-items.grappling-hook.cooldown%s</#00ffff>.
 
 related: [ ]
