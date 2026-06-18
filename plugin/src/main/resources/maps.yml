@@ -71,7 +71,7 @@ map1:
   description: "Default map"
   author: "Server Admin"
   size: "MEDIUM"
-  icon: "GRASS_BLOCK"
+  icon: "minecraft:grass_block"
   spawn-points:
     - "0,65,0,0,0"     # Format: x,y,z,yaw,pitch
   world-borders: [ ]    # Optional, format: centerX,centerZ,size (or centerX,centerZ,r:radius)
