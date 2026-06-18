@@ -5,8 +5,9 @@ import de.thecoolcraft11.hideAndSeek.items.ItemSkinSelectionService;
 import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
@@ -69,6 +70,7 @@ public class TrackerCrossbowItem implements GameItem {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public ItemStack createItem(HideAndSeek plugin) {
         ItemStack item = new ItemStack(Material.CROSSBOW);
@@ -86,6 +88,8 @@ public class TrackerCrossbowItem implements GameItem {
             meta.setUnbreakable(true);
             item.setItemMeta(meta);
         }
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.UNBREAKABLE).build());
 
         return item;
     }

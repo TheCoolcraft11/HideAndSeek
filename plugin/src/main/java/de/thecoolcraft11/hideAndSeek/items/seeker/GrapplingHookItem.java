@@ -6,6 +6,8 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import de.thecoolcraft11.minigameframework.items.ItemInteractionContext;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -26,6 +28,7 @@ public class GrapplingHookItem implements GameItem {
         return ID;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public ItemStack createItem(HideAndSeek plugin) {
         ItemStack item = new ItemStack(Material.FISHING_ROD);
@@ -43,6 +46,8 @@ public class GrapplingHookItem implements GameItem {
             meta.setUnbreakable(true);
             item.setItemMeta(meta);
         }
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.UNBREAKABLE).build());
 
         return item;
     }

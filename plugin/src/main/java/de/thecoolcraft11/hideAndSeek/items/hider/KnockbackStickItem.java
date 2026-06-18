@@ -57,7 +57,6 @@ public class KnockbackStickItem implements GameItem {
             meta.lore(lore);
             meta.addEnchant(Enchantment.KNOCKBACK, Math.clamp(level, 1, 5), true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            meta.setUnbreakable(true);
             item.setItemMeta(meta);
         }
         return item;

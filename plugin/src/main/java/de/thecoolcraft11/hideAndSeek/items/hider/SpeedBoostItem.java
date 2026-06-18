@@ -6,6 +6,8 @@ import de.thecoolcraft11.hideAndSeek.items.api.GameItem;
 import de.thecoolcraft11.hideAndSeek.model.SpeedBoostType;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -42,6 +44,7 @@ public class SpeedBoostItem implements GameItem {
         return ids;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static ItemStack createSpeedBoostItem(int level, HideAndSeek plugin) {
         Material material = switch (level) {
             case 0 -> Material.WOODEN_HOE;
@@ -68,6 +71,8 @@ public class SpeedBoostItem implements GameItem {
             meta.setUnbreakable(true);
             item.setItemMeta(meta);
         }
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY,
+                TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.UNBREAKABLE).build());
 
         return item;
     }
