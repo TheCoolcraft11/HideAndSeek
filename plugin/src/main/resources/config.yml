@@ -20,6 +20,13 @@ persistence:
 
 inject-datapack: true
 
+# When set to true, the datapack is copied from the JAR to the plugin's data folder
+# and loaded from there instead of directly from the JAR.
+# This allows server administrators to modify the datapack files on disk.
+# Changes take effect after a server restart.
+# Default: false
+copy-datapack-to-disk: false
+
 tab:
   enable-header: true
   enable-footer: true
