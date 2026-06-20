@@ -21,23 +21,32 @@ public class PlayerJoinWikiListener implements Listener {
     public void onLogin(PlayerLoginEvent event) {
         final org.bukkit.entity.Player player = event.getPlayer();
 
+        plugin.getTranslationManager().preferences().load(player.getUniqueId());
+
         Bukkit.getScheduler().runTask(plugin,
                 () -> plugin.getNmsAdapter().injectDialogFilter(player.getUniqueId(), plugin,
                         (command, p) -> {
                             String cmd = command.startsWith("/") ? command.substring(1) : command;
                             String[] parts = cmd.split(" ", 2);
 
-                            if (parts.length > 1) {
-                                String subName = parts[1].split(" ")[0];
-                                var subcommand = MinigameSubcommandRegistry.get(subName);
+                            String subName = parts.length > 1 ? parts[1].split(" ")[0] : parts[0];
+                            var subcommand = MinigameSubcommandRegistry.get(subName);
 
-                                if (subcommand != null && subcommand.getPermission() != null) {
-                                    return player.hasPermission(subcommand.getPermission());
-                                }
+                            if (subcommand != null && subcommand.getPermission() != null) {
+                                return player.hasPermission(subcommand.getPermission());
                             }
 
-                            String frameworkPerm = getFrameworkPerm(parts[1].split(" ")[0]);
+                            String frameworkPerm = getFrameworkPerm(subName);
                             return player.hasPermission(frameworkPerm);
+                        },
+                        (translationKey, clientLocale) -> {
+                            String lang = clientLocale;
+                            var prefs = plugin.getTranslationManager().preferences().getCachedOrDefault(
+                                    player.getUniqueId());
+                            if (prefs.language() != null && !prefs.language().isBlank()) {
+                                lang = prefs.language();
+                            }
+                            return plugin.trTextLocale(lang, translationKey);
                         }));
     }
 

@@ -134,7 +134,9 @@ public class NoopNmsAdapter implements NmsAdapter {
     }
 
     @Override
-    public void injectDialogFilter(UUID playerUuid, Plugin plugin, BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
+    public void injectDialogFilter(UUID playerUuid, Plugin plugin,
+                                   BiFunction<String, OfflinePlayer, Boolean> permissionChecker,
+                                   BiFunction<String, String, String> translationResolver) {
 
     }
 

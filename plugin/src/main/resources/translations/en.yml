@@ -1563,3 +1563,45 @@ tab:
 wiki:
   setting_not_found: "<gray>N/A</gray>"
   resolver_not_found: "<gray>N/A</gray>"
+
+datapack:
+  action:
+    mg:
+      unstuck:
+        label: " Unstuck"
+        tooltip: "Unstuck yourself"
+        description: "Teleports you either to your last known safe position, a safe position near you or back to the world spawn"
+      wiki:
+        label: " Wiki"
+        tooltip: "Click to open the wiki"
+      vote:
+        label: " Vote"
+        tooltip: "Click to open the vote menu"
+      loadout:
+        label: " Loadout"
+        tooltip: "Click to open the loadout menu"
+      skin:
+        label: " Skins"
+        tooltip: "Click to open the Skin menu"
+      level:
+        label: " Level"
+        tooltip: "Click to open the Level menu"
+      stats:
+        label: " Statistics"
+        tooltip: "Click to open the Statistics menu"
+      preferences:
+        label: " Preferences"
+        tooltip: "Click to open the Preferences Menu"
+      setting:
+        label: " Settings"
+        tooltip: "Open the Game Settings (Admins Only)"
+      gamecontrols:
+        dialog:
+          label: " Phase Controls"
+          tooltip: "Open the Phase Controls Dialog (Admins Only)"
+      gui:
+        label: " Game Menu"
+        tooltip: "Open the main Game Menu (Admins Only)"
+    server_links:
+      label: " Information"
+      tooltip: "Open the Server Links Dialog"

@@ -76,7 +76,8 @@ public interface NmsAdapter {
     void setCameraSessionChecker(Predicate<UUID> checker);
 
     void injectDialogFilter(UUID playerUUID, Plugin plugin,
-                            BiFunction<String, OfflinePlayer, Boolean> permissionChecker);
+                            BiFunction<String, OfflinePlayer, Boolean> permissionChecker,
+                            BiFunction<String, String, String> translationResolver);
 
     void injectSpectatorInventoryHandler(Player player,
                                          java.util.function.IntConsumer onSlotClick);

@@ -1501,3 +1501,45 @@ tab:
 wiki:
   setting_not_found: "<gray>N/A</gray>"
   resolver_not_found: "<gray>N/A</gray>"
+
+datapack:
+  action:
+    mg:
+      unstuck:
+        label: " Befreien"
+        tooltip: "Befreie dich selbst"
+        description: "Teleportiert dich entweder zu deiner letzten bekannten sicheren Position, in deine Nähe oder zurück zum Welt-Spawnpunkt"
+      wiki:
+        label: " Wiki"
+        tooltip: "Klicke, um das Wiki zu öffnen"
+      vote:
+        label: " Abstimmen"
+        tooltip: "Klicke, um das Abstimmungsmenü zu öffnen"
+      loadout:
+        label: " Loadout"
+        tooltip: "Klicke, um das Loadout-Menü zu öffnen"
+      skin:
+        label: " Skins"
+        tooltip: "Klicke, um das Skin-Menü zu öffnen"
+      level:
+        label: " Level"
+        tooltip: "Klicke, um das Level-Menü zu öffnen"
+      stats:
+        label: " Statistiken"
+        tooltip: "Klicke, um das Statistik-Menü zu öffnen"
+      preferences:
+        label: " Einstellungen"
+        tooltip: "Klicke, um das Einstellungs-Menü zu öffnen"
+      setting:
+        label: " Admin-Einstellungen"
+        tooltip: "Öffne die Spieleinstellungen (Nur Admins)"
+      gamecontrols:
+        dialog:
+          label: " Phasen-Steuerung"
+          tooltip: "Öffne den Phasen-Steuerungs-Dialog (Nur Admins)"
+      gui:
+        label: " Spielmenü"
+        tooltip: "Öffne das Haupt-Spielmenü (Nur Admins)"
+    server_links:
+      label: " Information"
+      tooltip: "Öffne den Server-Link-Dialog"

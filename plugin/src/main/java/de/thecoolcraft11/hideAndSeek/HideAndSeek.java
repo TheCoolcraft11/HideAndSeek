@@ -44,6 +44,7 @@ import de.thecoolcraft11.hideAndSeek.util.skin.SkinManager;
 import de.thecoolcraft11.hideAndSeek.vote.VoteManager;
 import de.thecoolcraft11.minigameframework.MinigameFramework;
 import de.thecoolcraft11.minigameframework.commands.MinigameSubcommandRegistry;
+import de.thecoolcraft11.minigameframework.translation.TranslationArguments;
 import de.thecoolcraft11.timer.Timer;
 import de.thecoolcraft11.timer.api.TimerAPI;
 import org.bukkit.Bukkit;
@@ -488,6 +489,11 @@ public final class HideAndSeek extends MinigameFramework {
                 getWorldManager().setWorldIcon(mapName, icon);
             }
         }
+    }
+
+    public String trTextLocale(String locale, String key) {
+        var tm = getTranslationManager();
+        return tm == null ? key : tm.translate(this, locale, key, TranslationArguments.EMPTY);
     }
 
 }

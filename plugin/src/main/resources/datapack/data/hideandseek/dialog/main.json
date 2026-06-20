@@ -172,7 +172,7 @@
       "tooltip": {
         "text": "Click to open the Level menu",
         "type": "text",
-        "color": "gold"
+        "color": "dark_green"
       },
       "action": {
         "type": "minecraft:run_command",

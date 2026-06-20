@@ -225,8 +225,9 @@ public class NmsAdapterImpl implements NmsAdapter {
 
     @Override
     public void injectDialogFilter(UUID playerUuid, Plugin plugin,
-                                   BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
-        dialogFilter.inject(playerUuid, plugin, permissionChecker);
+                                   BiFunction<String, OfflinePlayer, Boolean> permissionChecker,
+                                   BiFunction<String, String, String> translationResolver) {
+        dialogFilter.inject(playerUuid, plugin, permissionChecker, translationResolver);
     }
 
     @Override

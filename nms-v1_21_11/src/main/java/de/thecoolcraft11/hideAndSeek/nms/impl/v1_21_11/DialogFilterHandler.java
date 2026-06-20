@@ -144,8 +144,46 @@ public final class DialogFilterHandler {
         return null;
     }
 
+    private static String extractLocale(Object listener) {
+        try {
+            Class<?> clazz = listener.getClass();
+            for (Method m : clazz.getMethods()) {
+                String retName = m.getReturnType().getSimpleName();
+                if (("ClientInformation".equals(retName) || m.getReturnType().getName().contains("ClientInformation"))
+                        && m.getParameterCount() == 0) {
+                    Object info = m.invoke(listener);
+                    if (info != null) {
+                        for (Method im : info.getClass().getMethods()) {
+                            if (im.getParameterCount() == 0 && im.getReturnType() == String.class) {
+                                String lang = (String) im.invoke(info);
+                                if (lang != null && !lang.isEmpty()) return lang;
+                            }
+                        }
+                    }
+                }
+            }
+            for (Field f : clazz.getDeclaredFields()) {
+                if (f.getType().getName().contains("ClientInformation")) {
+                    f.setAccessible(true);
+                    Object info = f.get(listener);
+                    if (info != null) {
+                        for (Method im : info.getClass().getMethods()) {
+                            if (im.getParameterCount() == 0 && im.getReturnType() == String.class) {
+                                String lang = (String) im.invoke(info);
+                                if (lang != null && !lang.isEmpty()) return lang;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return "en";
+    }
+
     public void inject(UUID playerUuid, Plugin plugin,
-                       BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
+                       BiFunction<String, OfflinePlayer, Boolean> permissionChecker,
+                       BiFunction<String, String, String> translationResolver) {
         try {
             MinecraftServer server = MinecraftServer.getServer();
             List<Connection> connections = server.getConnection().getConnections();
@@ -166,7 +204,7 @@ public final class DialogFilterHandler {
                     continue;
                 }
 
-                injectPipelineHandler(channel, playerUuid, plugin, permissionChecker);
+                injectPipelineHandler(channel, playerUuid, connection, plugin, permissionChecker, translationResolver);
                 return;
             }
         } catch (Throwable t) {
@@ -174,8 +212,9 @@ public final class DialogFilterHandler {
         }
     }
 
-    private void injectPipelineHandler(Channel channel, UUID playerUuid, Plugin plugin,
-                                       BiFunction<String, OfflinePlayer, Boolean> permissionChecker) {
+    private void injectPipelineHandler(Channel channel, UUID playerUuid, Connection connection, Plugin plugin,
+                                       BiFunction<String, OfflinePlayer, Boolean> permissionChecker,
+                                       BiFunction<String, String, String> translationResolver) {
         String handlerName = "has_dialog_filter_" + playerUuid;
         if (channel.pipeline().get(handlerName) != null) {
             return;
@@ -189,8 +228,9 @@ public final class DialogFilterHandler {
                     try {
                         Object registryKey = extractRegistryKey(registryPacket);
                         if (registryKey != null && isDialogRegistry(registryKey)) {
+                            String locale = extractLocale(connection.getPacketListener());
                             Object modified = rebuildDialogRegistry(
-                                    registryPacket, permissionChecker, playerUuid);
+                                    registryPacket, permissionChecker, playerUuid, locale, translationResolver);
                             if (modified != null) {
 
                                 channel.pipeline().remove(handlerName);
@@ -210,7 +250,9 @@ public final class DialogFilterHandler {
 
     private Object rebuildDialogRegistry(ClientboundRegistryDataPacket original,
                                          BiFunction<String, OfflinePlayer, Boolean> permissionChecker,
-                                         UUID playerUuid) {
+                                         UUID playerUuid,
+                                         String locale,
+                                         BiFunction<String, String, String> translationResolver) {
         try {
             List<?> entries = extractListField(original);
             if (entries == null) {
@@ -223,7 +265,8 @@ public final class DialogFilterHandler {
             for (Object entry : entries) {
                 Identifier entryId = extractIdentifier(entry);
                 if (entryId != null && entryId.equals(targetKey)) {
-                    Object rebuilt = rebuildMainDialogEntry(entry, permissionChecker, playerUuid);
+                    Object rebuilt = rebuildMainDialogEntry(entry, permissionChecker, playerUuid, locale,
+                            translationResolver);
                     newEntries.add(rebuilt != null ? rebuilt : entry);
                 } else {
                     newEntries.add(entry);
@@ -249,7 +292,9 @@ public final class DialogFilterHandler {
 
     private Object rebuildMainDialogEntry(Object originalEntry,
                                           BiFunction<String, OfflinePlayer, Boolean> permissionChecker,
-                                          UUID playerUuid) {
+                                          UUID playerUuid,
+                                          String locale,
+                                          BiFunction<String, String, String> translationResolver) {
         try {
             Optional<?> dataOpt = extractOptionalField(originalEntry);
             if (Objects.requireNonNull(dataOpt).isEmpty()) {
@@ -268,6 +313,8 @@ public final class DialogFilterHandler {
                 }
                 CompoundTag action = actions.getCompound(i).get();
 
+                translateActionLabel(action, translationResolver, locale);
+
                 if (!lacksPermission(action, permissionChecker, playerUuid)) {
                     filteredActions.add(action);
                 }
@@ -285,6 +332,112 @@ public final class DialogFilterHandler {
                     c.setAccessible(true);
                     return c.newInstance(entryId, Optional.of(modified));
                 }
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private void translateActionLabel(CompoundTag action,
+                                      BiFunction<String, String, String> translationResolver,
+                                      String locale) {
+        try {
+            String translationKey = action.getString("translation-key").orElse("");
+
+            if (translationKey.isBlank()) {
+                translationKey = resolveTranslationKey(action);
+                if (translationKey == null) {
+                    return;
+                }
+            }
+
+            String labelKey = translationKey + ".label";
+            String translated = translationResolver.apply(labelKey, locale);
+            System.out.println("Translated: " + labelKey + " to " + translated + " for locale " + locale);
+            if (translated == null || translated.isBlank() || translated.equals("!" + labelKey + "!")) {
+                return;
+            }
+
+            action.getCompound("label").ifPresent(label -> {
+                ListTag extra = label.getListOrEmpty("extra");
+                boolean translatedLabel = false;
+                if (!extra.isEmpty()) {
+                    Optional<CompoundTag> textComp = extra.getCompound(0);
+                    if (textComp.isPresent() && !textComp.get().getString("text").orElse("").isBlank()) {
+                        textComp.get().putString("text", translated);
+                        translatedLabel = true;
+                    }
+                }
+                if (!translatedLabel) {
+                    String existingText = label.getString("text").orElse("");
+                    if (!existingText.isBlank()) {
+                        label.putString("text", translated);
+                    }
+                }
+            });
+
+            translateTooltip(action, translationKey, translationResolver, locale);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private void translateTooltip(CompoundTag action, String translationKey,
+                                  BiFunction<String, String, String> translationResolver,
+                                  String locale) {
+        try {
+            String tooltipKey = translationKey + ".tooltip";
+            String tooltipTranslated = translationResolver.apply(tooltipKey, locale);
+            if (tooltipTranslated == null || tooltipTranslated.isBlank() || tooltipTranslated.equals(
+                    "!" + tooltipKey + "!")) {
+                return;
+            }
+
+            Optional<CompoundTag> tooltipOpt = action.getCompound("tooltip");
+            if (tooltipOpt.isEmpty()) {
+                return;
+            }
+            CompoundTag tooltip = tooltipOpt.get();
+            tooltip.putString("text", tooltipTranslated);
+
+            ListTag extra = tooltip.getListOrEmpty("extra");
+            for (int i = 0; i < extra.size(); i++) {
+                Optional<CompoundTag> comp = extra.getCompound(i);
+                if (comp.isPresent()) {
+                    String existingText = comp.get().getString("text").orElse("");
+                    if (!existingText.isBlank()) {
+                        String descKey = translationKey + ".description";
+                        String descTranslated = translationResolver.apply(descKey, locale);
+                        if (descTranslated != null && !descTranslated.isBlank() && !descTranslated.equals(
+                                "!" + descKey + "!")) {
+                            comp.get().putString("text", descTranslated);
+                        }
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private String resolveTranslationKey(CompoundTag action) {
+        try {
+            Optional<CompoundTag> actionObj = action.getCompound("action");
+            if (actionObj.isEmpty()) {
+                return null;
+            }
+            CompoundTag actionTag = actionObj.get();
+            String type = actionTag.getString("type").orElse("");
+            if ("minecraft:run_command".equals(type)) {
+                String command = actionTag.getString("command").orElse("");
+                if (command.startsWith("mg ")) {
+                    return "datapack.action." + command.replace(" ", ".");
+                }
+            } else if ("minecraft:show_dialog".equals(type)) {
+                String dialog = actionTag.getString("dialog").orElse("");
+                if (dialog.contains(":")) {
+                    return "datapack.action." + dialog.substring(dialog.indexOf(':') + 1);
+                }
+                return "datapack.action." + dialog;
             }
         } catch (Throwable ignored) {
         }
