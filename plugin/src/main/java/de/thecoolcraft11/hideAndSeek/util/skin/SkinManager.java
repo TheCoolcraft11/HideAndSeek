@@ -48,6 +48,7 @@ public class SkinManager {
             String iconName = section.getString("icon", "PLAYER_HEAD");
             String value = section.getString("value", "");
             String signature = section.getString("signature", "");
+            String translationKey = section.getString("translation-key", "");
 
             if (value.isBlank()) {
                 plugin.getLogger().warning("Skin '" + key + "' has no value, skipping.");
@@ -66,7 +67,8 @@ public class SkinManager {
                 icon = new ItemStack(Material.PLAYER_HEAD);
             }
 
-            skinRegistry.put(key, new SkinData(key, name, icon, value, signature));
+            skinRegistry.put(key, new SkinData(key, name, icon, value, signature,
+                    translationKey.isBlank() ? null : translationKey.trim()));
         }
 
         plugin.getLogger().info("Loaded " + skinRegistry.size() + " skins from skins.yml");

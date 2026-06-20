@@ -109,10 +109,12 @@ public class HidingPhase implements GamePhase {
             plugin.getLogger().info("Hiding phase started - " + timeRemaining + " seconds");
         }
 
-        sendRoundStartAnnouncementChat(plugin, currentMapData, currentMapName);
+        sendRoundStartAnnouncementChat(hideAndSeekPlugin, currentMapData, currentMapName);
         final MapData mapDataForAnnouncement = currentMapData;
         final String mapNameForAnnouncement = currentMapName;
-        Bukkit.getScheduler().runTaskLater(plugin, () -> showRoundStartMapInfoTitle(plugin, mapDataForAnnouncement, mapNameForAnnouncement), 90L);
+        Bukkit.getScheduler().runTaskLater(hideAndSeekPlugin,
+                () -> showRoundStartMapInfoTitle(hideAndSeekPlugin, mapDataForAnnouncement, mapNameForAnnouncement),
+                90L);
 
 
         var invisibilityResult = plugin.getSettingService().getSetting("game.hider-invisibility");
@@ -614,7 +616,7 @@ public class HidingPhase implements GamePhase {
         blockPhysicsExceptions.addAll(MapConfigHelper.getBlockPhysicsExceptions(plugin, mapName));
     }
 
-    private void showRoundStartMapInfoTitle(MinigameFramework plugin, MapData mapData, String mapName) {
+    private void showRoundStartMapInfoTitle(HideAndSeek plugin, MapData mapData, String mapName) {
         var enabledResult = plugin.getSettingService().getSetting("game.maps.show-round-start-map-info-title");
         Object enabledObj = enabledResult.isSuccess() ? enabledResult.getValue() : true;
         boolean showTitle = (enabledObj instanceof Boolean) ? (Boolean) enabledObj : true;
@@ -628,7 +630,8 @@ public class HidingPhase implements GamePhase {
         for (Player player : Bukkit.getOnlinePlayers()) {
 
             String resolvedMapName = mapData != null && hasText(
-                    mapData.getDisplayName()) ? "<aqua>" + mapData.getDisplayName() : mapName;
+                    mapData.getDisplayName(plugin, player)) ? "<aqua>" + mapData.getDisplayName(plugin,
+                    player) : mapName;
             if (!hasText(resolvedMapName)) {
                 resolvedMapName = plugin.trText(player, "phase.hiding.unknown_map");
             }
@@ -654,7 +657,7 @@ public class HidingPhase implements GamePhase {
         }
     }
 
-    private void sendRoundStartAnnouncementChat(MinigameFramework plugin, MapData mapData, String mapName) {
+    private void sendRoundStartAnnouncementChat(HideAndSeek plugin, MapData mapData, String mapName) {
         Set<UUID> seekerIds = new HashSet<>(HideAndSeek.getDataController().getSeekers());
         Set<UUID> hiderIds = new HashSet<>(HideAndSeek.getDataController().getHiders());
         MapInfoDisplayMode displayMode = resolveMapInfoDisplayMode(plugin);
@@ -667,7 +670,7 @@ public class HidingPhase implements GamePhase {
         for (Player player : Bukkit.getOnlinePlayers()) {
 
             String displayMapName = mapData != null && hasText(
-                    mapData.getDisplayName()) ? mapData.getDisplayName() : mapName;
+                    mapData.getDisplayName(plugin, player)) ? mapData.getDisplayName(plugin, player) : mapName;
             if (!hasText(displayMapName)) {
                 displayMapName = plugin.trText(player, "phase.hiding.unknown_map");
             }

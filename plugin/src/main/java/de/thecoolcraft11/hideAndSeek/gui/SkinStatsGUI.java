@@ -184,7 +184,7 @@ public class SkinStatsGUI {
         if (meta != null) {
 
             meta.displayName(
-                    plugin.tr(viewer, "gui.skin_stats.item.name", Map.of("skin", skin.name()))
+                    plugin.tr(viewer, "gui.skin_stats.item.name", Map.of("skin", skin.getDisplayName(plugin, viewer)))
                             .decoration(
                                     TextDecoration.ITALIC,
                                     false

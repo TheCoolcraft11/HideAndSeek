@@ -318,6 +318,12 @@ public class MapManager {
         mapData.setPrettyName(prettyName);
 
 
+        String translationKey = section.getString("translation-key");
+        if (translationKey != null && !translationKey.isBlank()) {
+            mapData.setTranslationKey(translationKey.trim());
+        }
+
+
         String description = section.getString("description", "");
         mapData.setDescription(description);
 

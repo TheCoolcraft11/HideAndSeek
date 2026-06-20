@@ -319,7 +319,7 @@ public class PlayerStatsGUI {
                     ? plugin.getMapManager().getMapIcon(mapName, new ItemStack(Material.GRASS_BLOCK))
                     : new ItemStack(Material.GRASS_BLOCK);
             String prettyName = plugin.getMapManager() != null ? plugin.getMapManager().getMapData(
-                    mapName).getDisplayName() : mapName;
+                    mapName).getDisplayName(plugin, viewer) : mapName;
 
             List<Component> lore = List.of(
                     plugin.tr(viewer, "gui.stats.maps.times_played", Map.of("value", games)),

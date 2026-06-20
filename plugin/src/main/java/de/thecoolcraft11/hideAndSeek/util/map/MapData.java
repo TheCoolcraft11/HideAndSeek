@@ -1,9 +1,11 @@
 package de.thecoolcraft11.hideAndSeek.util.map;
 
+import de.thecoolcraft11.hideAndSeek.HideAndSeek;
 import de.thecoolcraft11.hideAndSeek.model.GameModeEnum;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
+import org.bukkit.command.CommandSender;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class MapData {
     private final String name;
     private String prettyName;
+    private String translationKey;
     private String description;
     private String author;
     private String size;
@@ -47,6 +50,7 @@ public class MapData {
     public MapData(String name) {
         this.name = name;
         this.prettyName = null;
+        this.translationKey = null;
         this.description = "";
         this.author = null;
         this.size = null;
@@ -81,6 +85,24 @@ public class MapData {
 
     public String getDisplayName() {
         return prettyName != null ? prettyName : name;
+    }
+
+    public String getDisplayName(HideAndSeek plugin, CommandSender sender) {
+        if (translationKey != null && !translationKey.isBlank()) {
+            String translated = plugin.trText(sender, translationKey);
+            if (!translated.equals("!" + translationKey + "!")) {
+                return translated;
+            }
+        }
+        return prettyName != null ? prettyName : name;
+    }
+
+    public String getTranslationKey() {
+        return translationKey;
+    }
+
+    public void setTranslationKey(String translationKey) {
+        this.translationKey = translationKey;
     }
 
     public String getDescription() {

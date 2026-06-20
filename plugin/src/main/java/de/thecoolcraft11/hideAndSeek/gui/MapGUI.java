@@ -99,7 +99,7 @@ public class MapGUI {
 
         boolean nowDisabled = plugin.getMapManager().toggleMapVoteDisabled(mapName);
         MapData mapData = plugin.getMapManager().getMapData(mapName);
-        String displayName = mapData != null ? mapData.getDisplayName() : mapName;
+        String displayName = mapData != null ? mapData.getDisplayName(plugin, admin) : mapName;
 
         admin.sendMessage(plugin.tr(admin, "gui.map_selector.admin.toggled",
                 Map.of(
@@ -161,7 +161,7 @@ public class MapGUI {
         HideAndSeek.getDataController().setCurrentMapName(mapName, true);
 
         MapData mapData = plugin.getMapManager().getMapData(mapName);
-        String displayName = (mapData != null) ? mapData.getDisplayName() : mapName;
+        String displayName = (mapData != null) ? mapData.getDisplayName(plugin, player) : mapName;
 
         player.sendMessage(plugin.tr(player,
                 "gui.map_selector.feedback.selection_specific",
@@ -207,7 +207,7 @@ public class MapGUI {
 
         if (meta != null) {
             NamedTextColor nameColor = isCurrentMap ? NamedTextColor.GREEN : NamedTextColor.AQUA;
-            String displayName = mapData != null ? mapData.getDisplayName() : mapName;
+            String displayName = mapData != null ? mapData.getDisplayName(plugin, player) : mapName;
 
             meta.displayName(Component.text(displayName, nameColor, TextDecoration.BOLD)
                     .decoration(TextDecoration.ITALIC, false));

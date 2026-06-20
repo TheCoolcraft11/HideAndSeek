@@ -219,7 +219,7 @@ public class VoteGUI {
                 voteManager.castMapVote(p.getUniqueId(), clickedMap);
                 boolean autoReady = voteManager.markReadyIfVoteComplete(p.getUniqueId());
                 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.1f);
-                String clickedMapDisplay = mapData != null ? mapData.getDisplayName() : clickedMap;
+                String clickedMapDisplay = mapData != null ? mapData.getDisplayName(plugin, p) : clickedMap;
                 p.sendMessage(plugin.tr(p, "gui.vote.feedback.map_voted",
                         Map.of("map", clickedMapDisplay)));
                 if (autoReady) {
@@ -402,7 +402,7 @@ public class VoteGUI {
             return item;
         }
         NamedTextColor nameColor = selected ? NamedTextColor.GREEN : NamedTextColor.AQUA;
-        String displayName = mapData != null ? mapData.getDisplayName() : mapName;
+        String displayName = mapData != null ? mapData.getDisplayName(plugin, player) : mapName;
         meta.displayName(Component.text(displayName, nameColor, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
         List<Component> lore = new ArrayList<>();
         if (lockedNoGamemode) {

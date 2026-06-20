@@ -102,7 +102,8 @@ public class SkinSelectorGUI {
             skinManager.assignSkin(p, skin);
 
             p.sendMessage(
-                    plugin.tr(p, "gui.skin_selector.feedback.changed", java.util.Map.of("skin", skin.name()))
+                    plugin.tr(p, "gui.skin_selector.feedback.changed",
+                            java.util.Map.of("skin", skin.getDisplayName(plugin, p)))
             );
 
             p.closeInventory();
@@ -135,7 +136,7 @@ public class SkinSelectorGUI {
                                 selected
                                         ? "gui.skin_selector.item.name_selected"
                                         : "gui.skin_selector.item.name",
-                                java.util.Map.of("name", skin.name())
+                                java.util.Map.of("name", skin.getDisplayName(plugin, viewer))
                         )
                         .decoration(TextDecoration.ITALIC, false)
         );

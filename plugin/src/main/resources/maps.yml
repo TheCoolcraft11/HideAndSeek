@@ -5,6 +5,7 @@
 # Format:
 # world-name:
 #   pretty-name: "Ancient Ruins"                    # Optional: Player-facing map title shown in GUI/titles
+#   translation-key: "map.ancient_ruins"            # Optional: Translation key for the map name (uses plugin.trText, falls back to pretty-name/name)
 #   description: "A brief description of the map"
 #   author: "Map Creator"                          # Optional: Name of the map creator
 #   size: "MEDIUM"                                 # Optional: Map size - SMALL, MEDIUM, LARGE
