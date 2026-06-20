@@ -6,14 +6,29 @@ import de.thecoolcraft11.hideAndSeek.model.MapInfoDisplayMode;
 import de.thecoolcraft11.hideAndSeek.setting.SettingIconHelper;
 import de.thecoolcraft11.hideAndSeek.setting.spec.*;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import java.util.List;
 import java.util.Map;
 
 public final class GameCoreSettingGroup implements SettingGroup {
+
+    private static ItemStack colorIcon(Object value) {
+        String hex = value instanceof String s ? s.trim() : "";
+        if (hex.isEmpty()) return new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+        String input = hex.startsWith("#") ? hex.substring(1) : hex;
+        if (!input.matches("[0-9A-Fa-f]{6}")) return new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+        int rgb = Integer.parseInt(input, 16);
+        ItemStack item = new ItemStack(Material.LEATHER_CHESTPLATE);
+        LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
+        meta.setColor(Color.fromRGB(rgb));
+        item.setItemMeta(meta);
+        return item;
+    }
 
     @Override
     public List<SettingSpec> settings() {
@@ -181,7 +196,17 @@ public final class GameCoreSettingGroup implements SettingGroup {
                         return new ItemStack(Material.APPLE);
                     }
                     return new ItemStack(Material.GOLDEN_APPLE);
-                }), new FloatSettingSpec("game.block-form.view-height", 0.1f, 0f, 1.5f,
-                        "View Height of player when they hide in a block", Material.LADDER));
+                }),
+                new FloatSettingSpec("game.block-form.view-height", 0.1f, 0f, 1.5f,
+                        "View Height of player when they hide in a block", Material.LADDER),
+                new StringSettingSpec("game.teams.hider-color", "",
+                        "Override hex color for the hider team (e.g. #00AA00). Leave empty to use the team's default color",
+                        Material.CHAINMAIL_CHESTPLATE, (plugin, value) -> colorIcon(value)),
+                new StringSettingSpec("game.teams.seeker-color", "",
+                        "Override hex color for the seeker team (e.g. #AA0000). Leave empty to use the team's default color",
+                        Material.CHAINMAIL_CHESTPLATE, (plugin, value) -> colorIcon(value)),
+                new StringSettingSpec("game.teams.lobby-color", "#696969",
+                        "Hex color used in the lobby phase for team color placeholders",
+                        Material.CHAINMAIL_CHESTPLATE, (plugin, value) -> colorIcon(value)));
     }
 }

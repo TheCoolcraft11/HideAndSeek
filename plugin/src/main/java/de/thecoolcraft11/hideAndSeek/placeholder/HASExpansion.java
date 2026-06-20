@@ -152,6 +152,24 @@ public class HASExpansion extends PlaceholderExpansion {
             case "seekers":
                 return HideAndSeek.getDataController().getSeekers().size() + "";
 
+            case "team_color": {
+                var plugin = HideAndSeek.getActiveInstance();
+                if (plugin.getStateManager().isPhase("lobby")) {
+                    String lobbyColor = plugin.getSettingRegistry().get("game.teams.lobby-color");
+                    if (lobbyColor != null && !lobbyColor.isEmpty()) return lobbyColor;
+                    return "#696969";
+                }
+                boolean isHider = HideAndSeek.getDataController().getHiders().contains(player.getUniqueId());
+                String overrideKey = isHider ? "game.teams.hider-color" : "game.teams.seeker-color";
+                String override = plugin.getSettingRegistry().get(overrideKey);
+                if (override != null && !override.isEmpty()) return override;
+                String teamName = plugin.getTeamManager().getPlayerTeam(player);
+                if (teamName == null) return "#FFFFFF";
+                Team team = plugin.getTeamManager().getTeam(teamName);
+                if (team == null) return "#FFFFFF";
+                return team.color().asHexString();
+            }
+
             default:
                 return null;
         }
