@@ -830,6 +830,11 @@ public class MapManager {
         return "world";
     }
 
+    public void reloadMaps() {
+        loadMapConfigurations();
+        plugin.getLogger().info("Reloaded " + mapDataCache.size() + " maps from maps.yml");
+    }
+
     public void loadDisallowedBlockStates() {
         BlockStateFilter.clear();
         var disallowedStatesResult = plugin.getSettingService().getSetting("disallowed-blockstates");

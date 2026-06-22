@@ -276,6 +276,9 @@ command:
       spawn: "<yellow>Zum Welt-Spawn teleportiert.</yellow>"
       spawn_fallback: "<yellow>Als letzten Ausweg zum Spawn teleportiert.</yellow>"
       fallback: "<yellow>Unstuck-Fallback genutzt: In die Nähe des Spawns gesendet.</yellow>"
+  reload:
+    maps: "<green>Karten erfolgreich neu geladen.</green>"
+    skins: "<green>Skins erfolgreich neu geladen.</green>"
 gui:
   appearance:
     title: "Aussehen anpassen ({page}/{total})"

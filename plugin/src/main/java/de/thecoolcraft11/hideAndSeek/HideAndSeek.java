@@ -216,6 +216,8 @@ public final class HideAndSeek extends MinigameFramework {
         MinigameSubcommandRegistry.register(new UnstuckCommand(this, unstuckManager));
         MinigameSubcommandRegistry.register(new StatsCommand(this));
 
+        registerReloadActions();
+
         unstuckManager.startTrackingTask();
 
         WikiHelper.ensureWikiExists(this);
@@ -476,6 +478,10 @@ public final class HideAndSeek extends MinigameFramework {
 
     public SkinSelectorGUI getSkinSelectorGUI() {
         return skinSelectorGUI;
+    }
+
+    private void registerReloadActions() {
+        ReloadActionRegistrar.registerAll(this);
     }
 
     public void updateWorldIconsForAllMaps() {
