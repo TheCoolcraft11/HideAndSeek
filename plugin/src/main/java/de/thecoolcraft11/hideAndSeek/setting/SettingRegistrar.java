@@ -287,6 +287,9 @@ public class SettingRegistrar {
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.hiding.filter").icon(Material.HOPPER).build());
 
+        plugin.getSectionRegistry().register(
+                SectionDefinition.builder("anticheat.blindness").icon(Material.GLASS).build());
+
         plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.seeking").icon(Material.ENDER_EYE).build());
 
         plugin.getSectionRegistry().register(SectionDefinition.builder("anticheat.seeking.filter").icon(Material.HOPPER).build());
@@ -339,7 +342,8 @@ public class SettingRegistrar {
                 new GameAdvancedSettingGroup(),
                 new HiderItemsSettingGroup(),
                 new SeekerItemsSettingGroup(),
-                new AdrenalineRushSettingGroup()
+                new AdrenalineRushSettingGroup(),
+                new BlindnessAntiCheatSettingGroup()
         ));
     }
 }

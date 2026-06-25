@@ -75,6 +75,7 @@ public final class HideAndSeek extends MinigameFramework {
     private AntiCheatVisibilityListener antiCheatVisibilityListener;
     private HiderCampingListener hiderCampingListener;
     private EnvironmentalDamageListener environmentalDamageListener;
+    private BlindnessAntiCheatListener blindnessAntiCheatListener;
     private SeekingBossBarService seekingBossBarService;
     private AdrenalineRushService adrenalineRushService;
     private AdrenalineRushListener adrenalineRushListener;
@@ -159,6 +160,7 @@ public final class HideAndSeek extends MinigameFramework {
         antiCheatVisibilityListener = new AntiCheatVisibilityListener(this);
         hiderCampingListener = new HiderCampingListener(this, playerHitListener);
         environmentalDamageListener = new EnvironmentalDamageListener(this, playerHitListener);
+        blindnessAntiCheatListener = new BlindnessAntiCheatListener(this);
         tabProvider = new CustomTabProvider(this, getConfig());
         scoreboardProvider = new CustomScoreboardProvider(this);
 
@@ -171,6 +173,7 @@ public final class HideAndSeek extends MinigameFramework {
         Bukkit.getPluginManager().registerEvents(antiCheatVisibilityListener, this);
         Bukkit.getPluginManager().registerEvents(hiderCampingListener, this);
         Bukkit.getPluginManager().registerEvents(environmentalDamageListener, this);
+        Bukkit.getPluginManager().registerEvents(blindnessAntiCheatListener, this);
         Bukkit.getPluginManager().registerEvents(new HiderEquipmentChangeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerItemUsageListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CrossbowTrackerListener(this), this);
@@ -267,6 +270,9 @@ public final class HideAndSeek extends MinigameFramework {
         }
         if (environmentalDamageListener != null) {
             environmentalDamageListener.shutdown();
+        }
+        if (blindnessAntiCheatListener != null) {
+            blindnessAntiCheatListener.shutdown();
         }
         if (seekingBossBarService != null) {
             seekingBossBarService.stopSeekingSession();
