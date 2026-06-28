@@ -9,7 +9,6 @@ import de.thecoolcraft11.hideAndSeek.util.XpProgressHelper;
 import de.thecoolcraft11.minigameframework.items.CustomItemBuilder;
 import de.thecoolcraft11.minigameframework.items.ItemActionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
@@ -326,6 +325,18 @@ public class GhostEssenceItem implements GameItem {
         }.runTaskTimer(plugin, 1L, 1L);
     }
 
+    private static boolean isInsideBorder(Player player, Location adjustedLoc) {
+        WorldBorder border = player.getWorld().getWorldBorder();
+        double halfSize = border.getSize() / 2.0;
+        double minX = border.getCenter().getX() - halfSize;
+        double maxX = border.getCenter().getX() + halfSize;
+        double minZ = border.getCenter().getZ() - halfSize;
+        double maxZ = border.getCenter().getZ() + halfSize;
+        boolean insideBorder = adjustedLoc.getX() >= minX && adjustedLoc.getX() <= maxX
+                && adjustedLoc.getZ() >= minZ && adjustedLoc.getZ() <= maxZ;
+        return insideBorder;
+    }
+
     private void finalizeGhostMode(Player player, HideAndSeek plugin, org.bukkit.entity.Zombie ghost,
                                    Location startLoc, int maxRadius, int minLightB, int minLightS,
                                    boolean restoreBlockDisplayVisible, GhostEssenceParticleMode particleMode,
@@ -343,7 +354,8 @@ public class GhostEssenceItem implements GameItem {
         boolean isCheating = false;
         String reasonKey = "";
 
-        if (!player.getWorld().getWorldBorder().isInside(adjustedLoc)) {
+        boolean insideBorder = isInsideBorder(player, adjustedLoc);
+        if (!insideBorder) {
             isCheating = true;
             reasonKey = "item.ghost_essence.messages.error_outside_border";
         } else if (adjustedLoc.distance(startLoc) > maxRadius + 1.5) {

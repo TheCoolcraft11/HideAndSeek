@@ -336,6 +336,18 @@ public class PlayerHitListener implements Listener {
         );
     }
 
+    private static boolean isIsOutsideBorder(Player hider) {
+        org.bukkit.WorldBorder border = hider.getWorld().getWorldBorder();
+        Location loc = hider.getLocation();
+        double halfSize = border.getSize() / 2.0;
+        double minX = border.getCenter().getX() - halfSize;
+        double maxX = border.getCenter().getX() + halfSize;
+        double minZ = border.getCenter().getZ() - halfSize;
+        double maxZ = border.getCenter().getZ() + halfSize;
+        boolean isOutsideBorder = loc.getX() < minX || loc.getX() > maxX || loc.getZ() < minZ || loc.getZ() > maxZ;
+        return isOutsideBorder;
+    }
+
     public void checkWorldBorderDamage() {
 
         boolean damageEnabled = plugin.getSettingRegistry().get("game.world-border.damage-hiders-outside", true);
@@ -369,7 +381,7 @@ public class PlayerHitListener implements Listener {
                 continue;
             }
 
-            boolean isOutsideBorder = !hider.getWorld().getWorldBorder().isInside(hider.getLocation());
+            boolean isOutsideBorder = isIsOutsideBorder(hider);
 
             if (isOutsideBorder) {
 
