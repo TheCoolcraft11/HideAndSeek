@@ -160,21 +160,11 @@ it)*, Seeker's Assistant *(NMS only, disabled without it)*
 | Paper (or Purpur) | 1.21.10+ |
 | MinigameFramework | 1.0.0    |
 
-### MinigameFramework
-
-> [!IMPORTANT]
-> HideAndSeek depends on **MinigameFramework**, a companion library also developed by me. **It is not currently publicly
-> available, neither the JAR nor the source code.**
-
-> [!NOTE]
-> MinigameFramework will be released publicly in the future. This section will be updated when that happens.
-
----
 
 ## Installation
 
 1. Ensure your server runs Paper 1.21.10/11 with Java 21 or newer.
-2. Wait until `MinigameFramework.jar` is released and place it in your `plugins/` folder.
+2. Download `MinigameFramework.jar` and place it in your `plugins/` folder.
 3. Place `HideAndSeek-1.0-SNAPSHOT.jar` in your `plugins/` folder.
 4. Start the server once to generate config files.
 5. Set up at least two scoreboard teams via MinigameFramework's team configuration.
@@ -659,8 +649,6 @@ All perk costs, cooldowns, radii, durations, and other parameters are configurab
 | `/mg stats [player]`     | `hideandseek.command.stats`         | Open the stats GUI for yourself or another player                                |
 | `/mg debug <subcommand>` | *(op)*                              | Debug utilities (points, coins, skins, perks, config validation, YAML migration) |
 
-> **Note:** Full permission nodes and additional admin commands will be documented once MinigameFramework's command API
-> is finalized.
 
 ### Role Permissions
 
@@ -725,7 +713,7 @@ adapter. The `plugin` module depends on all modules and is bundled into a single
 
 - Java 21 JDK
 - Git
-- `MinigameFramework.jar`: **not publicly available**; will be released soon
+- [`MinigameFramework.jar`](https://github.com/TheCoolcraft11/HideAndSeek.git)
 
 ### Steps
 
