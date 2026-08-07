@@ -160,22 +160,35 @@ it)*, Seeker's Assistant *(NMS only, disabled without it)*
 | Paper (or Purpur) | 1.21.10+ |
 | MinigameFramework | 1.0.0    |
 
+## Dependencies
+
+| Dependency        | Required | Source                                              | Notes                                                                                                               |
+|-------------------|----------|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| Java              | Yes      | –                                                   | 21 or newer                                                                                                         |
+| Paper (or Purpur) | Yes      | https://papermc.io                                  | 1.21.10+                                                                                                            |
+| MinigameFramework | Yes      | https://github.com/TheCoolcraft11/MinigameFramework | No published release yet, must be built from source and installed to your local Maven repo (see that repo's README) |
+| Timer             | Optional | https://github.com/TheCoolcraft11/Timer             | Standalone actionbar timer plugin; HideAndSeek works without it using its own internal timing                       |
+
+> **Note:** None of these have published Releases/JARs on GitHub yet (Modrinth listings are pending review). Until then,
+> everything must be built from source per [Building from Source](#building-from-source).
 
 ## Installation
 
 1. Ensure your server runs Paper 1.21.10/11 with Java 21 or newer.
 2. Download `MinigameFramework.jar` and place it in your `plugins/` folder.
 3. Place `HideAndSeek-1.0-SNAPSHOT.jar` in your `plugins/` folder.
-4. Start the server once to generate config files.
-5. Set up at least two scoreboard teams via MinigameFramework's team configuration.
-6. Add at least one map (see [Map Setup](#map-setup)).
-7. Restart the server.
+4. Optionally Place `Timer-1.0-SNAPSHOT.jar` in your `plugins/` folder
+5. Start the server once to generate config files.
+6. Set up at least two scoreboard teams via MinigameFramework's team configuration.
+7. Add at least one map (see [Map Setup](#map-setup)).
+8. Restart the server.
 
 ### Quick Checklist
 
 - [ ] Java 21+ on the server
 - [ ] Paper 1.21.10/11 server jar
 - [ ] `MinigameFramework.jar` in `plugins/`
+- [ ] `Timer-1.0-SNAPSHOT.jar` in `plugins/` (optional)
 - [ ] `HideAndSeek-1.0-SNAPSHOT.jar` in `plugins/`
 - [ ] Two teams configured in MinigameFramework
 - [ ] At least one map entry in `plugins/HideAndSeek/maps.yml`
@@ -713,7 +726,7 @@ adapter. The `plugin` module depends on all modules and is bundled into a single
 
 - Java 21 JDK
 - Git
-- [`MinigameFramework.jar`](https://github.com/TheCoolcraft11/HideAndSeek.git)
+- [`MinigameFramework.jar`](https://github.com/TheCoolcraft11/MinigameFramework.git)
 
 ### Steps
 
@@ -723,8 +736,8 @@ adapter. The `plugin` module depends on all modules and is bundled into a single
    cd HideAndSeek
    ```
 
-2. Install `MinigameFramework.jar` into your local Maven cache so Gradle can resolve it. Replace the version with
-   whatever the author provides:
+2. Install [`MinigameFramework.jar`](https://github.com/TheCoolcraft11/MinigameFramework) into your local Maven cache so
+   Gradle can resolve it:
 
    Linux/Mac:
    ```bash
@@ -741,7 +754,25 @@ adapter. The `plugin` module depends on all modules and is bundled into a single
    mvn install:install-file -Dfile=C:\path\to\MinigameFramework.jar -DgroupId=de.thecoolcraft11 -DartifactId=minigameframework -Dversion=1.0-SNAPSHOT -Dpackaging=jar
    ```
 
-3. Build the plugin:
+3. Install [`Timer.jar`](https://github.com/TheCoolcraft11/Timer) into your local Maven cache if you want to build with
+   the optional Timer dependency:
+
+   Linux/Mac:
+   ```bash
+   mvn install:install-file \
+     -Dfile=/path/to/Timer.jar \
+     -DgroupId=de.thecoolcraft11 \
+     -DartifactId=timer \
+     -Dversion=1.0-SNAPSHOT \
+     -Dpackaging=jar
+   ```
+
+   Windows:
+   ```cmd
+   mvn install:install-file -Dfile=C:\path\to\Timer.jar -DgroupId=de.thecoolcraft11 -DartifactId=timer -Dversion=1.0-SNAPSHOT -Dpackaging=jar
+   ```
+
+4. Build the plugin:
    ```bash
    ./gradlew shadowJar
    ```
@@ -750,9 +781,9 @@ adapter. The `plugin` module depends on all modules and is bundled into a single
    gradlew.bat shadowJar
    ```
 
-4. The output JAR will be at:
+5. The output JAR will be at:
    ```
    plugin/build/libs/HideAndSeek-1.0-SNAPSHOT.jar
    ```
 
-5. Copy the JAR to your server's `plugins/` directory alongside `MinigameFramework.jar`.
+6. Copy the JAR to your server's `plugins/` directory alongside `MinigameFramework.jar` & `Timer.jar`.
