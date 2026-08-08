@@ -403,6 +403,8 @@ gui:
       size: "<yellow>Size: {size}</yellow>"
       players: "<light_purple>Players: {players}</light_purple>"
       can_still_ready: "<gray>You can still ready manually.</gray>"
+      no_maps_available: "<red>No maps available :(</red>"
+      no_maps_description: "<gray>There are no maps configured for this mode.</gray>"
   main_menu:
     loadout:
       name: "<aqua><bold>Loadout Selector</bold></aqua>"
@@ -414,8 +416,6 @@ gui:
       name: "<aqua><bold>Skin Selector</bold></aqua>"
       lore: "<gray>Click to choose item skins</gray>"
       can_still_ready: "<gray>You can still ready manually.</gray>"
-      no_maps_available: "<red>No maps available :(</red>"
-      no_maps_description: "<gray>There are no maps configured for this mode.</gray>"
       size: "<yellow>Size: {size}</yellow>"
       players: "<light_purple>Players: {players}</light_purple>"
       map_description: "<gray>{description}</gray>"
@@ -878,21 +878,6 @@ gui:
     balance: "Balance: {balance} pts"
     click_to_purchase: "<aqua>Click to purchase"
     not_enough_points: "<dark_red>Not enough points"
-    shop:
-      title: "<gold>Perk-Shop"
-      locked_suffix: " <dark_gray>[GESPERRT]"
-      owned_by: "<yellow>Besitzer: {owner}"
-      sold_out: "<dark_red>Ausverkauft (globales Limit erreicht)"
-      already_purchased: "<dark_green>Bereits gekauft"
-      finite_seeker: "<aqua>Begrenzter Sucher-Perk"
-      owners_limit: "<gray>Besitzer: {buyers}/{limit}"
-      owners_unlimited: "<gray>Besitzer: {buyers}/unbegrenzt"
-      rebuyable: "<aqua>Wiederkaufbar mit Cooldown"
-      cooldown: "Cooldown: {seconds}s"
-      cost: "Kosten: {cost} Pkt"
-      balance: "Guthaben: {balance} Pkt"
-      click_to_purchase: "<aqua>Klicken zum Kaufen"
-      not_enough_points: "<dark_red>Nicht genug Punkte"
 util:
   adrenaline_rush:
     hider:
